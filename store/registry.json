@@ -89,6 +89,24 @@
       "iconBg": "#8b5cf6",
       "category": "templates",
       "section": "templates"
+    },
+    {
+      "id": "gradient-maker",
+      "name": "Gradient & Background Maker",
+      "description": "Linear, radial, conic gradients. Mesh backgrounds. Drag color stops, 24 presets, copy CSS, download PNG.",
+      "icon": "🌈",
+      "iconBg": "#a855f7",
+      "category": "images",
+      "section": "images"
+    },
+    {
+      "id": "presentation-maker",
+      "name": "Slide Deck Builder",
+      "description": "Build presentations with 6 slide types. Theme colors, reorder slides, export as self-contained HTML slideshow.",
+      "icon": "📊",
+      "iconBg": "#f59e0b",
+      "category": "templates",
+      "section": "templates"
     }
   ]
 }

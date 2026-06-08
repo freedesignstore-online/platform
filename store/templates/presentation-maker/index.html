@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slide Deck Builder - FreeDesignStore</title>
+<link rel="icon" href="/favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a { color: #ec4899; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; font-size: 14px; color: #6b7280; }
+.back:hover { color: #ec4899; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.subtitle { color: #6b7280; margin-bottom: 24px; font-size: 15px; }
+.container { max-width: 1200px; margin: 0 auto; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
+.main-layout { display: grid; grid-template-columns: 200px 1fr 280px; gap: 16px; }
+@media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; } }
+.sidebar { display: flex; flex-direction: column; gap: 8px; max-height: 520px; overflow-y: auto; }
+.slide-thumb { aspect-ratio: 16/9; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; padding: 6px; font-size: 10px; display: flex; align-items: center; justify-content: center; text-align: center; color: #6b7280; background: #fff; transition: all .15s; position: relative; }
+.slide-thumb:hover { border-color: #ec4899; }
+.slide-thumb.active { border-color: #ec4899; box-shadow: 0 0 0 2px #ec489933; }
+.slide-thumb .num { position: absolute; top: 4px; left: 6px; font-size: 9px; font-weight: 700; color: #ec4899; }
+.slide-thumb .rm { position: absolute; top: 2px; right: 6px; font-size: 12px; color: #dc2626; cursor: pointer; opacity: 0; }
+.slide-thumb:hover .rm { opacity: 1; }
+.canvas-area { display: flex; align-items: center; justify-content: center; background: repeating-conic-gradient(#e5e7eb 0% 25%, transparent 0% 50%) 50%/16px 16px; border-radius: 12px; padding: 16px; min-height: 380px; }
+#slideCanvas { border-radius: 4px; box-shadow: 0 4px 20px rgba(0,0,0,.12); cursor: text; }
+.controls label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 4px; margin-top: 12px; }
+.controls label:first-child { margin-top: 0; }
+select, input[type="text"], textarea { width: 100%; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+textarea { resize: vertical; min-height: 70px; font-size: 13px; }
+input[type="color"] { width: 100%; height: 34px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 2px; cursor: pointer; }
+.color-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.btn { padding: 8px 14px; border-radius: 8px; border: none; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-primary:hover { background: #db2777; }
+.btn-secondary { background: #fff; border: 1px solid #e5e7eb; color: #1a1a1a; }
+.btn-secondary:hover { border-color: #ec4899; }
+.btn-block { width: 100%; margin-top: 8px; }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; }
+.nav-row { display: flex; justify-content: center; gap: 12px; align-items: center; margin-top: 12px; }
+.nav-row button { width: 36px; height: 36px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; font-size: 16px; }
+.nav-row button:hover { border-color: #ec4899; }
+.nav-row span { font-size: 13px; color: #6b7280; }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="back">&larr; Back to FreeDesignStore</a>
+  <h1>Slide Deck Builder</h1>
+  <p class="subtitle">Build presentation slide decks. Edit inline, choose themes, and export as a self-contained HTML slideshow.</p>
+
+  <div class="panel">
+    <div class="main-layout">
+      <div class="sidebar" id="sidebar"></div>
+      <div>
+        <div class="canvas-area">
+          <canvas id="slideCanvas" width="960" height="540"></canvas>
+        </div>
+        <div class="nav-row">
+          <button id="prevSlide">&larr;</button>
+          <span id="slideNum">1 / 1</span>
+          <button id="nextSlide">&rarr;</button>
+        </div>
+      </div>
+      <div class="controls">
+        <label>Slide Type</label>
+        <select id="slideType">
+          <option value="title">Title Slide</option>
+          <option value="content">Content</option>
+          <option value="image-text">Image + Text</option>
+          <option value="quote">Quote</option>
+          <option value="bullets">Bullets</option>
+          <option value="ending">Ending</option>
+        </select>
+
+        <label>Heading</label>
+        <input type="text" id="slideHeading" value="Welcome" maxlength="80">
+
+        <label>Body / Bullets</label>
+        <textarea id="slideBody">Enter your content here.
+Each line becomes a bullet.</textarea>
+
+        <label>Theme Colors</label>
+        <div class="color-row">
+          <div><label style="font-size:11px">Primary</label><input type="color" id="color1" value="#1a1a1a"></div>
+          <div><label style="font-size:11px">Accent</label><input type="color" id="color2" value="#ec4899"></div>
+          <div><label style="font-size:11px">Text</label><input type="color" id="color3" value="#ffffff"></div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-secondary" id="addSlideBtn">+ Add Slide</button>
+          <button class="btn btn-secondary" id="dupSlideBtn">Duplicate</button>
+        </div>
+        <button class="btn btn-primary btn-block" id="exportBtn">Export HTML Slideshow</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('slideCanvas');
+const ctx = canvas.getContext('2d');
+const W = 960, H = 540;
+canvas.style.width = '100%';
+canvas.style.maxWidth = '700px';
+
+const sidebar = document.getElementById('sidebar');
+const slideNumEl = document.getElementById('slideNum');
+const slideTypeEl = document.getElementById('slideType');
+const slideHeadingEl = document.getElementById('slideHeading');
+const slideBodyEl = document.getElementById('slideBody');
+const color1El = document.getElementById('color1');
+const color2El = document.getElementById('color2');
+const color3El = document.getElementById('color3');
+
+let slides = [
+  { type: 'title', heading: 'Your Presentation', body: 'Subtitle goes here' },
+  { type: 'bullets', heading: 'Key Points', body: 'First point\nSecond point\nThird point' },
+  { type: 'quote', heading: '"Design is intelligence made visible."', body: '- Alina Wheeler' },
+  { type: 'ending', heading: 'Thank You', body: 'Questions?' }
+];
+let current = 0;
+let theme = { bg: '#1a1a1a', accent: '#ec4899', text: '#ffffff' };
+
+function renderSidebar() {
+  sidebar.innerHTML = slides.map((s, i) => `
+    <div class="slide-thumb ${i === current ? 'active' : ''}" data-i="${i}">
+      <span class="num">${i + 1}</span>
+      ${s.heading.slice(0, 30)}
+      ${slides.length > 1 ? `<span class="rm" data-rm="${i}">&times;</span>` : ''}
+    </div>
+  `).join('');
+  slideNumEl.textContent = `${current + 1} / ${slides.length}`;
+}
+
+function loadSlide() {
+  const s = slides[current];
+  slideTypeEl.value = s.type;
+  slideHeadingEl.value = s.heading;
+  slideBodyEl.value = s.body;
+  renderCanvas();
+  renderSidebar();
+}
+
+function saveSlide() {
+  slides[current].type = slideTypeEl.value;
+  slides[current].heading = slideHeadingEl.value;
+  slides[current].body = slideBodyEl.value;
+}
+
+function wrapText(text, x, y, maxW, lineH, align) {
+  ctx.textAlign = align || 'left';
+  const words = text.split(' ');
+  let line = '', cy = y;
+  words.forEach(word => {
+    const test = line + word + ' ';
+    if (ctx.measureText(test).width > maxW && line) {
+      ctx.fillText(line.trim(), x, cy);
+      cy += lineH;
+      line = word + ' ';
+    } else line = test;
+  });
+  ctx.fillText(line.trim(), x, cy);
+  return cy - y + lineH;
+}
+
+function renderCanvas() {
+  const s = slides[current];
+  const bg = theme.bg;
+  const ac = theme.accent;
+  const tc = theme.text;
+  const pad = 80;
+
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  if (s.type === 'title') {
+    ctx.fillStyle = ac;
+    ctx.fillRect(0, H - 6, W, 6);
+    ctx.fillStyle = tc;
+    ctx.font = '800 48px Manrope, system-ui';
+    ctx.textAlign = 'center';
+    wrapText(s.heading, W/2, H*0.4, W - pad*2, 58, 'center');
+    ctx.fillStyle = tc + 'aa';
+    ctx.font = '400 24px Manrope, system-ui';
+    ctx.fillText(s.body.split('\n')[0], W/2, H*0.62);
+  } else if (s.type === 'content') {
+    ctx.fillStyle = ac;
+    ctx.fillRect(pad, 60, 50, 4);
+    ctx.fillStyle = tc;
+    ctx.font = '700 32px Manrope, system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText(s.heading, pad, 100);
+    ctx.fillStyle = tc + 'cc';
+    ctx.font = '400 20px Manrope, system-ui';
+    wrapText(s.body.replace(/\n/g, ' '), pad, 160, W - pad*2, 30, 'left');
+  } else if (s.type === 'image-text') {
+    ctx.fillStyle = ac + '22';
+    ctx.fillRect(0, 0, W*0.45, H);
+    ctx.fillStyle = ac;
+    ctx.font = '700 80px Manrope, system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('IMG', W*0.225, H/2 + 20);
+    ctx.fillStyle = tc;
+    ctx.font = '700 28px Manrope, system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText(s.heading, W*0.5 + 20, 120);
+    ctx.fillStyle = tc + 'cc';
+    ctx.font = '400 18px Manrope, system-ui';
+    wrapText(s.body.replace(/\n/g, ' '), W*0.5 + 20, 170, W*0.45 - 40, 26, 'left');
+  } else if (s.type === 'quote') {
+    ctx.fillStyle = ac + '33';
+    ctx.font = '800 120px Manrope, system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText('"', pad - 10, 140);
+    ctx.fillStyle = tc;
+    ctx.font = '600 28px Manrope, system-ui';
+    ctx.textAlign = 'center';
+    wrapText(s.heading, W/2, H*0.38, W - pad*2, 38, 'center');
+    ctx.fillStyle = ac;
+    ctx.font = '500 20px Manrope, system-ui';
+    ctx.fillText(s.body.split('\n')[0], W/2, H*0.7);
+  } else if (s.type === 'bullets') {
+    ctx.fillStyle = ac;
+    ctx.fillRect(pad, 60, 50, 4);
+    ctx.fillStyle = tc;
+    ctx.font = '700 30px Manrope, system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText(s.heading, pad, 100);
+    const lines = s.body.split('\n').filter(l => l.trim());
+    ctx.font = '400 20px Manrope, system-ui';
+    lines.forEach((line, i) => {
+      const y = 160 + i * 42;
+      ctx.fillStyle = ac;
+      ctx.beginPath();
+      ctx.arc(pad + 8, y - 6, 5, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = tc + 'dd';
+      ctx.fillText(line.trim(), pad + 28, y);
+    });
+  } else { // ending
+    ctx.fillStyle = ac;
+    ctx.fillRect(0, 0, W, 6);
+    ctx.fillStyle = tc;
+    ctx.font = '800 52px Manrope, system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(s.heading, W/2, H*0.44);
+    ctx.fillStyle = tc + '99';
+    ctx.font = '400 24px Manrope, system-ui';
+    ctx.fillText(s.body.split('\n')[0], W/2, H*0.6);
+  }
+
+  // Slide number
+  ctx.fillStyle = tc + '44';
+  ctx.font = '500 14px Manrope, system-ui';
+  ctx.textAlign = 'right';
+  ctx.fillText(`${current + 1}`, W - 30, H - 20);
+}
+
+sidebar.addEventListener('click', e => {
+  const rm = e.target.closest('[data-rm]');
+  if (rm) {
+    const i = parseInt(rm.dataset.rm);
+    slides.splice(i, 1);
+    if (current >= slides.length) current = slides.length - 1;
+    loadSlide();
+    return;
+  }
+  const thumb = e.target.closest('.slide-thumb');
+  if (thumb) {
+    saveSlide();
+    current = parseInt(thumb.dataset.i);
+    loadSlide();
+  }
+});
+
+document.getElementById('prevSlide').addEventListener('click', () => { saveSlide(); current = Math.max(0, current - 1); loadSlide(); });
+document.getElementById('nextSlide').addEventListener('click', () => { saveSlide(); current = Math.min(slides.length - 1, current + 1); loadSlide(); });
+
+document.getElementById('addSlideBtn').addEventListener('click', () => {
+  saveSlide();
+  slides.splice(current + 1, 0, { type: 'content', heading: 'New Slide', body: 'Content here' });
+  current++;
+  loadSlide();
+});
+
+document.getElementById('dupSlideBtn').addEventListener('click', () => {
+  saveSlide();
+  slides.splice(current + 1, 0, { ...slides[current] });
+  current++;
+  loadSlide();
+});
+
+[slideTypeEl].forEach(el => el.addEventListener('change', () => { saveSlide(); renderCanvas(); renderSidebar(); }));
+[slideHeadingEl, slideBodyEl].forEach(el => el.addEventListener('input', () => { saveSlide(); renderCanvas(); renderSidebar(); }));
+[color1El, color2El, color3El].forEach(el => el.addEventListener('input', () => {
+  theme = { bg: color1El.value, accent: color2El.value, text: color3El.value };
+  renderCanvas();
+}));
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  saveSlide();
+  const bg = theme.bg, ac = theme.accent, tc = theme.text;
+  const slidesHTML = slides.map((s, i) => {
+    let content = '';
+    if (s.type === 'title') {
+      content = `<h1 style="font-size:3em;margin:0">${esc(s.heading)}</h1><p style="opacity:.7;font-size:1.4em;margin-top:.5em">${esc(s.body.split('\n')[0])}</p>`;
+    } else if (s.type === 'content') {
+      content = `<h2 style="border-left:4px solid ${ac};padding-left:12px">${esc(s.heading)}</h2><p style="opacity:.8;font-size:1.1em;margin-top:1em;line-height:1.6">${esc(s.body.replace(/\n/g,' '))}</p>`;
+    } else if (s.type === 'quote') {
+      content = `<p style="font-size:1.6em;font-weight:600;font-style:italic;max-width:80%">${esc(s.heading)}</p><p style="color:${ac};margin-top:1em">${esc(s.body.split('\n')[0])}</p>`;
+    } else if (s.type === 'bullets') {
+      const items = s.body.split('\n').filter(l=>l.trim()).map(l=>`<li>${esc(l.trim())}</li>`).join('');
+      content = `<h2>${esc(s.heading)}</h2><ul style="text-align:left;font-size:1.2em;line-height:2;list-style:disc;padding-left:1.5em;margin-top:1em">${items}</ul>`;
+    } else if (s.type === 'image-text') {
+      content = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:2em;width:80%;text-align:left"><div style="background:${ac}22;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:2em;color:${ac}">IMG</div><div><h2>${esc(s.heading)}</h2><p style="opacity:.8;margin-top:.5em">${esc(s.body.replace(/\n/g,' '))}</p></div></div>`;
+    } else {
+      content = `<h1 style="font-size:3em">${esc(s.heading)}</h1><p style="opacity:.6;font-size:1.3em;margin-top:.5em">${esc(s.body.split('\n')[0])}</p>`;
+    }
+    return `<section class="slide" style="display:${i===0?'flex':'none'}">${content}</section>`;
+  }).join('\n');
+
+  const html = `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Presentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',system-ui;background:${bg};color:${tc};overflow:hidden}
+.slide{width:100vw;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px;text-align:center}
+.counter{position:fixed;bottom:20px;right:30px;opacity:.4;font-size:14px}
+</style></head><body>
+${slidesHTML}
+<div class="counter" id="counter">1 / ${slides.length}</div>
+<script>
+let c=0;const ss=document.querySelectorAll('.slide'),ct=document.getElementById('counter');
+function go(d){ss[c].style.display='none';c=Math.max(0,Math.min(ss.length-1,c+d));ss[c].style.display='flex';ct.textContent=(c+1)+' / '+ss.length;}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')go(1);if(e.key==='ArrowLeft')go(-1);});
+document.addEventListener('click',e=>{if(e.clientX>window.innerWidth/2)go(1);else go(-1);});
+<\/script></body></html>`;
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const link = document.createElement('a');
+  link.download = 'presentation.html';
+  link.href = URL.createObjectURL(blob);
+  link.click();
+});
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+  if (e.key === 'ArrowLeft') { saveSlide(); current = Math.max(0, current - 1); loadSlide(); }
+  if (e.key === 'ArrowRight') { saveSlide(); current = Math.min(slides.length - 1, current + 1); loadSlide(); }
+});
+
+loadSlide();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>
