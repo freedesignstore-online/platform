@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Logo Concept Generator - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
+a.back:hover { text-decoration: underline; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+p.subtitle { color: #6b7280; margin-bottom: 24px; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+@media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: #6b7280; margin-bottom: 6px; }
+.form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; outline: none; transition: border-color .2s; }
+.form-group input:focus, .form-group select:focus { border-color: #ec4899; }
+.controls-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 24px; }
+.btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 14px; transition: opacity .2s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
+.sliders { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; padding: 16px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; }
+.slider-group label { display: block; font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 4px; }
+.slider-group input[type="range"] { width: 100%; accent-color: #ec4899; }
+.slider-group .val { font-size: 12px; color: #ec4899; font-weight: 600; }
+.concepts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.concept-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; transition: transform .2s, box-shadow .2s; }
+.concept-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,.1); }
+.concept-preview { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #fafafa; border-bottom: 1px solid #e5e7eb; }
+.concept-preview svg { width: 70%; height: 70%; }
+.concept-info { padding: 16px; }
+.concept-info h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.concept-info p { font-size: 12px; color: #6b7280; margin-bottom: 12px; }
+.concept-info button { padding: 6px 14px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer; transition: all .15s; }
+.concept-info button:hover { border-color: #ec4899; color: #ec4899; }
+.empty-state { text-align: center; padding: 60px 24px; color: #9ca3af; }
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+.color-pickers { display: flex; gap: 8px; align-items: center; }
+.color-pickers input[type="color"] { width: 32px; height: 32px; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; padding: 2px; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<h1>Smart Logo Concept Generator</h1>
+<p class="subtitle">Enter your brand details and get 6 unique algorithmic logo concepts — geometric, monogram, and abstract marks.</p>
+
+<div class="panel">
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Brand Name</label>
+      <input type="text" id="brandName" placeholder="e.g. Apex, NovaTech, BlueLeaf">
+    </div>
+    <div class="form-group">
+      <label>Industry</label>
+      <select id="industry">
+        <option value="tech">Technology</option>
+        <option value="finance">Finance</option>
+        <option value="health">Health & Wellness</option>
+        <option value="food">Food & Beverage</option>
+        <option value="creative">Creative & Design</option>
+        <option value="education">Education</option>
+        <option value="nature">Nature & Environment</option>
+        <option value="sport">Sports & Fitness</option>
+        <option value="fashion">Fashion & Beauty</option>
+        <option value="music">Music & Entertainment</option>
+        <option value="travel">Travel & Hospitality</option>
+        <option value="real_estate">Real Estate</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="sliders">
+    <div class="slider-group">
+      <label>Complexity <span class="val" id="complexityVal">50</span></label>
+      <input type="range" id="complexity" min="0" max="100" value="50">
+    </div>
+    <div class="slider-group">
+      <label>Symmetry <span class="val" id="symmetryVal">70</span></label>
+      <input type="range" id="symmetry" min="0" max="100" value="70">
+    </div>
+    <div class="slider-group">
+      <label>Weight <span class="val" id="weightVal">50</span></label>
+      <input type="range" id="weight" min="0" max="100" value="50">
+    </div>
+    <div class="slider-group">
+      <label>Colors</label>
+      <div class="color-pickers">
+        <input type="color" id="color1" value="#ec4899">
+        <input type="color" id="color2" value="#1a1a1a">
+      </div>
+    </div>
+  </div>
+
+  <div class="controls-row">
+    <button class="btn btn-primary" onclick="generate()">Generate Concepts</button>
+    <button class="btn btn-secondary" onclick="generate()">Regenerate</button>
+  </div>
+
+  <div class="concepts-grid" id="conceptsGrid">
+    <div class="empty-state" style="grid-column: 1 / -1;">
+      <div class="icon">&#9670;</div>
+      <p>Enter your brand name above and click Generate<br>to create unique logo concepts</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// Slider value display
+['complexity', 'symmetry', 'weight'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => {
+    document.getElementById(id + 'Val').textContent = el.value;
+  });
+});
+
+// Seeded random for reproducible variation within a generation
+let seed = 1;
+function seededRandom() {
+  seed = (seed * 16807) % 2147483647;
+  return (seed - 1) / 2147483646;
+}
+
+function generate() {
+  const name = document.getElementById('brandName').value.trim();
+  if (!name) { showToast('Please enter a brand name'); return; }
+
+  seed = hashString(name + Date.now());
+  const industry = document.getElementById('industry').value;
+  const complexity = parseInt(document.getElementById('complexity').value) / 100;
+  const symmetry = parseInt(document.getElementById('symmetry').value) / 100;
+  const weight = parseInt(document.getElementById('weight').value) / 100;
+  const c1 = document.getElementById('color1').value;
+  const c2 = document.getElementById('color2').value;
+
+  const concepts = [
+    generateGeometric(name, industry, complexity, symmetry, weight, c1, c2),
+    generateMonogram(name, complexity, symmetry, weight, c1, c2),
+    generateAbstract(name, industry, complexity, symmetry, weight, c1, c2),
+    generateLissajous(name, complexity, symmetry, weight, c1, c2),
+    generateInitials(name, complexity, symmetry, weight, c1, c2),
+    generateFractal(name, industry, complexity, symmetry, weight, c1, c2)
+  ];
+
+  const grid = document.getElementById('conceptsGrid');
+  grid.innerHTML = concepts.map((c, i) => `
+    <div class="concept-card">
+      <div class="concept-preview">${c.svg}</div>
+      <div class="concept-info">
+        <h3>${c.title}</h3>
+        <p>${c.description}</p>
+        <button onclick="downloadSVG(${i})">Download SVG</button>
+      </div>
+    </div>
+  `).join('');
+
+  window._concepts = concepts;
+}
+
+function hashString(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h) || 1;
+}
+
+// --- CONCEPT 1: Geometric shape based on industry ---
+function generateGeometric(name, industry, complexity, symmetry, weight, c1, c2) {
+  const sides = { tech: 6, finance: 4, health: 0, food: 5, creative: 3, education: 8, nature: 5, sport: 3, fashion: 4, music: 5, travel: 6, real_estate: 4 };
+  const n = sides[industry] || 6;
+  const sw = 1.5 + weight * 3;
+  const layers = 1 + Math.floor(complexity * 3);
+  let paths = '';
+
+  for (let layer = 0; layer < layers; layer++) {
+    const r = 35 - layer * (8 / layers);
+    const rot = layer * (symmetry > 0.5 ? 30 : 15 + seededRandom() * 30);
+    if (n === 0) {
+      // Circle for health
+      paths += `<circle cx="50" cy="50" r="${r}" fill="none" stroke="${layer % 2 === 0 ? c1 : c2}" stroke-width="${sw}" transform="rotate(${rot} 50 50)" opacity="${1 - layer * 0.2}"/>`;
+    } else {
+      const points = [];
+      for (let i = 0; i < n; i++) {
+        const angle = (Math.PI * 2 * i / n) - Math.PI / 2 + (rot * Math.PI / 180);
+        points.push(`${50 + r * Math.cos(angle)},${50 + r * Math.sin(angle)}`);
+      }
+      paths += `<polygon points="${points.join(' ')}" fill="none" stroke="${layer % 2 === 0 ? c1 : c2}" stroke-width="${sw}" stroke-linejoin="round" opacity="${1 - layer * 0.15}"/>`;
+    }
+  }
+
+  // Add initial in center
+  const initial = name.charAt(0).toUpperCase();
+  const fontSize = 18 + weight * 8;
+  paths += `<text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-family="Manrope, sans-serif" font-size="${fontSize}" font-weight="${weight > 0.5 ? 700 : 500}" fill="${c2}">${initial}</text>`;
+
+  const svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${paths}</svg>`;
+  return { svg, title: 'Geometric Mark', description: `${n === 0 ? 'Circular' : n + '-sided'} geometric frame with layered depth` };
+}
+
+// --- CONCEPT 2: Stylized monogram ---
+function generateMonogram(name, complexity, symmetry, weight, c1, c2) {
+  const letters = name.slice(0, 2).toUpperCase();
+  const sw = 2 + weight * 4;
+  const fontSize = 28 + weight * 10;
+  let elements = '';
+
+  // Background shape
+  if (symmetry > 0.5) {
+    elements += `<circle cx="50" cy="50" r="40" fill="${c1}" opacity="0.1"/>`;
+    elements += `<circle cx="50" cy="50" r="40" fill="none" stroke="${c1}" stroke-width="${sw * 0.5}"/>`;
+  } else {
+    elements += `<rect x="10" y="10" width="80" height="80" rx="${12 * symmetry}" fill="${c1}" opacity="0.1"/>`;
+    elements += `<rect x="10" y="10" width="80" height="80" rx="${12 * symmetry}" fill="none" stroke="${c1}" stroke-width="${sw * 0.5}"/>`;
+  }
+
+  // Decorative lines based on complexity
+  if (complexity > 0.3) {
+    const lineCount = Math.floor(complexity * 5);
+    for (let i = 0; i < lineCount; i++) {
+      const y = 20 + i * (60 / lineCount);
+      elements += `<line x1="15" y1="${y}" x2="85" y2="${y}" stroke="${c2}" stroke-width="0.3" opacity="0.2"/>`;
+    }
+  }
+
+  // Letters
+  if (letters.length >= 2) {
+    elements += `<text x="38" y="55" text-anchor="middle" dominant-baseline="central" font-family="Manrope, sans-serif" font-size="${fontSize}" font-weight="700" fill="${c1}">${letters[0]}</text>`;
+    elements += `<text x="62" y="55" text-anchor="middle" dominant-baseline="central" font-family="Manrope, sans-serif" font-size="${fontSize * 0.8}" font-weight="400" fill="${c2}">${letters[1]}</text>`;
+  } else {
+    elements += `<text x="50" y="52" text-anchor="middle" dominant-baseline="central" font-family="Manrope, sans-serif" font-size="${fontSize * 1.2}" font-weight="700" fill="${c1}">${letters[0]}</text>`;
+  }
+
+  const svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${elements}</svg>`;
+  return { svg, title: 'Monogram', description: 'Dual-letter monogram with framing element' };
+}
+
+// --- CONCEPT 3: Abstract mark from mathematical curves ---
+function generateAbstract(name, industry, complexity, symmetry, weight, c1, c2) {
+  const sw = 1.5 + weight * 3;
+  const loops = 2 + Math.floor(complexity * 4);
+  let paths = '';
+
+  // Generate spirograph-like pattern
+  const R = 30, r = 10 + seededRandom() * 15, d = 15 + seededRandom() * 15;
+  const steps = 100 + Math.floor(complexity * 200);
+  const points = [];
+
+  for (let i = 0; i <= steps; i++) {
+    const t = (i / steps) * Math.PI * 2 * loops;
+    const x = 50 + (R - r) * Math.cos(t) + d * Math.cos((R - r) / r * t);
+    const y = 50 + (R - r) * Math.sin(t) + d * Math.sin((R - r) / r * t);
+    // Scale to fit
+    points.push([x, y]);
+  }
+
+  // Normalize points to fit in viewbox
+  const xs = points.map(p => p[0]), ys = points.map(p => p[1]);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const scale = 70 / Math.max(maxX - minX, maxY - minY);
+  const normPoints = points.map(([x, y]) => [
+    15 + (x - minX) * scale,
+    15 + (y - minY) * scale
+  ]);
+
+  let pathD = `M ${normPoints[0][0]} ${normPoints[0][1]}`;
+  for (let i = 1; i < normPoints.length; i++) {
+    pathD += ` L ${normPoints[i][0]} ${normPoints[i][1]}`;
+  }
+
+  paths += `<path d="${pathD}" fill="none" stroke="${c1}" stroke-width="${sw}" stroke-linecap="round" opacity="0.8"/>`;
+
+  if (symmetry > 0.5) {
+    paths += `<path d="${pathD}" fill="none" stroke="${c2}" stroke-width="${sw * 0.5}" stroke-linecap="round" opacity="0.3" transform="rotate(180 50 50)"/>`;
+  }
+
+  const svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${paths}</svg>`;
+  return { svg, title: 'Abstract Spirograph', description: 'Mathematical curve pattern — unique to your brand name' };
+}
+
+// --- CONCEPT 4: Lissajous curve ---
+function generateLissajous(name, complexity, symmetry, weight, c1, c2) {
+  const sw = 1.5 + weight * 3;
+  const a = 2 + Math.floor(seededRandom() * 4);
+  const b = 3 + Math.floor(seededRandom() * 4);
+  const delta = seededRandom() * Math.PI;
+  const steps = 200;
+  let elements = '';
+
+  const points = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = (i / steps) * Math.PI * 2;
+    const x = 50 + 32 * Math.sin(a * t + delta);
+    const y = 50 + 32 * Math.cos(b * t);
+    points.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+  }
+
+  elements += `<polyline points="${points.join(' ')}" fill="none" stroke="${c1}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+  // Add dots at intersections for complexity
+  if (complexity > 0.4) {
+    const dotCount = Math.floor(complexity * 8);
+    for (let i = 0; i < dotCount; i++) {
+      const t = (i / dotCount) * Math.PI * 2;
+      const x = 50 + 32 * Math.sin(a * t + delta);
+      const y = 50 + 32 * Math.cos(b * t);
+      elements += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${1.5 + weight}" fill="${c2}"/>`;
+    }
+  }
+
+  // Center letter
+  const initial = name.charAt(0).toUpperCase();
+  if (symmetry > 0.3) {
+    elements += `<text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-family="Manrope, sans-serif" font-size="16" font-weight="600" fill="${c2}">${initial}</text>`;
+  }
+
+  const svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${elements}</svg>`;
+  return { svg, title: 'Lissajous Mark', description: `Harmonic curve (${a}:${b} ratio) creating a flowing symbol` };
+}
+
+// --- CONCEPT 5: Stacked/overlapping initials ---
+function generateInitials(name, complexity, symmetry, weight, c1, c2) {
+  const words = name.split(/\s+/);
+  const initials = words.length > 1
+    ? words.map(w => w[0]).join('').toUpperCase().slice(0, 3)
+    : name.slice(0, 2).toUpperCase();
+
+  const sw = 2 + weight * 3;
+  let elements = '';
+
+  // Background shapes — overlapping circles
+  const circleCount = initials.length;
+  const spacing = 18;
+  const startX = 50 - (circleCount - 1) * spacing / 2;
+
+  for (let i = 0; i < circleCount; i++) {
+    const cx = startX + i * spacing;
+    elements += `<circle cx="${cx}" cy="50" r="22" fill="${c1}" opacity="${0.1 + i * 0.05}" stroke="${c1}" stroke-width="${sw * 0.3}"/>`;
+  }
+
+  // Letters stacked with overlap
+  const letterSpacing = 14;
+  const startLX = 50 - (initials.length - 1) * letterSpacing / 2;
+  const fontSize = 22 - (initials.length > 2 ? 4 : 0);
+
+  for (let i = 0; i < initials.length; i++) {
+    const x = startLX + i * letterSpacing;
+    const fw = i === 0 ? '700' : '400';
+    const fill = i === 0 ? c1 : c2;
+    elements += `<text x="${x}" y="54" text-anchor="middle" dominant-baseline="central" font-family="Manrope, sans-serif" font-size="${fontSize}" font-weight="${fw}" fill="${fill}">${initials[i]}</text>`;
+  }
+
+  // Underline accent
+  if (complexity > 0.3) {
+    const lineW = initials.length * letterSpacing + 10;
+    elements += `<line x1="${50 - lineW/2}" y1="68" x2="${50 + lineW/2}" y2="68" stroke="${c1}" stroke-width="${sw * 0.6}" stroke-linecap="round"/>`;
+  }
+
+  const svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${elements}</svg>`;
+  return { svg, title: 'Overlapping Initials', description: `Layered "${initials}" with circular frames` };
+}
+
+// --- CONCEPT 6: Fractal/recursive pattern ---
+function generateFractal(name, industry, complexity, symmetry, weight, c1, c2) {
+  const sw = 1 + weight * 2;
+  const depth = 2 + Math.floor(complexity * 2);
+  let elements = '';
+
+  // Recursive tree or Koch-like pattern
+  const branches = symmetry > 0.5 ? Math.round(3 + seededRandom() * 3) : 2;
+  const angleSpread = 30 + symmetry * 60;
+
+  function drawBranch(x, y, len, angle, d) {
+    if (d <= 0 || len < 2) return;
+    const x2 = x + len * Math.cos(angle * Math.PI / 180);
+    const y2 = y + len * Math.sin(angle * Math.PI / 180);
+    const opacity = 0.3 + (d / depth) * 0.7;
+    const strokeW = sw * (d / depth);
+    elements += `<line x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${d % 2 === 0 ? c1 : c2}" stroke-width="${strokeW.toFixed(1)}" stroke-linecap="round" opacity="${opacity.toFixed(2)}"/>`;
+
+    const newLen = len * (0.55 + seededRandom() * 0.15);
+    for (let i = 0; i < branches; i++) {
+      const branchAngle = angle - angleSpread / 2 + (i / (branches - 1 || 1)) * angleSpread;
+      drawBranch(x2, y2, newLen, branchAngle, d - 1);
+    }
+  }
+
+  if (symmetry > 0.6) {
+    // Radial symmetry
+    const arms = Math.round(3 + seededRandom() * 4);
+    for (let i = 0; i < arms; i++) {
+      const angle = (360 / arms) * i - 90;
+      drawBranch(50, 50, 18, angle, depth);
+    }
+  } else {
+    // Single tree growing up
+    drawBranch(50, 80, 25, -90, depth);
+  }
+
+  // Central dot
+  elements += `<circle cx="50" cy="${symmetry > 0.6 ? 50 : 80}" r="${2 + weight * 2}" fill="${c1}"/>`;
+
+  const svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${elements}</svg>`;
+  return { svg, title: 'Fractal Mark', description: `Recursive ${symmetry > 0.6 ? 'radial' : 'branching'} pattern — organic complexity` };
+}
+
+// --- Download ---
+function downloadSVG(index) {
+  const concept = window._concepts[index];
+  if (!concept) return;
+  const blob = new Blob([concept.svg], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `logo-concept-${index + 1}.svg`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Downloaded SVG');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// Enter key
+document.getElementById('brandName').addEventListener('keydown', e => {
+  if (e.key === 'Enter') generate();
+});
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

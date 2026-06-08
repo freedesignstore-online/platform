@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Color Palette from Description - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
+a.back:hover { text-decoration: underline; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+p.subtitle { color: #6b7280; margin-bottom: 24px; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
+.input-row { display: flex; gap: 12px; margin-bottom: 24px; }
+.input-row input { flex: 1; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 15px; outline: none; transition: border-color .2s; }
+.input-row input:focus { border-color: #ec4899; }
+.btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 14px; transition: opacity .2s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
+.palette-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; min-height: 200px; align-items: stretch; }
+.swatch { flex: 1; min-width: 100px; min-height: 200px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding: 12px; cursor: pointer; position: relative; transition: transform .2s; }
+.swatch:hover { transform: scale(1.03); }
+.swatch .info { background: rgba(255,255,255,.92); border-radius: 8px; padding: 8px 12px; text-align: center; font-size: 12px; width: 100%; backdrop-filter: blur(4px); }
+.swatch .info .hex { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+.swatch .info .name { color: #6b7280; font-size: 11px; }
+.keywords-display { margin-bottom: 16px; }
+.keywords-display span { display: inline-block; background: #fdf2f8; color: #ec4899; border: 1px solid #fbcfe8; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 500; margin: 4px 4px 4px 0; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.export-box { margin-top: 16px; }
+.export-box textarea { width: 100%; height: 100px; font-family: monospace; font-size: 13px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; resize: vertical; background: #fafafa; }
+.suggestions { margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb; }
+.suggestions h3 { font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #6b7280; }
+.suggestions button { background: none; border: 1px solid #e5e7eb; border-radius: 20px; padding: 6px 14px; font-family: inherit; font-size: 13px; cursor: pointer; margin: 4px 4px 4px 0; transition: all .2s; }
+.suggestions button:hover { border-color: #ec4899; background: #fdf2f8; color: #ec4899; }
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; color: #9ca3af; text-align: center; }
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+.loading { animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<h1>Smart Color Palette from Description</h1>
+<p class="subtitle">Describe a mood, scene, or brand — get an intelligent 5-color palette generated from your words.</p>
+
+<div class="panel">
+  <div class="input-row">
+    <input type="text" id="descInput" placeholder="e.g. sunset over ocean, cozy coffee shop, corporate tech startup..." autofocus>
+    <button class="btn btn-primary" onclick="generateFromText()">Generate</button>
+    <button class="btn btn-secondary" onclick="regenerate()">Regenerate</button>
+  </div>
+
+  <div class="keywords-display" id="keywordsDisplay"></div>
+
+  <div class="palette-row" id="paletteRow">
+    <div class="empty-state">
+      <div class="icon">&#127912;</div>
+      <p>Type a description above and click Generate<br>to create an intelligent color palette</p>
+    </div>
+  </div>
+
+  <div class="actions" id="actions" style="display:none;">
+    <button class="btn btn-secondary" onclick="exportCSS()">Copy CSS Variables</button>
+    <button class="btn btn-secondary" onclick="exportTailwind()">Copy Tailwind</button>
+    <button class="btn btn-secondary" onclick="exportAll()">Copy All Hex</button>
+  </div>
+
+  <div class="export-box" id="exportBox" style="display:none;">
+    <textarea id="exportOutput" readonly></textarea>
+  </div>
+
+  <div class="suggestions">
+    <h3>Try these descriptions:</h3>
+    <button onclick="tryExample(this)">sunset over ocean</button>
+    <button onclick="tryExample(this)">corporate tech startup</button>
+    <button onclick="tryExample(this)">cozy coffee shop</button>
+    <button onclick="tryExample(this)">tropical rainforest</button>
+    <button onclick="tryExample(this)">minimalist scandinavian</button>
+    <button onclick="tryExample(this)">vintage retro 80s</button>
+    <button onclick="tryExample(this)">dark moody gothic</button>
+    <button onclick="tryExample(this)">playful children toys</button>
+    <button onclick="tryExample(this)">luxury gold elegant</button>
+    <button onclick="tryExample(this)">fresh spring garden</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// --- Keyword-to-color mapping database ---
+const colorFamilies = {
+  warm: { hueRange: [0, 60], sat: [55, 85], lit: [40, 65] },
+  cool: { hueRange: [180, 260], sat: [40, 75], lit: [35, 60] },
+  neutral: { hueRange: [0, 360], sat: [5, 20], lit: [30, 70] },
+  vibrant: { hueRange: [0, 360], sat: [75, 95], lit: [45, 60] },
+  pastel: { hueRange: [0, 360], sat: [30, 55], lit: [70, 85] },
+  earth: { hueRange: [20, 50], sat: [30, 60], lit: [25, 50] },
+  dark: { hueRange: [0, 360], sat: [20, 50], lit: [10, 30] },
+  light: { hueRange: [0, 360], sat: [15, 40], lit: [80, 95] }
+};
+
+const keywordMap = {
+  // Nature
+  sunset: { families: ['warm'], hues: [0, 15, 30, 280, 45], weight: 3 },
+  sunrise: { families: ['warm'], hues: [40, 50, 20, 350, 60], weight: 2 },
+  ocean: { families: ['cool'], hues: [200, 210, 195, 220, 180], weight: 3 },
+  sea: { families: ['cool'], hues: [195, 205, 185, 210, 190], weight: 2 },
+  sky: { families: ['cool'], hues: [210, 200, 220, 195, 230], weight: 2 },
+  forest: { families: ['earth'], hues: [120, 140, 100, 80, 150], weight: 3 },
+  nature: { families: ['earth'], hues: [120, 90, 60, 140, 30], weight: 2 },
+  garden: { families: ['pastel'], hues: [120, 340, 60, 280, 90], weight: 2 },
+  flower: { families: ['pastel'], hues: [330, 340, 300, 60, 120], weight: 2 },
+  spring: { families: ['pastel'], hues: [120, 80, 340, 60, 150], weight: 2 },
+  summer: { families: ['vibrant'], hues: [45, 180, 340, 120, 200], weight: 2 },
+  autumn: { families: ['warm', 'earth'], hues: [25, 35, 15, 45, 5], weight: 3 },
+  fall: { families: ['warm', 'earth'], hues: [25, 35, 15, 45, 5], weight: 2 },
+  winter: { families: ['cool'], hues: [210, 220, 200, 240, 190], weight: 2 },
+  mountain: { families: ['cool', 'earth'], hues: [210, 160, 30, 200, 120], weight: 2 },
+  desert: { families: ['warm', 'earth'], hues: [35, 25, 45, 15, 50], weight: 2 },
+  tropical: { families: ['vibrant'], hues: [160, 45, 340, 120, 30], weight: 3 },
+  rainforest: { families: ['vibrant'], hues: [140, 120, 160, 80, 100], weight: 3 },
+  beach: { families: ['warm', 'pastel'], hues: [45, 195, 35, 200, 50], weight: 2 },
+  sand: { families: ['warm'], hues: [40, 35, 45, 30, 50], weight: 1 },
+  earth: { families: ['earth'], hues: [25, 35, 15, 45, 80], weight: 2 },
+  stone: { families: ['neutral'], hues: [30, 25, 35, 20, 40], weight: 2 },
+  rock: { families: ['neutral', 'earth'], hues: [25, 20, 30, 15, 35], weight: 1 },
+  water: { families: ['cool'], hues: [200, 195, 210, 185, 220], weight: 2 },
+  river: { families: ['cool'], hues: [195, 200, 180, 210, 170], weight: 2 },
+  ice: { families: ['cool', 'light'], hues: [195, 200, 210, 190, 180], weight: 2 },
+  snow: { families: ['light'], hues: [210, 200, 220, 195, 0], weight: 2 },
+  fire: { families: ['warm', 'vibrant'], hues: [5, 15, 25, 0, 40], weight: 3 },
+  flame: { families: ['warm', 'vibrant'], hues: [10, 20, 30, 0, 45], weight: 2 },
+  lava: { families: ['warm', 'dark'], hues: [5, 10, 0, 15, 25], weight: 2 },
+  night: { families: ['dark'], hues: [240, 260, 220, 270, 210], weight: 3 },
+  moon: { families: ['cool', 'light'], hues: [220, 240, 60, 210, 45], weight: 2 },
+  star: { families: ['dark', 'vibrant'], hues: [240, 50, 260, 45, 270], weight: 1 },
+  space: { families: ['dark'], hues: [260, 240, 280, 220, 300], weight: 2 },
+  galaxy: { families: ['dark', 'vibrant'], hues: [270, 250, 290, 200, 310], weight: 2 },
+  aurora: { families: ['vibrant'], hues: [150, 280, 120, 300, 170], weight: 2 },
+  rainbow: { families: ['vibrant'], hues: [0, 60, 120, 200, 280], weight: 3 },
+  cloud: { families: ['light', 'neutral'], hues: [210, 220, 200, 0, 230], weight: 1 },
+  storm: { families: ['dark', 'cool'], hues: [220, 240, 210, 250, 200], weight: 2 },
+  thunder: { families: ['dark', 'vibrant'], hues: [260, 45, 240, 270, 50], weight: 2 },
+  rain: { families: ['cool'], hues: [210, 220, 200, 230, 195], weight: 1 },
+  fog: { families: ['neutral', 'light'], hues: [210, 0, 220, 200, 195], weight: 1 },
+  moss: { families: ['earth'], hues: [100, 110, 90, 120, 80], weight: 2 },
+  lavender: { families: ['pastel'], hues: [270, 280, 260, 290, 250], weight: 2 },
+  rose: { families: ['warm', 'pastel'], hues: [345, 350, 340, 355, 335], weight: 2 },
+  coral: { families: ['warm'], hues: [15, 10, 20, 5, 25], weight: 2 },
+  mint: { families: ['cool', 'pastel'], hues: [160, 150, 170, 140, 175], weight: 2 },
+  sage: { families: ['earth', 'pastel'], hues: [130, 120, 140, 110, 150], weight: 2 },
+  olive: { families: ['earth'], hues: [80, 75, 85, 70, 90], weight: 1 },
+  jade: { families: ['cool'], hues: [155, 160, 150, 165, 145], weight: 2 },
+  emerald: { families: ['vibrant'], hues: [150, 145, 155, 140, 160], weight: 2 },
+  ruby: { families: ['vibrant', 'warm'], hues: [350, 345, 355, 340, 0], weight: 2 },
+  sapphire: { families: ['cool', 'vibrant'], hues: [220, 225, 215, 230, 210], weight: 2 },
+  amethyst: { families: ['cool', 'vibrant'], hues: [275, 280, 270, 285, 265], weight: 2 },
+
+  // Moods
+  calm: { families: ['pastel', 'cool'], hues: [200, 170, 220, 160, 190], weight: 2 },
+  peaceful: { families: ['pastel', 'cool'], hues: [190, 210, 170, 150, 200], weight: 2 },
+  serene: { families: ['pastel', 'cool'], hues: [195, 180, 210, 165, 200], weight: 2 },
+  relaxing: { families: ['pastel'], hues: [170, 200, 140, 220, 160], weight: 2 },
+  cozy: { families: ['warm', 'earth'], hues: [25, 35, 15, 45, 10], weight: 3 },
+  warm: { families: ['warm'], hues: [25, 15, 35, 10, 45], weight: 2 },
+  hot: { families: ['warm', 'vibrant'], hues: [5, 0, 10, 350, 15], weight: 2 },
+  cold: { families: ['cool'], hues: [200, 210, 220, 195, 230], weight: 2 },
+  happy: { families: ['vibrant', 'pastel'], hues: [50, 340, 180, 45, 120], weight: 2 },
+  cheerful: { families: ['vibrant'], hues: [50, 45, 60, 340, 180], weight: 2 },
+  playful: { families: ['vibrant'], hues: [340, 45, 180, 280, 120], weight: 2 },
+  fun: { families: ['vibrant'], hues: [330, 50, 170, 280, 45], weight: 2 },
+  energetic: { families: ['vibrant'], hues: [5, 45, 330, 180, 280], weight: 2 },
+  bold: { families: ['vibrant', 'dark'], hues: [350, 240, 45, 0, 270], weight: 2 },
+  dramatic: { families: ['dark', 'vibrant'], hues: [350, 0, 280, 240, 45], weight: 2 },
+  moody: { families: ['dark'], hues: [260, 240, 280, 220, 300], weight: 2 },
+  dark: { families: ['dark'], hues: [240, 260, 220, 280, 0], weight: 2 },
+  gothic: { families: ['dark'], hues: [280, 350, 260, 0, 300], weight: 3 },
+  mysterious: { families: ['dark'], hues: [270, 290, 250, 300, 240], weight: 2 },
+  romantic: { families: ['warm', 'pastel'], hues: [340, 350, 330, 345, 320], weight: 2 },
+  elegant: { families: ['dark', 'neutral'], hues: [0, 45, 270, 210, 30], weight: 2 },
+  sophisticated: { families: ['neutral', 'dark'], hues: [0, 210, 30, 270, 45], weight: 2 },
+  luxurious: { families: ['warm', 'dark'], hues: [45, 35, 270, 0, 50], weight: 2 },
+  luxury: { families: ['warm', 'dark'], hues: [45, 35, 270, 0, 50], weight: 3 },
+  premium: { families: ['dark', 'neutral'], hues: [0, 45, 220, 270, 40], weight: 2 },
+  clean: { families: ['light', 'neutral'], hues: [210, 0, 200, 195, 220], weight: 2 },
+  minimal: { families: ['neutral', 'light'], hues: [0, 210, 220, 200, 30], weight: 2 },
+  minimalist: { families: ['neutral', 'light'], hues: [0, 210, 30, 220, 200], weight: 3 },
+  fresh: { families: ['cool', 'pastel'], hues: [150, 170, 120, 180, 90], weight: 2 },
+  crisp: { families: ['cool', 'light'], hues: [200, 180, 210, 170, 195], weight: 1 },
+  soft: { families: ['pastel'], hues: [330, 200, 270, 150, 50], weight: 2 },
+  gentle: { families: ['pastel', 'light'], hues: [200, 330, 150, 270, 45], weight: 2 },
+  dreamy: { families: ['pastel'], hues: [270, 300, 200, 330, 240], weight: 2 },
+  ethereal: { families: ['pastel', 'light'], hues: [270, 200, 300, 180, 250], weight: 2 },
+  nostalgic: { families: ['warm', 'pastel'], hues: [35, 25, 45, 330, 15], weight: 2 },
+  vintage: { families: ['warm', 'earth'], hues: [35, 45, 20, 170, 350], weight: 3 },
+  retro: { families: ['vibrant'], hues: [350, 45, 180, 30, 170], weight: 2 },
+  futuristic: { families: ['cool', 'vibrant'], hues: [200, 280, 180, 300, 240], weight: 2 },
+  cyber: { families: ['vibrant', 'dark'], hues: [280, 180, 300, 200, 320], weight: 2 },
+  neon: { families: ['vibrant'], hues: [300, 180, 330, 120, 60], weight: 3 },
+
+  // Industries & contexts
+  corporate: { families: ['cool', 'neutral'], hues: [220, 210, 0, 200, 230], weight: 3 },
+  professional: { families: ['neutral', 'cool'], hues: [220, 0, 210, 200, 230], weight: 2 },
+  business: { families: ['cool', 'neutral'], hues: [215, 220, 0, 210, 200], weight: 2 },
+  tech: { families: ['cool', 'vibrant'], hues: [220, 200, 260, 180, 240], weight: 2 },
+  startup: { families: ['vibrant'], hues: [260, 180, 340, 200, 45], weight: 2 },
+  medical: { families: ['cool', 'light'], hues: [180, 195, 200, 170, 210], weight: 2 },
+  health: { families: ['cool', 'pastel'], hues: [160, 180, 120, 195, 150], weight: 2 },
+  organic: { families: ['earth'], hues: [100, 80, 120, 60, 40], weight: 2 },
+  eco: { families: ['earth'], hues: [120, 100, 140, 80, 150], weight: 2 },
+  sustainable: { families: ['earth'], hues: [120, 100, 80, 140, 60], weight: 1 },
+  food: { families: ['warm'], hues: [25, 35, 10, 45, 5], weight: 2 },
+  restaurant: { families: ['warm', 'earth'], hues: [15, 25, 0, 35, 350], weight: 2 },
+  coffee: { families: ['earth', 'warm'], hues: [25, 30, 20, 35, 15], weight: 3 },
+  cafe: { families: ['earth', 'warm'], hues: [30, 25, 35, 20, 40], weight: 2 },
+  bakery: { families: ['warm', 'pastel'], hues: [35, 30, 340, 40, 25], weight: 2 },
+  fashion: { families: ['neutral', 'vibrant'], hues: [0, 340, 330, 350, 45], weight: 2 },
+  beauty: { families: ['pastel', 'warm'], hues: [340, 330, 350, 320, 300], weight: 2 },
+  spa: { families: ['pastel', 'cool'], hues: [170, 160, 180, 150, 200], weight: 2 },
+  wellness: { families: ['pastel', 'cool'], hues: [160, 150, 170, 140, 190], weight: 2 },
+  yoga: { families: ['pastel', 'earth'], hues: [270, 150, 30, 180, 40], weight: 2 },
+  fitness: { families: ['vibrant', 'dark'], hues: [0, 210, 45, 340, 120], weight: 2 },
+  sport: { families: ['vibrant'], hues: [210, 0, 120, 45, 340], weight: 2 },
+  gaming: { families: ['vibrant', 'dark'], hues: [270, 340, 180, 45, 120], weight: 2 },
+  kids: { families: ['vibrant', 'pastel'], hues: [45, 340, 180, 120, 280], weight: 2 },
+  children: { families: ['vibrant', 'pastel'], hues: [50, 340, 180, 120, 280], weight: 2 },
+  toys: { families: ['vibrant'], hues: [0, 50, 180, 120, 280], weight: 2 },
+  wedding: { families: ['pastel', 'light'], hues: [340, 45, 0, 30, 270], weight: 2 },
+  christmas: { families: ['vibrant'], hues: [0, 120, 350, 130, 45], weight: 3 },
+  halloween: { families: ['warm', 'dark'], hues: [30, 270, 0, 280, 35], weight: 3 },
+  music: { families: ['vibrant', 'dark'], hues: [280, 340, 200, 45, 260], weight: 2 },
+  art: { families: ['vibrant'], hues: [0, 45, 180, 270, 120], weight: 1 },
+  creative: { families: ['vibrant'], hues: [280, 45, 340, 180, 120], weight: 2 },
+  education: { families: ['cool'], hues: [220, 200, 210, 45, 195], weight: 2 },
+  finance: { families: ['cool', 'dark'], hues: [220, 150, 210, 160, 200], weight: 2 },
+  real_estate: { families: ['warm', 'neutral'], hues: [25, 210, 35, 0, 45], weight: 2 },
+  travel: { families: ['vibrant', 'cool'], hues: [200, 45, 340, 180, 30], weight: 2 },
+  adventure: { families: ['vibrant', 'earth'], hues: [30, 200, 120, 45, 340], weight: 2 },
+  scandinavian: { families: ['neutral', 'light'], hues: [30, 0, 200, 150, 45], weight: 3 },
+  japanese: { families: ['neutral', 'pastel'], hues: [0, 340, 45, 120, 200], weight: 2 },
+  bohemian: { families: ['warm', 'earth'], hues: [25, 350, 45, 170, 280], weight: 2 },
+  industrial: { families: ['neutral', 'dark'], hues: [210, 0, 30, 220, 200], weight: 2 },
+  rustic: { families: ['earth', 'warm'], hues: [25, 30, 20, 35, 120], weight: 2 },
+  modern: { families: ['neutral', 'cool'], hues: [220, 0, 200, 260, 180], weight: 2 },
+  classic: { families: ['neutral', 'warm'], hues: [220, 0, 45, 210, 350], weight: 2 },
+  navy: { families: ['dark', 'cool'], hues: [225, 220, 230, 215, 235], weight: 2 },
+  gold: { families: ['warm'], hues: [45, 40, 50, 35, 55], weight: 3 },
+  silver: { families: ['neutral', 'light'], hues: [210, 220, 200, 0, 215], weight: 2 },
+  bronze: { families: ['warm', 'earth'], hues: [30, 25, 35, 20, 40], weight: 2 },
+  copper: { families: ['warm'], hues: [20, 15, 25, 10, 30], weight: 2 },
+  pink: { families: ['warm', 'pastel'], hues: [340, 335, 345, 330, 350], weight: 2 },
+  blue: { families: ['cool'], hues: [220, 210, 230, 200, 240], weight: 2 },
+  red: { families: ['warm', 'vibrant'], hues: [0, 350, 10, 345, 15], weight: 2 },
+  green: { families: ['cool'], hues: [120, 140, 100, 150, 160], weight: 2 },
+  purple: { families: ['cool'], hues: [270, 280, 260, 290, 250], weight: 2 },
+  orange: { families: ['warm'], hues: [25, 30, 20, 35, 15], weight: 2 },
+  yellow: { families: ['warm', 'vibrant'], hues: [50, 45, 55, 40, 60], weight: 2 },
+  teal: { families: ['cool'], hues: [175, 180, 170, 185, 165], weight: 2 },
+  turquoise: { families: ['cool', 'vibrant'], hues: [175, 180, 170, 185, 165], weight: 2 },
+  magenta: { families: ['vibrant'], hues: [300, 310, 290, 320, 280], weight: 2 },
+  peach: { families: ['warm', 'pastel'], hues: [20, 15, 25, 10, 30], weight: 2 },
+  burgundy: { families: ['dark', 'warm'], hues: [345, 350, 340, 355, 335], weight: 2 },
+  maroon: { families: ['dark', 'warm'], hues: [0, 350, 5, 345, 10], weight: 2 },
+  tan: { families: ['warm', 'light'], hues: [35, 30, 40, 25, 45], weight: 1 },
+  cream: { families: ['warm', 'light'], hues: [40, 45, 35, 50, 30], weight: 1 },
+  ivory: { families: ['light', 'warm'], hues: [45, 40, 50, 35, 55], weight: 1 },
+  charcoal: { families: ['dark', 'neutral'], hues: [0, 210, 220, 200, 230], weight: 1 },
+  gray: { families: ['neutral'], hues: [0, 210, 220, 200, 230], weight: 1 },
+  grey: { families: ['neutral'], hues: [0, 210, 220, 200, 230], weight: 1 },
+  black: { families: ['dark'], hues: [0, 240, 260, 270, 220], weight: 2 },
+  white: { families: ['light'], hues: [0, 210, 45, 200, 220], weight: 2 },
+  monochrome: { families: ['neutral'], hues: [0, 0, 0, 0, 0], weight: 2 },
+
+  // Textures & materials
+  wood: { families: ['earth', 'warm'], hues: [25, 30, 20, 35, 15], weight: 2 },
+  marble: { families: ['neutral', 'light'], hues: [0, 30, 210, 45, 200], weight: 2 },
+  velvet: { families: ['dark', 'warm'], hues: [280, 340, 350, 270, 0], weight: 2 },
+  silk: { families: ['pastel', 'light'], hues: [330, 270, 200, 45, 340], weight: 1 },
+  leather: { families: ['earth', 'dark'], hues: [25, 20, 30, 15, 35], weight: 2 },
+  denim: { families: ['cool'], hues: [220, 215, 225, 210, 230], weight: 2 },
+  cotton: { families: ['light', 'neutral'], hues: [0, 210, 200, 30, 45], weight: 1 },
+  glass: { families: ['cool', 'light'], hues: [200, 195, 210, 190, 205], weight: 1 },
+  metal: { families: ['neutral', 'dark'], hues: [210, 220, 200, 0, 230], weight: 1 },
+  concrete: { families: ['neutral'], hues: [210, 200, 0, 220, 195], weight: 1 },
+  brick: { families: ['warm', 'earth'], hues: [10, 15, 5, 20, 0], weight: 2 },
+  ceramic: { families: ['neutral', 'light'], hues: [30, 200, 0, 45, 210], weight: 1 },
+  neon_light: { families: ['vibrant'], hues: [300, 180, 330, 60, 120], weight: 2 },
+
+  // Decades
+  '80s': { families: ['vibrant'], hues: [300, 180, 330, 280, 50], weight: 3 },
+  '90s': { families: ['vibrant'], hues: [180, 280, 330, 45, 150], weight: 2 },
+  '70s': { families: ['warm', 'earth'], hues: [30, 45, 15, 80, 350], weight: 2 },
+  '60s': { families: ['vibrant'], hues: [45, 0, 180, 300, 120], weight: 2 },
+  '50s': { families: ['pastel'], hues: [180, 340, 45, 150, 350], weight: 2 }
+};
+
+// Color name helper
+const colorNames = [
+  { name: 'Rose', h: [340, 360] }, { name: 'Rose', h: [0, 10] },
+  { name: 'Crimson', h: [345, 360] }, { name: 'Coral', h: [10, 25] },
+  { name: 'Orange', h: [25, 40] }, { name: 'Amber', h: [40, 50] },
+  { name: 'Gold', h: [50, 60] }, { name: 'Yellow', h: [55, 70] },
+  { name: 'Lime', h: [70, 90] }, { name: 'Olive', h: [75, 95] },
+  { name: 'Green', h: [90, 150] }, { name: 'Emerald', h: [140, 160] },
+  { name: 'Teal', h: [160, 180] }, { name: 'Cyan', h: [180, 195] },
+  { name: 'Sky', h: [195, 210] }, { name: 'Blue', h: [210, 240] },
+  { name: 'Indigo', h: [240, 260] }, { name: 'Violet', h: [260, 280] },
+  { name: 'Purple', h: [280, 300] }, { name: 'Magenta', h: [300, 320] },
+  { name: 'Pink', h: [320, 345] }
+];
+
+function getColorName(h, s, l) {
+  if (s < 15) { return l > 70 ? 'Light Gray' : l > 40 ? 'Gray' : 'Charcoal'; }
+  if (l > 85) return 'White';
+  if (l < 15) return 'Black';
+  const prefix = l > 70 ? 'Light ' : l < 30 ? 'Dark ' : '';
+  for (const c of colorNames) {
+    if (h >= c.h[0] && h < c.h[1]) return prefix + c.name;
+  }
+  return prefix + 'Color';
+}
+
+let currentPalette = [];
+let detectedKeywords = [];
+
+function tokenize(text) {
+  return text.toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 1);
+}
+
+function matchKeywords(tokens) {
+  const matched = [];
+  const text = tokens.join(' ');
+
+  // Check compound keywords (two-word matches)
+  for (const key of Object.keys(keywordMap)) {
+    const k = key.replace('_', ' ');
+    if (text.includes(k) || tokens.includes(key)) {
+      matched.push({ keyword: key, ...keywordMap[key] });
+    }
+  }
+
+  // Also check single tokens against map
+  for (const token of tokens) {
+    if (keywordMap[token] && !matched.find(m => m.keyword === token)) {
+      matched.push({ keyword: token, ...keywordMap[token] });
+    }
+  }
+
+  return matched;
+}
+
+function hslToHex(h, s, l) {
+  h = ((h % 360) + 360) % 360;
+  s = Math.max(0, Math.min(100, s)) / 100;
+  l = Math.max(0, Math.min(100, l)) / 100;
+  const a = s * Math.min(l, 1 - l);
+  const f = n => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color).toString(16).padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+function hexToHsl(hex) {
+  let r = parseInt(hex.slice(1, 3), 16) / 255;
+  let g = parseInt(hex.slice(3, 5), 16) / 255;
+  let b = parseInt(hex.slice(5, 7), 16) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h, s, l = (max + min) / 2;
+  if (max === min) { h = s = 0; }
+  else {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = ((g - b) / d + (g < b ? 6 : 0)) * 60; break;
+      case g: h = ((b - r) / d + 2) * 60; break;
+      case b: h = ((r - g) / d + 4) * 60; break;
+    }
+  }
+  return { h: Math.round(h), s: Math.round(s * 100), l: Math.round(l * 100) };
+}
+
+function generateFromKeywords(matches) {
+  if (matches.length === 0) {
+    // Random vibrant palette as fallback
+    const baseH = Math.random() * 360;
+    return Array.from({ length: 5 }, (_, i) => {
+      const h = (baseH + i * 72 + (Math.random() - 0.5) * 20) % 360;
+      return hslToHex(h, 50 + Math.random() * 30, 40 + Math.random() * 30);
+    });
+  }
+
+  // Weighted combination of matched keyword hues
+  const totalWeight = matches.reduce((sum, m) => sum + m.weight, 0);
+  const hueSlots = [0, 0, 0, 0, 0];
+  const satAccum = [];
+  const litAccum = [];
+
+  // Blend hues from matches weighted by their importance
+  for (const match of matches) {
+    const w = match.weight / totalWeight;
+    for (let i = 0; i < 5; i++) {
+      hueSlots[i] += match.hues[i] * w;
+    }
+    // Accumulate family params for sat/lit
+    for (const fam of match.families) {
+      const f = colorFamilies[fam];
+      if (f) {
+        satAccum.push(f.sat);
+        litAccum.push(f.lit);
+      }
+    }
+  }
+
+  // Average sat/lit ranges
+  const avgSat = satAccum.length > 0
+    ? satAccum.reduce((a, b) => [a[0] + b[0], a[1] + b[1]], [0, 0]).map(v => v / satAccum.length)
+    : [50, 70];
+  const avgLit = litAccum.length > 0
+    ? litAccum.reduce((a, b) => [a[0] + b[0], a[1] + b[1]], [0, 0]).map(v => v / litAccum.length)
+    : [35, 60];
+
+  // Generate 5 colors with variation
+  const palette = [];
+  for (let i = 0; i < 5; i++) {
+    const h = (hueSlots[i] + (Math.random() - 0.5) * 25 + 360) % 360;
+    const s = avgSat[0] + Math.random() * (avgSat[1] - avgSat[0]);
+    // Spread lightness across the range for variety
+    const litSpread = avgLit[0] + (i / 4) * (avgLit[1] - avgLit[0]) + (Math.random() - 0.5) * 10;
+    const l = Math.max(15, Math.min(90, litSpread));
+    palette.push(hslToHex(h, s, l));
+  }
+
+  return palette;
+}
+
+function generateFromText() {
+  const input = document.getElementById('descInput').value.trim();
+  if (!input) return;
+
+  const tokens = tokenize(input);
+  const matches = matchKeywords(tokens);
+  detectedKeywords = matches.map(m => m.keyword);
+
+  currentPalette = generateFromKeywords(matches);
+  render();
+}
+
+function regenerate() {
+  if (currentPalette.length === 0) { generateFromText(); return; }
+  const input = document.getElementById('descInput').value.trim();
+  if (!input) return;
+  const tokens = tokenize(input);
+  const matches = matchKeywords(tokens);
+  currentPalette = generateFromKeywords(matches);
+  render();
+}
+
+function render() {
+  const row = document.getElementById('paletteRow');
+  const kw = document.getElementById('keywordsDisplay');
+  const actions = document.getElementById('actions');
+
+  // Show detected keywords
+  if (detectedKeywords.length > 0) {
+    kw.innerHTML = detectedKeywords.map(k => `<span>${k}</span>`).join('');
+  } else {
+    kw.innerHTML = '<span style="background:#f3f4f6;color:#6b7280;border-color:#e5e7eb;">no keywords matched — random palette</span>';
+  }
+
+  // Render palette
+  row.innerHTML = '';
+  currentPalette.forEach((color, i) => {
+    const { h, s, l } = hexToHsl(color);
+    const name = getColorName(h, s, l);
+    const lum = relativeLuminance(color);
+    const textColor = lum > 0.4 ? '#1a1a1a' : '#ffffff';
+    row.innerHTML += `
+      <div class="swatch" style="background:${color}; color:${textColor}" onclick="copyColor('${color}')">
+        <div class="info">
+          <div class="hex">${color.toUpperCase()}</div>
+          <div class="name">${name}</div>
+        </div>
+      </div>`;
+  });
+
+  actions.style.display = 'flex';
+}
+
+function relativeLuminance(hex) {
+  let r = parseInt(hex.slice(1, 3), 16) / 255;
+  let g = parseInt(hex.slice(3, 5), 16) / 255;
+  let b = parseInt(hex.slice(5, 7), 16) / 255;
+  [r, g, b] = [r, g, b].map(c => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function copyColor(hex) {
+  navigator.clipboard.writeText(hex);
+  showToast(`Copied ${hex}`);
+}
+
+function exportCSS() {
+  const vars = currentPalette.map((c, i) => `  --color-${i + 1}: ${c};`).join('\n');
+  const out = `:root {\n${vars}\n}`;
+  document.getElementById('exportOutput').value = out;
+  document.getElementById('exportBox').style.display = 'block';
+  navigator.clipboard.writeText(out);
+  showToast('CSS variables copied to clipboard');
+}
+
+function exportTailwind() {
+  const colors = currentPalette.map((c, i) => `        '${i + 1}': '${c}',`).join('\n');
+  const out = `module.exports = {\n  theme: {\n    extend: {\n      colors: {\n        brand: {\n${colors}\n        }\n      }\n    }\n  }\n}`;
+  document.getElementById('exportOutput').value = out;
+  document.getElementById('exportBox').style.display = 'block';
+  navigator.clipboard.writeText(out);
+  showToast('Tailwind config copied to clipboard');
+}
+
+function exportAll() {
+  const out = currentPalette.join('\n');
+  document.getElementById('exportOutput').value = out;
+  document.getElementById('exportBox').style.display = 'block';
+  navigator.clipboard.writeText(out);
+  showToast('Hex codes copied to clipboard');
+}
+
+function tryExample(btn) {
+  document.getElementById('descInput').value = btn.textContent;
+  generateFromText();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// Enter key to generate
+document.getElementById('descInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') generateFromText();
+});
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

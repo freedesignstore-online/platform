@@ -107,6 +107,33 @@
       "iconBg": "#f59e0b",
       "category": "templates",
       "section": "templates"
+    },
+    {
+      "id": "ai-color-from-text",
+      "name": "Smart Color from Description",
+      "description": "Type a mood or scene — get a matching 5-color palette. \"Sunset ocean\" → warm pinks, deep blues.",
+      "icon": "🧠",
+      "iconBg": "#a855f7",
+      "category": "brand",
+      "section": "brand"
+    },
+    {
+      "id": "ai-logo-concepts",
+      "name": "Smart Logo Concepts",
+      "description": "Enter brand name + industry. Get 6 unique procedural logos: geometric, monogram, spirograph, fractal.",
+      "icon": "💡",
+      "iconBg": "#ec4899",
+      "category": "brand",
+      "section": "brand"
+    },
+    {
+      "id": "ai-background-remover",
+      "name": "Background Remover",
+      "description": "Upload photo, remove background instantly. Edge detection + flood fill. Download transparent PNG.",
+      "icon": "✂️",
+      "iconBg": "#10b981",
+      "category": "images",
+      "section": "images"
     }
   ]
 }
