@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Card Designer - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
+a.back:hover { text-decoration: underline; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+p.subtitle { color: #6b7280; margin-bottom: 24px; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
+.btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 14px; transition: opacity .2s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
+.layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 4px; }
+.form-group input { font-family: inherit; font-size: 14px; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; width: 100%; }
+.template-selector { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.template-btn { padding: 6px 14px; border-radius: 6px; border: 2px solid #e5e7eb; background: #fff; cursor: pointer; font-size: 13px; font-weight: 500; transition: border-color .2s; }
+.template-btn:hover { border-color: #ec4899; }
+.template-btn.active { border-color: #ec4899; background: #fdf2f8; }
+.color-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.color-row input[type="color"] { width: 40px; height: 36px; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; padding: 2px; }
+.color-row label { font-size: 12px; color: #6b7280; }
+.card-preview-area { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.card-frame { width: 350px; height: 200px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,.12); overflow: hidden; position: relative; }
+.card-label { font-size: 12px; color: #6b7280; font-weight: 500; }
+.face-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
+.face-btn { padding: 6px 12px; border-radius: 6px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; font-size: 13px; }
+.face-btn.active { background: #ec4899; color: #fff; border-color: #ec4899; }
+.actions { display: flex; gap: 12px; margin-top: 16px; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<h1>Business Card Designer</h1>
+<p class="subtitle">Design print-ready business cards with multiple templates.</p>
+
+<div class="panel">
+  <div class="template-selector" id="templateSelector"></div>
+
+  <div class="layout">
+    <div>
+      <div class="form-group"><label>Full Name</label><input type="text" id="fname" value="Jane Smith" oninput="renderCard()"></div>
+      <div class="form-group"><label>Job Title</label><input type="text" id="ftitle" value="Senior Designer" oninput="renderCard()"></div>
+      <div class="form-group"><label>Email</label><input type="text" id="femail" value="jane@studio.co" oninput="renderCard()"></div>
+      <div class="form-group"><label>Phone</label><input type="text" id="fphone" value="+1 555 123 4567" oninput="renderCard()"></div>
+      <div class="form-group"><label>Website</label><input type="text" id="fweb" value="www.studio.co" oninput="renderCard()"></div>
+      <div class="form-group"><label>Company / Address</label><input type="text" id="faddr" value="Studio Co, NYC" oninput="renderCard()"></div>
+
+      <div style="margin-top:20px;">
+        <label style="font-size:13px;font-weight:500;color:#6b7280;margin-bottom:8px;display:block;">Colors</label>
+        <div class="color-row">
+          <div><input type="color" id="colBg" value="#ffffff" onchange="renderCard()"><br><label>Background</label></div>
+          <div><input type="color" id="colText" value="#1a1a1a" onchange="renderCard()"><br><label>Text</label></div>
+          <div><input type="color" id="colAccent" value="#ec4899" onchange="renderCard()"><br><label>Accent</label></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-preview-area">
+      <div class="face-toggle">
+        <button class="face-btn active" onclick="setFace('front',this)">Front</button>
+        <button class="face-btn" onclick="setFace('back',this)">Back</button>
+      </div>
+      <div class="card-frame" id="cardFront"></div>
+      <div class="card-frame" id="cardBack" style="display:none;"></div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="downloadSVG()">Download SVG</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const templates = ['minimal', 'bold', 'elegant', 'modern', 'creative'];
+let currentTemplate = 'minimal';
+let face = 'front';
+
+function initTemplates() {
+  const sel = document.getElementById('templateSelector');
+  sel.innerHTML = templates.map(t => `<button class="template-btn ${t === currentTemplate ? 'active' : ''}" onclick="selectTemplate('${t}',this)">${t.charAt(0).toUpperCase()+t.slice(1)}</button>`).join('');
+}
+
+function selectTemplate(t, el) {
+  currentTemplate = t;
+  document.querySelectorAll('.template-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderCard();
+}
+
+function setFace(f, el) {
+  face = f;
+  document.querySelectorAll('.face-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('cardFront').style.display = f === 'front' ? 'block' : 'none';
+  document.getElementById('cardBack').style.display = f === 'back' ? 'block' : 'none';
+}
+
+function getFields() {
+  return {
+    name: document.getElementById('fname').value,
+    title: document.getElementById('ftitle').value,
+    email: document.getElementById('femail').value,
+    phone: document.getElementById('fphone').value,
+    web: document.getElementById('fweb').value,
+    addr: document.getElementById('faddr').value,
+    bg: document.getElementById('colBg').value,
+    text: document.getElementById('colText').value,
+    accent: document.getElementById('colAccent').value,
+  };
+}
+
+function renderCard() {
+  const d = getFields();
+  const front = document.getElementById('cardFront');
+  const back = document.getElementById('cardBack');
+
+  if (currentTemplate === 'minimal') {
+    front.innerHTML = `<div style="width:100%;height:100%;background:${d.bg};padding:24px;display:flex;flex-direction:column;justify-content:center;"><div style="font-size:18px;font-weight:700;color:${d.text};margin-bottom:4px;">${d.name}</div><div style="font-size:12px;color:${d.accent};margin-bottom:16px;">${d.title}</div><div style="font-size:11px;color:${d.text};opacity:.7;line-height:1.6;">${d.email}<br>${d.phone}<br>${d.web}</div></div>`;
+    back.innerHTML = `<div style="width:100%;height:100%;background:${d.bg};display:flex;align-items:center;justify-content:center;"><div style="font-size:24px;font-weight:700;color:${d.accent};">${d.addr}</div></div>`;
+  } else if (currentTemplate === 'bold') {
+    front.innerHTML = `<div style="width:100%;height:100%;background:${d.accent};padding:24px;display:flex;flex-direction:column;justify-content:space-between;"><div style="font-size:22px;font-weight:700;color:#fff;">${d.name}</div><div><div style="font-size:12px;color:rgba(255,255,255,.8);margin-bottom:2px;">${d.title}</div><div style="font-size:11px;color:rgba(255,255,255,.7);line-height:1.6;">${d.email} | ${d.phone}</div></div></div>`;
+    back.innerHTML = `<div style="width:100%;height:100%;background:${d.text};display:flex;flex-direction:column;align-items:center;justify-content:center;"><div style="font-size:28px;font-weight:700;color:${d.accent};">${d.name.split(' ').map(w=>w[0]).join('')}</div><div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:8px;">${d.web}</div></div>`;
+  } else if (currentTemplate === 'elegant') {
+    front.innerHTML = `<div style="width:100%;height:100%;background:${d.bg};padding:24px;display:flex;flex-direction:column;justify-content:center;border-left:4px solid ${d.accent};"><div style="font-size:16px;font-weight:700;color:${d.text};letter-spacing:2px;text-transform:uppercase;">${d.name}</div><div style="font-size:11px;color:${d.accent};margin-top:4px;letter-spacing:1px;">${d.title}</div><div style="margin-top:20px;font-size:11px;color:${d.text};opacity:.6;line-height:1.8;">${d.email}<br>${d.phone}<br>${d.web}</div></div>`;
+    back.innerHTML = `<div style="width:100%;height:100%;background:${d.bg};display:flex;align-items:center;justify-content:center;border-left:4px solid ${d.accent};"><div style="font-size:14px;color:${d.text};letter-spacing:3px;text-transform:uppercase;opacity:.5;">${d.addr}</div></div>`;
+  } else if (currentTemplate === 'modern') {
+    front.innerHTML = `<div style="width:100%;height:100%;background:${d.bg};padding:24px;display:grid;grid-template-columns:1fr 1fr;align-items:center;"><div><div style="font-size:16px;font-weight:700;color:${d.text};">${d.name}</div><div style="font-size:11px;color:${d.accent};margin-top:2px;">${d.title}</div></div><div style="text-align:right;font-size:11px;color:${d.text};opacity:.7;line-height:1.8;">${d.email}<br>${d.phone}<br>${d.web}</div></div>`;
+    back.innerHTML = `<div style="width:100%;height:100%;background:linear-gradient(135deg,${d.accent},${d.text});display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;font-weight:700;color:#fff;">${d.name.split(' ').map(w=>w[0]).join('')}</div></div>`;
+  } else { // creative
+    front.innerHTML = `<div style="width:100%;height:100%;background:${d.bg};padding:24px;position:relative;overflow:hidden;"><div style="position:absolute;top:-20px;right:-20px;width:120px;height:120px;border-radius:50%;background:${d.accent};opacity:.2;"></div><div style="position:relative;z-index:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;"><div style="font-size:18px;font-weight:700;color:${d.text};">${d.name}</div><div style="font-size:11px;color:${d.accent};">${d.title}</div><div style="font-size:10px;color:${d.text};opacity:.6;margin-top:8px;">${d.email} | ${d.phone}</div></div></div>`;
+    back.innerHTML = `<div style="width:100%;height:100%;background:${d.accent};padding:24px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;"><div style="position:absolute;bottom:-30px;left:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.1);"></div><div style="text-align:center;color:#fff;"><div style="font-size:20px;font-weight:700;">${d.addr}</div><div style="font-size:11px;opacity:.8;margin-top:4px;">${d.web}</div></div></div>`;
+  }
+}
+
+function downloadSVG() {
+  const d = getFields();
+  const w = 350, h = 200;
+  const el = face === 'front' ? document.getElementById('cardFront') : document.getElementById('cardBack');
+
+  // Build SVG from the card content
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`;
+  svg += `<foreignObject width="${w}" height="${h}">`;
+  svg += `<div xmlns="http://www.w3.org/1999/xhtml" style="font-family:'Manrope',system-ui,sans-serif;width:${w}px;height:${h}px;">`;
+  svg += el.innerHTML;
+  svg += `</div></foreignObject></svg>`;
+
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `business-card-${face}.svg`;
+  a.click();
+}
+
+initTemplates();
+renderCard();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

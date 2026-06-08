@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brand Kit Builder - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&family=Montserrat:wght@600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
+a.back:hover { text-decoration: underline; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+p.subtitle { color: #6b7280; margin-bottom: 24px; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
+.btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 14px; transition: opacity .2s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
+.steps { display: flex; gap: 8px; margin-bottom: 24px; }
+.step-dot { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; border: 2px solid #e5e7eb; color: #6b7280; }
+.step-dot.active { border-color: #ec4899; color: #ec4899; }
+.step-dot.done { background: #ec4899; border-color: #ec4899; color: #fff; }
+.wizard-step { display: none; }
+.wizard-step.active { display: block; }
+label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+input[type="text"], input[type="color"] { font-family: inherit; font-size: 14px; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; width: 100%; }
+input[type="color"] { width: 48px; height: 40px; padding: 2px; cursor: pointer; }
+.color-inputs { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.color-input-group { display: flex; align-items: center; gap: 8px; }
+.color-input-group input[type="text"] { flex: 1; }
+.font-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.font-option { border: 2px solid #e5e7eb; border-radius: 8px; padding: 16px; cursor: pointer; text-align: center; transition: border-color .2s; }
+.font-option:hover { border-color: #ec4899; }
+.font-option.selected { border-color: #ec4899; background: #fdf2f8; }
+.logo-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.logo-option { border: 2px solid #e5e7eb; border-radius: 8px; padding: 20px; cursor: pointer; text-align: center; transition: border-color .2s; }
+.logo-option:hover { border-color: #ec4899; }
+.logo-option.selected { border-color: #ec4899; background: #fdf2f8; }
+.nav-buttons { display: flex; gap: 12px; margin-top: 24px; }
+.brand-guide { border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+.guide-section { padding: 32px; border-bottom: 1px solid #e5e7eb; }
+.guide-section:last-child { border-bottom: none; }
+.guide-header { text-align: center; padding: 48px 32px; }
+.guide-colors { display: flex; gap: 0; height: 80px; border-radius: 8px; overflow: hidden; margin: 16px 0; }
+.guide-colors div { flex: 1; display: flex; align-items: flex-end; padding: 8px; font-size: 11px; font-weight: 600; }
+.guide-type-sample { margin: 12px 0; }
+.guide-spacing { display: flex; gap: 8px; align-items: flex-end; margin: 16px 0; }
+.guide-spacing div { background: #ec4899; border-radius: 4px; opacity: .6; }
+.logo-preview { display: inline-flex; align-items: center; justify-content: center; width: 80px; height: 80px; border-radius: 12px; font-weight: 700; font-size: 28px; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<h1>Brand Kit Builder</h1>
+<p class="subtitle">Build a complete brand guidelines page step by step.</p>
+
+<div class="panel">
+  <div class="steps" id="stepsNav"></div>
+
+  <div class="wizard-step active" id="step1">
+    <h2 style="margin-bottom:16px;">Step 1: Brand Name</h2>
+    <label for="brandName">Brand Name</label>
+    <input type="text" id="brandName" placeholder="e.g. Acme Studio" value="">
+    <div style="margin-top:12px;">
+      <label for="brandTagline">Tagline (optional)</label>
+      <input type="text" id="brandTagline" placeholder="e.g. Design that inspires">
+    </div>
+  </div>
+
+  <div class="wizard-step" id="step2">
+    <h2 style="margin-bottom:16px;">Step 2: Colors</h2>
+    <p style="color:#6b7280;margin-bottom:12px;">Pick your primary, secondary, accent, and neutral colors.</p>
+    <div class="color-inputs">
+      <div class="color-input-group"><input type="color" id="c1" value="#ec4899"><input type="text" id="c1t" value="#ec4899" placeholder="Primary"></div>
+      <div class="color-input-group"><input type="color" id="c2" value="#8b5cf6"><input type="text" id="c2t" value="#8b5cf6" placeholder="Secondary"></div>
+      <div class="color-input-group"><input type="color" id="c3" value="#f59e0b"><input type="text" id="c3t" value="#f59e0b" placeholder="Accent"></div>
+      <div class="color-input-group"><input type="color" id="c4" value="#1a1a1a"><input type="text" id="c4t" value="#1a1a1a" placeholder="Dark"></div>
+      <div class="color-input-group"><input type="color" id="c5" value="#f9fafb"><input type="text" id="c5t" value="#f9fafb" placeholder="Light"></div>
+    </div>
+  </div>
+
+  <div class="wizard-step" id="step3">
+    <h2 style="margin-bottom:16px;">Step 3: Typography</h2>
+    <p style="color:#6b7280;margin-bottom:12px;">Choose a heading font.</p>
+    <div class="font-options" id="headingFonts"></div>
+    <p style="color:#6b7280;margin-bottom:12px;margin-top:16px;">Choose a body font.</p>
+    <div class="font-options" id="bodyFonts"></div>
+  </div>
+
+  <div class="wizard-step" id="step4">
+    <h2 style="margin-bottom:16px;">Step 4: Logo Style</h2>
+    <p style="color:#6b7280;margin-bottom:12px;">Pick a logo mark style. Uses your brand initials.</p>
+    <div class="logo-options" id="logoOptions"></div>
+  </div>
+
+  <div class="wizard-step" id="step5">
+    <h2 style="margin-bottom:24px;">Your Brand Kit</h2>
+    <div class="brand-guide" id="brandGuide"></div>
+    <div style="margin-top:16px;">
+      <button class="btn btn-primary" onclick="downloadGuide()">Download as HTML</button>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="btn btn-secondary" id="prevBtn" onclick="prevStep()" style="display:none;">Previous</button>
+    <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">Next</button>
+  </div>
+</div>
+
+<script>
+const headingFonts = ['Playfair Display', 'Montserrat', 'Poppins', 'Manrope'];
+const bodyFonts = ['Inter', 'Manrope', 'Poppins', 'Montserrat'];
+const logoStyles = ['circle', 'rounded-square', 'plain', 'outline'];
+
+let currentStep = 1;
+let brand = { name: '', tagline: '', colors: [], headingFont: 'Montserrat', bodyFont: 'Inter', logoStyle: 'circle' };
+
+function renderSteps() {
+  const nav = document.getElementById('stepsNav');
+  nav.innerHTML = [1,2,3,4,5].map(i => `<div class="step-dot ${i === currentStep ? 'active' : ''} ${i < currentStep ? 'done' : ''}">${i}</div>`).join('');
+}
+
+function showStep(n) {
+  document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+  document.getElementById('prevBtn').style.display = n > 1 ? 'inline-block' : 'none';
+  document.getElementById('nextBtn').textContent = n === 4 ? 'Generate Kit' : n === 5 ? 'Start Over' : 'Next';
+  renderSteps();
+  if (n === 5) buildGuide();
+}
+
+function nextStep() {
+  if (currentStep === 5) { currentStep = 1; showStep(1); return; }
+  collectData();
+  currentStep++;
+  showStep(currentStep);
+}
+
+function prevStep() { if (currentStep > 1) { currentStep--; showStep(currentStep); } }
+
+function collectData() {
+  brand.name = document.getElementById('brandName').value || 'Brand';
+  brand.tagline = document.getElementById('brandTagline').value;
+  brand.colors = ['c1','c2','c3','c4','c5'].map(id => document.getElementById(id).value);
+}
+
+function initFonts() {
+  const hGrid = document.getElementById('headingFonts');
+  hGrid.innerHTML = headingFonts.map(f => `<div class="font-option ${f === brand.headingFont ? 'selected' : ''}" onclick="selectFont('heading','${f}',this)"><div style="font-family:'${f}',sans-serif;font-size:20px;font-weight:700;">Aa Bb Cc</div><div style="font-size:12px;color:#6b7280;margin-top:4px;">${f}</div></div>`).join('');
+  const bGrid = document.getElementById('bodyFonts');
+  bGrid.innerHTML = bodyFonts.map(f => `<div class="font-option ${f === brand.bodyFont ? 'selected' : ''}" onclick="selectFont('body','${f}',this)"><div style="font-family:'${f}',sans-serif;font-size:15px;">The quick brown fox</div><div style="font-size:12px;color:#6b7280;margin-top:4px;">${f}</div></div>`).join('');
+}
+
+function selectFont(type, font, el) {
+  if (type === 'heading') { brand.headingFont = font; document.querySelectorAll('#headingFonts .font-option').forEach(e => e.classList.remove('selected')); }
+  else { brand.bodyFont = font; document.querySelectorAll('#bodyFonts .font-option').forEach(e => e.classList.remove('selected')); }
+  el.classList.add('selected');
+}
+
+function initLogos() {
+  const grid = document.getElementById('logoOptions');
+  grid.innerHTML = logoStyles.map(s => {
+    let style = '';
+    if (s === 'circle') style = 'border-radius:50%;background:#ec4899;color:#fff;';
+    else if (s === 'rounded-square') style = 'border-radius:16px;background:#ec4899;color:#fff;';
+    else if (s === 'plain') style = 'background:transparent;color:#1a1a1a;';
+    else style = 'border-radius:50%;background:transparent;border:3px solid #ec4899;color:#ec4899;';
+    return `<div class="logo-option ${s === brand.logoStyle ? 'selected' : ''}" onclick="selectLogo('${s}',this)"><div class="logo-preview" style="${style}">AB</div><div style="font-size:12px;color:#6b7280;margin-top:8px;">${s.replace('-',' ')}</div></div>`;
+  }).join('');
+}
+
+function selectLogo(style, el) {
+  brand.logoStyle = style;
+  document.querySelectorAll('#logoOptions .logo-option').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function buildGuide() {
+  collectData();
+  const initials = brand.name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+  let logoStyle = '';
+  const pc = brand.colors[0];
+  if (brand.logoStyle === 'circle') logoStyle = `border-radius:50%;background:${pc};color:#fff;`;
+  else if (brand.logoStyle === 'rounded-square') logoStyle = `border-radius:16px;background:${pc};color:#fff;`;
+  else if (brand.logoStyle === 'plain') logoStyle = `background:transparent;color:${pc};`;
+  else logoStyle = `border-radius:50%;background:transparent;border:3px solid ${pc};color:${pc};`;
+
+  const guide = document.getElementById('brandGuide');
+  guide.innerHTML = `
+    <div class="guide-section guide-header" style="background:${brand.colors[4]};">
+      <div class="logo-preview" style="${logoStyle};width:100px;height:100px;font-size:36px;margin:0 auto 16px;">${initials}</div>
+      <h2 style="font-family:'${brand.headingFont}',sans-serif;font-size:32px;font-weight:700;">${brand.name}</h2>
+      ${brand.tagline ? `<p style="color:#6b7280;margin-top:8px;font-family:'${brand.bodyFont}',sans-serif;">${brand.tagline}</p>` : ''}
+    </div>
+    <div class="guide-section">
+      <h3 style="margin-bottom:12px;">Color Palette</h3>
+      <div class="guide-colors">${brand.colors.map((c,i) => {
+        const labels = ['Primary','Secondary','Accent','Dark','Light'];
+        const textC = i >= 3 && i < 4 ? '#fff' : '#1a1a1a';
+        return `<div style="background:${c};color:${textC};">${labels[i]}<br>${c}</div>`;
+      }).join('')}</div>
+      <p style="font-size:13px;color:#6b7280;margin-top:8px;">Use Primary for CTAs and links. Secondary for hover/active states. Accent for highlights. Dark for text. Light for backgrounds.</p>
+    </div>
+    <div class="guide-section">
+      <h3 style="margin-bottom:12px;">Typography</h3>
+      <div class="guide-type-sample"><span style="font-size:12px;color:#6b7280;">Heading &mdash; ${brand.headingFont}</span><div style="font-family:'${brand.headingFont}',sans-serif;font-size:28px;font-weight:700;margin-top:4px;">The quick brown fox</div></div>
+      <div class="guide-type-sample"><span style="font-size:12px;color:#6b7280;">Body &mdash; ${brand.bodyFont}</span><div style="font-family:'${brand.bodyFont}',sans-serif;font-size:16px;line-height:1.6;margin-top:4px;">The quick brown fox jumps over the lazy dog. Good typography makes reading effortless.</div></div>
+      <div style="margin-top:16px;font-size:13px;color:#6b7280;">
+        <strong>Scale:</strong> 12 / 14 / 16 / 20 / 24 / 32 / 48 / 64px<br>
+        <strong>Weights:</strong> 400 (regular), 600 (semibold), 700 (bold)
+      </div>
+    </div>
+    <div class="guide-section">
+      <h3 style="margin-bottom:12px;">Logo Variations</h3>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;">
+        <div style="padding:20px;background:${brand.colors[4]};border-radius:12px;"><div class="logo-preview" style="${logoStyle}">${initials}</div><div style="font-size:11px;color:#6b7280;text-align:center;margin-top:8px;">Light BG</div></div>
+        <div style="padding:20px;background:${brand.colors[3]};border-radius:12px;"><div class="logo-preview" style="${logoStyle.replace(pc,'#fff').replace('color:#1a1a1a','color:#fff').replace('color:'+pc,'color:#fff')}">${initials}</div><div style="font-size:11px;color:#999;text-align:center;margin-top:8px;">Dark BG</div></div>
+      </div>
+    </div>
+    <div class="guide-section">
+      <h3 style="margin-bottom:12px;">Spacing Tokens (8px grid)</h3>
+      <div class="guide-spacing">
+        ${[8,16,24,32,48,64].map(s => `<div style="width:${s}px;height:${s}px;background:${pc};opacity:.5;" title="${s}px"></div>`).join('')}
+      </div>
+      <div style="font-size:13px;color:#6b7280;margin-top:8px;">Base unit: 8px. Use multiples: 8, 16, 24, 32, 48, 64.</div>
+    </div>`;
+}
+
+function downloadGuide() {
+  collectData();
+  const initials = brand.name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${brand.name} Brand Guide</title><link href="https://fonts.googleapis.com/css2?family=${brand.headingFont.replace(/ /g,'+')}:wght@400;700&family=${brand.bodyFont.replace(/ /g,'+')}:wght@400;500;600&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'${brand.bodyFont}',sans-serif;background:#fafafa;color:#1a1a1a;padding:48px;max-width:800px;margin:0 auto;}h1,h2,h3{font-family:'${brand.headingFont}',sans-serif;}section{margin-bottom:48px;}</style></head><body>${document.getElementById('brandGuide').innerHTML}</body></html>`;
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${brand.name.toLowerCase().replace(/\s+/g,'-')}-brand-guide.html`;
+  a.click();
+}
+
+// Sync color inputs
+['c1','c2','c3','c4','c5'].forEach(id => {
+  document.getElementById(id).addEventListener('input', e => { document.getElementById(id+'t').value = e.target.value; });
+  document.getElementById(id+'t').addEventListener('input', e => { if (/^#[0-9a-f]{6}$/i.test(e.target.value)) document.getElementById(id).value = e.target.value; });
+});
+
+initFonts();
+initLogos();
+renderSteps();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

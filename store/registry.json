@@ -1,0 +1,76 @@
+{
+  "robots": [
+    {
+      "id": "logo-maker",
+      "name": "Logo Maker",
+      "description": "Type your brand name, pick a font and style, download SVG instantly. No signup.",
+      "icon": "✏️",
+      "iconBg": "#ec4899",
+      "category": "brand",
+      "section": "brand"
+    },
+    {
+      "id": "color-palette",
+      "name": "Color Palette Generator",
+      "description": "Generate harmonious palettes. Complementary, analogous, triadic. Extract from image. A11y contrast check.",
+      "icon": "🎨",
+      "iconBg": "#8b5cf6",
+      "category": "brand",
+      "section": "brand"
+    },
+    {
+      "id": "typography-pairing",
+      "name": "Typography Pairing",
+      "description": "Find perfect font combinations. Preview in context, adjust sizing, export CSS with @import.",
+      "icon": "Aa",
+      "iconBg": "#3b82f6",
+      "category": "brand",
+      "section": "brand"
+    },
+    {
+      "id": "brand-kit",
+      "name": "Brand Kit Builder",
+      "description": "Assemble a complete brand guide: logo + colors + fonts + usage rules. Download as HTML.",
+      "icon": "📋",
+      "iconBg": "#10b981",
+      "category": "brand",
+      "section": "brand"
+    },
+    {
+      "id": "business-card",
+      "name": "Business Card Designer",
+      "description": "Pick a template, enter your details, apply brand colors. Download print-ready SVG.",
+      "icon": "💼",
+      "iconBg": "#f59e0b",
+      "category": "brand",
+      "section": "brand"
+    },
+    {
+      "id": "favicon-generator",
+      "name": "Favicon Generator",
+      "description": "Letters or emoji to favicon. Multiple sizes (16-512px), SVG/PNG/ICO download, copy HTML tags.",
+      "icon": "⭐",
+      "iconBg": "#06b6d4",
+      "category": "brand",
+      "section": "brand"
+    },
+    {
+      "id": "image-resizer",
+      "name": "Image Resizer & Cropper",
+      "description": "Resize to Instagram, X, LinkedIn, YouTube dimensions. Custom crop, quality control, drag & drop.",
+      "icon": "📐",
+      "iconBg": "#f97316",
+      "category": "images",
+      "section": "images"
+    },
+    {
+      "id": "icon-library",
+      "name": "SVG Icon Library",
+      "description": "200+ icons searchable by name. Customize color and size. Copy SVG or download.",
+      "icon": "🔷",
+      "iconBg": "#6366f1",
+      "category": "images",
+      "section": "images"
+    }
+  ]
+}

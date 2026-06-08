@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Favicon Generator - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
+a.back:hover { text-decoration: underline; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+p.subtitle { color: #6b7280; margin-bottom: 24px; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
+.btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 14px; transition: opacity .2s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
+.layout { display: grid; grid-template-columns: 300px 1fr; gap: 24px; }
+@media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 4px; }
+.form-group input[type="text"] { font-family: inherit; font-size: 18px; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; width: 100%; text-align: center; }
+.form-group input[type="color"] { width: 48px; height: 40px; padding: 2px; border: 1px solid #e5e7eb; border-radius: 8px; cursor: pointer; }
+.form-group select { font-family: inherit; font-size: 14px; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; width: 100%; background: #fff; }
+.shape-options { display: flex; gap: 8px; }
+.shape-btn { width: 44px; height: 44px; border: 2px solid #e5e7eb; background: #f9fafb; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: border-color .2s; }
+.shape-btn:hover { border-color: #ec4899; }
+.shape-btn.active { border-color: #ec4899; background: #fdf2f8; }
+.shape-btn[data-shape="square"] { border-radius: 4px; }
+.shape-btn[data-shape="rounded"] { border-radius: 10px; }
+.shape-btn[data-shape="circle"] { border-radius: 50%; }
+.bg-options { display: flex; gap: 8px; margin-bottom: 8px; }
+.bg-btn { padding: 6px 12px; border: 2px solid #e5e7eb; border-radius: 6px; background: #fff; cursor: pointer; font-size: 13px; }
+.bg-btn:hover { border-color: #ec4899; }
+.bg-btn.active { border-color: #ec4899; background: #fdf2f8; }
+.previews { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; }
+.preview-item { text-align: center; }
+.preview-item .size-label { font-size: 11px; color: #6b7280; margin-top: 4px; }
+.preview-canvas { border: 1px solid #e5e7eb; border-radius: 4px; image-rendering: pixelated; }
+.gradient-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+.gradient-row input[type="color"] { width: 40px; height: 34px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.code-block { margin-top: 16px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 13px; cursor: pointer; position: relative; }
+.code-block:hover::after { content: 'Click to copy'; position: absolute; top: 8px; right: 8px; font-size: 11px; color: #ec4899; font-family: 'Manrope', sans-serif; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<h1>Favicon Generator</h1>
+<p class="subtitle">Create favicons from letters or emoji. Download as SVG, PNG, or ICO.</p>
+
+<div class="panel">
+  <div class="layout">
+    <div>
+      <div class="form-group">
+        <label>Text (1-2 letters or emoji)</label>
+        <input type="text" id="faviText" value="Fd" maxlength="3" oninput="render()">
+      </div>
+      <div class="form-group">
+        <label>Font Weight</label>
+        <select id="fontWeight" onchange="render()">
+          <option value="400">Regular</option>
+          <option value="600">Semibold</option>
+          <option value="700" selected>Bold</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Text Color</label>
+        <input type="color" id="textColor" value="#ffffff" onchange="render()">
+      </div>
+
+      <div class="form-group">
+        <label>Background</label>
+        <div class="bg-options">
+          <button class="bg-btn active" data-bg="solid" onclick="setBg('solid',this)">Solid</button>
+          <button class="bg-btn" data-bg="gradient" onclick="setBg('gradient',this)">Gradient</button>
+          <button class="bg-btn" data-bg="transparent" onclick="setBg('transparent',this)">None</button>
+        </div>
+        <div id="solidRow"><input type="color" id="bgColor" value="#ec4899" onchange="render()"></div>
+        <div id="gradientRow" class="gradient-row" style="display:none;">
+          <input type="color" id="grad1" value="#ec4899" onchange="render()">
+          <span style="color:#6b7280;font-size:12px;">to</span>
+          <input type="color" id="grad2" value="#8b5cf6" onchange="render()">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Shape</label>
+        <div class="shape-options">
+          <button class="shape-btn active" data-shape="square" onclick="setShape('square',this)">&#9632;</button>
+          <button class="shape-btn" data-shape="rounded" onclick="setShape('rounded',this)">&#9632;</button>
+          <button class="shape-btn" data-shape="circle" onclick="setShape('circle',this)">&#9679;</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3 style="margin-bottom:16px;">Preview</h3>
+      <div class="previews" id="previews"></div>
+
+      <div class="actions">
+        <button class="btn btn-primary" onclick="downloadSVG()">Download SVG</button>
+        <button class="btn btn-secondary" onclick="downloadPNG(16)">PNG 16</button>
+        <button class="btn btn-secondary" onclick="downloadPNG(32)">PNG 32</button>
+        <button class="btn btn-secondary" onclick="downloadPNG(48)">PNG 48</button>
+        <button class="btn btn-secondary" onclick="downloadPNG(180)">PNG 180</button>
+        <button class="btn btn-secondary" onclick="downloadPNG(512)">PNG 512</button>
+        <button class="btn btn-secondary" onclick="downloadICO()">Download ICO</button>
+      </div>
+
+      <div class="code-block" id="htmlTags" onclick="copyTags()">
+&lt;link rel="icon" type="image/svg+xml" href="/favicon.svg"&gt;
+&lt;link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png"&gt;
+&lt;link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"&gt;
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const sizes = [16, 32, 48, 180, 512];
+let bgMode = 'solid';
+let shape = 'square';
+
+function setBg(mode, el) {
+  bgMode = mode;
+  document.querySelectorAll('.bg-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('solidRow').style.display = mode === 'solid' ? 'block' : 'none';
+  document.getElementById('gradientRow').style.display = mode === 'gradient' ? 'flex' : 'none';
+  render();
+}
+
+function setShape(s, el) {
+  shape = s;
+  document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function getConfig() {
+  return {
+    text: document.getElementById('faviText').value || 'A',
+    textColor: document.getElementById('textColor').value,
+    fontWeight: document.getElementById('fontWeight').value,
+    bgColor: document.getElementById('bgColor').value,
+    grad1: document.getElementById('grad1').value,
+    grad2: document.getElementById('grad2').value,
+  };
+}
+
+function buildSVG(size) {
+  const c = getConfig();
+  const r = shape === 'circle' ? size / 2 : shape === 'rounded' ? size * 0.2 : 0;
+  let bg = '';
+  if (bgMode === 'solid') {
+    bg = `<rect width="${size}" height="${size}" rx="${r}" fill="${c.bgColor}"/>`;
+  } else if (bgMode === 'gradient') {
+    bg = `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${c.grad1}"/><stop offset="100%" stop-color="${c.grad2}"/></linearGradient></defs><rect width="${size}" height="${size}" rx="${r}" fill="url(#g)"/>`;
+  }
+  const fontSize = c.text.length > 2 ? size * 0.35 : c.text.length === 2 ? size * 0.4 : size * 0.55;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${bg}<text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" fill="${c.textColor}" font-family="Manrope,system-ui,sans-serif" font-weight="${c.fontWeight}" font-size="${fontSize}">${escapeXml(c.text)}</text></svg>`;
+}
+
+function escapeXml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderToCanvas(canvas, size) {
+  const svg = buildSVG(size);
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.onload = () => {
+    canvas.width = size; canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, size, size);
+    ctx.drawImage(img, 0, 0, size, size);
+    URL.revokeObjectURL(url);
+  };
+  img.src = url;
+}
+
+function render() {
+  const container = document.getElementById('previews');
+  container.innerHTML = '';
+  sizes.forEach(size => {
+    const displaySize = Math.min(size, 128);
+    const item = document.createElement('div');
+    item.className = 'preview-item';
+    const canvas = document.createElement('canvas');
+    canvas.className = 'preview-canvas';
+    canvas.style.width = displaySize + 'px';
+    canvas.style.height = displaySize + 'px';
+    item.appendChild(canvas);
+    const label = document.createElement('div');
+    label.className = 'size-label';
+    label.textContent = size + 'px';
+    item.appendChild(label);
+    container.appendChild(item);
+    renderToCanvas(canvas, size);
+  });
+}
+
+function downloadSVG() {
+  const svg = buildSVG(512);
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'favicon.svg';
+  a.click();
+}
+
+function downloadPNG(size) {
+  const svg = buildSVG(size);
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = size; canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, size, size);
+    canvas.toBlob(b => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(b);
+      a.download = `favicon-${size}.png`;
+      a.click();
+    });
+    URL.revokeObjectURL(url);
+  };
+  img.src = url;
+}
+
+function downloadICO() {
+  // ICO = PNG at 32px wrapped in ICO header
+  const svg = buildSVG(32);
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 32; canvas.height = 32;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, 32, 32);
+    canvas.toBlob(pngBlob => {
+      pngBlob.arrayBuffer().then(pngBuf => {
+        const png = new Uint8Array(pngBuf);
+        const ico = new ArrayBuffer(6 + 16 + png.length);
+        const view = new DataView(ico);
+        view.setUint16(0, 0, true); // reserved
+        view.setUint16(2, 1, true); // ICO type
+        view.setUint16(4, 1, true); // 1 image
+        view.setUint8(6, 32);  // width
+        view.setUint8(7, 32);  // height
+        view.setUint8(8, 0);   // colors
+        view.setUint8(9, 0);   // reserved
+        view.setUint16(10, 1, true); // planes
+        view.setUint16(12, 32, true); // bpp
+        view.setUint32(14, png.length, true); // size
+        view.setUint32(18, 22, true); // offset
+        new Uint8Array(ico).set(png, 22);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([ico], { type: 'image/x-icon' }));
+        a.download = 'favicon.ico';
+        a.click();
+      });
+    });
+    URL.revokeObjectURL(url);
+  };
+  img.src = url;
+}
+
+function copyTags() {
+  const text = document.getElementById('htmlTags').textContent.trim();
+  navigator.clipboard.writeText(text);
+  showToast('HTML tags copied');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+render();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SVG Icon Library - FreeDesignStore</title>
+<link rel="icon" href="/favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a { color: #ec4899; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; font-size: 14px; color: #6b7280; }
+.back:hover { color: #ec4899; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.subtitle { color: #6b7280; margin-bottom: 24px; font-size: 15px; }
+.container { max-width: 1200px; margin: 0 auto; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
+.toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; }
+.search-input { flex: 1; min-width: 200px; padding: 10px 16px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; }
+.search-input:focus { outline: none; border-color: #ec4899; }
+select { padding: 10px 14px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+.customize { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.customize label { font-size: 13px; color: #6b7280; font-weight: 500; }
+.customize input[type="number"] { width: 60px; padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; }
+.customize input[type="color"] { width: 32px; height: 32px; border: 1px solid #e5e7eb; border-radius: 8px; cursor: pointer; padding: 2px; }
+.icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; }
+.icon-card { display: flex; flex-direction: column; align-items: center; padding: 16px 8px; border: 1px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all .15s; gap: 8px; }
+.icon-card:hover { border-color: #ec4899; background: #fdf2f8; transform: translateY(-1px); }
+.icon-card svg { flex-shrink: 0; }
+.icon-card span { font-size: 10px; color: #6b7280; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1a1a1a; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999; }
+.toast.show { opacity: 1; }
+.count { font-size: 13px; color: #6b7280; }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="back">&larr; Back to FreeDesignStore</a>
+  <h1>SVG Icon Library</h1>
+  <p class="subtitle">200+ SVG icons. Click any icon to copy SVG code. Customize size, weight, and color.</p>
+
+  <div class="panel">
+    <div class="toolbar">
+      <input type="text" class="search-input" id="search" placeholder="Search icons...">
+      <select id="categoryFilter">
+        <option value="all">All Categories</option>
+        <option value="arrows">Arrows</option>
+        <option value="ui">UI</option>
+        <option value="social">Social</option>
+        <option value="business">Business</option>
+        <option value="media">Media</option>
+        <option value="weather">Weather</option>
+        <option value="shapes">Shapes</option>
+      </select>
+      <span class="count" id="count"></span>
+    </div>
+    <div class="customize">
+      <label>Size</label>
+      <input type="number" id="iconSize" value="24" min="12" max="96">
+      <label>Stroke</label>
+      <input type="number" id="strokeWidth" value="2" min="1" max="4" step="0.5">
+      <label>Color</label>
+      <input type="color" id="iconColor" value="#1a1a1a">
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="icon-grid" id="iconGrid"></div>
+  </div>
+</div>
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+const icons = [
+  // Arrows
+  {name:"arrow-up",cat:"arrows",path:"M12 19V5m0 0l-7 7m7-7l7 7"},
+  {name:"arrow-down",cat:"arrows",path:"M12 5v14m0 0l7-7m-7 7l-7-7"},
+  {name:"arrow-left",cat:"arrows",path:"M19 12H5m0 0l7 7m-7-7l7-7"},
+  {name:"arrow-right",cat:"arrows",path:"M5 12h14m0 0l-7-7m7 7l-7 7"},
+  {name:"chevron-up",cat:"arrows",path:"M18 15l-6-6-6 6"},
+  {name:"chevron-down",cat:"arrows",path:"M6 9l6 6 6-6"},
+  {name:"chevron-left",cat:"arrows",path:"M15 18l-6-6 6-6"},
+  {name:"chevron-right",cat:"arrows",path:"M9 18l6-6-6-6"},
+  {name:"arrows-expand",cat:"arrows",path:"M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"},
+  {name:"arrow-up-right",cat:"arrows",path:"M7 17L17 7m0 0H7m10 0v10"},
+  {name:"arrow-down-left",cat:"arrows",path:"M17 7L7 17m0 0h10M7 17V7"},
+  {name:"refresh",cat:"arrows",path:"M4 12a8 8 0 0 1 14.93-4M20 12a8 8 0 0 1-14.93 4"},
+  {name:"rotate-cw",cat:"arrows",path:"M21 4v6h-6M21 10A9 9 0 1 0 6.3 6.3"},
+  {name:"rotate-ccw",cat:"arrows",path:"M3 4v6h6M3 10a9 9 0 1 0 2.7-3.7"},
+  {name:"swap-h",cat:"arrows",path:"M4 7h16l-4-4m0 8H4l4 4"},
+  {name:"swap-v",cat:"arrows",path:"M7 4v16l-4-4m8 0V4l4 4"},
+  {name:"corner-up-right",cat:"arrows",path:"M4 20v-7a4 4 0 0 1 4-4h12m0 0l-4-4m4 4l-4 4"},
+  {name:"corner-down-left",cat:"arrows",path:"M20 4v7a4 4 0 0 1-4 4H4m0 0l4-4m-4 4l4 4"},
+  {name:"move",cat:"arrows",path:"M12 2v20m0-20l-3 3m3-3l3 3m-3 17l-3-3m3 3l3-3M2 12h20M2 12l3-3m-3 3l3 3m17-3l-3-3m3 3l-3 3"},
+  {name:"trending-up",cat:"arrows",path:"M3 17l6-6 4 4 8-8m0 0h-6m6 0v6"},
+  {name:"trending-down",cat:"arrows",path:"M3 7l6 6 4-4 8 8m0 0h-6m6 0v-6"},
+  {name:"upload",cat:"arrows",path:"M12 15V3m0 0l-4 4m4-4l4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"},
+  {name:"download",cat:"arrows",path:"M12 3v12m0 0l4-4m-4 4l-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"},
+  {name:"external-link",cat:"arrows",path:"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6m4-3h6v6m-11 5L21 3"},
+  {name:"log-in",cat:"arrows",path:"M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"},
+  {name:"log-out",cat:"arrows",path:"M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m7 14l5-5-5-5m5 5H9"},
+  // UI
+  {name:"home",cat:"ui",path:"M3 12l9-9 9 9M5 10v10a1 1 0 0 0 1 1h3v-6h6v6h3a1 1 0 0 0 1-1V10"},
+  {name:"search",cat:"ui",path:"M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"},
+  {name:"settings",cat:"ui",path:"M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm7.94-1A7.94 7.94 0 0 0 20 12a8 8 0 0 0-.06-2"},
+  {name:"menu",cat:"ui",path:"M4 6h16M4 12h16M4 18h16"},
+  {name:"x-close",cat:"ui",path:"M18 6L6 18M6 6l12 12"},
+  {name:"check",cat:"ui",path:"M5 12l5 5L20 7"},
+  {name:"plus",cat:"ui",path:"M12 5v14m-7-7h14"},
+  {name:"minus",cat:"ui",path:"M5 12h14"},
+  {name:"eye",cat:"ui",path:"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"},
+  {name:"eye-off",cat:"ui",path:"M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M1 1l22 22M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8"},
+  {name:"trash",cat:"ui",path:"M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"},
+  {name:"edit",cat:"ui",path:"M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7m-1.5-10.5a2.12 2.12 0 0 1 3 3L12 17l-4 1 1-4 9.5-9.5z"},
+  {name:"copy",cat:"ui",path:"M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2M16 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2"},
+  {name:"clipboard",cat:"ui",path:"M9 2h6a1 1 0 0 1 1 1v1H8V3a1 1 0 0 1 1-1zM5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"},
+  {name:"filter",cat:"ui",path:"M3 4h18l-7 8v6l-4 2V12L3 4z"},
+  {name:"sliders",cat:"ui",path:"M4 21v-7m0-4V3m8 18v-9m0-4V3m8 18v-5m0-4V3M1 14h6M9 8h6M17 16h6"},
+  {name:"grid",cat:"ui",path:"M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"},
+  {name:"list",cat:"ui",path:"M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"},
+  {name:"layers",cat:"ui",path:"M12 2l10 5-10 5L2 7l10-5zm0 0v20m10-15l-10 5-10-5"},
+  {name:"lock",cat:"ui",path:"M5 11V7a7 7 0 0 1 14 0v4M5 11h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"},
+  {name:"unlock",cat:"ui",path:"M7 11V7a5 5 0 0 1 9.9-1M5 11h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"},
+  {name:"bell",cat:"ui",path:"M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9m-4.27 13a2 2 0 0 1-3.46 0"},
+  {name:"star",cat:"ui",path:"M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"},
+  {name:"heart",cat:"ui",path:"M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"},
+  {name:"bookmark",cat:"ui",path:"M5 3h14a1 1 0 0 1 1 1v17l-8-4-8 4V4a1 1 0 0 1 1-1z"},
+  {name:"flag",cat:"ui",path:"M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1v12zm0 0v7"},
+  {name:"info",cat:"ui",path:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm0-14v0m0 4v4"},
+  {name:"alert-circle",cat:"ui",path:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm0-14v4m0 4v0"},
+  {name:"help-circle",cat:"ui",path:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm-1-7h.01M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"},
+  {name:"user",cat:"ui",path:"M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"},
+  {name:"users",cat:"ui",path:"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2m22 0v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75M9 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"},
+  {name:"calendar",cat:"ui",path:"M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6zm5-4v4m8-4v4M3 10h18"},
+  {name:"clock",cat:"ui",path:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm0-14v4l3 3"},
+  {name:"map-pin",cat:"ui",path:"M12 21c0 0-8-7.5-8-12a8 8 0 0 1 16 0c0 4.5-8 12-8 12zm0-9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"},
+  {name:"link",cat:"ui",path:"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"},
+  {name:"paperclip",cat:"ui",path:"M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.49"},
+  {name:"tag",cat:"ui",path:"M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82zM7 7h.01"},
+  {name:"inbox",cat:"ui",path:"M3 12l3-9h12l3 9M3 12h5l2 3h4l2-3h5M3 12v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"},
+  {name:"send",cat:"ui",path:"M22 2L11 13M22 2l-7 20-4-9-9-4 20-7"},
+  {name:"terminal",cat:"ui",path:"M4 17l6-5-6-5m8 10h6"},
+  {name:"code",cat:"ui",path:"M16 18l6-6-6-6M8 6l-6 6 6 6"},
+  // Social
+  {name:"share",cat:"social",path:"M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"},
+  {name:"message-circle",cat:"social",path:"M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"},
+  {name:"message-square",cat:"social",path:"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10z"},
+  {name:"at-sign",cat:"social",path:"M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"},
+  {name:"globe",cat:"social",path:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"},
+  {name:"wifi",cat:"social",path:"M12 20h.01M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0"},
+  {name:"rss",cat:"social",path:"M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16M5 19a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"},
+  {name:"thumbs-up",cat:"social",path:"M14 9V5a3 3 0 0 0-6 0v4H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h5.5M14 9h4.76a2 2 0 0 1 1.98 2.28l-1.5 8A2 2 0 0 1 17.26 21H10V9"},
+  {name:"thumbs-down",cat:"social",path:"M10 15V19a3 3 0 0 0 6 0v-4h4a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-5.5M10 15H5.24a2 2 0 0 1-1.98-2.28l1.5-8A2 2 0 0 1 6.74 3H14v12"},
+  {name:"phone",cat:"social",path:"M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"},
+  {name:"video",cat:"social",path:"M23 7l-7 5 7 5V7zM1 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H1V5z"},
+  {name:"camera",cat:"social",path:"M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2v11zm-11-3a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"},
+  {name:"image",cat:"social",path:"M3 3h18a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm13 7l-5-5L5 21"},
+  // Business
+  {name:"briefcase",cat:"business",path:"M2 7h20v13a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7zm6-5h8a2 2 0 0 1 2 2v3H6V4a2 2 0 0 1 2-2z"},
+  {name:"dollar-sign",cat:"business",path:"M12 1v22m5-18H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H7"},
+  {name:"credit-card",cat:"business",path:"M1 4h22a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm0 6h24"},
+  {name:"shopping-cart",cat:"business",path:"M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6m4 16a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm10 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"},
+  {name:"shopping-bag",cat:"business",path:"M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4H6zm0 4h12M16 10a4 4 0 0 1-8 0"},
+  {name:"package",cat:"business",path:"M3 7l9-4 9 4v10l-9 4-9-4V7zm9-4v20M3 7l9 4 9-4"},
+  {name:"truck",cat:"business",path:"M1 3h15v13H1V3zm15 6h4l3 3v4h-7V9zm-9 11a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm11 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"},
+  {name:"bar-chart",cat:"business",path:"M12 20V10M18 20V4M6 20v-4"},
+  {name:"pie-chart",cat:"business",path:"M12 2a10 10 0 0 1 10 10H12V2zm0 0a10 10 0 1 0 10 10"},
+  {name:"activity",cat:"business",path:"M22 12h-4l-3 9L9 3l-3 9H2"},
+  {name:"target",cat:"business",path:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm0-6a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0-2a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"},
+  {name:"award",cat:"business",path:"M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14zm-4 1.5L7 22l5-3 5 3-1-5.5"},
+  {name:"gift",cat:"business",path:"M3 8h18v4H3V8zm1 4v8h16v-8M12 8v12m-4.5-12a2.5 2.5 0 0 1 0-5C9 3 12 8 12 8m0 0s3-5 4.5-5a2.5 2.5 0 0 1 0 5"},
+  {name:"percent",cat:"business",path:"M19 5L5 19M6.5 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zm11 11a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"},
+  {name:"building",cat:"business",path:"M3 21V3h18v18M7 7h2m6 0h2M7 11h2m6 0h2M7 15h2m6 0h2M7 19h10"},
+  {name:"file",cat:"business",path:"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm0 0v6h6"},
+  {name:"folder",cat:"business",path:"M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v11z"},
+  {name:"mail",cat:"business",path:"M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 2l8 5 8-5"},
+  {name:"printer",cat:"business",path:"M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6v-8z"},
+  {name:"database",cat:"business",path:"M12 2c5.52 0 10 1.79 10 4v12c0 2.21-4.48 4-10 4S2 20.21 2 18V6c0-2.21 4.48-4 10-4zM2 6c0 2.21 4.48 4 10 4s10-1.79 10-4M2 12c0 2.21 4.48 4 10 4s10-1.79 10-4"},
+  {name:"server",cat:"business",path:"M2 4h20v6H2V4zm0 10h20v6H2v-6zM6 7h.01M6 17h.01"},
+  {name:"cloud",cat:"business",path:"M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"},
+  {name:"shield",cat:"business",path:"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"},
+  {name:"key",cat:"business",path:"M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.78 7.78 5.5 5.5 0 0 1 7.78-7.78zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"},
+  // Media
+  {name:"play",cat:"media",path:"M5 3l14 9-14 9V3z"},
+  {name:"pause",cat:"media",path:"M6 4h4v16H6V4zm8 0h4v16h-4V4z"},
+  {name:"stop-circle",cat:"media",path:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM9 9h6v6H9V9z"},
+  {name:"skip-forward",cat:"media",path:"M5 4l10 8-10 8V4zm14 0v16"},
+  {name:"skip-back",cat:"media",path:"M19 20L9 12l10-8v16zM5 4v16"},
+  {name:"volume",cat:"media",path:"M11 5L6 9H2v6h4l5 4V5z"},
+  {name:"volume-high",cat:"media",path:"M11 5L6 9H2v6h4l5 4V5zm8.07-.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"},
+  {name:"music",cat:"media",path:"M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm12-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"},
+  {name:"mic",cat:"media",path:"M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2m7 9v4m-4 0h8"},
+  {name:"headphones",cat:"media",path:"M3 18v-6a9 9 0 0 1 18 0v6M3 18a3 3 0 0 0 3 3h0a3 3 0 0 0 3-3v-2a3 3 0 0 0-3-3h-3m18 5a3 3 0 0 1-3 3h0a3 3 0 0 1-3-3v-2a3 3 0 0 1 3-3h3"},
+  {name:"radio",cat:"media",path:"M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm4.24-4.24a6 6 0 0 1 0 8.49m-8.49 0a6 6 0 0 1 0-8.49m11.31-2.83a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"},
+  {name:"film",cat:"media",path:"M2 2h20v20H2V2zm5 0v20m10-20v20M2 7h5m10 0h5M2 12h20M2 17h5m10 0h5"},
+  {name:"tv",cat:"media",path:"M2 7h20v13H2V7zm10-5l-4 5m4-5l4 5"},
+  {name:"monitor",cat:"media",path:"M2 3h20v14H2V3zm8 17h4m-2-3v3"},
+  {name:"smartphone",cat:"media",path:"M5 2h14a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 16h.01"},
+  // Weather
+  {name:"sun",cat:"weather",path:"M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0-15v2m0 18v-2m9 0l-1.5-1.5M4.5 4.5L6 6m12 12l1.5 1.5M4.5 19.5L6 18M22 12h-2M4 12H2m17.5-7.5L18 6M6 18l-1.5 1.5"},
+  {name:"moon",cat:"weather",path:"M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"},
+  {name:"cloud-rain",cat:"weather",path:"M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10zM8 19v2m4-2v2m4-2v2"},
+  {name:"cloud-snow",cat:"weather",path:"M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10zM8 15h.01m4 0h.01m4 0h.01M8 19h.01m4 0h.01m4 0h.01"},
+  {name:"wind",cat:"weather",path:"M5 8h8.5a2.5 2.5 0 0 0 0-5M3 12h15.5a2.5 2.5 0 0 1 0 5M4 16h5.5a2.5 2.5 0 0 1 0 5"},
+  {name:"thermometer",cat:"weather",path:"M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"},
+  {name:"droplet",cat:"weather",path:"M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"},
+  {name:"zap",cat:"weather",path:"M13 2L3 14h9l-1 8 10-12h-9l1-8z"},
+  {name:"umbrella",cat:"weather",path:"M12 22V12m0 0C12 5.37 16.5 2 12 2S2 7 12 12zm0 0c0-7-4.5-10 0-10s10 3 0 10"},
+  {name:"sunrise",cat:"weather",path:"M17 18a5 5 0 0 0-10 0M12 9V2m-7.78 9.22l1.42 1.42m12.72-1.42l-1.42 1.42M1 18h2m18 0h2M3 22h18"},
+  // Shapes
+  {name:"circle",cat:"shapes",path:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"},
+  {name:"square",cat:"shapes",path:"M3 3h18v18H3V3z"},
+  {name:"triangle",cat:"shapes",path:"M12 3l10 18H2L12 3z"},
+  {name:"hexagon",cat:"shapes",path:"M12 2l9 5v10l-9 5-9-5V7l9-5z"},
+  {name:"octagon",cat:"shapes",path:"M7.86 2h8.28L22 7.86v8.28L16.14 22H7.86L2 16.14V7.86L7.86 2z"},
+  {name:"diamond",cat:"shapes",path:"M12 2l10 10-10 10L2 12l10-10z"},
+  {name:"pentagon",cat:"shapes",path:"M12 2l9.5 7-3.6 11H6.1L2.5 9 12 2z"},
+  {name:"cross",cat:"shapes",path:"M9 2h6v7h7v6h-7v7H9v-7H2V9h7V2z"},
+  {name:"asterisk",cat:"shapes",path:"M12 2v20M4.93 4.93l14.14 14.14M2 12h20M4.93 19.07l14.14-14.14"},
+  {name:"hash",cat:"shapes",path:"M4 9h16M4 15h16M10 3v18M14 3v18"},
+  {name:"maximize",cat:"shapes",path:"M8 3H3v5m18-5h-5M3 16v5h5m13 0h-5"},
+  {name:"minimize",cat:"shapes",path:"M8 3v5H3m18 0h-5V3M3 16h5v5m13 0v-5h5"},
+  {name:"crop",cat:"shapes",path:"M6 2v14a2 2 0 0 0 2 2h14M2 6h4m12 0v12m0 0h4"},
+  {name:"scissors",cat:"shapes",path:"M6 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"},
+  {name:"type",cat:"shapes",path:"M4 7V4h16v3M9 20h6M12 4v16"},
+  {name:"bold",cat:"shapes",path:"M6 4h8a4 4 0 0 1 0 8H6V4zm0 8h9a4 4 0 0 1 0 8H6v-8z"},
+  {name:"italic",cat:"shapes",path:"M10 4h6m-4 0l-4 16m-2 0h6"},
+  {name:"underline",cat:"shapes",path:"M6 3v7a6 6 0 0 0 12 0V3M4 21h16"},
+  {name:"align-left",cat:"shapes",path:"M3 6h18M3 12h10M3 18h14"},
+  {name:"align-center",cat:"shapes",path:"M3 6h18M7 12h10M5 18h14"},
+  {name:"align-right",cat:"shapes",path:"M3 6h18M11 12h10M7 18h14"},
+  {name:"columns",cat:"shapes",path:"M12 3v18M3 3h18v18H3V3z"},
+  {name:"layout",cat:"shapes",path:"M3 3h18v18H3V3zm0 6h18M9 9v12"},
+  {name:"sidebar",cat:"shapes",path:"M3 3h18v18H3V3zm6 0v18"},
+  {name:"box",cat:"shapes",path:"M3 7l9-4 9 4v10l-9 4-9-4V7zm9-4v8m0 0l9-4m-9 4l-9-4"},
+  {name:"feather",cat:"shapes",path:"M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76zM16 8L2 22m15.5-7H9"},
+  {name:"pen-tool",cat:"shapes",path:"M12 19l7-7 3 3-7 7-3-3z M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z M2 2l7.586 7.586"},
+  {name:"droplets",cat:"shapes",path:"M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05zm10-3.3c1.47 0 2.67-1.22 2.67-2.7 0-.77-.38-1.5-1.14-2.13-.76-.62-1.24-1.38-1.53-2.37-.29.99-.77 1.75-1.53 2.37-.76.62-1.14 1.36-1.14 2.13 0 1.48 1.2 2.7 2.67 2.7z"},
+  {name:"aperture",cat:"shapes",path:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16L3.95 6.06M14.31 16H2.83M16.62 12l-5.74 9.94"},
+  {name:"compass",cat:"shapes",path:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"},
+  {name:"crosshair",cat:"shapes",path:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM22 12h-4M6 12H2M12 6V2M12 22v-4"},
+  {name:"life-buoy",cat:"shapes",path:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm0-6a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.93 4.93l4.24 4.24m5.66 5.66l4.24 4.24m0-14.14l-4.24 4.24m-5.66 5.66l-4.24 4.24"},
+];
+
+const grid = document.getElementById('iconGrid');
+const search = document.getElementById('search');
+const categoryFilter = document.getElementById('categoryFilter');
+const iconSize = document.getElementById('iconSize');
+const strokeWidth = document.getElementById('strokeWidth');
+const iconColor = document.getElementById('iconColor');
+const countEl = document.getElementById('count');
+const toast = document.getElementById('toast');
+
+function renderIcons() {
+  const q = search.value.toLowerCase();
+  const cat = categoryFilter.value;
+  const size = parseInt(iconSize.value) || 24;
+  const sw = parseFloat(strokeWidth.value) || 2;
+  const color = iconColor.value;
+
+  const filtered = icons.filter(i => {
+    if (cat !== 'all' && i.cat !== cat) return false;
+    if (q && !i.name.includes(q) && !i.cat.includes(q)) return false;
+    return true;
+  });
+
+  countEl.textContent = filtered.length + ' icons';
+  grid.innerHTML = filtered.map(i => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"><path d="${i.path}"/></svg>`;
+    return `<div class="icon-card" data-svg='${svg.replace(/'/g,"&#39;")}'>${svg}<span>${i.name}</span></div>`;
+  }).join('');
+}
+
+grid.addEventListener('click', e => {
+  const card = e.target.closest('.icon-card');
+  if (!card) return;
+  const svg = card.dataset.svg;
+  navigator.clipboard.writeText(svg).then(() => {
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1500);
+  });
+});
+
+search.addEventListener('input', renderIcons);
+categoryFilter.addEventListener('change', renderIcons);
+iconSize.addEventListener('input', renderIcons);
+strokeWidth.addEventListener('input', renderIcons);
+iconColor.addEventListener('input', renderIcons);
+
+renderIcons();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Resizer & Cropper - FreeDesignStore</title>
+<link rel="icon" href="/favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a { color: #ec4899; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; font-size: 14px; color: #6b7280; }
+.back:hover { color: #ec4899; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.subtitle { color: #6b7280; margin-bottom: 24px; font-size: 15px; }
+.container { max-width: 1100px; margin: 0 auto; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
+.drop-zone { border: 2px dashed #e5e7eb; border-radius: 12px; padding: 60px 24px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; }
+.drop-zone:hover, .drop-zone.dragover { border-color: #ec4899; background: #fdf2f8; }
+.drop-zone p { color: #6b7280; margin-top: 8px; font-size: 14px; }
+.drop-zone .icon { font-size: 48px; color: #ec4899; }
+.hidden { display: none; }
+.editor { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
+@media (max-width: 800px) { .editor { grid-template-columns: 1fr; } }
+.canvas-wrap { position: relative; overflow: hidden; border-radius: 8px; background: repeating-conic-gradient(#e5e7eb 0% 25%, transparent 0% 50%) 50%/20px 20px; display: flex; align-items: center; justify-content: center; min-height: 400px; }
+.canvas-wrap img { max-width: 100%; max-height: 500px; display: block; }
+.crop-overlay { position: absolute; border: 2px solid #ec4899; background: rgba(236,72,153,.08); cursor: move; }
+.controls label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 4px; margin-top: 14px; }
+.controls label:first-child { margin-top: 0; }
+.presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.preset-btn { padding: 8px 10px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; cursor: pointer; font-size: 12px; font-family: inherit; transition: all .15s; text-align: left; }
+.preset-btn:hover { border-color: #ec4899; background: #fdf2f8; }
+.preset-btn.active { border-color: #ec4899; background: #fdf2f8; color: #ec4899; }
+.preset-btn span { display: block; font-weight: 600; }
+.preset-btn small { color: #6b7280; }
+.row { display: flex; gap: 8px; align-items: center; }
+input[type="number"] { width: 100%; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; }
+input[type="range"] { width: 100%; accent-color: #ec4899; }
+.lock-btn { width: 36px; height: 36px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+.lock-btn.locked { background: #fdf2f8; border-color: #ec4899; }
+.actions { display: flex; gap: 8px; margin-top: 20px; }
+.btn { padding: 10px 18px; border-radius: 8px; border: none; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-primary:hover { background: #db2777; }
+.btn-secondary { background: #fff; border: 1px solid #e5e7eb; color: #1a1a1a; }
+.btn-secondary:hover { border-color: #ec4899; }
+select { padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; width: 100%; }
+.quality-val { font-size: 13px; color: #ec4899; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="back">&larr; Back to FreeDesignStore</a>
+  <h1>Image Resizer & Cropper</h1>
+  <p class="subtitle">Resize, crop, and export images for any platform. Drag & drop to start.</p>
+
+  <div class="panel" id="uploadPanel">
+    <div class="drop-zone" id="dropZone">
+      <div class="icon">&#128444;</div>
+      <p>Drop an image here or click to upload</p>
+      <input type="file" id="fileInput" accept="image/*" class="hidden">
+    </div>
+  </div>
+
+  <div class="editor hidden" id="editorSection">
+    <div class="panel">
+      <div class="canvas-wrap" id="canvasWrap">
+        <img id="preview" alt="Preview">
+        <div class="crop-overlay hidden" id="cropOverlay"></div>
+      </div>
+    </div>
+    <div class="panel controls">
+      <label>Presets</label>
+      <div class="presets">
+        <button class="preset-btn" data-w="1080" data-h="1080"><span>Instagram Post</span><small>1080x1080</small></button>
+        <button class="preset-btn" data-w="1080" data-h="1920"><span>Instagram Story</span><small>1080x1920</small></button>
+        <button class="preset-btn" data-w="1200" data-h="675"><span>X / Twitter</span><small>1200x675</small></button>
+        <button class="preset-btn" data-w="1200" data-h="627"><span>LinkedIn</span><small>1200x627</small></button>
+        <button class="preset-btn" data-w="1200" data-h="630"><span>Facebook</span><small>1200x630</small></button>
+        <button class="preset-btn" data-w="1280" data-h="720"><span>YouTube</span><small>1280x720</small></button>
+        <button class="preset-btn" data-w="1200" data-h="630"><span>OG Image</span><small>1200x630</small></button>
+        <button class="preset-btn" data-w="0" data-h="0"><span>Custom</span><small>Free size</small></button>
+      </div>
+
+      <label>Width (px)</label>
+      <div class="row">
+        <input type="number" id="widthInput" min="1" max="10000" value="1080">
+        <button class="lock-btn locked" id="lockBtn" title="Lock aspect ratio">&#128279;</button>
+      </div>
+
+      <label>Height (px)</label>
+      <input type="number" id="heightInput" min="1" max="10000" value="1080">
+
+      <label>Quality <span class="quality-val" id="qualityVal">90%</span></label>
+      <input type="range" id="qualitySlider" min="10" max="100" value="90">
+
+      <label>Format</label>
+      <select id="formatSelect">
+        <option value="image/png">PNG</option>
+        <option value="image/jpeg">JPEG</option>
+      </select>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="downloadBtn">Download</button>
+        <button class="btn btn-secondary" id="resetBtn">New Image</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const uploadPanel = document.getElementById('uploadPanel');
+const editorSection = document.getElementById('editorSection');
+const preview = document.getElementById('preview');
+const widthInput = document.getElementById('widthInput');
+const heightInput = document.getElementById('heightInput');
+const lockBtn = document.getElementById('lockBtn');
+const qualitySlider = document.getElementById('qualitySlider');
+const qualityVal = document.getElementById('qualityVal');
+const formatSelect = document.getElementById('formatSelect');
+const downloadBtn = document.getElementById('downloadBtn');
+const resetBtn = document.getElementById('resetBtn');
+const presetBtns = document.querySelectorAll('.preset-btn');
+
+let originalImage = null;
+let aspectLocked = true;
+let aspectRatio = 1;
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+function handleFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      originalImage = img;
+      preview.src = img.src;
+      widthInput.value = img.naturalWidth;
+      heightInput.value = img.naturalHeight;
+      aspectRatio = img.naturalWidth / img.naturalHeight;
+      uploadPanel.classList.add('hidden');
+      editorSection.classList.remove('hidden');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+presetBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    presetBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const w = parseInt(btn.dataset.w);
+    const h = parseInt(btn.dataset.h);
+    if (w && h) {
+      widthInput.value = w;
+      heightInput.value = h;
+      aspectRatio = w / h;
+    }
+  });
+});
+
+widthInput.addEventListener('input', () => {
+  if (aspectLocked) {
+    heightInput.value = Math.round(parseInt(widthInput.value) / aspectRatio);
+  }
+});
+
+heightInput.addEventListener('input', () => {
+  if (aspectLocked) {
+    widthInput.value = Math.round(parseInt(heightInput.value) * aspectRatio);
+  }
+});
+
+lockBtn.addEventListener('click', () => {
+  aspectLocked = !aspectLocked;
+  lockBtn.classList.toggle('locked', aspectLocked);
+  if (aspectLocked) {
+    aspectRatio = parseInt(widthInput.value) / parseInt(heightInput.value);
+  }
+});
+
+qualitySlider.addEventListener('input', () => {
+  qualityVal.textContent = qualitySlider.value + '%';
+});
+
+downloadBtn.addEventListener('click', () => {
+  if (!originalImage) return;
+  const w = parseInt(widthInput.value);
+  const h = parseInt(heightInput.value);
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  const srcRatio = originalImage.naturalWidth / originalImage.naturalHeight;
+  const dstRatio = w / h;
+  let sx = 0, sy = 0, sw = originalImage.naturalWidth, sh = originalImage.naturalHeight;
+  if (srcRatio > dstRatio) {
+    sw = originalImage.naturalHeight * dstRatio;
+    sx = (originalImage.naturalWidth - sw) / 2;
+  } else {
+    sh = originalImage.naturalWidth / dstRatio;
+    sy = (originalImage.naturalHeight - sh) / 2;
+  }
+  ctx.drawImage(originalImage, sx, sy, sw, sh, 0, 0, w, h);
+  const format = formatSelect.value;
+  const quality = parseInt(qualitySlider.value) / 100;
+  const dataUrl = canvas.toDataURL(format, quality);
+  const link = document.createElement('a');
+  link.download = `resized-${w}x${h}.${format === 'image/png' ? 'png' : 'jpg'}`;
+  link.href = dataUrl;
+  link.click();
+});
+
+resetBtn.addEventListener('click', () => {
+  originalImage = null;
+  preview.src = '';
+  fileInput.value = '';
+  uploadPanel.classList.remove('hidden');
+  editorSection.classList.add('hidden');
+  presetBtns.forEach(b => b.classList.remove('active'));
+});
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

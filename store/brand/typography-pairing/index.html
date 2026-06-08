@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Typography Pairing Tool - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600&family=Lora:wght@400;700&family=Montserrat:wght@400;600;700&family=Merriweather:wght@400;700&family=Raleway:wght@400;600&family=Source+Serif+4:wght@400;700&family=Poppins:wght@400;600;700&family=Crimson+Text:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
+a.back:hover { text-decoration: underline; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+p.subtitle { color: #6b7280; margin-bottom: 24px; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 24px; }
+select, input[type="range"], input[type="text"] { font-family: inherit; font-size: 14px; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; }
+select { min-width: 160px; }
+.btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; transition: opacity .2s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
+.pairings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px; margin-bottom: 24px; }
+.pairing-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; cursor: pointer; transition: border-color .2s, box-shadow .2s; }
+.pairing-card:hover { border-color: #ec4899; box-shadow: 0 2px 8px rgba(236,72,153,.15); }
+.pairing-card.selected { border-color: #ec4899; box-shadow: 0 2px 8px rgba(236,72,153,.2); }
+.pairing-card .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: .5px; }
+.tag-classic { background: #fef3c7; color: #92400e; }
+.tag-modern { background: #dbeafe; color: #1e40af; }
+.tag-playful { background: #fce7f3; color: #9d174d; }
+.tag-elegant { background: #f3e8ff; color: #6b21a8; }
+.pairing-card h3 { font-size: 12px; color: #6b7280; font-weight: 500; margin-bottom: 8px; }
+.preview-section { margin-top: 24px; }
+.context-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.context-tab { padding: 6px 14px; border-radius: 6px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; font-size: 13px; font-weight: 500; }
+.context-tab.active { background: #ec4899; color: #fff; border-color: #ec4899; }
+.preview-box { border: 1px solid #e5e7eb; border-radius: 12px; padding: 32px; min-height: 200px; }
+.sliders { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+.slider-group label { display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+.slider-group input[type="range"] { width: 100%; padding: 0; }
+.slider-group .value { font-size: 12px; color: #6b7280; text-align: right; }
+textarea.custom-text { width: 100%; height: 60px; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; resize: vertical; margin-bottom: 16px; }
+.export-box { margin-top: 16px; }
+.export-box textarea { width: 100%; height: 100px; font-family: monospace; font-size: 13px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; resize: vertical; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<h1>Typography Pairing Tool</h1>
+<p class="subtitle">Find the perfect heading + body font combinations for your project.</p>
+
+<div class="panel">
+  <textarea class="custom-text" id="customText" placeholder="Type custom preview text...">The quick brown fox jumps over the lazy dog. Design is not just what it looks like, design is how it works.</textarea>
+
+  <div class="pairings-grid" id="pairingsGrid"></div>
+
+  <h3 style="margin-bottom:12px;">Preview Selected Pairing</h3>
+  <div class="context-tabs" id="contextTabs">
+    <button class="context-tab active" data-ctx="hero">Hero</button>
+    <button class="context-tab" data-ctx="card">Card</button>
+    <button class="context-tab" data-ctx="article">Article</button>
+  </div>
+
+  <div class="sliders">
+    <div class="slider-group">
+      <label>Heading Size: <span id="hSizeVal">36px</span></label>
+      <input type="range" id="hSize" min="20" max="72" value="36" oninput="updatePreview()">
+    </div>
+    <div class="slider-group">
+      <label>Body Size: <span id="bSizeVal">16px</span></label>
+      <input type="range" id="bSize" min="12" max="24" value="16" oninput="updatePreview()">
+    </div>
+    <div class="slider-group">
+      <label>Line Height: <span id="lhVal">1.6</span></label>
+      <input type="range" id="lh" min="10" max="24" value="16" oninput="updatePreview()">
+    </div>
+    <div class="slider-group">
+      <label>Letter Spacing: <span id="lsVal">0px</span></label>
+      <input type="range" id="ls" min="-2" max="5" value="0" oninput="updatePreview()">
+    </div>
+  </div>
+
+  <div class="preview-box" id="previewBox"></div>
+
+  <div class="export-box">
+    <button class="btn btn-primary" onclick="exportCSS()" style="margin-top:16px;margin-bottom:8px;">Export CSS</button>
+    <textarea id="exportOutput" readonly placeholder="CSS output will appear here..."></textarea>
+  </div>
+</div>
+
+<script>
+const pairings = [
+  { heading: 'Playfair Display', body: 'Inter', mood: 'elegant', desc: 'Serif elegance meets clean sans' },
+  { heading: 'Montserrat', body: 'Merriweather', mood: 'classic', desc: 'Geometric sans + readable serif' },
+  { heading: 'Poppins', body: 'Inter', mood: 'modern', desc: 'Friendly geometric duo' },
+  { heading: 'Raleway', body: 'Lora', mood: 'elegant', desc: 'Thin sans with literary serif' },
+  { heading: 'Manrope', body: 'Source Serif 4', mood: 'modern', desc: 'Technical sans + refined serif' },
+  { heading: 'Playfair Display', body: 'Raleway', mood: 'classic', desc: 'High contrast serif + light sans' },
+  { heading: 'Poppins', body: 'Crimson Text', mood: 'playful', desc: 'Round sans with old-style serif' },
+  { heading: 'Montserrat', body: 'Inter', mood: 'modern', desc: 'Bold geometric + neutral body' },
+  { heading: 'Lora', body: 'Manrope', mood: 'classic', desc: 'Calligraphic serif + modern sans' },
+  { heading: 'Crimson Text', body: 'Raleway', mood: 'elegant', desc: 'Old-style serif + thin sans' },
+];
+
+let selectedIdx = 0;
+let context = 'hero';
+
+function renderPairings() {
+  const grid = document.getElementById('pairingsGrid');
+  const text = document.getElementById('customText').value || 'The quick brown fox jumps over the lazy dog.';
+  grid.innerHTML = pairings.map((p, i) => `
+    <div class="pairing-card ${i === selectedIdx ? 'selected' : ''}" onclick="selectPairing(${i})">
+      <span class="tag tag-${p.mood}">${p.mood}</span>
+      <h3>${p.heading} + ${p.body}</h3>
+      <div style="font-family:'${p.heading}',serif;font-size:22px;font-weight:700;margin-bottom:8px;">${text.split('.')[0]}.</div>
+      <div style="font-family:'${p.body}',sans-serif;font-size:14px;line-height:1.5;color:#4b5563;">${text}</div>
+    </div>
+  `).join('');
+}
+
+function selectPairing(i) { selectedIdx = i; renderPairings(); updatePreview(); }
+
+function updatePreview() {
+  const p = pairings[selectedIdx];
+  const hSize = document.getElementById('hSize').value;
+  const bSize = document.getElementById('bSize').value;
+  const lh = (document.getElementById('lh').value / 10).toFixed(1);
+  const ls = document.getElementById('ls').value;
+  document.getElementById('hSizeVal').textContent = hSize + 'px';
+  document.getElementById('bSizeVal').textContent = bSize + 'px';
+  document.getElementById('lhVal').textContent = lh;
+  document.getElementById('lsVal').textContent = ls + 'px';
+  const text = document.getElementById('customText').value || 'The quick brown fox jumps over the lazy dog.';
+  const box = document.getElementById('previewBox');
+  const headStyle = `font-family:'${p.heading}',serif;font-size:${hSize}px;font-weight:700;letter-spacing:${ls}px;margin-bottom:16px;`;
+  const bodyStyle = `font-family:'${p.body}',sans-serif;font-size:${bSize}px;line-height:${lh};color:#4b5563;`;
+
+  if (context === 'hero') {
+    box.innerHTML = `<div style="text-align:center;padding:40px 20px;"><h2 style="${headStyle}">${text.split('.')[0]}.</h2><p style="${bodyStyle}max-width:600px;margin:0 auto;">${text}</p></div>`;
+  } else if (context === 'card') {
+    box.innerHTML = `<div style="max-width:350px;border:1px solid #e5e7eb;border-radius:12px;padding:24px;"><h3 style="${headStyle}font-size:${Math.round(hSize*0.7)}px;">Card Title</h3><p style="${bodyStyle}">${text.substring(0,120)}...</p><a style="color:#ec4899;font-weight:600;font-size:14px;text-decoration:none;margin-top:12px;display:inline-block;">Read more</a></div>`;
+  } else {
+    box.innerHTML = `<article style="max-width:640px;"><h1 style="${headStyle}">${text.split('.')[0]}.</h1><p style="${bodyStyle}margin-bottom:16px;">${text}</p><p style="${bodyStyle}">${text}</p></article>`;
+  }
+}
+
+function exportCSS() {
+  const p = pairings[selectedIdx];
+  const hSize = document.getElementById('hSize').value;
+  const bSize = document.getElementById('bSize').value;
+  const lh = (document.getElementById('lh').value / 10).toFixed(1);
+  const ls = document.getElementById('ls').value;
+  const css = `@import url('https://fonts.googleapis.com/css2?family=${p.heading.replace(/ /g,'+')}:wght@400;700&family=${p.body.replace(/ /g,'+')}:wght@400;500;600&display=swap');
+
+h1, h2, h3, h4 {
+  font-family: '${p.heading}', serif;
+  font-size: ${hSize}px;
+  font-weight: 700;
+  letter-spacing: ${ls}px;
+}
+
+body, p {
+  font-family: '${p.body}', sans-serif;
+  font-size: ${bSize}px;
+  line-height: ${lh};
+}`;
+  document.getElementById('exportOutput').value = css;
+}
+
+document.getElementById('customText').addEventListener('input', () => { renderPairings(); updatePreview(); });
+
+document.getElementById('contextTabs').addEventListener('click', e => {
+  if (e.target.classList.contains('context-tab')) {
+    document.querySelectorAll('.context-tab').forEach(t => t.classList.remove('active'));
+    e.target.classList.add('active');
+    context = e.target.dataset.ctx;
+    updatePreview();
+  }
+});
+
+renderPairings();
+updatePreview();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

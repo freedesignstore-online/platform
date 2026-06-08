@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Logo Maker - FreeDesignStore</title>
+<meta name="description" content="Create a professional logo in seconds. Type your name, pick a style, download SVG. Free, no signup.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,700&family=Space+Grotesk:wght@400;600;700&family=Playfair+Display:wght@400;700;900&family=Inter:wght@400;600;700;900&family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#fafafa;--text:#1a1a1a;--muted:#6b7280;--accent:#ec4899;--panel:#ffffff;--line:#e5e7eb;--shadow:0 1px 3px rgba(0,0,0,.08)}
+body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.back{position:fixed;top:12px;left:12px;z-index:99;color:var(--accent);text-decoration:none;font-size:.8rem;font-weight:600;opacity:.7}.back:hover{opacity:1}
+h1{text-align:center;color:var(--text);margin:20px 0 4px;font-size:1.6rem;font-weight:700}
+.sub{text-align:center;color:var(--muted);font-size:.85rem;margin-bottom:16px}
+.layout{display:flex;gap:16px;max-width:1100px;margin:0 auto;padding:0 16px;flex-wrap:wrap}
+.controls{width:320px;flex-shrink:0}
+.preview-area{flex:1;min-width:400px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.panel h3{font-size:.85rem;font-weight:700;margin-bottom:10px;color:var(--text)}
+label{font-size:.75rem;color:var(--muted);display:block;margin:8px 0 4px;font-weight:500}
+input[type=text]{width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:8px;font-size:.9rem;font-family:inherit;background:var(--bg)}
+input[type=text]:focus{outline:none;border-color:var(--accent)}
+.color-row{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.color-swatch{width:28px;height:28px;border-radius:6px;cursor:pointer;border:2px solid transparent;transition:all .15s}
+.color-swatch.active{border-color:var(--text);transform:scale(1.15)}
+.style-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0}
+.style-btn{padding:6px;border:1px solid var(--line);border-radius:6px;font-size:.68rem;font-weight:600;cursor:pointer;text-align:center;background:var(--panel);transition:all .15s;font-family:inherit}
+.style-btn:hover{border-color:var(--accent)}
+.style-btn.active{border-color:var(--accent);background:rgba(236,72,153,.05)}
+.font-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:6px 0}
+.font-btn{padding:8px;border:1px solid var(--line);border-radius:6px;cursor:pointer;text-align:center;background:var(--panel);transition:all .15s;font-size:.9rem}
+.font-btn:hover{border-color:var(--accent)}
+.font-btn.active{border-color:var(--accent);background:rgba(236,72,153,.05)}
+.preview-canvas{background:white;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;min-height:300px;position:relative}
+.logo-display{padding:40px;text-align:center}
+.btn-row{display:flex;gap:8px;margin-top:12px;justify-content:center}
+.btn{padding:8px 20px;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;border:none;transition:all .15s}
+.btn-primary{background:var(--accent);color:white}.btn-primary:hover{filter:brightness(1.1)}
+.btn-secondary{background:var(--panel);color:var(--text);border:1px solid var(--line)}.btn-secondary:hover{border-color:var(--accent)}
+.size-pills{display:flex;gap:4px;margin:8px 0}
+.size-pill{padding:4px 10px;border:1px solid var(--line);border-radius:4px;font-size:.68rem;cursor:pointer;background:var(--panel)}.size-pill.active{background:var(--accent);color:white;border-color:var(--accent)}
+.variations{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.variation{background:white;border:1px solid var(--line);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:all .15s}
+.variation:hover{border-color:var(--accent);transform:translateY(-1px)}
+.variation.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(236,72,153,.2)}
+footer{text-align:center;padding:24px;font-size:.7rem;color:var(--muted);margin-top:20px}
+footer a{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<h1>Logo Maker</h1>
+<p class="sub">Type your brand name, pick a style, download SVG. Free, no signup required.</p>
+
+<div class="layout">
+<div class="controls">
+<div class="panel">
+<h3>Brand Name</h3>
+<input type="text" id="brandName" value="Acme" placeholder="Your brand name">
+<label>Tagline (optional)</label>
+<input type="text" id="tagline" value="" placeholder="Your tagline here">
+</div>
+
+<div class="panel">
+<h3>Font</h3>
+<div class="font-grid" id="fontGrid"></div>
+</div>
+
+<div class="panel">
+<h3>Style</h3>
+<div class="style-grid" id="styleGrid"></div>
+</div>
+
+<div class="panel">
+<h3>Color</h3>
+<div class="color-row" id="colorRow"></div>
+<label>Custom</label>
+<input type="text" id="customColor" placeholder="#ec4899" style="width:100px">
+</div>
+
+<div class="panel">
+<h3>Icon Position</h3>
+<div class="style-grid" id="layoutGrid"></div>
+</div>
+</div>
+
+<div class="preview-area">
+<div class="panel preview-canvas" id="preview"></div>
+<div class="btn-row">
+<button class="btn btn-primary" id="downloadSvg">Download SVG</button>
+<button class="btn btn-secondary" id="downloadPng">Download PNG</button>
+<button class="btn btn-secondary" id="randomize">Randomize</button>
+</div>
+<h3 style="margin-top:16px;font-size:.85rem">Variations</h3>
+<div class="variations" id="variations"></div>
+</div>
+</div>
+
+<footer>Built with <a href="/">FreeDesignStore</a> | <a href="https://openfrontier.pages.dev">Open Frontier</a></footer>
+
+<script>
+const FONTS = [
+  {name:'Manrope',family:'Manrope',weight:'800',style:'modern'},
+  {name:'Fraunces',family:'Fraunces',weight:'700',style:'elegant'},
+  {name:'Space Grotesk',family:'Space Grotesk',weight:'700',style:'tech'},
+  {name:'Playfair',family:'Playfair Display',weight:'900',style:'luxury'},
+  {name:'Inter',family:'Inter',weight:'900',style:'clean'},
+  {name:'Poppins',family:'Poppins',weight:'800',style:'friendly'},
+];
+
+const STYLES = [
+  {id:'minimal',label:'Minimal'},
+  {id:'bold',label:'Bold'},
+  {id:'outlined',label:'Outlined'},
+  {id:'rounded',label:'Rounded'},
+  {id:'uppercase',label:'UPPERCASE'},
+  {id:'monogram',label:'Monogram'},
+];
+
+const LAYOUTS = [
+  {id:'text-only',label:'Text Only'},
+  {id:'icon-left',label:'Icon Left'},
+  {id:'icon-top',label:'Icon Top'},
+];
+
+const COLORS = ['#ec4899','#8b5cf6','#3b82f6','#10b981','#f59e0b','#ef4444','#06b6d4','#1a1a1a','#6366f1','#f97316'];
+
+const ICONS = ['◆','●','▲','★','◎','⬡','◈','▣','⊕','◇'];
+
+let state = {font:0,style:0,color:'#ec4899',layout:0,icon:0};
+
+function buildUI(){
+  // Fonts
+  const fg=document.getElementById('fontGrid');
+  fg.innerHTML=FONTS.map((f,i)=>`<div class="font-btn${i===state.font?' active':''}" data-i="${i}" style="font-family:'${f.family}';font-weight:${f.weight}">${f.name}</div>`).join('');
+  fg.onclick=e=>{const i=e.target.dataset.i;if(i!=null){state.font=+i;render();}};
+
+  // Styles
+  const sg=document.getElementById('styleGrid');
+  sg.innerHTML=STYLES.map((s,i)=>`<div class="style-btn${i===state.style?' active':''}" data-i="${i}">${s.label}</div>`).join('');
+  sg.onclick=e=>{const i=e.target.dataset.i;if(i!=null){state.style=+i;render();}};
+
+  // Layouts
+  const lg=document.getElementById('layoutGrid');
+  lg.innerHTML=LAYOUTS.map((l,i)=>`<div class="style-btn${i===state.layout?' active':''}" data-i="${i}">${l.label}</div>`).join('');
+  lg.onclick=e=>{const i=e.target.dataset.i;if(i!=null){state.layout=+i;render();}};
+
+  // Colors
+  const cr=document.getElementById('colorRow');
+  cr.innerHTML=COLORS.map(c=>`<div class="color-swatch${c===state.color?' active':''}" style="background:${c}" data-c="${c}"></div>`).join('');
+  cr.onclick=e=>{const c=e.target.dataset.c;if(c){state.color=c;render();}};
+}
+
+function render(){
+  buildUI();
+  const name=document.getElementById('brandName').value||'Acme';
+  const tagline=document.getElementById('tagline').value;
+  const font=FONTS[state.font];
+  const style=STYLES[state.style];
+  const layout=LAYOUTS[state.layout];
+  const color=state.color;
+  const icon=ICONS[state.icon];
+
+  let logoHTML='';
+  let fontSize='2.8rem';
+  let textTransform='none';
+  let letterSpacing='0';
+  let textStyle='';
+
+  if(style.id==='uppercase'){textTransform='uppercase';letterSpacing='.15em';fontSize='2.2rem';}
+  if(style.id==='bold'){fontSize='3.2rem';}
+  if(style.id==='outlined'){textStyle=`-webkit-text-stroke:2px ${color};color:transparent;`;}
+  if(style.id==='rounded'){textStyle+=`background:${color};color:white;padding:8px 24px;border-radius:99px;display:inline-block;`;}
+  if(style.id==='monogram'){
+    const initials=name.split(' ').map(w=>w[0]).join('').slice(0,2);
+    logoHTML=`<div style="width:80px;height:80px;background:${color};border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'${font.family}';font-weight:${font.weight};font-size:2rem;color:white">${initials}</div>`;
+    if(tagline)logoHTML+=`<div style="margin-top:8px;font-size:.75rem;color:#6b7280">${tagline}</div>`;
+  }
+
+  if(style.id!=='monogram'){
+    const iconEl=layout.id!=='text-only'?`<div style="font-size:1.8rem;color:${color}">${icon}</div>`:'';
+    const textEl=`<div style="font-family:'${font.family}';font-weight:${font.weight};font-size:${fontSize};text-transform:${textTransform};letter-spacing:${letterSpacing};color:${style.id==='outlined'||style.id==='rounded'?'':color};${textStyle}">${name}</div>`;
+    const tagEl=tagline?`<div style="font-size:.8rem;color:#6b7280;margin-top:4px;letter-spacing:.05em">${tagline}</div>`:'';
+
+    if(layout.id==='icon-left'){
+      logoHTML=`<div style="display:flex;align-items:center;gap:12px">${iconEl}${textEl}</div>${tagEl}`;
+    }else if(layout.id==='icon-top'){
+      logoHTML=`${iconEl}<div style="margin-top:8px">${textEl}</div>${tagEl}`;
+    }else{
+      logoHTML=`${textEl}${tagEl}`;
+    }
+  }
+
+  document.getElementById('preview').innerHTML=`<div class="logo-display">${logoHTML}</div>`;
+
+  // Render variations
+  const vars=document.getElementById('variations');
+  const varConfigs=[
+    {font:(state.font+1)%FONTS.length,color:COLORS[(COLORS.indexOf(color)+1)%COLORS.length]},
+    {font:(state.font+2)%FONTS.length,color:COLORS[(COLORS.indexOf(color)+3)%COLORS.length]},
+    {font:state.font,style:(state.style+1)%STYLES.length},
+  ];
+  vars.innerHTML=varConfigs.map((vc,i)=>{
+    const f=FONTS[vc.font||state.font];
+    const c=vc.color||color;
+    const s=STYLES[vc.style||state.style];
+    let display=name;
+    if(s.id==='uppercase')display=name.toUpperCase();
+    return`<div class="variation" data-vi="${i}"><div style="font-family:'${f.family}';font-weight:${f.weight};font-size:1.2rem;color:${c}">${display}</div></div>`;
+  }).join('');
+}
+
+function generateSVG(){
+  const name=document.getElementById('brandName').value||'Acme';
+  const tagline=document.getElementById('tagline').value;
+  const font=FONTS[state.font];
+  const style=STYLES[state.style];
+  const color=state.color;
+  const layout=LAYOUTS[state.layout];
+  const icon=ICONS[state.icon];
+
+  let textTransform=style.id==='uppercase'?name.toUpperCase():name;
+  let fontSize=48;
+  if(style.id==='bold')fontSize=56;
+  if(style.id==='uppercase')fontSize=40;
+
+  const width=Math.max(300,textTransform.length*fontSize*0.6+80);
+  const height=tagline?140:100;
+
+  let svgContent='';
+  let textY=height/2+(tagline?-10:0);
+  let textX=width/2;
+
+  if(layout.id==='icon-left'){
+    textX=width/2+20;
+    svgContent+=`<text x="40" y="${textY+8}" font-size="32" fill="${color}" text-anchor="middle">${icon}</text>`;
+  }else if(layout.id==='icon-top'){
+    svgContent+=`<text x="${width/2}" y="35" font-size="28" fill="${color}" text-anchor="middle">${icon}</text>`;
+    textY+=20;
+  }
+
+  if(style.id==='outlined'){
+    svgContent+=`<text x="${textX}" y="${textY}" font-family="${font.family}" font-weight="${font.weight}" font-size="${fontSize}" fill="none" stroke="${color}" stroke-width="2" text-anchor="middle">${textTransform}</text>`;
+  }else if(style.id==='rounded'){
+    const tw=textTransform.length*fontSize*0.55;
+    svgContent+=`<rect x="${textX-tw/2-20}" y="${textY-fontSize/2-10}" width="${tw+40}" height="${fontSize+20}" rx="${fontSize}" fill="${color}"/>`;
+    svgContent+=`<text x="${textX}" y="${textY+fontSize*0.35}" font-family="${font.family}" font-weight="${font.weight}" font-size="${fontSize*0.7}" fill="white" text-anchor="middle">${textTransform}</text>`;
+  }else if(style.id==='monogram'){
+    const initials=name.split(' ').map(w=>w[0]).join('').slice(0,2);
+    svgContent+=`<circle cx="${width/2}" cy="${height/2-10}" r="40" fill="${color}"/>`;
+    svgContent+=`<text x="${width/2}" y="${height/2+5}" font-family="${font.family}" font-weight="${font.weight}" font-size="32" fill="white" text-anchor="middle">${initials}</text>`;
+  }else{
+    svgContent+=`<text x="${textX}" y="${textY}" font-family="${font.family}" font-weight="${font.weight}" font-size="${fontSize}" fill="${color}" text-anchor="middle">${textTransform}</text>`;
+  }
+
+  if(tagline&&style.id!=='monogram'){
+    svgContent+=`<text x="${width/2}" y="${textY+30}" font-family="Manrope" font-size="14" fill="#6b7280" text-anchor="middle">${tagline}</text>`;
+  }
+
+  return`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">${svgContent}</svg>`;
+}
+
+document.getElementById('downloadSvg').onclick=()=>{
+  const svg=generateSVG();
+  const blob=new Blob([svg],{type:'image/svg+xml'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=(document.getElementById('brandName').value||'logo')+'.svg';
+  a.click();
+};
+
+document.getElementById('downloadPng').onclick=()=>{
+  const svg=generateSVG();
+  const canvas=document.createElement('canvas');
+  canvas.width=800;canvas.height=400;
+  const ctx=canvas.getContext('2d');
+  const img=new Image();
+  img.onload=()=>{ctx.drawImage(img,0,0,800,400);
+    const a=document.createElement('a');a.href=canvas.toDataURL('image/png');
+    a.download=(document.getElementById('brandName').value||'logo')+'.png';a.click();};
+  img.src='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg)));
+};
+
+document.getElementById('randomize').onclick=()=>{
+  state.font=Math.random()*FONTS.length|0;
+  state.style=Math.random()*STYLES.length|0;
+  state.color=COLORS[Math.random()*COLORS.length|0];
+  state.layout=Math.random()*LAYOUTS.length|0;
+  state.icon=Math.random()*ICONS.length|0;
+  render();
+};
+
+document.getElementById('brandName').oninput=render;
+document.getElementById('tagline').oninput=render;
+document.getElementById('customColor').oninput=e=>{if(/^#[0-9a-f]{6}$/i.test(e.target.value)){state.color=e.target.value;render();}};
+
+render();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

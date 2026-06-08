@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gradient & Background Maker - FreeDesignStore</title>
+<link rel="icon" href="/favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a { color: #ec4899; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; font-size: 14px; color: #6b7280; }
+.back:hover { color: #ec4899; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.subtitle { color: #6b7280; margin-bottom: 24px; font-size: 15px; }
+.container { max-width: 1100px; margin: 0 auto; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
+.preview-area { width: 100%; height: 300px; border-radius: 12px; margin-bottom: 20px; position: relative; cursor: pointer; transition: height .3s; }
+.preview-area.fullscreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1000; border-radius: 0; margin: 0; }
+.fs-hint { position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,.5); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 11px; }
+.controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 700px) { .controls { grid-template-columns: 1fr; } }
+label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 6px; }
+select, input[type="number"] { width: 100%; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+input[type="range"] { width: 100%; accent-color: #ec4899; }
+.stops { display: flex; flex-direction: column; gap: 8px; }
+.stop-row { display: flex; gap: 8px; align-items: center; }
+.stop-row input[type="color"] { width: 40px; height: 36px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 2px; cursor: pointer; }
+.stop-row input[type="number"] { width: 70px; }
+.btn { padding: 8px 16px; border-radius: 8px; border: none; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-primary:hover { background: #db2777; }
+.btn-secondary { background: #fff; border: 1px solid #e5e7eb; color: #1a1a1a; }
+.btn-secondary:hover { border-color: #ec4899; }
+.btn-sm { padding: 6px 10px; font-size: 12px; }
+.btn-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+.actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+.code-block { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 13px; word-break: break-all; margin-top: 12px; cursor: pointer; position: relative; }
+.code-block:hover::after { content: 'Click to copy'; position: absolute; top: -24px; right: 0; font-size: 11px; color: #ec4899; font-family: 'Manrope', system-ui; }
+.presets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; margin-top: 12px; }
+.preset-swatch { width: 100%; aspect-ratio: 1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: border-color .15s; }
+.preset-swatch:hover { border-color: #ec4899; }
+h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+.mesh-controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+.mesh-controls input[type="color"] { width: 100%; height: 40px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 2px; cursor: pointer; }
+.tab-bar { display: flex; gap: 4px; margin-bottom: 16px; }
+.tab { padding: 8px 16px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 500; }
+.tab.active { background: #ec4899; color: #fff; border-color: #ec4899; }
+.section { display: none; }
+.section.active { display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="back">&larr; Back to FreeDesignStore</a>
+  <h1>Gradient & Background Maker</h1>
+  <p class="subtitle">Create beautiful gradients and mesh backgrounds. Copy CSS or download as PNG.</p>
+
+  <div class="panel">
+    <div class="preview-area" id="preview">
+      <span class="fs-hint">Click for fullscreen</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="tab-bar">
+      <button class="tab active" data-tab="gradient">Gradient</button>
+      <button class="tab" data-tab="mesh">Mesh</button>
+      <button class="tab" data-tab="presets">Presets</button>
+    </div>
+
+    <div class="section active" id="sec-gradient">
+      <div class="controls">
+        <div>
+          <label>Type</label>
+          <select id="gradType">
+            <option value="linear">Linear</option>
+            <option value="radial">Radial</option>
+            <option value="conic">Conic</option>
+          </select>
+
+          <label style="margin-top:14px">Angle (linear/conic)</label>
+          <input type="range" id="angle" min="0" max="360" value="135">
+          <span id="angleVal" style="font-size:12px;color:#6b7280">135deg</span>
+        </div>
+        <div>
+          <label>Color Stops</label>
+          <div class="stops" id="stops"></div>
+          <button class="btn btn-secondary btn-sm" id="addStop" style="margin-top:8px">+ Add Stop</button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="copyCSS">Copy CSS</button>
+        <button class="btn btn-secondary" id="downloadPNG">Download PNG</button>
+        <button class="btn btn-secondary" id="toggleFS">Fullscreen</button>
+      </div>
+      <div class="code-block" id="codeBlock"></div>
+    </div>
+
+    <div class="section" id="sec-mesh">
+      <h3>Mesh Gradient (4 color blobs)</h3>
+      <div class="mesh-controls" id="meshColors">
+        <input type="color" value="#ec4899" data-i="0">
+        <input type="color" value="#8b5cf6" data-i="1">
+        <input type="color" value="#06b6d4" data-i="2">
+        <input type="color" value="#f97316" data-i="3">
+      </div>
+      <div class="actions" style="margin-top:14px">
+        <button class="btn btn-primary" id="applyMesh">Apply Mesh</button>
+        <button class="btn btn-secondary" id="randomMesh">Randomize</button>
+      </div>
+    </div>
+
+    <div class="section" id="sec-presets">
+      <h3>Preset Gradients</h3>
+      <div class="presets-grid" id="presetsGrid"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const preview = document.getElementById('preview');
+const gradType = document.getElementById('gradType');
+const angleInput = document.getElementById('angle');
+const angleVal = document.getElementById('angleVal');
+const stopsEl = document.getElementById('stops');
+const addStopBtn = document.getElementById('addStop');
+const codeBlock = document.getElementById('codeBlock');
+const copyBtn = document.getElementById('copyCSS');
+const downloadBtn = document.getElementById('downloadPNG');
+const toggleFSBtn = document.getElementById('toggleFS');
+const tabs = document.querySelectorAll('.tab');
+const sections = document.querySelectorAll('.section');
+
+let stops = [
+  { color: '#ec4899', pos: 0 },
+  { color: '#8b5cf6', pos: 50 },
+  { color: '#06b6d4', pos: 100 }
+];
+let currentCSS = '';
+let isMesh = false;
+
+const presets = [
+  ['#667eea','#764ba2'],['#f093fb','#f5576c'],['#4facfe','#00f2fe'],['#43e97b','#38f9d7'],
+  ['#fa709a','#fee140'],['#a18cd1','#fbc2eb'],['#fccb90','#d57eeb'],['#e0c3fc','#8ec5fc'],
+  ['#f5576c','#ff9a9e'],['#667eea','#06b6d4'],['#ff9a9e','#fecfef'],['#a1c4fd','#c2e9fb'],
+  ['#d4fc79','#96e6a1'],['#84fab0','#8fd3f4'],['#cfd9df','#e2ebf0'],['#ffecd2','#fcb69f'],
+  ['#ff9966','#ff5e62'],['#00c6ff','#0072ff'],['#f857a6','#ff5858'],['#ffe259','#ffa751'],
+  ['#c471f5','#fa71cd'],['#48c6ef','#6f86d6'],['#feada6','#f5efef'],['#accbee','#e7f0fd']
+];
+
+function renderStops() {
+  stopsEl.innerHTML = stops.map((s, i) => `
+    <div class="stop-row">
+      <input type="color" value="${s.color}" data-i="${i}" class="stop-color">
+      <input type="number" value="${s.pos}" min="0" max="100" data-i="${i}" class="stop-pos">
+      <span style="font-size:11px;color:#6b7280">%</span>
+      ${stops.length > 2 ? `<button class="btn btn-danger btn-sm stop-rm" data-i="${i}">x</button>` : ''}
+    </div>
+  `).join('');
+}
+
+function getGradientCSS() {
+  const type = gradType.value;
+  const angle = angleInput.value;
+  const colorStops = stops.map(s => `${s.color} ${s.pos}%`).join(', ');
+  if (type === 'linear') return `linear-gradient(${angle}deg, ${colorStops})`;
+  if (type === 'radial') return `radial-gradient(circle, ${colorStops})`;
+  return `conic-gradient(from ${angle}deg, ${colorStops})`;
+}
+
+function update() {
+  if (isMesh) return;
+  currentCSS = getGradientCSS();
+  preview.style.background = currentCSS;
+  codeBlock.textContent = `background: ${currentCSS};`;
+}
+
+function applyMesh() {
+  isMesh = true;
+  const colors = [...document.querySelectorAll('#meshColors input')].map(i => i.value);
+  const css = `background: ${colors[0]};
+background-image:
+  radial-gradient(at 20% 30%, ${colors[0]}88 0px, transparent 50%),
+  radial-gradient(at 80% 20%, ${colors[1]}88 0px, transparent 50%),
+  radial-gradient(at 70% 80%, ${colors[2]}88 0px, transparent 50%),
+  radial-gradient(at 20% 80%, ${colors[3]}88 0px, transparent 50%);
+filter: blur(0px);`;
+  preview.style.cssText = `width:100%;height:300px;border-radius:12px;margin-bottom:20px;position:relative;cursor:pointer;${css}`;
+  currentCSS = css;
+  codeBlock.textContent = css;
+}
+
+stopsEl.addEventListener('input', e => {
+  const i = parseInt(e.target.dataset.i);
+  if (e.target.classList.contains('stop-color')) stops[i].color = e.target.value;
+  if (e.target.classList.contains('stop-pos')) stops[i].pos = parseInt(e.target.value);
+  isMesh = false;
+  update();
+});
+
+stopsEl.addEventListener('click', e => {
+  if (e.target.classList.contains('stop-rm')) {
+    stops.splice(parseInt(e.target.dataset.i), 1);
+    renderStops();
+    update();
+  }
+});
+
+addStopBtn.addEventListener('click', () => {
+  stops.push({ color: '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0'), pos: 50 });
+  renderStops();
+  isMesh = false;
+  update();
+});
+
+gradType.addEventListener('change', () => { isMesh = false; update(); });
+angleInput.addEventListener('input', () => { angleVal.textContent = angleInput.value + 'deg'; isMesh = false; update(); });
+
+copyBtn.addEventListener('click', () => {
+  navigator.clipboard.writeText(codeBlock.textContent);
+  copyBtn.textContent = 'Copied!';
+  setTimeout(() => copyBtn.textContent = 'Copy CSS', 1500);
+});
+
+codeBlock.addEventListener('click', () => {
+  navigator.clipboard.writeText(codeBlock.textContent);
+});
+
+downloadBtn.addEventListener('click', () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1920; canvas.height = 1080;
+  const ctx = canvas.getContext('2d');
+  if (isMesh) {
+    const colors = [...document.querySelectorAll('#meshColors input')].map(i => i.value);
+    ctx.fillStyle = colors[0];
+    ctx.fillRect(0, 0, 1920, 1080);
+    const blobs = [[384,324,colors[0]],[1536,216,colors[1]],[1344,864,colors[2]],[384,864,colors[3]]];
+    blobs.forEach(([x,y,c]) => {
+      const g = ctx.createRadialGradient(x, y, 0, x, y, 500);
+      g.addColorStop(0, c + '88');
+      g.addColorStop(1, 'transparent');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 1920, 1080);
+    });
+  } else {
+    const type = gradType.value;
+    const angle = parseInt(angleInput.value);
+    let grad;
+    if (type === 'linear') {
+      const rad = (angle - 90) * Math.PI / 180;
+      const cx = 960, cy = 540, len = 1100;
+      grad = ctx.createLinearGradient(cx - Math.cos(rad)*len, cy - Math.sin(rad)*len, cx + Math.cos(rad)*len, cy + Math.sin(rad)*len);
+    } else if (type === 'radial') {
+      grad = ctx.createRadialGradient(960, 540, 0, 960, 540, 960);
+    } else {
+      grad = ctx.createConicGradient(angle * Math.PI / 180, 960, 540);
+    }
+    stops.forEach(s => grad.addColorStop(s.pos / 100, s.color));
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 1920, 1080);
+  }
+  const link = document.createElement('a');
+  link.download = 'gradient.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+
+preview.addEventListener('click', () => preview.classList.toggle('fullscreen'));
+toggleFSBtn.addEventListener('click', () => preview.classList.toggle('fullscreen'));
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    sections.forEach(s => s.classList.remove('active'));
+    document.getElementById('sec-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+document.getElementById('applyMesh').addEventListener('click', applyMesh);
+document.getElementById('randomMesh').addEventListener('click', () => {
+  document.querySelectorAll('#meshColors input').forEach(inp => {
+    inp.value = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0');
+  });
+  applyMesh();
+});
+
+// Presets
+const presetsGrid = document.getElementById('presetsGrid');
+presets.forEach(p => {
+  const div = document.createElement('div');
+  div.className = 'preset-swatch';
+  div.style.background = `linear-gradient(135deg, ${p[0]}, ${p[1]})`;
+  div.addEventListener('click', () => {
+    stops = [{ color: p[0], pos: 0 }, { color: p[1], pos: 100 }];
+    renderStops();
+    isMesh = false;
+    update();
+    tabs.forEach(t => t.classList.remove('active'));
+    tabs[0].classList.add('active');
+    sections.forEach(s => s.classList.remove('active'));
+    sections[0].classList.add('active');
+  });
+  presetsGrid.appendChild(div);
+});
+
+document.querySelectorAll('#meshColors input').forEach(inp => inp.addEventListener('input', applyMesh));
+
+renderStops();
+update();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>
