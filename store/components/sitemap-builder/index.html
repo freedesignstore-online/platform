@@ -108,7 +108,13 @@ select.tb-select{padding:6px 10px;border:1px solid var(--line);border-radius:var
   </div>
   <div class="sidebar" id="sidebar">
     <h3>Page Details</h3>
-    <div class="no-sel" id="noSel">Click a page node to edit</div>
+    <div class="no-sel" id="noSel">
+      <strong>How to use:</strong><br><br>
+      Click any node to edit its details<br><br>
+      Click the <strong style="color:var(--accent)">+</strong> button on a node to add a child page<br><br>
+      Drag nodes to rearrange the tree<br><br>
+      Use Templates to start with a pre-built sitemap
+    </div>
     <div id="editPanel" style="display:none">
       <div class="edit-field"><label>Page Name</label><input type="text" id="editName"></div>
       <div class="edit-field"><label>URL Path</label><input type="text" id="editUrl" placeholder="/about"></div>
@@ -144,7 +150,15 @@ function toast(msg) { const t = document.getElementById('toast'); t.textContent 
 function save() { localStorage.setItem(LS_KEY, JSON.stringify({ tree, nextId })); updateSaveList(); }
 
 function defaultTree() {
-  return { id: genId(), name: 'Home', url: '/', desc: '', status: 'planned', children: [] };
+  return { id: genId(), name: 'Home', url: '/', desc: 'Your website root', status: 'live', children: [
+    { id: genId(), name: 'About', url: '/about', desc: '', status: 'live', children: [] },
+    { id: genId(), name: 'Products', url: '/products', desc: '', status: 'planned', children: [
+      { id: genId(), name: 'Widget', url: '/products/widget', desc: '', status: 'planned', children: [] },
+      { id: genId(), name: 'Gadget', url: '/products/gadget', desc: '', status: 'planned', children: [] },
+    ]},
+    { id: genId(), name: 'Blog', url: '/blog', desc: '', status: 'planned', children: [] },
+    { id: genId(), name: 'Contact', url: '/contact', desc: '', status: 'planned', children: [] },
+  ]};
 }
 
 function findNode(node, id) {
