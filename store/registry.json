@@ -242,6 +242,42 @@
       "iconBg": "#3b82f6",
       "category": "images",
       "section": "images"
+    },
+    {
+      "id": "tailwind-theme",
+      "name": "Tailwind Theme Builder",
+      "description": "Visual editor for tailwind.config.js. Colors with 50-950 scales, typography, spacing, shadows, breakpoints. Live preview.",
+      "icon": "🎨",
+      "iconBg": "#06b6d4",
+      "category": "brand",
+      "section": "brand"
+    },
+    {
+      "id": "css-animation",
+      "name": "CSS Animation Studio",
+      "description": "Visual keyframe editor. Timeline, cubic-bezier curves, 20 presets. Preview + export @keyframes CSS.",
+      "icon": "🎬",
+      "iconBg": "#8b5cf6",
+      "category": "brand",
+      "section": "brand"
+    },
+    {
+      "id": "css-effects",
+      "name": "CSS Effects Generator",
+      "description": "Glassmorphism, neumorphism, multi-layer shadows, animated gradients. All-in-one with live preview.",
+      "icon": "✨",
+      "iconBg": "#ec4899",
+      "category": "brand",
+      "section": "brand"
+    },
+    {
+      "id": "noise-texture",
+      "name": "Noise & Texture Generator",
+      "description": "Perlin noise, film grain, paper, marble, fabric textures. Tileable. Download PNG/SVG/CSS.",
+      "icon": "🌫️",
+      "iconBg": "#6b7280",
+      "category": "images",
+      "section": "images"
     }
   ]
 }

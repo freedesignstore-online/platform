@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Noise & Texture Generator - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; padding-bottom: 80px; }
+a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
+a.back:hover { text-decoration: underline; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+p.subtitle { color: #6b7280; margin-bottom: 24px; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
+h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 6px; }
+select, input[type="number"] { width: 100%; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+input[type="range"] { width: 100%; accent-color: #ec4899; }
+input[type="color"] { width: 48px; height: 36px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 2px; cursor: pointer; }
+.btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 13px; transition: opacity .2s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
+.layout { display: grid; grid-template-columns: 300px 1fr; gap: 24px; }
+@media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+.field { margin-bottom: 14px; }
+.field-row { display: flex; gap: 10px; align-items: center; }
+.range-val { font-size: 12px; color: #6b7280; min-width: 40px; text-align: right; }
+.preview-area { border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; position: relative; background: #000; }
+.preview-area canvas { display: block; width: 100%; image-rendering: pixelated; }
+.tile-preview { display: grid; grid-template-columns: 1fr 1fr; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; margin-top: 16px; }
+.tile-preview canvas { display: block; width: 100%; image-rendering: auto; }
+.overlay-area { margin-top: 16px; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; position: relative; display: none; }
+.overlay-area canvas { display: block; width: 100%; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.favs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; margin-top: 12px; }
+.fav-item { aspect-ratio: 1; border-radius: 8px; border: 1px solid #e5e7eb; cursor: pointer; overflow: hidden; position: relative; transition: border-color .15s; }
+.fav-item:hover { border-color: #ec4899; }
+.fav-item canvas { width: 100%; height: 100%; }
+.fav-item .fav-remove { position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; background: rgba(0,0,0,.6); color: #fff; border: none; border-radius: 50%; font-size: 11px; cursor: pointer; display: none; line-height: 18px; text-align: center; }
+.fav-item:hover .fav-remove { display: block; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 100; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<h1>Noise & Texture Generator</h1>
+<p class="subtitle">Generate seamless noise and textures. Export PNG, CSS background, or SVG filter.</p>
+
+<div class="layout">
+<div>
+<div class="panel">
+<h3>Texture Type</h3>
+<div class="field">
+<select id="noiseType">
+<option value="perlin">Perlin Noise</option>
+<option value="simplex">Simplex Noise</option>
+<option value="grain">Film Grain</option>
+<option value="paper">Paper Texture</option>
+<option value="fabric">Fabric / Canvas</option>
+<option value="concrete">Concrete / Stone</option>
+<option value="wood">Wood Grain</option>
+<option value="marble">Marble</option>
+</select>
+</div>
+<h3>Settings</h3>
+<div class="field">
+<label>Scale <span class="range-val" id="scaleVal">50</span></label>
+<input type="range" id="scale" min="5" max="200" value="50">
+</div>
+<div class="field">
+<label>Intensity <span class="range-val" id="intensityVal">100%</span></label>
+<input type="range" id="intensity" min="10" max="100" value="100">
+</div>
+<div class="field">
+<label>Contrast <span class="range-val" id="contrastVal">100%</span></label>
+<input type="range" id="contrast" min="50" max="200" value="100">
+</div>
+<div class="field">
+<label>Color Mode</label>
+<select id="colorMode">
+<option value="mono">Monochrome</option>
+<option value="twocolor">Two-Color</option>
+</select>
+</div>
+<div class="field-row" id="colorFields">
+<div>
+<label>Color 1</label>
+<input type="color" id="color1" value="#000000">
+</div>
+<div id="color2Field" style="display:none;">
+<label>Color 2</label>
+<input type="color" id="color2" value="#ffffff">
+</div>
+</div>
+<div class="field">
+<label>Canvas Size</label>
+<select id="canvasSize">
+<option value="256">256 x 256</option>
+<option value="512" selected>512 x 512</option>
+<option value="1024">1024 x 1024</option>
+<option value="2048">2048 x 2048</option>
+</select>
+</div>
+<div class="field">
+<label>Seed</label>
+<div class="field-row">
+<input type="number" id="seed" value="42" min="0" max="99999" style="flex:1;">
+<button class="btn btn-secondary" id="randomSeed" style="white-space:nowrap;">Randomize</button>
+</div>
+</div>
+<div class="actions">
+<button class="btn btn-primary" id="generate">Generate</button>
+</div>
+</div>
+<div class="panel">
+<h3>Overlay on Photo</h3>
+<input type="file" id="overlayFile" accept="image/*" style="font-size:13px;">
+</div>
+<div class="panel">
+<h3>Export</h3>
+<div class="actions">
+<button class="btn btn-primary" id="dlPng">Download PNG</button>
+<button class="btn btn-secondary" id="copyCSS">Copy CSS (base64)</button>
+<button class="btn btn-secondary" id="copySVG">Copy SVG Filter</button>
+<button class="btn btn-secondary" id="saveFav">Save Favorite</button>
+</div>
+</div>
+<div class="panel" id="favsPanel" style="display:none;">
+<h3>Favorites</h3>
+<div class="favs-grid" id="favsGrid"></div>
+</div>
+</div>
+<div>
+<div class="panel">
+<h3>Preview</h3>
+<div class="preview-area"><canvas id="mainCanvas" width="512" height="512"></canvas></div>
+<h3 style="margin-top:16px;">2x2 Tile Preview</h3>
+<div class="tile-preview">
+<canvas id="tile0" width="256" height="256"></canvas>
+<canvas id="tile1" width="256" height="256"></canvas>
+<canvas id="tile2" width="256" height="256"></canvas>
+<canvas id="tile3" width="256" height="256"></canvas>
+</div>
+<div class="overlay-area" id="overlayArea"><canvas id="overlayCanvas" width="512" height="512"></canvas></div>
+</div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+
+// Seeded PRNG (xorshift32)
+function createRng(seed) {
+  let s = seed | 0 || 1;
+  return function() { s ^= s << 13; s ^= s >> 17; s ^= s << 5; return ((s >>> 0) / 4294967296); };
+}
+
+// Perlin noise implementation
+function createPerlinNoise(seed) {
+  const rng = createRng(seed);
+  const perm = new Uint8Array(512);
+  const p = Array.from({ length: 256 }, (_, i) => i);
+  for (let i = 255; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [p[i], p[j]] = [p[j], p[i]]; }
+  for (let i = 0; i < 512; i++) perm[i] = p[i & 255];
+
+  const grads = [[1,1],[-1,1],[1,-1],[-1,-1],[1,0],[-1,0],[0,1],[0,-1]];
+  function dot(gi, x, y) { const g = grads[gi % 8]; return g[0] * x + g[1] * y; }
+  function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+  function lerp(a, b, t) { return a + t * (b - a); }
+
+  return function(x, y) {
+    const xi = Math.floor(x) & 255, yi = Math.floor(y) & 255;
+    const xf = x - Math.floor(x), yf = y - Math.floor(y);
+    const u = fade(xf), v = fade(yf);
+    const aa = perm[perm[xi] + yi], ab = perm[perm[xi] + yi + 1];
+    const ba = perm[perm[xi + 1] + yi], bb = perm[perm[xi + 1] + yi + 1];
+    return lerp(lerp(dot(aa, xf, yf), dot(ba, xf - 1, yf), u), lerp(dot(ab, xf, yf - 1), dot(bb, xf - 1, yf - 1), u), v);
+  };
+}
+
+// Simplex 2D noise
+function createSimplexNoise(seed) {
+  const rng = createRng(seed);
+  const perm = new Uint8Array(512);
+  const p = Array.from({ length: 256 }, (_, i) => i);
+  for (let i = 255; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [p[i], p[j]] = [p[j], p[i]]; }
+  for (let i = 0; i < 512; i++) perm[i] = p[i & 255];
+
+  const G2 = (3 - Math.sqrt(3)) / 6, F2 = (Math.sqrt(3) - 1) / 2;
+  const grad = [[1,1],[-1,1],[1,-1],[-1,-1],[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]];
+
+  return function(x, y) {
+    const s = (x + y) * F2;
+    const i = Math.floor(x + s), j = Math.floor(y + s);
+    const t = (i + j) * G2;
+    const x0 = x - (i - t), y0 = y - (j - t);
+    const i1 = x0 > y0 ? 1 : 0, j1 = x0 > y0 ? 0 : 1;
+    const x1 = x0 - i1 + G2, y1 = y0 - j1 + G2;
+    const x2 = x0 - 1 + 2 * G2, y2 = y0 - 1 + 2 * G2;
+    const ii = i & 255, jj = j & 255;
+
+    let n0 = 0, n1 = 0, n2 = 0;
+    let t0 = 0.5 - x0 * x0 - y0 * y0;
+    if (t0 > 0) { t0 *= t0; const gi = perm[ii + perm[jj]] % 12; n0 = t0 * t0 * (grad[gi][0] * x0 + grad[gi][1] * y0); }
+    let t1 = 0.5 - x1 * x1 - y1 * y1;
+    if (t1 > 0) { t1 *= t1; const gi = perm[ii + i1 + perm[jj + j1]] % 12; n1 = t1 * t1 * (grad[gi][0] * x1 + grad[gi][1] * y1); }
+    let t2 = 0.5 - x2 * x2 - y2 * y2;
+    if (t2 > 0) { t2 *= t2; const gi = perm[ii + 1 + perm[jj + 1]] % 12; n2 = t2 * t2 * (grad[gi][0] * x2 + grad[gi][1] * y2); }
+    return 70 * (n0 + n1 + n2);
+  };
+}
+
+function hexToRgb(hex) { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+
+function generateTexture() {
+  const type = document.getElementById('noiseType').value;
+  const scale = +document.getElementById('scale').value;
+  const intensity = +document.getElementById('intensity').value / 100;
+  const contrast = +document.getElementById('contrast').value / 100;
+  const colorMode = document.getElementById('colorMode').value;
+  const c1 = hexToRgb(document.getElementById('color1').value);
+  const c2 = hexToRgb(document.getElementById('color2').value);
+  const size = +document.getElementById('canvasSize').value;
+  const seed = +document.getElementById('seed').value;
+
+  const canvas = document.getElementById('mainCanvas');
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const imgData = ctx.createImageData(size, size);
+  const d = imgData.data;
+
+  const rng = createRng(seed);
+  const perlin = createPerlinNoise(seed);
+  const simplex = createSimplexNoise(seed);
+  const freq = scale / 10;
+
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const idx = (y * size + x) * 4;
+      let v = 0; // 0..1
+
+      switch (type) {
+        case 'perlin': {
+          const nx = x / size * freq, ny = y / size * freq;
+          v = (perlin(nx, ny) + 1) * 0.5;
+          v += (perlin(nx * 2, ny * 2) + 1) * 0.25;
+          v += (perlin(nx * 4, ny * 4) + 1) * 0.125;
+          v /= 1.75;
+          break;
+        }
+        case 'simplex': {
+          const nx = x / size * freq, ny = y / size * freq;
+          v = (simplex(nx, ny) + 1) * 0.5;
+          v += (simplex(nx * 2, ny * 2) + 1) * 0.25;
+          v /= 1.5;
+          break;
+        }
+        case 'grain': {
+          v = rng();
+          v = 0.5 + (v - 0.5) * intensity;
+          break;
+        }
+        case 'paper': {
+          const nx = x / size * freq * 2, ny = y / size * freq * 2;
+          const base = (perlin(nx, ny) + 1) * 0.5;
+          const fine = rng() * 0.15;
+          v = 0.85 + base * 0.1 + fine;
+          break;
+        }
+        case 'fabric': {
+          const hLine = Math.sin(x / (scale / 20) * Math.PI) * 0.5 + 0.5;
+          const vLine = Math.sin(y / (scale / 20) * Math.PI) * 0.5 + 0.5;
+          v = (hLine * 0.5 + vLine * 0.5) * 0.3 + 0.5;
+          v += (rng() - 0.5) * 0.1;
+          break;
+        }
+        case 'concrete': {
+          const nx = x / size * freq * 1.5, ny = y / size * freq * 1.5;
+          const base = (perlin(nx, ny) + 1) * 0.5;
+          const detail = (perlin(nx * 4, ny * 4) + 1) * 0.5;
+          const grain = rng() * 0.2;
+          v = base * 0.5 + detail * 0.3 + grain;
+          break;
+        }
+        case 'wood': {
+          const nx = x / size * freq * 0.5, ny = y / size * freq * 0.5;
+          const n = perlin(nx, ny * 8);
+          const ring = Math.sin((ny * freq * 2 + n * 2) * Math.PI * 2) * 0.5 + 0.5;
+          v = ring * 0.6 + 0.3;
+          v += (rng() - 0.5) * 0.05;
+          break;
+        }
+        case 'marble': {
+          const nx = x / size * freq, ny = y / size * freq;
+          const turbulence = perlin(nx * 2, ny * 2) + perlin(nx * 4, ny * 4) * 0.5;
+          const vein = Math.sin(ny * freq + turbulence * 4) * 0.5 + 0.5;
+          v = vein * 0.8 + 0.1;
+          v += (rng() - 0.5) * 0.03;
+          break;
+        }
+      }
+
+      // Apply contrast
+      v = 0.5 + (v - 0.5) * contrast;
+      v = Math.max(0, Math.min(1, v)) * intensity;
+
+      if (colorMode === 'mono') {
+        const c = Math.round(v * c1[0] + (1 - v) * 255);
+        const cg = Math.round(v * c1[1] + (1 - v) * 255);
+        const cb = Math.round(v * c1[2] + (1 - v) * 255);
+        d[idx] = c; d[idx + 1] = cg; d[idx + 2] = cb;
+      } else {
+        d[idx] = Math.round(c1[0] * (1 - v) + c2[0] * v);
+        d[idx + 1] = Math.round(c1[1] * (1 - v) + c2[1] * v);
+        d[idx + 2] = Math.round(c1[2] * (1 - v) + c2[2] * v);
+      }
+      d[idx + 3] = 255;
+    }
+  }
+
+  ctx.putImageData(imgData, 0, 0);
+  updateTilePreview();
+  updateOverlay();
+}
+
+function updateTilePreview() {
+  const src = document.getElementById('mainCanvas');
+  for (let i = 0; i < 4; i++) {
+    const tile = document.getElementById('tile' + i);
+    tile.width = src.width; tile.height = src.height;
+    const tctx = tile.getContext('2d');
+    tctx.drawImage(src, 0, 0);
+  }
+}
+
+let overlayImage = null;
+document.getElementById('overlayFile').addEventListener('change', e => {
+  const file = e.target.files[0]; if (!file) return;
+  const img = new Image();
+  img.onload = () => { overlayImage = img; document.getElementById('overlayArea').style.display = 'block'; updateOverlay(); };
+  img.src = URL.createObjectURL(file);
+});
+
+function updateOverlay() {
+  if (!overlayImage) return;
+  const canvas = document.getElementById('overlayCanvas');
+  const src = document.getElementById('mainCanvas');
+  canvas.width = overlayImage.width; canvas.height = overlayImage.height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(overlayImage, 0, 0);
+  ctx.globalAlpha = 0.4;
+  ctx.globalCompositeOperation = 'overlay';
+  const pattern = ctx.createPattern(src, 'repeat');
+  ctx.fillStyle = pattern;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+// Controls
+['noiseType','scale','intensity','contrast','colorMode','color1','color2','canvasSize','seed'].forEach(id =>
+  document.getElementById(id).addEventListener('input', () => {
+    document.getElementById('scaleVal').textContent = document.getElementById('scale').value;
+    document.getElementById('intensityVal').textContent = document.getElementById('intensity').value + '%';
+    document.getElementById('contrastVal').textContent = document.getElementById('contrast').value + '%';
+    document.getElementById('color2Field').style.display = document.getElementById('colorMode').value === 'twocolor' ? 'block' : 'none';
+  })
+);
+
+document.getElementById('generate').addEventListener('click', generateTexture);
+document.getElementById('randomSeed').addEventListener('click', () => {
+  document.getElementById('seed').value = Math.floor(Math.random() * 99999);
+  generateTexture();
+});
+
+// Export
+document.getElementById('dlPng').addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = `texture-${document.getElementById('noiseType').value}-${document.getElementById('seed').value}.png`;
+  link.href = document.getElementById('mainCanvas').toDataURL('image/png');
+  link.click();
+  showToast('PNG downloaded');
+});
+
+document.getElementById('copyCSS').addEventListener('click', () => {
+  const dataUrl = document.getElementById('mainCanvas').toDataURL('image/png');
+  const css = `background-image: url(${dataUrl});\nbackground-repeat: repeat;\nbackground-size: ${document.getElementById('canvasSize').value}px;`;
+  navigator.clipboard.writeText(css).then(() => showToast('CSS copied'));
+});
+
+document.getElementById('copySVG').addEventListener('click', () => {
+  const seed = document.getElementById('seed').value;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" seed="${seed}" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#noise)" opacity="0.5"/></svg>`;
+  navigator.clipboard.writeText(svg).then(() => showToast('SVG filter copied'));
+});
+
+// Favorites (localStorage)
+const FAVS_KEY = 'fds-noise-favs';
+function loadFavs() { try { return JSON.parse(localStorage.getItem(FAVS_KEY)) || []; } catch { return []; } }
+function saveFavs(favs) { localStorage.setItem(FAVS_KEY, JSON.stringify(favs)); }
+
+function renderFavs() {
+  const favs = loadFavs();
+  const panel = document.getElementById('favsPanel');
+  const grid = document.getElementById('favsGrid');
+  if (favs.length === 0) { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+  grid.innerHTML = '';
+  favs.forEach((fav, i) => {
+    const item = document.createElement('div');
+    item.className = 'fav-item';
+    item.title = fav.type + ' (seed: ' + fav.seed + ')';
+    const img = new Image();
+    img.src = fav.thumbnail;
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+    item.appendChild(img);
+    const btn = document.createElement('button');
+    btn.className = 'fav-remove';
+    btn.textContent = '\u00d7';
+    btn.addEventListener('click', e => { e.stopPropagation(); const f = loadFavs(); f.splice(i, 1); saveFavs(f); renderFavs(); });
+    item.appendChild(btn);
+    item.addEventListener('click', () => {
+      document.getElementById('noiseType').value = fav.type;
+      document.getElementById('scale').value = fav.scale;
+      document.getElementById('intensity').value = fav.intensity;
+      document.getElementById('contrast').value = fav.contrast;
+      document.getElementById('colorMode').value = fav.colorMode;
+      document.getElementById('color1').value = fav.color1;
+      document.getElementById('color2').value = fav.color2;
+      document.getElementById('canvasSize').value = fav.canvasSize;
+      document.getElementById('seed').value = fav.seed;
+      generateTexture();
+    });
+    grid.appendChild(item);
+  });
+}
+
+document.getElementById('saveFav').addEventListener('click', () => {
+  const favs = loadFavs();
+  if (favs.length >= 20) { showToast('Max 20 favorites'); return; }
+  const thumbCanvas = document.createElement('canvas');
+  thumbCanvas.width = 80; thumbCanvas.height = 80;
+  thumbCanvas.getContext('2d').drawImage(document.getElementById('mainCanvas'), 0, 0, 80, 80);
+  favs.push({
+    type: document.getElementById('noiseType').value,
+    scale: +document.getElementById('scale').value,
+    intensity: +document.getElementById('intensity').value,
+    contrast: +document.getElementById('contrast').value,
+    colorMode: document.getElementById('colorMode').value,
+    color1: document.getElementById('color1').value,
+    color2: document.getElementById('color2').value,
+    canvasSize: +document.getElementById('canvasSize').value,
+    seed: +document.getElementById('seed').value,
+    thumbnail: thumbCanvas.toDataURL('image/png', 0.6)
+  });
+  saveFavs(favs);
+  renderFavs();
+  showToast('Saved to favorites');
+});
+
+renderFavs();
+generateTexture();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

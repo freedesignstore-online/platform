@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS Effects Generator - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; padding-bottom: 80px; }
+a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
+a.back:hover { text-decoration: underline; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+p.subtitle { color: #6b7280; margin-bottom: 24px; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
+h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 6px; }
+input[type="range"] { width: 100%; accent-color: #ec4899; }
+input[type="color"] { width: 48px; height: 36px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 2px; cursor: pointer; }
+input[type="number"] { width: 80px; padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 13px; }
+select { padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+.btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 13px; transition: opacity .2s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 2px solid #e5e7eb; padding-bottom: 0; }
+.tab { padding: 10px 18px; cursor: pointer; font-weight: 600; font-size: 14px; border: none; background: none; color: #6b7280; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color .15s, border-color .15s; font-family: inherit; }
+.tab:hover { color: #1a1a1a; }
+.tab.active { color: #ec4899; border-bottom-color: #ec4899; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.layout { display: grid; grid-template-columns: 320px 1fr; gap: 24px; }
+@media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+.field { margin-bottom: 14px; }
+.field-row { display: flex; gap: 10px; align-items: center; }
+.range-val { font-size: 12px; color: #6b7280; min-width: 40px; text-align: right; }
+.preview-area { display: flex; align-items: center; justify-content: center; min-height: 320px; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; position: relative; }
+.glass-bg { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 40px; }
+.glass-card { padding: 32px 40px; border-radius: 16px; text-align: center; color: #fff; font-weight: 600; font-size: 18px; max-width: 280px; }
+.neu-preview { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+.neu-box { width: 160px; height: 160px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; transition: all .2s; }
+.shadow-preview-box { width: 180px; height: 180px; background: #fff; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; color: #6b7280; }
+.presets-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 14px; }
+@media (max-width: 600px) { .presets-grid { grid-template-columns: repeat(3, 1fr); } }
+.preset-btn { padding: 6px 4px; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 500; text-align: center; background: #fff; font-family: inherit; transition: border-color .15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.preset-btn:hover, .preset-btn.active { border-color: #ec4899; }
+.shadow-layer { padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 8px; position: relative; }
+.shadow-layer .remove-layer { position: absolute; top: 6px; right: 6px; background: none; border: none; color: #dc2626; cursor: pointer; font-size: 14px; }
+.shadow-layer .field { margin-bottom: 8px; }
+.gradient-stops { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+.gradient-stop { display: flex; gap: 4px; align-items: center; padding: 4px 8px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 12px; }
+.gradient-stop .remove-stop { background: none; border: none; color: #dc2626; cursor: pointer; font-size: 12px; }
+.code-output { margin-top: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; padding: 12px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; word-break: break-all; max-height: 120px; overflow-y: auto; cursor: pointer; white-space: pre-wrap; }
+.gradient-presets-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 14px; }
+@media (max-width: 600px) { .gradient-presets-grid { grid-template-columns: repeat(4, 1fr); } }
+.grad-preset { width: 100%; aspect-ratio: 1.5; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: border-color .15s; }
+.grad-preset:hover { border-color: #ec4899; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 100; }
+.toast.show { opacity: 1; }
+.chk-row { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 8px; }
+.chk-row input[type="checkbox"] { accent-color: #ec4899; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<h1>CSS Effects Generator</h1>
+<p class="subtitle">Glassmorphism, neumorphism, shadows, and gradients. Tweak and copy CSS.</p>
+
+<div class="tabs">
+<button class="tab active" data-tab="glass">Glassmorphism</button>
+<button class="tab" data-tab="neu">Neumorphism</button>
+<button class="tab" data-tab="shadows">Shadows</button>
+<button class="tab" data-tab="gradients">Gradients</button>
+</div>
+
+<!-- GLASSMORPHISM -->
+<div class="tab-content active" id="tab-glass">
+<div class="layout">
+<div>
+<div class="panel">
+<h3>Glass Settings</h3>
+<div class="field">
+<label>Background Blur <span class="range-val" id="glassBlurVal">10px</span></label>
+<input type="range" id="glassBlur" min="4" max="20" value="10">
+</div>
+<div class="field">
+<label>Background Opacity <span class="range-val" id="glassOpacityVal">0.25</span></label>
+<input type="range" id="glassOpacity" min="0" max="100" value="25">
+</div>
+<div class="field">
+<label>Border Thickness <span class="range-val" id="glassBorderVal">1px</span></label>
+<input type="range" id="glassBorder" min="0" max="4" value="1">
+</div>
+<div class="field">
+<label>Border Opacity <span class="range-val" id="glassBorderOpVal">0.3</span></label>
+<input type="range" id="glassBorderOp" min="0" max="100" value="30">
+</div>
+<div class="field">
+<label>Color Tint</label>
+<input type="color" id="glassTint" value="#ffffff">
+</div>
+<div class="field">
+<label>Background Style</label>
+<select id="glassBgStyle">
+<option value="gradient1">Pink/Purple Gradient</option>
+<option value="gradient2">Blue/Teal Gradient</option>
+<option value="gradient3">Orange/Red Gradient</option>
+<option value="gradient4">Green/Cyan Gradient</option>
+<option value="upload">Upload Image</option>
+</select>
+<input type="file" id="glassBgFile" accept="image/*" style="display:none;margin-top:8px;">
+</div>
+<div class="field">
+<label>Border Radius <span class="range-val" id="glassRadiusVal">16px</span></label>
+<input type="range" id="glassRadius" min="0" max="40" value="16">
+</div>
+<div class="actions">
+<button class="btn btn-primary" id="glassCopy">Copy CSS</button>
+</div>
+<div class="code-output" id="glassCode" style="display:none;"></div>
+</div>
+</div>
+<div>
+<div class="panel">
+<h3>Preview</h3>
+<div class="preview-area" id="glassPreviewArea">
+<div class="glass-bg" id="glassBg">
+<div class="glass-card" id="glassCard">Glassmorphism</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- NEUMORPHISM -->
+<div class="tab-content" id="tab-neu">
+<div class="layout">
+<div>
+<div class="panel">
+<h3>Neumorphism Settings</h3>
+<div class="field">
+<label>Background Color</label>
+<input type="color" id="neuBg" value="#e0e5ec">
+</div>
+<div class="field">
+<label>Shape</label>
+<select id="neuShape">
+<option value="flat">Flat</option>
+<option value="pressed">Pressed</option>
+<option value="convex">Convex</option>
+</select>
+</div>
+<div class="field">
+<label>Light Direction</label>
+<select id="neuLight">
+<option value="tl">Top-Left</option>
+<option value="tr">Top-Right</option>
+<option value="bl">Bottom-Left</option>
+<option value="br">Bottom-Right</option>
+</select>
+</div>
+<div class="field">
+<label>Distance <span class="range-val" id="neuDistVal">6px</span></label>
+<input type="range" id="neuDist" min="1" max="20" value="6">
+</div>
+<div class="field">
+<label>Blur <span class="range-val" id="neuBlurVal">12px</span></label>
+<input type="range" id="neuBlur" min="1" max="40" value="12">
+</div>
+<div class="field">
+<label>Intensity <span class="range-val" id="neuIntVal">0.15</span></label>
+<input type="range" id="neuInt" min="5" max="50" value="15">
+</div>
+<div class="field">
+<label>Border Radius <span class="range-val" id="neuRadVal">20px</span></label>
+<input type="range" id="neuRad" min="0" max="60" value="20">
+</div>
+<div class="actions">
+<button class="btn btn-primary" id="neuCopy">Copy CSS</button>
+</div>
+<div class="code-output" id="neuCode" style="display:none;"></div>
+</div>
+</div>
+<div>
+<div class="panel">
+<h3>Preview</h3>
+<div class="preview-area" id="neuPreviewArea">
+<div class="neu-preview" id="neuPreview">
+<div class="neu-box" id="neuBox">Neumorphic</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SHADOWS -->
+<div class="tab-content" id="tab-shadows">
+<div class="layout">
+<div>
+<div class="panel">
+<h3>Shadow Presets</h3>
+<div class="presets-grid" id="shadowPresets"></div>
+<h3>Shadow Layers</h3>
+<div id="shadowLayers"></div>
+<button class="btn btn-secondary btn-sm" id="addShadowLayer" style="width:100%;margin-top:8px;">+ Add Layer</button>
+<div class="actions">
+<button class="btn btn-primary" id="shadowCopy">Copy CSS</button>
+</div>
+<div class="code-output" id="shadowCode" style="display:none;"></div>
+</div>
+</div>
+<div>
+<div class="panel">
+<h3>Preview</h3>
+<div class="preview-area" style="background:#f0f0f0;">
+<div class="shadow-preview-box" id="shadowBox">Shadow</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- GRADIENTS -->
+<div class="tab-content" id="tab-gradients">
+<div class="layout">
+<div>
+<div class="panel">
+<h3>Gradient Presets</h3>
+<div class="gradient-presets-grid" id="gradPresets"></div>
+<h3>Gradient Settings</h3>
+<div class="field">
+<label>Type</label>
+<select id="gradType">
+<option value="linear">Linear</option>
+<option value="radial">Radial</option>
+<option value="conic">Conic</option>
+</select>
+</div>
+<div class="field" id="gradAngleField">
+<label>Angle <span class="range-val" id="gradAngleVal">135deg</span></label>
+<input type="range" id="gradAngle" min="0" max="360" value="135">
+</div>
+<h3>Color Stops</h3>
+<div class="gradient-stops" id="gradStops"></div>
+<button class="btn btn-secondary btn-sm" id="addGradStop">+ Add Stop</button>
+<div class="field" style="margin-top:14px;">
+<div class="chk-row"><input type="checkbox" id="gradAnimated"><label style="margin:0;cursor:pointer;" for="gradAnimated">Animated gradient</label></div>
+</div>
+<div class="field">
+<div class="chk-row"><input type="checkbox" id="gradMesh"><label style="margin:0;cursor:pointer;" for="gradMesh">Mesh gradient (multi-radial)</label></div>
+</div>
+<div class="actions">
+<button class="btn btn-primary" id="gradCopyCSS">Copy CSS</button>
+<button class="btn btn-secondary" id="gradDownload">Download PNG</button>
+</div>
+<div class="code-output" id="gradCode" style="display:none;"></div>
+</div>
+</div>
+<div>
+<div class="panel">
+<h3>Preview</h3>
+<div class="preview-area" id="gradPreview" style="min-height:360px;"></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// Toast
+function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+function copyText(text) { navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard')); }
+
+// Tabs
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ---- GLASSMORPHISM ----
+const glassBgs = {
+  gradient1: 'linear-gradient(135deg, #ec4899, #8b5cf6, #3b82f6)',
+  gradient2: 'linear-gradient(135deg, #3b82f6, #06b6d4, #10b981)',
+  gradient3: 'linear-gradient(135deg, #f97316, #ef4444, #ec4899)',
+  gradient4: 'linear-gradient(135deg, #10b981, #06b6d4, #3b82f6)'
+};
+let glassBgImage = null;
+
+function updateGlass() {
+  const blur = document.getElementById('glassBlur').value;
+  const opacity = document.getElementById('glassOpacity').value / 100;
+  const border = document.getElementById('glassBorder').value;
+  const borderOp = document.getElementById('glassBorderOp').value / 100;
+  const tint = document.getElementById('glassTint').value;
+  const radius = document.getElementById('glassRadius').value;
+  const bgStyle = document.getElementById('glassBgStyle').value;
+
+  document.getElementById('glassBlurVal').textContent = blur + 'px';
+  document.getElementById('glassOpacityVal').textContent = opacity.toFixed(2);
+  document.getElementById('glassBorderVal').textContent = border + 'px';
+  document.getElementById('glassBorderOpVal').textContent = borderOp.toFixed(2);
+  document.getElementById('glassRadiusVal').textContent = radius + 'px';
+
+  const bg = document.getElementById('glassBg');
+  if (bgStyle === 'upload' && glassBgImage) {
+    bg.style.background = `url(${glassBgImage}) center/cover`;
+  } else {
+    bg.style.background = glassBgs[bgStyle] || glassBgs.gradient1;
+  }
+
+  const r = parseInt(tint.slice(1, 3), 16), g = parseInt(tint.slice(3, 5), 16), b = parseInt(tint.slice(5, 7), 16);
+  const card = document.getElementById('glassCard');
+  card.style.background = `rgba(${r},${g},${b},${opacity})`;
+  card.style.backdropFilter = `blur(${blur}px)`;
+  card.style.webkitBackdropFilter = `blur(${blur}px)`;
+  card.style.border = `${border}px solid rgba(255,255,255,${borderOp})`;
+  card.style.borderRadius = radius + 'px';
+}
+
+document.getElementById('glassBgStyle').addEventListener('change', e => {
+  document.getElementById('glassBgFile').style.display = e.target.value === 'upload' ? 'block' : 'none';
+  updateGlass();
+});
+document.getElementById('glassBgFile').addEventListener('change', e => {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => { glassBgImage = ev.target.result; updateGlass(); };
+  reader.readAsDataURL(file);
+});
+['glassBlur','glassOpacity','glassBorder','glassBorderOp','glassTint','glassRadius','glassBgStyle'].forEach(id =>
+  document.getElementById(id).addEventListener('input', updateGlass));
+
+document.getElementById('glassCopy').addEventListener('click', () => {
+  const blur = document.getElementById('glassBlur').value;
+  const opacity = (document.getElementById('glassOpacity').value / 100).toFixed(2);
+  const border = document.getElementById('glassBorder').value;
+  const borderOp = (document.getElementById('glassBorderOp').value / 100).toFixed(2);
+  const tint = document.getElementById('glassTint').value;
+  const radius = document.getElementById('glassRadius').value;
+  const r = parseInt(tint.slice(1, 3), 16), g = parseInt(tint.slice(3, 5), 16), b = parseInt(tint.slice(5, 7), 16);
+  const css = `background: rgba(${r}, ${g}, ${b}, ${opacity});\nbackdrop-filter: blur(${blur}px);\n-webkit-backdrop-filter: blur(${blur}px);\nborder: ${border}px solid rgba(255, 255, 255, ${borderOp});\nborder-radius: ${radius}px;`;
+  copyText(css);
+  const out = document.getElementById('glassCode'); out.style.display = 'block'; out.textContent = css;
+});
+
+updateGlass();
+
+// ---- NEUMORPHISM ----
+function hexToRgb(hex) { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function rgbToHex(r, g, b) { return '#' + [r, g, b].map(c => Math.max(0, Math.min(255, Math.round(c))).toString(16).padStart(2, '0')).join(''); }
+
+function updateNeu() {
+  const bg = document.getElementById('neuBg').value;
+  const shape = document.getElementById('neuShape').value;
+  const light = document.getElementById('neuLight').value;
+  const dist = +document.getElementById('neuDist').value;
+  const blur = +document.getElementById('neuBlur').value;
+  const intensity = document.getElementById('neuInt').value / 100;
+  const rad = document.getElementById('neuRad').value;
+
+  document.getElementById('neuDistVal').textContent = dist + 'px';
+  document.getElementById('neuBlurVal').textContent = blur + 'px';
+  document.getElementById('neuIntVal').textContent = intensity.toFixed(2);
+  document.getElementById('neuRadVal').textContent = rad + 'px';
+
+  const [r, g, b] = hexToRgb(bg);
+  const lightColor = rgbToHex(r + (255 - r) * intensity, g + (255 - g) * intensity, b + (255 - b) * intensity);
+  const darkColor = rgbToHex(r * (1 - intensity), g * (1 - intensity), b * (1 - intensity));
+
+  const dirs = { tl: [1, 1], tr: [-1, 1], bl: [1, -1], br: [-1, -1] };
+  const [dx, dy] = dirs[light];
+
+  const preview = document.getElementById('neuPreview');
+  preview.style.background = bg;
+  const box = document.getElementById('neuBox');
+  box.style.background = bg;
+  box.style.borderRadius = rad + 'px';
+  box.style.color = rgbToHex(r * 0.6, g * 0.6, b * 0.6);
+
+  let shadow, gradient = 'none';
+  if (shape === 'flat') {
+    shadow = `${dist * dx}px ${dist * dy}px ${blur}px ${darkColor}, ${-dist * dx}px ${-dist * dy}px ${blur}px ${lightColor}`;
+  } else if (shape === 'pressed') {
+    shadow = `inset ${dist * dx}px ${dist * dy}px ${blur}px ${darkColor}, inset ${-dist * dx}px ${-dist * dy}px ${blur}px ${lightColor}`;
+  } else {
+    shadow = `${dist * dx}px ${dist * dy}px ${blur}px ${darkColor}, ${-dist * dx}px ${-dist * dy}px ${blur}px ${lightColor}`;
+    gradient = `linear-gradient(${light === 'tl' ? '145deg' : light === 'tr' ? '215deg' : light === 'bl' ? '35deg' : '325deg'}, ${lightColor}, ${darkColor})`;
+  }
+  box.style.boxShadow = shadow;
+  box.style.backgroundImage = gradient;
+
+  const area = document.getElementById('neuPreviewArea');
+  area.style.background = bg;
+}
+
+['neuBg','neuShape','neuLight','neuDist','neuBlur','neuInt','neuRad'].forEach(id =>
+  document.getElementById(id).addEventListener('input', updateNeu));
+
+document.getElementById('neuCopy').addEventListener('click', () => {
+  const bg = document.getElementById('neuBg').value;
+  const box = document.getElementById('neuBox');
+  const rad = document.getElementById('neuRad').value;
+  let css = `background: ${bg};\nborder-radius: ${rad}px;\nbox-shadow: ${box.style.boxShadow};`;
+  if (box.style.backgroundImage !== 'none') css += `\nbackground-image: ${box.style.backgroundImage};`;
+  copyText(css);
+  const out = document.getElementById('neuCode'); out.style.display = 'block'; out.textContent = css;
+});
+
+updateNeu();
+
+// ---- SHADOWS ----
+const shadowPresets = [
+  { name: 'Subtle', layers: [{ x: 0, y: 1, blur: 3, spread: 0, color: '#00000012', inset: false }] },
+  { name: 'Small', layers: [{ x: 0, y: 2, blur: 8, spread: -1, color: '#0000001a', inset: false }] },
+  { name: 'Medium', layers: [{ x: 0, y: 4, blur: 16, spread: -2, color: '#00000020', inset: false }] },
+  { name: 'Large', layers: [{ x: 0, y: 8, blur: 32, spread: -4, color: '#00000025', inset: false }] },
+  { name: 'XL', layers: [{ x: 0, y: 16, blur: 48, spread: -8, color: '#0000002a', inset: false }] },
+  { name: 'Sharp', layers: [{ x: 4, y: 4, blur: 0, spread: 0, color: '#1a1a1a33', inset: false }] },
+  { name: 'Soft', layers: [{ x: 0, y: 2, blur: 4, spread: 0, color: '#0000000d', inset: false }, { x: 0, y: 8, blur: 24, spread: -4, color: '#0000001a', inset: false }] },
+  { name: 'Pink', layers: [{ x: 0, y: 4, blur: 20, spread: -2, color: '#ec489950', inset: false }] },
+  { name: 'Blue', layers: [{ x: 0, y: 4, blur: 20, spread: -2, color: '#3b82f650', inset: false }] },
+  { name: 'Purple', layers: [{ x: 0, y: 4, blur: 20, spread: -2, color: '#8b5cf650', inset: false }] },
+  { name: 'Layered', layers: [{ x: 0, y: 1, blur: 2, spread: 0, color: '#0000000d', inset: false }, { x: 0, y: 2, blur: 4, spread: 0, color: '#0000000d', inset: false }, { x: 0, y: 4, blur: 8, spread: 0, color: '#0000000d', inset: false }] },
+  { name: 'Inset', layers: [{ x: 0, y: 2, blur: 8, spread: 0, color: '#00000020', inset: true }] },
+  { name: 'Float', layers: [{ x: 0, y: 20, blur: 40, spread: -12, color: '#00000030', inset: false }] },
+  { name: 'Outline', layers: [{ x: 0, y: 0, blur: 0, spread: 2, color: '#ec4899', inset: false }] },
+  { name: 'Dreamy', layers: [{ x: 0, y: 4, blur: 12, spread: 0, color: '#ec489930', inset: false }, { x: 0, y: 8, blur: 32, spread: 0, color: '#8b5cf620', inset: false }] }
+];
+
+let shadowLayers = [{ x: 0, y: 4, blur: 16, spread: -2, color: '#00000020', inset: false }];
+
+function renderShadowPresets() {
+  const grid = document.getElementById('shadowPresets');
+  grid.innerHTML = shadowPresets.map((p, i) => `<button class="preset-btn" data-idx="${i}">${p.name}</button>`).join('');
+  grid.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      shadowLayers = JSON.parse(JSON.stringify(shadowPresets[btn.dataset.idx].layers));
+      renderShadowLayers();
+      updateShadows();
+    });
+  });
+}
+
+function renderShadowLayers() {
+  const container = document.getElementById('shadowLayers');
+  container.innerHTML = shadowLayers.map((l, i) => `
+    <div class="shadow-layer">
+      ${shadowLayers.length > 1 ? `<button class="remove-layer" data-idx="${i}">&times;</button>` : ''}
+      <div style="font-weight:600;font-size:12px;margin-bottom:8px;">Layer ${i + 1}</div>
+      <div class="field"><label>X <span class="range-val">${l.x}px</span></label><input type="range" data-idx="${i}" data-prop="x" min="-30" max="30" value="${l.x}"></div>
+      <div class="field"><label>Y <span class="range-val">${l.y}px</span></label><input type="range" data-idx="${i}" data-prop="y" min="-30" max="30" value="${l.y}"></div>
+      <div class="field"><label>Blur <span class="range-val">${l.blur}px</span></label><input type="range" data-idx="${i}" data-prop="blur" min="0" max="60" value="${l.blur}"></div>
+      <div class="field"><label>Spread <span class="range-val">${l.spread}px</span></label><input type="range" data-idx="${i}" data-prop="spread" min="-20" max="20" value="${l.spread}"></div>
+      <div class="field-row"><label style="margin:0;">Color</label><input type="color" data-idx="${i}" data-prop="color" value="${l.color.slice(0, 7)}"></div>
+      <div class="chk-row"><input type="checkbox" data-idx="${i}" data-prop="inset" ${l.inset ? 'checked' : ''}><label style="margin:0;">Inset</label></div>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.remove-layer').forEach(btn => {
+    btn.addEventListener('click', () => { shadowLayers.splice(+btn.dataset.idx, 1); renderShadowLayers(); updateShadows(); });
+  });
+  container.querySelectorAll('input[type="range"]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      shadowLayers[+inp.dataset.idx][inp.dataset.prop] = +inp.value;
+      inp.previousElementSibling.querySelector('.range-val').textContent = inp.value + 'px';
+      updateShadows();
+    });
+  });
+  container.querySelectorAll('input[type="color"]').forEach(inp => {
+    inp.addEventListener('input', () => { shadowLayers[+inp.dataset.idx].color = inp.value + '40'; updateShadows(); });
+  });
+  container.querySelectorAll('input[type="checkbox"]').forEach(inp => {
+    inp.addEventListener('change', () => { shadowLayers[+inp.dataset.idx].inset = inp.checked; updateShadows(); });
+  });
+}
+
+function getShadowCSS() {
+  return shadowLayers.map(l => `${l.inset ? 'inset ' : ''}${l.x}px ${l.y}px ${l.blur}px ${l.spread}px ${l.color}`).join(',\n  ');
+}
+
+function updateShadows() {
+  document.getElementById('shadowBox').style.boxShadow = shadowLayers.map(l => `${l.inset ? 'inset ' : ''}${l.x}px ${l.y}px ${l.blur}px ${l.spread}px ${l.color}`).join(', ');
+}
+
+document.getElementById('addShadowLayer').addEventListener('click', () => {
+  if (shadowLayers.length >= 5) { showToast('Max 5 layers'); return; }
+  shadowLayers.push({ x: 0, y: 4, blur: 12, spread: 0, color: '#00000020', inset: false });
+  renderShadowLayers();
+  updateShadows();
+});
+
+document.getElementById('shadowCopy').addEventListener('click', () => {
+  const css = `box-shadow: ${getShadowCSS()};`;
+  copyText(css);
+  const out = document.getElementById('shadowCode'); out.style.display = 'block'; out.textContent = css;
+});
+
+renderShadowPresets();
+renderShadowLayers();
+updateShadows();
+
+// ---- GRADIENTS ----
+const gradientPresets = [
+  { stops: ['#ec4899', '#8b5cf6'], angle: 135 },
+  { stops: ['#3b82f6', '#06b6d4'], angle: 135 },
+  { stops: ['#f97316', '#ef4444'], angle: 135 },
+  { stops: ['#10b981', '#3b82f6'], angle: 135 },
+  { stops: ['#fbbf24', '#f97316'], angle: 135 },
+  { stops: ['#ec4899', '#f97316', '#fbbf24'], angle: 90 },
+  { stops: ['#1a1a1a', '#374151'], angle: 135 },
+  { stops: ['#fafafa', '#e5e7eb'], angle: 180 },
+  { stops: ['#8b5cf6', '#ec4899', '#f97316'], angle: 90 },
+  { stops: ['#06b6d4', '#10b981', '#84cc16'], angle: 90 },
+  { stops: ['#4f46e5', '#7c3aed', '#ec4899'], angle: 135 },
+  { stops: ['#dc2626', '#f97316', '#fbbf24', '#10b981', '#3b82f6', '#8b5cf6'], angle: 90 },
+  { stops: ['#0f172a', '#1e293b', '#334155'], angle: 180 },
+  { stops: ['#fce7f3', '#ddd6fe'], angle: 135 },
+  { stops: ['#ecfdf5', '#d1fae5', '#6ee7b7'], angle: 180 },
+  { stops: ['#eff6ff', '#bfdbfe', '#60a5fa'], angle: 180 },
+  { stops: ['#1e3a5f', '#3b82f6', '#93c5fd'], angle: 135 },
+  { stops: ['#ec4899', '#f43f5e'], angle: 45 },
+  { stops: ['#7c3aed', '#2563eb', '#06b6d4'], angle: 135 },
+  { stops: ['#f59e0b', '#d97706', '#92400e'], angle: 180 },
+  { stops: ['#064e3b', '#10b981', '#34d399'], angle: 135 },
+  { stops: ['#831843', '#ec4899', '#f9a8d4'], angle: 135 },
+  { stops: ['#312e81', '#6366f1', '#a5b4fc'], angle: 135 },
+  { stops: ['#7f1d1d', '#ef4444', '#fca5a5'], angle: 135 },
+  { stops: ['#1e1b4b', '#4338ca', '#818cf8', '#c7d2fe'], angle: 135 },
+  { stops: ['#f0fdf4', '#bbf7d0', '#4ade80', '#16a34a'], angle: 180 },
+  { stops: ['#fff1f2', '#ffe4e6', '#fda4af', '#e11d48'], angle: 180 },
+  { stops: ['#0c4a6e', '#0ea5e9', '#7dd3fc', '#e0f2fe'], angle: 135 },
+  { stops: ['#1a1a1a', '#ec4899'], angle: 135 },
+  { stops: ['#fafafa', '#ec4899', '#8b5cf6', '#1a1a1a'], angle: 135 }
+];
+
+let gradStops = [{ color: '#ec4899', pos: 0 }, { color: '#8b5cf6', pos: 100 }];
+
+function renderGradPresets() {
+  const grid = document.getElementById('gradPresets');
+  grid.innerHTML = gradientPresets.map((p, i) => {
+    const stopsCSS = p.stops.map((c, j) => `${c} ${Math.round(j / (p.stops.length - 1) * 100)}%`).join(', ');
+    return `<div class="grad-preset" data-idx="${i}" style="background:linear-gradient(${p.angle}deg, ${stopsCSS})"></div>`;
+  }).join('');
+  grid.querySelectorAll('.grad-preset').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = gradientPresets[btn.dataset.idx];
+      gradStops = p.stops.map((c, j) => ({ color: c, pos: Math.round(j / (p.stops.length - 1) * 100) }));
+      document.getElementById('gradAngle').value = p.angle;
+      document.getElementById('gradType').value = 'linear';
+      renderGradStops();
+      updateGradient();
+    });
+  });
+}
+
+function renderGradStops() {
+  const container = document.getElementById('gradStops');
+  container.innerHTML = gradStops.map((s, i) => `
+    <div class="gradient-stop">
+      <input type="color" value="${s.color}" data-idx="${i}" data-prop="color" style="width:28px;height:28px;">
+      <input type="number" value="${s.pos}" data-idx="${i}" data-prop="pos" min="0" max="100" style="width:50px;font-size:11px;">%
+      ${gradStops.length > 2 ? `<button class="remove-stop" data-idx="${i}">&times;</button>` : ''}
+    </div>
+  `).join('');
+  container.querySelectorAll('input[type="color"]').forEach(inp => {
+    inp.addEventListener('input', () => { gradStops[+inp.dataset.idx].color = inp.value; updateGradient(); });
+  });
+  container.querySelectorAll('input[type="number"]').forEach(inp => {
+    inp.addEventListener('input', () => { gradStops[+inp.dataset.idx].pos = +inp.value; updateGradient(); });
+  });
+  container.querySelectorAll('.remove-stop').forEach(btn => {
+    btn.addEventListener('click', () => { gradStops.splice(+btn.dataset.idx, 1); renderGradStops(); updateGradient(); });
+  });
+}
+
+function getGradientCSS() {
+  const type = document.getElementById('gradType').value;
+  const angle = document.getElementById('gradAngle').value;
+  const animated = document.getElementById('gradAnimated').checked;
+  const mesh = document.getElementById('gradMesh').checked;
+  const sorted = [...gradStops].sort((a, b) => a.pos - b.pos);
+  const stopsStr = sorted.map(s => `${s.color} ${s.pos}%`).join(', ');
+
+  if (mesh && sorted.length >= 2) {
+    const meshParts = sorted.map((s, i) => {
+      const x = (i % 3) * 40 + 10 + Math.random() * 20;
+      const y = Math.floor(i / 3) * 50 + 20 + Math.random() * 20;
+      return `radial-gradient(ellipse at ${Math.round(x)}% ${Math.round(y)}%, ${s.color} 0%, transparent 70%)`;
+    });
+    return meshParts.join(',\n  ');
+  }
+
+  let grad;
+  if (type === 'linear') grad = `linear-gradient(${angle}deg, ${stopsStr})`;
+  else if (type === 'radial') grad = `radial-gradient(circle, ${stopsStr})`;
+  else grad = `conic-gradient(from ${angle}deg, ${stopsStr})`;
+
+  if (animated) {
+    return `background: ${grad};\nbackground-size: 200% 200%;\nanimation: gradientShift 3s ease infinite;\n\n@keyframes gradientShift {\n  0% { background-position: 0% 50%; }\n  50% { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}`;
+  }
+  return `background: ${grad};`;
+}
+
+function updateGradient() {
+  const angle = document.getElementById('gradAngle').value;
+  document.getElementById('gradAngleVal').textContent = angle + 'deg';
+  const type = document.getElementById('gradType').value;
+  document.getElementById('gradAngleField').style.display = type === 'radial' ? 'none' : 'block';
+
+  const mesh = document.getElementById('gradMesh').checked;
+  const animated = document.getElementById('gradAnimated').checked;
+  const sorted = [...gradStops].sort((a, b) => a.pos - b.pos);
+  const stopsStr = sorted.map(s => `${s.color} ${s.pos}%`).join(', ');
+  const preview = document.getElementById('gradPreview');
+
+  if (mesh && sorted.length >= 2) {
+    const parts = sorted.map((s, i) => {
+      const x = (i % 3) * 40 + 10 + ((i * 37) % 20);
+      const y = Math.floor(i / 3) * 50 + 20 + ((i * 53) % 20);
+      return `radial-gradient(ellipse at ${x}% ${y}%, ${s.color} 0%, transparent 70%)`;
+    });
+    preview.style.background = parts.join(', ');
+    preview.style.animation = '';
+    preview.style.backgroundSize = '';
+    return;
+  }
+
+  let grad;
+  if (type === 'linear') grad = `linear-gradient(${angle}deg, ${stopsStr})`;
+  else if (type === 'radial') grad = `radial-gradient(circle, ${stopsStr})`;
+  else grad = `conic-gradient(from ${angle}deg, ${stopsStr})`;
+
+  preview.style.background = grad;
+  if (animated) {
+    preview.style.backgroundSize = '200% 200%';
+    preview.style.animation = 'gradientShift 3s ease infinite';
+  } else {
+    preview.style.backgroundSize = '';
+    preview.style.animation = '';
+  }
+}
+
+document.getElementById('addGradStop').addEventListener('click', () => {
+  if (gradStops.length >= 8) { showToast('Max 8 stops'); return; }
+  gradStops.push({ color: '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0'), pos: 50 });
+  renderGradStops();
+  updateGradient();
+});
+
+['gradType','gradAngle','gradAnimated','gradMesh'].forEach(id =>
+  document.getElementById(id).addEventListener('input', updateGradient));
+
+document.getElementById('gradCopyCSS').addEventListener('click', () => {
+  const css = getGradientCSS();
+  copyText(css);
+  const out = document.getElementById('gradCode'); out.style.display = 'block'; out.textContent = css;
+});
+
+document.getElementById('gradDownload').addEventListener('click', () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1200; canvas.height = 630;
+  const ctx = canvas.getContext('2d');
+  const sorted = [...gradStops].sort((a, b) => a.pos - b.pos);
+  const angle = +document.getElementById('gradAngle').value * Math.PI / 180;
+  const grd = ctx.createLinearGradient(
+    600 - Math.cos(angle) * 600, 315 - Math.sin(angle) * 315,
+    600 + Math.cos(angle) * 600, 315 + Math.sin(angle) * 315
+  );
+  sorted.forEach(s => grd.addColorStop(s.pos / 100, s.color));
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, 1200, 630);
+  const link = document.createElement('a');
+  link.download = 'gradient.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  showToast('PNG downloaded');
+});
+
+// Add animated keyframes to page
+const styleEl = document.createElement('style');
+styleEl.textContent = '@keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }';
+document.head.appendChild(styleEl);
+
+renderGradPresets();
+renderGradStops();
+updateGradient();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

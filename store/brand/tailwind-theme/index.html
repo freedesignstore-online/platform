@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tailwind Theme Builder - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
+a.back:hover { text-decoration: underline; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+p.subtitle { color: #6b7280; margin-bottom: 24px; }
+.panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
+h2 { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 6px; }
+input[type="text"], input[type="number"], select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+input[type="color"] { width: 48px; height: 40px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 2px; cursor: pointer; }
+textarea { resize: vertical; min-height: 120px; font-family: 'Courier New', monospace; font-size: 12px; }
+.btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 13px; transition: opacity .2s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+
+.tabs { display: flex; gap: 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 20px; flex-wrap: wrap; }
+.tab { padding: 10px 16px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -2px; color: #6b7280; font-family: inherit; transition: all .15s; }
+.tab:hover { color: #1a1a1a; }
+.tab.active { color: #ec4899; border-bottom-color: #ec4899; }
+.sec { display: none; }
+.sec.active { display: block; }
+
+.color-row { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+.color-field { display: flex; gap: 8px; align-items: center; }
+.color-field input[type="text"] { width: 100px; }
+.swatch-row { display: flex; gap: 2px; margin-top: 8px; border-radius: 8px; overflow: hidden; }
+.swatch { flex: 1; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; cursor: pointer; position: relative; min-width: 0; transition: transform .15s; }
+.swatch:hover { transform: scaleY(1.15); z-index: 1; }
+.swatch .shade-label { opacity: 0; transition: opacity .15s; }
+.swatch:hover .shade-label { opacity: 1; }
+.color-group { margin-bottom: 24px; }
+.color-group-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.color-group-header input[type="text"] { width: 140px; font-size: 14px; font-weight: 600; border: 1px solid transparent; padding: 4px 8px; }
+.color-group-header input[type="text"]:focus { border-color: #e5e7eb; }
+
+.font-select { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media (max-width: 640px) { .font-select { grid-template-columns: 1fr; } }
+.type-preview { padding: 20px; background: #fafafa; border-radius: 8px; border: 1px solid #e5e7eb; }
+
+.spacing-ruler { display: flex; gap: 4px; align-items: flex-end; margin-top: 12px; flex-wrap: wrap; }
+.spacing-bar { background: #ec4899; border-radius: 4px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px; font-size: 9px; color: #fff; font-weight: 600; min-width: 20px; }
+
+.radius-previews { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+.radius-item { width: 64px; height: 64px; background: #ec4899; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 600; }
+
+.shadow-previews { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
+.shadow-card { width: 100px; height: 80px; background: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: #6b7280; }
+
+.bp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 12px; }
+.bp-item { text-align: center; padding: 12px; background: #fafafa; border-radius: 8px; border: 1px solid #e5e7eb; }
+.bp-icon { font-size: 24px; margin-bottom: 4px; }
+.bp-label { font-size: 13px; font-weight: 600; }
+.bp-value { font-size: 12px; color: #6b7280; }
+
+.preset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.preset-card { padding: 16px; border-radius: 12px; border: 2px solid #e5e7eb; cursor: pointer; transition: border-color .15s; }
+.preset-card:hover { border-color: #ec4899; }
+.preset-card .preset-name { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+.preset-card .preset-swatches { display: flex; gap: 3px; border-radius: 4px; overflow: hidden; }
+.preset-card .preset-sw { width: 24px; height: 24px; }
+
+.live-preview { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+.lp-header { padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+.lp-hero { padding: 48px 24px; text-align: center; }
+.lp-hero h2 { font-size: 32px; margin-bottom: 8px; }
+.lp-hero p { font-size: 15px; margin-bottom: 16px; }
+.lp-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 24px; }
+@media (max-width: 640px) { .lp-cards { grid-template-columns: 1fr; } }
+.lp-card { padding: 20px; border-radius: 8px; }
+.lp-card h3 { font-size: 15px; margin-bottom: 4px; }
+.lp-card p { font-size: 13px; }
+.lp-btn { display: inline-block; padding: 10px 24px; border-radius: 6px; font-weight: 600; font-size: 14px; text-decoration: none; }
+
+.export-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<h1>Tailwind Theme Builder</h1>
+<p class="subtitle">Visual editor that outputs a complete tailwind.config.js with colors, typography, spacing, and more.</p>
+
+<div class="panel">
+<h2>Presets</h2>
+<div class="preset-grid" id="presetGrid"></div>
+<div class="row">
+<button class="btn btn-secondary" onclick="showImport()">Import tailwind.config.js</button>
+</div>
+<div id="importWrap" style="display:none;margin-top:12px;">
+<textarea id="importInput" placeholder="Paste your tailwind.config.js here..."></textarea>
+<button class="btn btn-primary btn-sm" style="margin-top:8px;" onclick="doImport()">Parse & Load</button>
+</div>
+</div>
+
+<div class="tabs" id="mainTabs">
+<button class="tab active" data-tab="colors">Colors</button>
+<button class="tab" data-tab="typography">Typography</button>
+<button class="tab" data-tab="spacing">Spacing</button>
+<button class="tab" data-tab="radius">Border Radius</button>
+<button class="tab" data-tab="shadows">Shadows</button>
+<button class="tab" data-tab="breakpoints">Breakpoints</button>
+<button class="tab" data-tab="preview">Live Preview</button>
+<button class="tab" data-tab="export">Export</button>
+</div>
+
+<div class="sec active" id="sec-colors">
+<div class="panel">
+<div class="row" style="margin-bottom:16px;">
+<button class="btn btn-primary btn-sm" onclick="addColorGroup()">+ Add Color</button>
+</div>
+<div id="colorGroups"></div>
+</div>
+</div>
+
+<div class="sec" id="sec-typography">
+<div class="panel">
+<div class="font-select">
+<div>
+<label>Heading Font (Google Fonts)</label>
+<input type="text" id="headingFont" value="Inter" placeholder="e.g. Inter, Poppins">
+</div>
+<div>
+<label>Body Font (Google Fonts)</label>
+<input type="text" id="bodyFont" value="Inter" placeholder="e.g. Inter, Roboto">
+</div>
+</div>
+<div class="row" style="margin-bottom:16px;">
+<div>
+<label>Base Size (px)</label>
+<input type="number" id="baseSize" value="16" min="10" max="24" style="width:80px;">
+</div>
+<div>
+<label>Scale Ratio</label>
+<select id="scaleRatio" style="width:120px;">
+<option value="1.125">Minor Second (1.125)</option>
+<option value="1.2" selected>Minor Third (1.2)</option>
+<option value="1.25">Major Third (1.25)</option>
+<option value="1.333">Perfect Fourth (1.333)</option>
+<option value="1.5">Perfect Fifth (1.5)</option>
+</select>
+</div>
+<button class="btn btn-primary btn-sm" onclick="loadFonts()">Load Fonts</button>
+</div>
+<div class="type-preview" id="typePreview"></div>
+</div>
+</div>
+
+<div class="sec" id="sec-spacing">
+<div class="panel">
+<div>
+<label>Base Unit (px)</label>
+<input type="number" id="baseUnit" value="4" min="1" max="16" style="width:80px;" oninput="renderSpacing()">
+</div>
+<div class="spacing-ruler" id="spacingRuler"></div>
+<div id="spacingTable" style="margin-top:16px;font-size:13px;"></div>
+</div>
+</div>
+
+<div class="sec" id="sec-radius">
+<div class="panel">
+<h3>Border Radius Scale</h3>
+<div id="radiusInputs" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:16px;"></div>
+<div class="radius-previews" id="radiusPreviews"></div>
+</div>
+</div>
+
+<div class="sec" id="sec-shadows">
+<div class="panel">
+<h3>Box Shadow Scale</h3>
+<div id="shadowInputs" style="display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:16px;"></div>
+<div class="shadow-previews" id="shadowPreviews"></div>
+</div>
+</div>
+
+<div class="sec" id="sec-breakpoints">
+<div class="panel">
+<h3>Screen Breakpoints</h3>
+<div id="bpInputs" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:16px;"></div>
+<div class="bp-grid" id="bpGrid"></div>
+</div>
+</div>
+
+<div class="sec" id="sec-preview">
+<div class="panel" style="padding:0;">
+<div class="live-preview" id="livePreview"></div>
+</div>
+</div>
+
+<div class="sec" id="sec-export">
+<div class="panel">
+<div class="export-tabs">
+<button class="btn btn-primary btn-sm" onclick="showExport('tw')">tailwind.config.js</button>
+<button class="btn btn-secondary btn-sm" onclick="showExport('css')">CSS Variables</button>
+<button class="btn btn-secondary btn-sm" onclick="showExport('json')">JSON Tokens</button>
+</div>
+<textarea id="exportOutput" rows="20" readonly></textarea>
+<button class="btn btn-primary" style="margin-top:12px;" onclick="copyExport()">Copy to Clipboard</button>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== State ===== */
+const SHADES = [50,100,200,300,400,500,600,700,800,900,950];
+
+let state = {
+  colors: [
+    { name: 'primary', base: '#3b82f6' },
+    { name: 'secondary', base: '#8b5cf6' },
+    { name: 'accent', base: '#ec4899' },
+    { name: 'neutral', base: '#6b7280' }
+  ],
+  colorScales: {},
+  headingFont: 'Inter',
+  bodyFont: 'Inter',
+  baseSize: 16,
+  scaleRatio: 1.2,
+  baseUnit: 4,
+  radius: { none:'0px', sm:'2px', DEFAULT:'4px', md:'6px', lg:'8px', xl:'12px', '2xl':'16px', full:'9999px' },
+  shadows: {
+    sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+    DEFAULT: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+    md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+    lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+    xl: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+    '2xl': '0 25px 50px -12px rgb(0 0 0 / 0.25)'
+  },
+  breakpoints: { sm:'640px', md:'768px', lg:'1024px', xl:'1280px', '2xl':'1536px' }
+};
+
+/* ===== Color generation ===== */
+function hexToHsl(hex) {
+  let r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255;
+  const max = Math.max(r,g,b), min = Math.min(r,g,b), d = max - min;
+  let h = 0, s = 0, l = (max+min)/2;
+  if (d > 0) {
+    s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+    if (max === r) h = ((g-b)/d + (g<b?6:0))/6;
+    else if (max === g) h = ((b-r)/d+2)/6;
+    else h = ((r-g)/d+4)/6;
+  }
+  return [h*360, s*100, l*100];
+}
+
+function hslToHex(h, s, l) {
+  h = ((h%360)+360)%360; s = Math.max(0,Math.min(100,s))/100; l = Math.max(0,Math.min(100,l))/100;
+  const a = s * Math.min(l, 1-l);
+  const f = n => { const k = (n+h/30)%12; return l - a * Math.max(Math.min(k-3, 9-k, 1), -1); };
+  const toHex = x => Math.round(x*255).toString(16).padStart(2,'0');
+  return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
+}
+
+function generateScale(baseHex) {
+  const [h, s, l] = hexToHsl(baseHex);
+  const targets = { 50:97, 100:94, 200:86, 300:76, 400:64, 500:50, 600:40, 700:32, 800:24, 900:17, 950:10 };
+  const scale = {};
+  for (const [shade, targetL] of Object.entries(targets)) {
+    const adjustedS = shade < 200 ? s * 0.6 : shade > 800 ? s * 0.8 : s;
+    scale[shade] = hslToHex(h, adjustedS, targetL);
+  }
+  scale[500] = baseHex;
+  return scale;
+}
+
+function textColor(hex) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return (r*299+g*587+b*114)/1000 > 128 ? '#1a1a1a' : '#ffffff';
+}
+
+/* ===== Presets ===== */
+const PRESETS = [
+  { name:'Minimal', colors:{ primary:'#1a1a1a', secondary:'#6b7280', accent:'#3b82f6', neutral:'#9ca3af' }},
+  { name:'Corporate', colors:{ primary:'#1e40af', secondary:'#0e7490', accent:'#dc2626', neutral:'#64748b' }},
+  { name:'Playful', colors:{ primary:'#ec4899', secondary:'#8b5cf6', accent:'#f59e0b', neutral:'#6b7280' }},
+  { name:'Dark Luxury', colors:{ primary:'#c9a96e', secondary:'#1a1a1a', accent:'#a78bfa', neutral:'#4b5563' }},
+  { name:'Nature', colors:{ primary:'#16a34a', secondary:'#15803d', accent:'#ca8a04', neutral:'#78716c' }}
+];
+
+function renderPresets() {
+  const grid = document.getElementById('presetGrid');
+  grid.innerHTML = PRESETS.map((p,i) => `
+    <div class="preset-card" onclick="applyPreset(${i})">
+      <div class="preset-name">${p.name}</div>
+      <div class="preset-swatches">
+        ${Object.values(p.colors).map(c => `<div class="preset-sw" style="background:${c}"></div>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function applyPreset(i) {
+  const p = PRESETS[i];
+  state.colors = Object.entries(p.colors).map(([name, base]) => ({ name, base }));
+  rebuildAll();
+  toast('Preset applied');
+}
+
+/* ===== Color Groups ===== */
+function addColorGroup(name='custom', base='#6366f1') {
+  state.colors.push({ name, base });
+  renderColorGroups();
+}
+
+function removeColorGroup(i) {
+  state.colors.splice(i, 1);
+  renderColorGroups();
+}
+
+function renderColorGroups() {
+  const container = document.getElementById('colorGroups');
+  state.colorScales = {};
+  container.innerHTML = state.colors.map((c, i) => {
+    const scale = generateScale(c.base);
+    state.colorScales[c.name] = scale;
+    return `
+    <div class="color-group">
+      <div class="color-group-header">
+        <input type="text" value="${c.name}" onchange="state.colors[${i}].name=this.value;renderColorGroups()">
+        <div class="color-field">
+          <input type="color" value="${c.base}" onchange="state.colors[${i}].base=this.value;renderColorGroups()">
+          <input type="text" value="${c.base}" style="width:90px;" onchange="state.colors[${i}].base=this.value;renderColorGroups()">
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="removeColorGroup(${i})">Remove</button>
+      </div>
+      <div class="swatch-row">
+        ${SHADES.map(sh => `<div class="swatch" style="background:${scale[sh]};color:${textColor(scale[sh])}" onclick="navigator.clipboard.writeText('${scale[sh]}');toast('Copied ${scale[sh]}')"><span class="shade-label">${sh}</span></div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ===== Typography ===== */
+function loadFonts() {
+  state.headingFont = document.getElementById('headingFont').value;
+  state.bodyFont = document.getElementById('bodyFont').value;
+  const fonts = [state.headingFont, state.bodyFont].filter(Boolean);
+  const existing = document.getElementById('gfonts');
+  if (existing) existing.remove();
+  if (fonts.length) {
+    const link = document.createElement('link');
+    link.id = 'gfonts';
+    link.rel = 'stylesheet';
+    link.href = `https://fonts.googleapis.com/css2?${fonts.map(f => `family=${encodeURIComponent(f)}:wght@400;600;700`).join('&')}&display=swap`;
+    document.head.appendChild(link);
+  }
+  renderTypography();
+}
+
+function renderTypography() {
+  state.baseSize = parseInt(document.getElementById('baseSize').value) || 16;
+  state.scaleRatio = parseFloat(document.getElementById('scaleRatio').value) || 1.2;
+  const r = state.scaleRatio, base = state.baseSize;
+  const levels = [
+    { tag: 'h1', size: base * r*r*r*r*r },
+    { tag: 'h2', size: base * r*r*r*r },
+    { tag: 'h3', size: base * r*r*r },
+    { tag: 'h4', size: base * r*r },
+    { tag: 'h5', size: base * r },
+    { tag: 'h6', size: base },
+    { tag: 'body', size: base },
+    { tag: 'small', size: base / r }
+  ];
+  const preview = document.getElementById('typePreview');
+  preview.innerHTML = levels.map(lv => {
+    const isHeading = lv.tag.startsWith('h');
+    const font = isHeading ? state.headingFont : state.bodyFont;
+    const weight = isHeading ? 700 : 400;
+    return `<div style="font-family:'${font}',sans-serif;font-size:${lv.size.toFixed(1)}px;font-weight:${weight};margin-bottom:8px;line-height:1.3;">
+      <span style="color:#9ca3af;font-size:11px;font-family:Manrope;font-weight:500;display:inline-block;width:48px;">${lv.tag}</span>
+      ${lv.size.toFixed(0)}px - The quick brown fox jumps
+    </div>`;
+  }).join('');
+}
+
+/* ===== Spacing ===== */
+const SPACING_KEYS = [0.5,1,1.5,2,3,4,5,6,8,10,12,16,20,24];
+function renderSpacing() {
+  state.baseUnit = parseInt(document.getElementById('baseUnit').value) || 4;
+  const ruler = document.getElementById('spacingRuler');
+  const table = document.getElementById('spacingTable');
+  ruler.innerHTML = SPACING_KEYS.map(k => {
+    const px = k * state.baseUnit;
+    return `<div class="spacing-bar" style="width:${Math.max(20, px)}px;height:${Math.max(20, px)}px;" title="${k}: ${px}px">${k}</div>`;
+  }).join('');
+  table.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:4px;">' +
+    SPACING_KEYS.map(k => `<div style="padding:4px 8px;background:#f9fafb;border-radius:4px;font-size:12px;"><b>${k}</b>: ${k*state.baseUnit}px</div>`).join('') + '</div>';
+}
+
+/* ===== Radius ===== */
+const RADIUS_KEYS = ['none','sm','DEFAULT','md','lg','xl','2xl','full'];
+function renderRadius() {
+  const inputs = document.getElementById('radiusInputs');
+  inputs.innerHTML = RADIUS_KEYS.map(k => `
+    <div>
+      <label>${k}</label>
+      <input type="text" value="${state.radius[k]}" style="width:100%;" onchange="state.radius['${k}']=this.value;renderRadiusPreviews()">
+    </div>
+  `).join('');
+  renderRadiusPreviews();
+}
+
+function renderRadiusPreviews() {
+  const container = document.getElementById('radiusPreviews');
+  container.innerHTML = RADIUS_KEYS.map(k =>
+    `<div class="radius-item" style="border-radius:${state.radius[k]}">${k}</div>`
+  ).join('');
+}
+
+/* ===== Shadows ===== */
+const SHADOW_KEYS = ['sm','DEFAULT','md','lg','xl','2xl'];
+function renderShadows() {
+  const inputs = document.getElementById('shadowInputs');
+  inputs.innerHTML = SHADOW_KEYS.map(k => `
+    <div style="display:flex;gap:8px;align-items:center;">
+      <label style="min-width:50px;margin:0;">${k}</label>
+      <input type="text" value="${state.shadows[k]}" onchange="state.shadows['${k}']=this.value;renderShadowPreviews()">
+    </div>
+  `).join('');
+  renderShadowPreviews();
+}
+
+function renderShadowPreviews() {
+  const container = document.getElementById('shadowPreviews');
+  container.innerHTML = SHADOW_KEYS.map(k =>
+    `<div class="shadow-card" style="box-shadow:${state.shadows[k]}">${k}</div>`
+  ).join('');
+}
+
+/* ===== Breakpoints ===== */
+const BP_KEYS = ['sm','md','lg','xl','2xl'];
+const BP_ICONS = { sm:'&#128241;', md:'&#128241;', lg:'&#128187;', xl:'&#128187;', '2xl':'&#128422;' };
+function renderBreakpoints() {
+  const inputs = document.getElementById('bpInputs');
+  inputs.innerHTML = BP_KEYS.map(k => `
+    <div>
+      <label>${k}</label>
+      <input type="text" value="${state.breakpoints[k]}" onchange="state.breakpoints['${k}']=this.value;renderBpGrid()">
+    </div>
+  `).join('');
+  renderBpGrid();
+}
+
+function renderBpGrid() {
+  const grid = document.getElementById('bpGrid');
+  grid.innerHTML = BP_KEYS.map(k => `
+    <div class="bp-item">
+      <div class="bp-icon">${BP_ICONS[k]}</div>
+      <div class="bp-label">${k}</div>
+      <div class="bp-value">${state.breakpoints[k]}</div>
+    </div>
+  `).join('');
+}
+
+/* ===== Live Preview ===== */
+function renderLivePreview() {
+  const primary = state.colorScales.primary || state.colorScales[state.colors[0]?.name] || {};
+  const accent = state.colorScales.accent || state.colorScales[state.colors[2]?.name] || {};
+  const neutral = state.colorScales.neutral || state.colorScales[state.colors[3]?.name] || {};
+  const p500 = primary[500] || '#3b82f6';
+  const p50 = primary[50] || '#eff6ff';
+  const p700 = primary[700] || '#1d4ed8';
+  const a500 = accent[500] || '#ec4899';
+  const n100 = neutral[100] || '#f3f4f6';
+  const n500 = neutral[500] || '#6b7280';
+  const n900 = neutral[900] || '#111827';
+  const hf = state.headingFont || 'Inter';
+  const bf = state.bodyFont || 'Inter';
+  const rad = state.radius.lg || '8px';
+
+  document.getElementById('livePreview').innerHTML = `
+    <div class="lp-header" style="background:${p500};color:#fff;font-family:'${hf}',sans-serif;">
+      <b>My Site</b>
+      <div style="display:flex;gap:16px;font-size:14px;">
+        <span>Home</span><span>About</span><span>Contact</span>
+      </div>
+    </div>
+    <div class="lp-hero" style="background:${p50};font-family:'${hf}',sans-serif;">
+      <h2 style="color:${n900}">Build Something Amazing</h2>
+      <p style="color:${n500};font-family:'${bf}',sans-serif;">Your theme, visualized in a real layout.</p>
+      <a class="lp-btn" style="background:${p500};color:#fff;border-radius:${rad};">Get Started</a>
+      <a class="lp-btn" style="background:transparent;color:${p500};border:2px solid ${p500};border-radius:${rad};margin-left:8px;">Learn More</a>
+    </div>
+    <div class="lp-cards">
+      ${['Feature One','Feature Two','Feature Three'].map((t,i) => `
+        <div class="lp-card" style="background:${i===0?p50:n100};border-radius:${rad};border:1px solid ${i===0?p500:'#e5e7eb'};">
+          <h3 style="color:${n900};font-family:'${hf}',sans-serif;">${t}</h3>
+          <p style="color:${n500};font-family:'${bf}',sans-serif;">Description text for this feature card.</p>
+        </div>
+      `).join('')}
+    </div>
+    <div style="padding:16px 24px;background:${n900};color:${n500};font-size:12px;font-family:'${bf}',sans-serif;text-align:center;">
+      Built with your Tailwind theme
+    </div>
+  `;
+}
+
+/* ===== Export ===== */
+function generateTailwindConfig() {
+  const colors = {};
+  for (const c of state.colors) {
+    colors[c.name] = {};
+    const scale = state.colorScales[c.name] || generateScale(c.base);
+    for (const sh of SHADES) colors[c.name][sh] = scale[sh];
+  }
+  const config = {
+    theme: {
+      extend: {
+        colors,
+        fontFamily: {
+          heading: [`'${state.headingFont}'`, 'sans-serif'],
+          body: [`'${state.bodyFont}'`, 'sans-serif']
+        },
+        fontSize: {},
+        spacing: {},
+        borderRadius: { ...state.radius },
+        boxShadow: { ...state.shadows },
+        screens: { ...state.breakpoints }
+      }
+    }
+  };
+  const r = state.scaleRatio, base = state.baseSize;
+  const sizes = { xs: base/r, sm: base*0.875, base: base, lg: base*r, xl: base*r*r, '2xl': base*r*r*r, '3xl': base*r*r*r*r, '4xl': base*r*r*r*r*r };
+  for (const [k,v] of Object.entries(sizes)) config.theme.extend.fontSize[k] = `${(v/16).toFixed(3)}rem`;
+  for (const k of SPACING_KEYS) config.theme.extend.spacing[k] = `${k*state.baseUnit/16}rem`;
+
+  return `/** @type {import('tailwindcss').Config} */\nmodule.exports = ${JSON.stringify(config, null, 2)}\n`;
+}
+
+function generateCSSVars() {
+  let css = ':root {\n';
+  for (const c of state.colors) {
+    const scale = state.colorScales[c.name] || generateScale(c.base);
+    for (const sh of SHADES) css += `  --color-${c.name}-${sh}: ${scale[sh]};\n`;
+  }
+  css += `\n  --font-heading: '${state.headingFont}', sans-serif;\n  --font-body: '${state.bodyFont}', sans-serif;\n  --font-size-base: ${state.baseSize}px;\n\n`;
+  for (const k of SPACING_KEYS) css += `  --spacing-${String(k).replace('.', '_')}: ${k*state.baseUnit}px;\n`;
+  css += '\n';
+  for (const [k,v] of Object.entries(state.radius)) css += `  --radius-${k === 'DEFAULT' ? 'default' : k}: ${v};\n`;
+  css += '\n';
+  for (const [k,v] of Object.entries(state.shadows)) css += `  --shadow-${k === 'DEFAULT' ? 'default' : k}: ${v};\n`;
+  css += '}\n';
+  return css;
+}
+
+function generateJSONTokens() {
+  const tokens = { color: {}, font: {}, fontSize: {}, spacing: {}, borderRadius: {}, boxShadow: {}, breakpoint: {} };
+  for (const c of state.colors) {
+    tokens.color[c.name] = {};
+    const scale = state.colorScales[c.name] || generateScale(c.base);
+    for (const sh of SHADES) tokens.color[c.name][sh] = { value: scale[sh] };
+  }
+  tokens.font.heading = { value: `'${state.headingFont}', sans-serif` };
+  tokens.font.body = { value: `'${state.bodyFont}', sans-serif` };
+  const r = state.scaleRatio, base = state.baseSize;
+  ['xs','sm','base','lg','xl','2xl','3xl','4xl'].forEach((k,i) => {
+    const sizes = [base/r, base*0.875, base, base*r, base*r*r, base*r*r*r, base*r*r*r*r, base*r*r*r*r*r];
+    tokens.fontSize[k] = { value: `${sizes[i].toFixed(1)}px` };
+  });
+  for (const k of SPACING_KEYS) tokens.spacing[k] = { value: `${k*state.baseUnit}px` };
+  for (const [k,v] of Object.entries(state.radius)) tokens.borderRadius[k] = { value: v };
+  for (const [k,v] of Object.entries(state.shadows)) tokens.boxShadow[k] = { value: v };
+  for (const [k,v] of Object.entries(state.breakpoints)) tokens.breakpoint[k] = { value: v };
+  return JSON.stringify(tokens, null, 2);
+}
+
+let currentExportType = 'tw';
+function showExport(type) {
+  currentExportType = type;
+  const output = document.getElementById('exportOutput');
+  if (type === 'tw') output.value = generateTailwindConfig();
+  else if (type === 'css') output.value = generateCSSVars();
+  else output.value = generateJSONTokens();
+}
+
+function copyExport() {
+  const output = document.getElementById('exportOutput');
+  navigator.clipboard.writeText(output.value);
+  toast('Copied to clipboard');
+}
+
+/* ===== Import ===== */
+function showImport() {
+  const w = document.getElementById('importWrap');
+  w.style.display = w.style.display === 'none' ? 'block' : 'none';
+}
+
+function doImport() {
+  try {
+    const raw = document.getElementById('importInput').value;
+    const match = raw.match(/module\.exports\s*=\s*(\{[\s\S]*\})/);
+    if (!match) { toast('Could not parse config'); return; }
+    const obj = eval('(' + match[1] + ')');
+    const ext = obj.theme?.extend || obj.theme || {};
+    if (ext.colors) {
+      state.colors = [];
+      for (const [name, val] of Object.entries(ext.colors)) {
+        if (typeof val === 'object' && val[500]) {
+          state.colors.push({ name, base: val[500] });
+        } else if (typeof val === 'string') {
+          state.colors.push({ name, base: val });
+        }
+      }
+    }
+    if (ext.borderRadius) Object.assign(state.radius, ext.borderRadius);
+    if (ext.boxShadow) Object.assign(state.shadows, ext.boxShadow);
+    if (ext.screens) Object.assign(state.breakpoints, ext.screens);
+    if (ext.fontFamily) {
+      if (ext.fontFamily.heading) state.headingFont = ext.fontFamily.heading[0].replace(/'/g,'');
+      if (ext.fontFamily.body) state.bodyFont = ext.fontFamily.body[0].replace(/'/g,'');
+    }
+    rebuildAll();
+    document.getElementById('importWrap').style.display = 'none';
+    toast('Config imported');
+  } catch(e) { toast('Parse error: ' + e.message); }
+}
+
+/* ===== Tabs ===== */
+document.querySelectorAll('#mainTabs .tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('#mainTabs .tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('sec-' + tab.dataset.tab).classList.add('active');
+    if (tab.dataset.tab === 'preview') renderLivePreview();
+    if (tab.dataset.tab === 'export') showExport(currentExportType);
+  });
+});
+
+/* ===== Toast ===== */
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+/* ===== Init ===== */
+function rebuildAll() {
+  document.getElementById('headingFont').value = state.headingFont;
+  document.getElementById('bodyFont').value = state.bodyFont;
+  document.getElementById('baseSize').value = state.baseSize;
+  document.getElementById('baseUnit').value = state.baseUnit;
+  renderColorGroups();
+  renderTypography();
+  renderSpacing();
+  renderRadius();
+  renderShadows();
+  renderBreakpoints();
+}
+
+renderPresets();
+rebuildAll();
+loadFonts();
+</script>
+<script src="/ai-queue.js"></script>
+<script src="/related.js"></script>
+</body>
+</html>
