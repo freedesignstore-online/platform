@@ -46,6 +46,20 @@ input[type=text]:focus{outline:none;border-color:var(--accent)}
 .variation.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(236,72,153,.2)}
 footer{text-align:center;padding:24px;font-size:.7rem;color:var(--muted);margin-top:20px}
 footer a{color:var(--accent);text-decoration:none}
+.hf-btn{position:fixed;bottom:40px;right:40px;z-index:1000;background:var(--accent);color:#fff;border:none;padding:8px 18px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(236,72,153,.3);transition:transform .15s}.hf-btn:hover{transform:scale(1.05)}
+.hf-panel{position:fixed;bottom:0;left:0;right:0;z-index:1001;background:var(--panel);border-top:1px solid var(--line);box-shadow:0 -4px 20px rgba(0,0,0,.1);max-height:0;overflow:hidden;transition:max-height .3s ease}.hf-panel.open{max-height:340px}
+.hf-panel-inner{padding:16px 20px;overflow-y:auto;max-height:320px}
+.hf-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.hf-tabs{display:flex;gap:8px}
+.hf-tab{padding:5px 12px;border-radius:6px;font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid var(--line);background:var(--bg);font-family:inherit}.hf-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.hf-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--muted);padding:4px 8px}
+.hf-items{display:flex;gap:8px;flex-wrap:wrap}
+.hf-item{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:.7rem;transition:border-color .15s;position:relative;min-width:120px}.hf-item:hover{border-color:var(--accent)}
+.hf-item .hf-heart{position:absolute;top:4px;right:6px;background:none;border:none;cursor:pointer;font-size:.85rem;opacity:.5}.hf-item .hf-heart:hover{opacity:1}
+.hf-item-color{width:14px;height:14px;border-radius:3px;display:inline-block;vertical-align:middle;margin-right:4px}
+.hf-item-title{font-weight:600;margin-bottom:2px}
+.hf-item-meta{color:var(--muted);font-size:.65rem}
+.hf-empty{color:var(--muted);font-size:.75rem;padding:16px;text-align:center}
 </style>
 </head>
 <body>
@@ -296,6 +310,131 @@ document.getElementById('tagline').oninput=render;
 document.getElementById('customColor').oninput=e=>{if(/^#[0-9a-f]{6}$/i.test(e.target.value)){state.color=e.target.value;render();}};
 
 render();
+</script>
+<button class="hf-btn" id="hfToggle">History & Favorites</button>
+<div class="hf-panel" id="hfPanel">
+<div class="hf-panel-inner">
+<div class="hf-header">
+<div class="hf-tabs">
+<button class="hf-tab active" data-tab="history" id="hfTabHistory">History (0)</button>
+<button class="hf-tab" data-tab="favorites" id="hfTabFavs">Favorites (0)</button>
+</div>
+<button class="hf-close" id="hfClose">&times;</button>
+</div>
+<div class="hf-items" id="hfItems"></div>
+</div>
+</div>
+
+<script>
+(function(){
+const KEY_H='fds-logo-history', KEY_F='fds-logo-favorites';
+function load(k){try{return JSON.parse(localStorage.getItem(k))||[];}catch(e){return[];}}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v));}
+
+let currentTab='history';
+
+function getState(){
+  return {
+    font:state.font, style:state.style, color:state.color, layout:state.layout, icon:state.icon,
+    name:document.getElementById('brandName').value||'Acme',
+    tagline:document.getElementById('tagline').value||'',
+    ts:Date.now()
+  };
+}
+
+function addHistory(){
+  const h=load(KEY_H);
+  const s=getState();
+  h.unshift(s);
+  if(h.length>10)h.length=10;
+  save(KEY_H,h);
+  updateCounts();
+  if(currentTab==='history')renderItems();
+}
+
+function addFavorite(){
+  const f=load(KEY_F);
+  const s=getState();
+  f.unshift(s);
+  if(f.length>20)f.length=20;
+  save(KEY_F,f);
+  updateCounts();
+  if(currentTab==='favorites')renderItems();
+}
+
+function removeFavorite(idx){
+  const f=load(KEY_F);
+  f.splice(idx,1);
+  save(KEY_F,f);
+  updateCounts();
+  renderItems();
+}
+
+function restoreState(s){
+  state.font=s.font; state.style=s.style; state.color=s.color; state.layout=s.layout; state.icon=s.icon;
+  document.getElementById('brandName').value=s.name||'Acme';
+  document.getElementById('tagline').value=s.tagline||'';
+  render();
+}
+
+function updateCounts(){
+  const h=load(KEY_H), f=load(KEY_F);
+  document.getElementById('hfTabHistory').textContent='History ('+h.length+')';
+  document.getElementById('hfTabFavs').textContent='Favorites ('+f.length+')';
+}
+
+function fmtTime(ts){const d=new Date(ts);return d.toLocaleDateString()+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+
+function renderItems(){
+  const container=document.getElementById('hfItems');
+  const items=currentTab==='history'?load(KEY_H):load(KEY_F);
+  if(!items.length){container.innerHTML='<div class="hf-empty">No '+(currentTab==='history'?'history':'favorites')+' yet.</div>';return;}
+  container.innerHTML=items.map((it,i)=>{
+    const heartBtn=currentTab==='history'
+      ?`<button class="hf-heart" data-fav="${i}" title="Save to favorites">&hearts;</button>`
+      :`<button class="hf-heart" data-rmfav="${i}" title="Remove">&times;</button>`;
+    return `<div class="hf-item" data-restore="${i}">
+      ${heartBtn}
+      <div class="hf-item-title"><span class="hf-item-color" style="background:${it.color}"></span>${it.name||'Acme'}</div>
+      <div class="hf-item-meta">${FONTS[it.font]?.name||'?'} / ${STYLES[it.style]?.label||'?'} / ${LAYOUTS[it.layout]?.label||'?'}</div>
+      <div class="hf-item-meta">${fmtTime(it.ts)}</div>
+    </div>`;
+  }).join('');
+}
+
+// Events
+document.getElementById('hfToggle').onclick=()=>document.getElementById('hfPanel').classList.toggle('open');
+document.getElementById('hfClose').onclick=()=>document.getElementById('hfPanel').classList.remove('open');
+
+document.querySelectorAll('.hf-tab').forEach(tab=>{
+  tab.onclick=()=>{
+    document.querySelectorAll('.hf-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    currentTab=tab.dataset.tab;
+    renderItems();
+  };
+});
+
+document.getElementById('hfItems').addEventListener('click',e=>{
+  const favBtn=e.target.closest('[data-fav]');
+  if(favBtn){e.stopPropagation();const items=load(KEY_H);addFavorite();return;}
+  const rmBtn=e.target.closest('[data-rmfav]');
+  if(rmBtn){e.stopPropagation();removeFavorite(+rmBtn.dataset.rmfav);return;}
+  const item=e.target.closest('[data-restore]');
+  if(item){const items=currentTab==='history'?load(KEY_H):load(KEY_F);restoreState(items[+item.dataset.restore]);}
+});
+
+// Hook into render to auto-save history on meaningful actions
+const origRender=render;
+let lastSaved='';
+window.render=function(){
+  origRender();
+  const s=JSON.stringify({font:state.font,style:state.style,color:state.color,layout:state.layout,name:document.getElementById('brandName').value});
+  if(s!==lastSaved){lastSaved=s;addHistory();}
+};
+
+updateCounts();
+})();
 </script>
 <script src="/related.js"></script>
 </body>

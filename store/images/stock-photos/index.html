@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Stock Photo Library - FreeDesignStore</title>
+<link rel="icon" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a { color: #ec4899; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; font-size: 14px; color: #6b7280; }
+.back:hover { color: #ec4899; text-decoration: none; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.subtitle { color: #6b7280; margin-bottom: 24px; font-size: 15px; }
+.container { max-width: 1200px; margin: 0 auto; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
+.btn { padding: 8px 16px; border-radius: 8px; border: none; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-primary:hover { background: #db2777; }
+.btn-secondary { background: #fff; border: 1px solid #e5e7eb; color: #1a1a1a; }
+.btn-secondary:hover { border-color: #ec4899; color: #ec4899; }
+.btn-sm { padding: 6px 10px; font-size: 12px; }
+.api-key-bar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+.api-key-bar input { flex: 1; min-width: 250px; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 13px; }
+.api-key-bar .status { font-size: 12px; color: #6b7280; }
+.api-key-bar .status.active { color: #10b981; font-weight: 600; }
+.search-bar { display: flex; gap: 10px; margin-bottom: 16px; }
+.search-bar input { flex: 1; padding: 10px 16px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; }
+.search-bar input:focus { outline: none; border-color: #ec4899; }
+.categories { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.cat-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 500; transition: all .15s; }
+.cat-btn:hover, .cat-btn.active { background: #ec4899; color: #fff; border-color: #ec4899; }
+.masonry { column-count: 3; column-gap: 16px; }
+@media (max-width: 900px) { .masonry { column-count: 2; } }
+@media (max-width: 600px) { .masonry { column-count: 1; } }
+.photo-card { break-inside: avoid; margin-bottom: 16px; border-radius: 10px; overflow: hidden; position: relative; background: #fff; border: 1px solid #e5e7eb; cursor: pointer; transition: transform .15s, box-shadow .15s; }
+.photo-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.1); }
+.photo-card .thumb { width: 100%; display: block; }
+.photo-card .placeholder { width: 100%; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.3); }
+.photo-card .overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 12px; background: linear-gradient(transparent, rgba(0,0,0,.6)); display: flex; align-items: center; justify-content: space-between; opacity: 0; transition: opacity .2s; }
+.photo-card:hover .overlay { opacity: 1; }
+.overlay .label { color: #fff; font-size: 12px; font-weight: 500; }
+.overlay .actions { display: flex; gap: 6px; }
+.icon-btn { width: 30px; height: 30px; border-radius: 50%; border: none; background: rgba(255,255,255,.9); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: background .15s; }
+.icon-btn:hover { background: #ec4899; color: #fff; }
+.icon-btn.fav-active { background: #ec4899; color: #fff; }
+.tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
+.tab { padding: 8px 16px; border-radius: 8px 8px 0 0; border: none; background: transparent; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 500; color: #6b7280; }
+.tab.active { color: #ec4899; border-bottom: 2px solid #ec4899; }
+.section { display: none; }
+.section.active { display: block; }
+.drop-zone { border: 2px dashed #e5e7eb; border-radius: 12px; padding: 40px; text-align: center; color: #6b7280; transition: all .2s; margin-bottom: 16px; }
+.drop-zone.dragover { border-color: #ec4899; background: #fdf2f8; }
+.drop-zone p { margin-bottom: 8px; }
+.upload-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.upload-card { border-radius: 8px; overflow: hidden; position: relative; border: 1px solid #e5e7eb; aspect-ratio: 1; }
+.upload-card img { width: 100%; height: 100%; object-fit: cover; }
+.upload-card .upload-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; gap: 6px; opacity: 0; transition: opacity .2s; }
+.upload-card:hover .upload-overlay { opacity: 1; }
+.tag-input { display: flex; gap: 6px; margin-top: 8px; }
+.tag-input input { flex: 1; padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 12px; }
+.tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+.tag { padding: 2px 8px; border-radius: 12px; background: #fdf2f8; color: #ec4899; font-size: 11px; }
+.empty-state { text-align: center; padding: 40px; color: #9ca3af; }
+.history-list { display: flex; flex-direction: column; gap: 8px; }
+.history-item { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 8px; border: 1px solid #e5e7eb; }
+.history-item img, .history-item .hist-placeholder { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; }
+.history-item .hist-placeholder { display: flex; align-items: center; justify-content: center; font-size: 10px; color: #fff; }
+.history-item .hist-info { flex: 1; }
+.history-item .hist-info .name { font-size: 13px; font-weight: 500; }
+.history-item .hist-info .time { font-size: 11px; color: #9ca3af; }
+.badge { position: absolute; top: 8px; right: 8px; padding: 2px 8px; border-radius: 10px; background: rgba(236,72,153,.9); color: #fff; font-size: 10px; font-weight: 600; }
+.privacy-note { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; font-size: 12px; color: #166534; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="back">&larr; Back to FreeDesignStore</a>
+  <h1>Free Stock Photo Library</h1>
+  <p class="subtitle">Browse curated photos by category, upload your own, or connect your Unsplash API key for unlimited real photos.</p>
+
+  <div class="panel">
+    <div class="api-key-bar">
+      <input type="text" id="apiKey" placeholder="Unsplash Access Key (optional) - get one free at unsplash.com/developers">
+      <button class="btn btn-secondary btn-sm" onclick="connectApi()">Connect</button>
+      <span class="status" id="apiStatus">No API key - showing placeholders</span>
+    </div>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search photos..." onkeydown="if(event.key==='Enter')searchPhotos()">
+      <button class="btn btn-primary" onclick="searchPhotos()">Search</button>
+    </div>
+    <div class="categories" id="categories"></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="browse" onclick="switchTab('browse')">Browse</button>
+    <button class="tab" data-tab="uploads" onclick="switchTab('uploads')">My Uploads</button>
+    <button class="tab" data-tab="favorites" onclick="switchTab('favorites')">Favorites</button>
+    <button class="tab" data-tab="history" onclick="switchTab('history')">History</button>
+  </div>
+
+  <div class="section active" id="sec-browse">
+    <div class="masonry" id="gallery"></div>
+  </div>
+
+  <div class="section" id="sec-uploads">
+    <div class="privacy-note">All uploaded files stay on YOUR device. Nothing is uploaded anywhere - stored in your browser's IndexedDB.</div>
+    <div class="drop-zone" id="dropZone">
+      <p><strong>Drag & drop images here</strong></p>
+      <p style="font-size:12px;">or click to browse files</p>
+      <input type="file" id="fileInput" multiple accept="image/*" style="display:none">
+    </div>
+    <div class="tag-input" id="uploadTagInput" style="display:none;">
+      <input type="text" id="tagField" placeholder="Add tags (comma separated)">
+      <button class="btn btn-sm btn-primary" onclick="saveUploadTags()">Save Tags</button>
+    </div>
+    <div class="upload-grid" id="uploadsGrid"></div>
+    <p class="empty-state" id="uploadsEmpty">No uploads yet. Drag & drop photos above to start your collection.</p>
+  </div>
+
+  <div class="section" id="sec-favorites">
+    <div class="masonry" id="favGallery"></div>
+    <p class="empty-state" id="favEmpty">No favorites yet. Click the heart icon on any photo to save it here.</p>
+  </div>
+
+  <div class="section" id="sec-history">
+    <div class="history-list" id="historyList"></div>
+    <p class="empty-state" id="histEmpty">No history yet. Browse and interact with photos to see your activity here.</p>
+  </div>
+</div>
+
+<script>
+const CATEGORIES = ['Nature','Business','Technology','Food','People','Architecture','Travel','Abstract'];
+const GRADIENTS = [
+  'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+  'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+  'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+  'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+  'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
+  'linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)',
+  'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)',
+  'linear-gradient(135deg, #f5576c 0%, #ff6f91 50%, #ffc75f 100%)',
+  'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+  'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
+  'linear-gradient(135deg, #fddb92 0%, #d1fdff 100%)',
+  'linear-gradient(135deg, #9890e3 0%, #b1f4cf 100%)',
+  'linear-gradient(135deg, #ebc0fd 0%, #d9ded8 100%)',
+  'linear-gradient(135deg, #96fbc4 0%, #f9f586 100%)',
+  'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+  'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+  'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)',
+  'linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)',
+  'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
+  'linear-gradient(135deg, #cfd9df 0%, #e2ebf0 100%)',
+  'linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%)',
+  'linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)',
+  'linear-gradient(135deg, #37ecba 0%, #72afd3 100%)',
+  'linear-gradient(135deg, #ebbba7 0%, #cfc7f8 100%)',
+  'linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%)',
+  'linear-gradient(135deg, #c1dfc4 0%, #deecdd 100%)',
+  'linear-gradient(135deg, #0ba360 0%, #3cba92 100%)',
+  'linear-gradient(135deg, #00c6fb 0%, #005bea 100%)',
+  'linear-gradient(135deg, #d5dee7 0%, #ffafbd 50%, #c9ffbf 100%)'
+];
+const ASPECTS = [0.75, 1, 1.2, 0.8, 1.33, 0.66, 1, 0.9, 1.1, 0.85];
+
+let apiKey = localStorage.getItem('unsplash_key') || '';
+let favorites = JSON.parse(localStorage.getItem('sp_favorites') || '[]');
+let history = JSON.parse(localStorage.getItem('sp_history') || '[]');
+let currentCategory = 'All';
+let db = null;
+let pendingUploadId = null;
+
+// IndexedDB setup
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('StockPhotosDB', 1);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('uploads')) {
+        const store = d.createObjectStore('uploads', { keyPath: 'id' });
+        store.createIndex('category', 'category', { unique: false });
+      }
+    };
+    req.onsuccess = e => { db = e.target.result; resolve(db); };
+    req.onerror = e => reject(e);
+  });
+}
+
+// Init
+async function init() {
+  await openDB();
+  if (apiKey) {
+    document.getElementById('apiKey').value = apiKey;
+    document.getElementById('apiStatus').textContent = 'Connected to Unsplash';
+    document.getElementById('apiStatus').classList.add('active');
+  }
+  renderCategories();
+  renderGallery();
+  setupDragDrop();
+}
+
+function renderCategories() {
+  const cont = document.getElementById('categories');
+  cont.innerHTML = '';
+  ['All', ...CATEGORIES].forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn' + (cat === currentCategory ? ' active' : '');
+    btn.textContent = cat;
+    btn.onclick = () => { currentCategory = cat; renderCategories(); renderGallery(); };
+    cont.appendChild(btn);
+  });
+}
+
+function renderGallery() {
+  const gallery = document.getElementById('gallery');
+  gallery.innerHTML = '';
+  if (apiKey) {
+    fetchUnsplash(currentCategory === 'All' ? 'design' : currentCategory);
+  } else {
+    renderPlaceholders(gallery);
+  }
+}
+
+function renderPlaceholders(gallery) {
+  const cats = currentCategory === 'All' ? CATEGORIES : [currentCategory];
+  let idx = 0;
+  cats.forEach(cat => {
+    const count = currentCategory === 'All' ? 4 : 30;
+    for (let i = 0; i < count; i++) {
+      const card = createPlaceholderCard(cat, idx);
+      gallery.appendChild(card);
+      idx++;
+    }
+  });
+}
+
+function createPlaceholderCard(cat, idx) {
+  const card = document.createElement('div');
+  card.className = 'photo-card';
+  const gradIdx = idx % GRADIENTS.length;
+  const aspect = ASPECTS[idx % ASPECTS.length];
+  const id = `placeholder-${cat}-${idx}`;
+  const isFav = favorites.includes(id);
+  card.innerHTML = `
+    <div class="placeholder" style="background:${GRADIENTS[gradIdx]};aspect-ratio:${aspect};">${cat}</div>
+    <div class="overlay">
+      <span class="label">${cat} #${idx + 1}</span>
+      <div class="actions">
+        <button class="icon-btn ${isFav ? 'fav-active' : ''}" onclick="toggleFav('${id}','${cat}',${gradIdx},${aspect},event)" title="Favorite">&#9829;</button>
+        <button class="icon-btn" onclick="downloadPlaceholder(event)" title="Download">&#8595;</button>
+      </div>
+    </div>
+  `;
+  card.onclick = () => addToHistory(id, cat);
+  return card;
+}
+
+async function fetchUnsplash(query) {
+  const gallery = document.getElementById('gallery');
+  gallery.innerHTML = '<p style="color:#6b7280;padding:20px;">Loading from Unsplash...</p>';
+  try {
+    const res = await fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=30&client_id=${apiKey}`);
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+    gallery.innerHTML = '';
+    data.results.forEach((photo, i) => {
+      const card = document.createElement('div');
+      card.className = 'photo-card';
+      const id = `unsplash-${photo.id}`;
+      const isFav = favorites.includes(id);
+      card.innerHTML = `
+        <img class="thumb" src="${photo.urls.small}" alt="${photo.alt_description || query}" loading="lazy">
+        <div class="overlay">
+          <span class="label">${photo.user.name}</span>
+          <div class="actions">
+            <button class="icon-btn ${isFav ? 'fav-active' : ''}" onclick="toggleFav('${id}','${query}',0,0,event)" title="Favorite">&#9829;</button>
+            <a href="${photo.links.download}" target="_blank" class="icon-btn" onclick="event.stopPropagation()" title="Download">&#8595;</a>
+          </div>
+        </div>
+      `;
+      card.onclick = () => addToHistory(id, photo.alt_description || query);
+      gallery.appendChild(card);
+    });
+    if (data.results.length === 0) {
+      gallery.innerHTML = '<p class="empty-state">No results found. Try a different search term.</p>';
+    }
+  } catch (err) {
+    gallery.innerHTML = '<p style="color:#dc2626;padding:20px;">Failed to fetch from Unsplash. Check your API key and try again.</p>';
+    renderPlaceholders(gallery);
+  }
+}
+
+function searchPhotos() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) { renderGallery(); return; }
+  if (apiKey) {
+    fetchUnsplash(q);
+  } else {
+    const gallery = document.getElementById('gallery');
+    gallery.innerHTML = '';
+    const match = CATEGORIES.filter(c => c.toLowerCase().includes(q.toLowerCase()));
+    if (match.length) {
+      let idx = 0;
+      match.forEach(cat => {
+        for (let i = 0; i < 8; i++) {
+          gallery.appendChild(createPlaceholderCard(cat, idx++));
+        }
+      });
+    } else {
+      gallery.innerHTML = '<p class="empty-state">No matching categories. Try: Nature, Business, Technology, Food, People, Architecture, Travel, Abstract</p>';
+    }
+  }
+  addToHistory('search', `Search: "${q}"`);
+}
+
+function connectApi() {
+  const key = document.getElementById('apiKey').value.trim();
+  if (key) {
+    apiKey = key;
+    localStorage.setItem('unsplash_key', key);
+    document.getElementById('apiStatus').textContent = 'Connected to Unsplash';
+    document.getElementById('apiStatus').classList.add('active');
+    renderGallery();
+  } else {
+    apiKey = '';
+    localStorage.removeItem('unsplash_key');
+    document.getElementById('apiStatus').textContent = 'No API key - showing placeholders';
+    document.getElementById('apiStatus').classList.remove('active');
+    renderGallery();
+  }
+}
+
+function toggleFav(id, label, gradIdx, aspect, e) {
+  e.stopPropagation();
+  const idx = favorites.indexOf(id);
+  if (idx >= 0) {
+    favorites.splice(idx, 1);
+  } else {
+    favorites.push(id);
+  }
+  localStorage.setItem('sp_favorites', JSON.stringify(favorites));
+  renderGallery();
+  if (document.getElementById('sec-favorites').classList.contains('active')) renderFavorites();
+}
+
+function addToHistory(id, label) {
+  history = history.filter(h => h.id !== id);
+  history.unshift({ id, label, time: Date.now() });
+  if (history.length > 50) history = history.slice(0, 50);
+  localStorage.setItem('sp_history', JSON.stringify(history));
+}
+
+function downloadPlaceholder(e) {
+  e.stopPropagation();
+  alert('Connect your free Unsplash API key (unsplash.com/developers) to download real photos. For uploaded photos, use the My Uploads tab.');
+}
+
+// Tabs
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(`sec-${tab}`).classList.add('active');
+  if (tab === 'uploads') renderUploads();
+  if (tab === 'favorites') renderFavorites();
+  if (tab === 'history') renderHistory();
+}
+
+// Uploads
+function setupDragDrop() {
+  const zone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  zone.onclick = () => fileInput.click();
+  zone.ondragover = e => { e.preventDefault(); zone.classList.add('dragover'); };
+  zone.ondragleave = () => zone.classList.remove('dragover');
+  zone.ondrop = e => { e.preventDefault(); zone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); };
+  fileInput.onchange = e => handleFiles(e.target.files);
+}
+
+function handleFiles(files) {
+  Array.from(files).forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const item = { id: 'upload-' + Date.now() + '-' + Math.random().toString(36).slice(2), name: file.name, data: e.target.result, tags: [], category: 'Uncategorized', date: Date.now() };
+      const tx = db.transaction('uploads', 'readwrite');
+      tx.objectStore('uploads').add(item);
+      tx.oncomplete = () => renderUploads();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderUploads() {
+  const grid = document.getElementById('uploadsGrid');
+  const empty = document.getElementById('uploadsEmpty');
+  const tx = db.transaction('uploads', 'readonly');
+  const store = tx.objectStore('uploads');
+  const req = store.getAll();
+  req.onsuccess = () => {
+    const items = req.result;
+    if (items.length === 0) { grid.innerHTML = ''; empty.style.display = ''; return; }
+    empty.style.display = 'none';
+    grid.innerHTML = items.map(item => `
+      <div class="upload-card">
+        <img src="${item.data}" alt="${item.name}">
+        <div class="upload-overlay">
+          <button class="icon-btn" onclick="downloadUpload('${item.id}')" title="Download">&#8595;</button>
+          <button class="icon-btn" onclick="tagUpload('${item.id}')" title="Tag">&#9998;</button>
+          <button class="icon-btn" onclick="deleteUpload('${item.id}')" title="Delete">&#10005;</button>
+        </div>
+        ${item.tags.length ? `<div style="position:absolute;bottom:4px;left:4px;display:flex;gap:2px;flex-wrap:wrap;">${item.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>` : ''}
+      </div>
+    `).join('');
+  };
+}
+
+function downloadUpload(id) {
+  const tx = db.transaction('uploads', 'readonly');
+  const req = tx.objectStore('uploads').get(id);
+  req.onsuccess = () => {
+    const item = req.result;
+    if (!item) return;
+    const a = document.createElement('a');
+    a.href = item.data;
+    a.download = item.name;
+    a.click();
+    addToHistory(id, `Downloaded: ${item.name}`);
+  };
+}
+
+function tagUpload(id) {
+  pendingUploadId = id;
+  const tagInput = document.getElementById('uploadTagInput');
+  tagInput.style.display = 'flex';
+  document.getElementById('tagField').focus();
+}
+
+function saveUploadTags() {
+  if (!pendingUploadId) return;
+  const tags = document.getElementById('tagField').value.split(',').map(t => t.trim()).filter(Boolean);
+  const tx = db.transaction('uploads', 'readwrite');
+  const store = tx.objectStore('uploads');
+  const req = store.get(pendingUploadId);
+  req.onsuccess = () => {
+    const item = req.result;
+    item.tags = [...new Set([...item.tags, ...tags])];
+    store.put(item);
+    tx.oncomplete = () => {
+      document.getElementById('uploadTagInput').style.display = 'none';
+      document.getElementById('tagField').value = '';
+      pendingUploadId = null;
+      renderUploads();
+    };
+  };
+}
+
+function deleteUpload(id) {
+  if (!confirm('Delete this upload?')) return;
+  const tx = db.transaction('uploads', 'readwrite');
+  tx.objectStore('uploads').delete(id);
+  tx.oncomplete = () => renderUploads();
+}
+
+// Favorites
+function renderFavorites() {
+  const gallery = document.getElementById('favGallery');
+  const empty = document.getElementById('favEmpty');
+  if (favorites.length === 0) { gallery.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  gallery.innerHTML = '';
+  favorites.forEach((id, i) => {
+    const card = document.createElement('div');
+    card.className = 'photo-card';
+    if (id.startsWith('placeholder-')) {
+      const parts = id.split('-');
+      const cat = parts[1];
+      const gradIdx = i % GRADIENTS.length;
+      card.innerHTML = `
+        <div class="placeholder" style="background:${GRADIENTS[gradIdx]};aspect-ratio:1;">${cat}</div>
+        <span class="badge">Favorite</span>
+        <div class="overlay">
+          <span class="label">${cat}</span>
+          <div class="actions">
+            <button class="icon-btn fav-active" onclick="toggleFav('${id}','${cat}',0,0,event)" title="Remove">&#9829;</button>
+          </div>
+        </div>
+      `;
+    } else {
+      card.innerHTML = `<div class="placeholder" style="background:${GRADIENTS[i % GRADIENTS.length]};aspect-ratio:1;">${id.split('-')[0]}</div>`;
+    }
+    gallery.appendChild(card);
+  });
+}
+
+// History
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  const empty = document.getElementById('histEmpty');
+  if (history.length === 0) { list.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  list.innerHTML = history.slice(0, 20).map((h, i) => `
+    <div class="history-item">
+      <div class="hist-placeholder" style="background:${GRADIENTS[i % GRADIENTS.length]};width:48px;height:48px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;">${h.label.slice(0, 3)}</div>
+      <div class="hist-info">
+        <div class="name">${h.label}</div>
+        <div class="time">${new Date(h.time).toLocaleString()}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+init();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

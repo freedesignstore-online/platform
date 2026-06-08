@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Logo & Brand Asset Library - FreeDesignStore</title>
+<link rel="icon" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a { color: #ec4899; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; font-size: 14px; color: #6b7280; }
+.back:hover { color: #ec4899; text-decoration: none; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.subtitle { color: #6b7280; margin-bottom: 24px; font-size: 15px; }
+.container { max-width: 1200px; margin: 0 auto; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
+.btn { padding: 8px 16px; border-radius: 8px; border: none; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-primary:hover { background: #db2777; }
+.btn-secondary { background: #fff; border: 1px solid #e5e7eb; color: #1a1a1a; }
+.btn-secondary:hover { border-color: #ec4899; color: #ec4899; }
+.btn-sm { padding: 6px 10px; font-size: 12px; }
+.categories { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.cat-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 500; transition: all .15s; }
+.cat-btn:hover, .cat-btn.active { background: #ec4899; color: #fff; border-color: #ec4899; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+@media (max-width: 600px) { .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } }
+.logo-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all .15s; position: relative; }
+.logo-card:hover { border-color: #ec4899; box-shadow: 0 4px 16px rgba(236,72,153,.1); transform: translateY(-2px); }
+.logo-card svg { width: 100%; height: 100px; margin-bottom: 12px; }
+.logo-card .name { font-size: 12px; font-weight: 500; color: #6b7280; }
+.logo-card .fav-btn { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border-radius: 50%; border: none; background: #f3f4f6; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.logo-card .fav-btn:hover, .logo-card .fav-btn.active { background: #ec4899; color: #fff; }
+.editor-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+.editor-overlay.hidden { display: none; }
+.editor { background: #fff; border-radius: 16px; width: 100%; max-width: 700px; max-height: 90vh; overflow-y: auto; padding: 32px; }
+.editor h2 { font-size: 20px; margin-bottom: 16px; }
+.editor-preview { width: 100%; height: 180px; display: flex; align-items: center; justify-content: center; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 20px; }
+.editor-preview svg { width: 160px; height: 160px; }
+.editor-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+@media (max-width: 600px) { .editor-fields { grid-template-columns: 1fr; } }
+.editor-fields label { display: block; font-size: 12px; font-weight: 500; color: #6b7280; margin-bottom: 4px; }
+.editor-fields input { width: 100%; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; }
+.editor-fields input[type="color"] { height: 40px; padding: 4px; cursor: pointer; }
+.editor-actions { display: flex; gap: 10px; justify-content: flex-end; }
+.tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
+.tab { padding: 8px 16px; border-radius: 8px 8px 0 0; border: none; background: transparent; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 500; color: #6b7280; }
+.tab.active { color: #ec4899; border-bottom: 2px solid #ec4899; }
+.section { display: none; }
+.section.active { display: block; }
+.recent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+.recent-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; transition: border-color .15s; }
+.recent-card:hover { border-color: #ec4899; }
+.recent-card svg { width: 80px; height: 60px; }
+.recent-card .time { font-size: 10px; color: #9ca3af; margin-top: 4px; }
+.empty-state { text-align: center; padding: 40px; color: #9ca3af; }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="back">&larr; Back to FreeDesignStore</a>
+  <h1>Free Logo & Brand Asset Library</h1>
+  <p class="subtitle">24 customizable SVG logo templates. Click any logo to edit text, colors, and icons. Download as SVG for free.</p>
+
+  <div class="panel">
+    <div class="categories" id="categories"></div>
+    <div class="tabs">
+      <button class="tab active" data-tab="all" onclick="switchTab('all')">All Logos</button>
+      <button class="tab" data-tab="favorites" onclick="switchTab('favorites')">Favorites</button>
+      <button class="tab" data-tab="recent" onclick="switchTab('recent')">Recent</button>
+    </div>
+    <div class="section active" id="sec-all">
+      <div class="grid" id="logoGrid"></div>
+    </div>
+    <div class="section" id="sec-favorites">
+      <div class="grid" id="favGrid"></div>
+      <p class="empty-state" id="favEmpty">No favorites yet. Click the heart on any logo to save it here.</p>
+    </div>
+    <div class="section" id="sec-recent">
+      <div class="recent-grid" id="recentGrid"></div>
+      <p class="empty-state" id="recentEmpty">No recent customizations yet. Edit a logo to see it here.</p>
+    </div>
+  </div>
+</div>
+
+<div class="editor-overlay hidden" id="editorOverlay" onclick="if(event.target===this)closeEditor()">
+  <div class="editor">
+    <h2 id="editorTitle">Customize Logo</h2>
+    <div class="editor-preview" id="editorPreview"></div>
+    <div class="editor-fields">
+      <div><label>Text (line 1)</label><input id="edText1" oninput="updatePreview()"></div>
+      <div><label>Text (line 2)</label><input id="edText2" oninput="updatePreview()"></div>
+      <div><label>Primary Color</label><input type="color" id="edColor1" value="#ec4899" oninput="updatePreview()"></div>
+      <div><label>Secondary Color</label><input type="color" id="edColor2" value="#1a1a1a" oninput="updatePreview()"></div>
+      <div><label>Background</label><input type="color" id="edBg" value="#ffffff" oninput="updatePreview()"></div>
+      <div><label>Font Size</label><input type="number" id="edSize" value="24" min="10" max="60" oninput="updatePreview()"></div>
+    </div>
+    <div class="editor-actions">
+      <button class="btn btn-secondary" onclick="closeEditor()">Cancel</button>
+      <button class="btn btn-primary" onclick="downloadLogo()">Download SVG</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const LOGO_CATEGORIES = ['Minimal','Geometric','Wordmark','Monogram','Icon+Text','Badge'];
+const logos = [];
+let favorites = JSON.parse(localStorage.getItem('fl_favorites') || '[]');
+let recent = JSON.parse(localStorage.getItem('fl_recent') || '[]');
+let currentCategory = 'All';
+let editingLogo = null;
+let editState = {};
+
+// Logo template generators
+function genMinimal(idx) {
+  const shapes = [
+    `<circle cx="50" cy="40" r="18" fill="COLOR1" opacity="0.9"/><text x="50" y="75" text-anchor="middle" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="700" fill="COLOR2">TEXT1</text>`,
+    `<rect x="30" y="25" width="40" height="30" rx="4" fill="COLOR1"/><text x="50" y="78" text-anchor="middle" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="700" fill="COLOR2">TEXT1</text>`,
+    `<line x1="20" y1="50" x2="80" y2="50" stroke="COLOR1" stroke-width="3"/><text x="50" y="42" text-anchor="middle" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="700" fill="COLOR2">TEXT1</text>`,
+    `<polygon points="50,20 70,45 50,70 30,45" fill="COLOR1" opacity="0.8"/><text x="50" y="88" text-anchor="middle" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="600" fill="COLOR2">TEXT1</text>`
+  ];
+  return shapes[idx % shapes.length];
+}
+
+function genGeometric(idx) {
+  const shapes = [
+    `<polygon points="50,15 85,75 15,75" fill="none" stroke="COLOR1" stroke-width="3"/><text x="50" y="60" text-anchor="middle" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="700" fill="COLOR2">TEXT1</text>`,
+    `<circle cx="50" cy="50" r="30" fill="none" stroke="COLOR1" stroke-width="2.5"/><circle cx="50" cy="50" r="20" fill="COLOR1" opacity="0.2"/><text x="50" y="55" text-anchor="middle" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="700" fill="COLOR2">TEXT1</text>`,
+    `<rect x="20" y="20" width="60" height="60" fill="none" stroke="COLOR1" stroke-width="2.5" transform="rotate(45 50 50)"/><text x="50" y="55" text-anchor="middle" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="700" fill="COLOR2">TEXT1</text>`,
+    `<path d="M50 15 L80 35 L80 65 L50 85 L20 65 L20 35 Z" fill="none" stroke="COLOR1" stroke-width="2.5"/><text x="50" y="55" text-anchor="middle" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="700" fill="COLOR2">TEXT1</text>`
+  ];
+  return shapes[idx % shapes.length];
+}
+
+function genWordmark(idx) {
+  const styles = [
+    `<text x="50" y="50" text-anchor="middle" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="700" fill="COLOR2">TEXT1</text><text x="50" y="70" text-anchor="middle" font-family="Manrope,sans-serif" font-size="10" fill="COLOR1" letter-spacing="3">TEXT2</text>`,
+    `<text x="50" y="55" text-anchor="middle" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="800" fill="COLOR1">TEXT1</text><line x1="20" y1="65" x2="80" y2="65" stroke="COLOR2" stroke-width="1.5"/>`,
+    `<text x="50" y="48" text-anchor="middle" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="300" fill="COLOR2" letter-spacing="4">TEXT1</text><text x="50" y="68" text-anchor="middle" font-family="Manrope,sans-serif" font-size="10" font-weight="700" fill="COLOR1">TEXT2</text>`,
+    `<rect x="10" y="30" width="80" height="40" rx="6" fill="COLOR1" opacity="0.1"/><text x="50" y="55" text-anchor="middle" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="700" fill="COLOR1">TEXT1</text>`
+  ];
+  return styles[idx % styles.length];
+}
+
+function genMonogram(idx) {
+  const styles = [
+    `<circle cx="50" cy="50" r="32" fill="COLOR1"/><text x="50" y="58" text-anchor="middle" font-family="Manrope,sans-serif" font-size="28" font-weight="700" fill="BG">TEXT1</text>`,
+    `<rect x="18" y="18" width="64" height="64" rx="12" fill="COLOR1"/><text x="50" y="58" text-anchor="middle" font-family="Manrope,sans-serif" font-size="28" font-weight="700" fill="BG">TEXT1</text>`,
+    `<circle cx="50" cy="50" r="32" fill="none" stroke="COLOR1" stroke-width="3"/><text x="50" y="58" text-anchor="middle" font-family="Manrope,sans-serif" font-size="28" font-weight="700" fill="COLOR1">TEXT1</text>`,
+    `<polygon points="50,18 82,50 50,82 18,50" fill="COLOR1"/><text x="50" y="57" text-anchor="middle" font-family="Manrope,sans-serif" font-size="24" font-weight="700" fill="BG">TEXT1</text>`
+  ];
+  return styles[idx % styles.length];
+}
+
+function genIconText(idx) {
+  const icons = [
+    `<circle cx="30" cy="40" r="15" fill="COLOR1"/><path d="M25 40 L30 45 L38 35" stroke="BG" stroke-width="2.5" fill="none"/><text x="60" y="38" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="700" fill="COLOR2">TEXT1</text><text x="60" y="52" font-family="Manrope,sans-serif" font-size="9" fill="COLOR1">TEXT2</text>`,
+    `<rect x="15" y="28" width="24" height="24" rx="5" fill="COLOR1"/><path d="M22 40 L32 40 M27 35 L27 45" stroke="BG" stroke-width="2.5"/><text x="55" y="38" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="700" fill="COLOR2">TEXT1</text><text x="55" y="52" font-family="Manrope,sans-serif" font-size="9" fill="COLOR1">TEXT2</text>`,
+    `<polygon points="27,25 40,45 14,45" fill="COLOR1"/><text x="60" y="38" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="700" fill="COLOR2">TEXT1</text><text x="60" y="52" font-family="Manrope,sans-serif" font-size="9" fill="COLOR1">TEXT2</text>`,
+    `<circle cx="27" cy="38" r="12" fill="none" stroke="COLOR1" stroke-width="2.5"/><circle cx="27" cy="38" r="5" fill="COLOR1"/><text x="55" y="38" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="700" fill="COLOR2">TEXT1</text><text x="55" y="52" font-family="Manrope,sans-serif" font-size="9" fill="COLOR1">TEXT2</text>`
+  ];
+  return icons[idx % icons.length];
+}
+
+function genBadge(idx) {
+  const styles = [
+    `<circle cx="50" cy="50" r="38" fill="none" stroke="COLOR1" stroke-width="2"/><circle cx="50" cy="50" r="33" fill="none" stroke="COLOR1" stroke-width="1"/><text x="50" y="47" text-anchor="middle" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="700" fill="COLOR2">TEXT1</text><text x="50" y="63" text-anchor="middle" font-family="Manrope,sans-serif" font-size="8" fill="COLOR1" letter-spacing="2">TEXT2</text>`,
+    `<rect x="12" y="12" width="76" height="76" rx="38" fill="COLOR1" opacity="0.08"/><rect x="18" y="18" width="64" height="64" rx="32" fill="none" stroke="COLOR1" stroke-width="2"/><text x="50" y="47" text-anchor="middle" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="700" fill="COLOR2">TEXT1</text><text x="50" y="63" text-anchor="middle" font-family="Manrope,sans-serif" font-size="8" fill="COLOR1">TEXT2</text>`,
+    `<path d="M50 10 L88 35 L88 65 L50 90 L12 65 L12 35 Z" fill="none" stroke="COLOR1" stroke-width="2"/><text x="50" y="47" text-anchor="middle" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="700" fill="COLOR2">TEXT1</text><text x="50" y="63" text-anchor="middle" font-family="Manrope,sans-serif" font-size="8" fill="COLOR1" letter-spacing="1">TEXT2</text>`,
+    `<rect x="12" y="20" width="76" height="60" rx="10" fill="none" stroke="COLOR1" stroke-width="2"/><line x1="12" y1="35" x2="88" y2="35" stroke="COLOR1" stroke-width="1.5"/><text x="50" y="57" text-anchor="middle" font-family="Manrope,sans-serif" font-size="SIZE" font-weight="700" fill="COLOR2">TEXT1</text><text x="50" y="30" text-anchor="middle" font-family="Manrope,sans-serif" font-size="8" fill="COLOR1" letter-spacing="2">TEXT2</text>`
+  ];
+  return styles[idx % styles.length];
+}
+
+const generators = { Minimal: genMinimal, Geometric: genGeometric, Wordmark: genWordmark, Monogram: genMonogram, 'Icon+Text': genIconText, Badge: genBadge };
+const defaultTexts = [
+  ['BRAND','Studio'],['LOGO','Creative'],['ACME','Design'],['PIXEL','Agency'],
+  ['APEX','Labs'],['NOVA','Digital'],['FLUX','Works'],['CORE','Media'],
+  ['WAVE','Tech'],['BOLD','Co'],['EDGE','Pro'],['PEAK','Studio'],
+  ['VIBE','Creative'],['ZEST','Digital'],['PURE','Design'],['MINT','Labs'],
+  ['GLOW','Agency'],['SWIFT','Works'],['SPARK','Co'],['DRIFT','Media'],
+  ['PRISM','Studio'],['LUNAR','Tech'],['BLOOM','Pro'],['CRAFT','Labs']
+];
+
+const defaultColors = [
+  ['#ec4899','#1a1a1a'],['#6366f1','#1e1b4b'],['#10b981','#064e3b'],['#f59e0b','#78350f'],
+  ['#3b82f6','#1e3a5f'],['#8b5cf6','#2e1065'],['#ef4444','#7f1d1d'],['#06b6d4','#164e63'],
+  ['#d946ef','#4a044e'],['#14b8a6','#134e4a'],['#f97316','#7c2d12'],['#84cc16','#365314'],
+  ['#ec4899','#831843'],['#6366f1','#312e81'],['#10b981','#022c22'],['#eab308','#713f12'],
+  ['#0ea5e9','#0c4a6e'],['#a855f7','#3b0764'],['#f43f5e','#881337'],['#22d3ee','#083344'],
+  ['#c084fc','#581c87'],['#2dd4bf','#115e59'],['#fb923c','#9a3412'],['#a3e635','#3f6212']
+];
+
+// Build logo data
+LOGO_CATEGORIES.forEach((cat, ci) => {
+  for (let i = 0; i < 4; i++) {
+    const idx = ci * 4 + i;
+    logos.push({
+      id: `logo-${idx}`,
+      category: cat,
+      template: generators[cat](i),
+      text1: defaultTexts[idx][0],
+      text2: defaultTexts[idx][1],
+      color1: defaultColors[idx][0],
+      color2: defaultColors[idx][1]
+    });
+  }
+});
+
+function renderSVG(logo, text1, text2, color1, color2, bg, size) {
+  let svg = logo.template
+    .replace(/COLOR1/g, color1 || logo.color1)
+    .replace(/COLOR2/g, color2 || logo.color2)
+    .replace(/BG/g, bg || '#ffffff')
+    .replace(/TEXT1/g, text1 || logo.text1)
+    .replace(/TEXT2/g, text2 || logo.text2)
+    .replace(/SIZE/g, size || '16');
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" style="background:${bg || '#ffffff'}"><rect width="100" height="100" fill="${bg || '#ffffff'}"/>${svg}</svg>`;
+}
+
+function renderCategories() {
+  const cont = document.getElementById('categories');
+  cont.innerHTML = '';
+  ['All', ...LOGO_CATEGORIES].forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn' + (cat === currentCategory ? ' active' : '');
+    btn.textContent = cat;
+    btn.onclick = () => { currentCategory = cat; renderCategories(); renderLogos(); };
+    cont.appendChild(btn);
+  });
+}
+
+function renderLogos() {
+  const grid = document.getElementById('logoGrid');
+  const filtered = currentCategory === 'All' ? logos : logos.filter(l => l.category === currentCategory);
+  grid.innerHTML = filtered.map(logo => {
+    const isFav = favorites.includes(logo.id);
+    return `<div class="logo-card" onclick="openEditor('${logo.id}')">
+      ${renderSVG(logo, logo.text1, logo.text2, logo.color1, logo.color2, '#ffffff', '16')}
+      <div class="name">${logo.category} - ${logo.text1}</div>
+      <button class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFav('${logo.id}',event)">&#9829;</button>
+    </div>`;
+  }).join('');
+}
+
+function renderFavorites() {
+  const grid = document.getElementById('favGrid');
+  const empty = document.getElementById('favEmpty');
+  const favLogos = logos.filter(l => favorites.includes(l.id));
+  if (favLogos.length === 0) { grid.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  grid.innerHTML = favLogos.map(logo => `
+    <div class="logo-card" onclick="openEditor('${logo.id}')">
+      ${renderSVG(logo, logo.text1, logo.text2, logo.color1, logo.color2, '#ffffff', '16')}
+      <div class="name">${logo.category} - ${logo.text1}</div>
+      <button class="fav-btn active" onclick="toggleFav('${logo.id}',event)">&#9829;</button>
+    </div>
+  `).join('');
+}
+
+function renderRecent() {
+  const grid = document.getElementById('recentGrid');
+  const empty = document.getElementById('recentEmpty');
+  if (recent.length === 0) { grid.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  grid.innerHTML = recent.slice(0, 10).map(r => {
+    const logo = logos.find(l => l.id === r.id);
+    if (!logo) return '';
+    return `<div class="recent-card" onclick="openEditor('${logo.id}')">
+      ${renderSVG(logo, r.text1 || logo.text1, r.text2 || logo.text2, r.color1 || logo.color1, r.color2 || logo.color2, r.bg || '#ffffff', r.size || '16')}
+      <div class="time">${new Date(r.time).toLocaleDateString()}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleFav(id, e) {
+  e.stopPropagation();
+  const idx = favorites.indexOf(id);
+  if (idx >= 0) favorites.splice(idx, 1);
+  else favorites.push(id);
+  localStorage.setItem('fl_favorites', JSON.stringify(favorites));
+  renderLogos();
+  renderFavorites();
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(`sec-${tab}`).classList.add('active');
+  if (tab === 'favorites') renderFavorites();
+  if (tab === 'recent') renderRecent();
+}
+
+function openEditor(id) {
+  editingLogo = logos.find(l => l.id === id);
+  if (!editingLogo) return;
+  const prev = recent.find(r => r.id === id);
+  editState = {
+    text1: prev?.text1 || editingLogo.text1,
+    text2: prev?.text2 || editingLogo.text2,
+    color1: prev?.color1 || editingLogo.color1,
+    color2: prev?.color2 || editingLogo.color2,
+    bg: prev?.bg || '#ffffff',
+    size: prev?.size || '16'
+  };
+  document.getElementById('edText1').value = editState.text1;
+  document.getElementById('edText2').value = editState.text2;
+  document.getElementById('edColor1').value = editState.color1;
+  document.getElementById('edColor2').value = editState.color2;
+  document.getElementById('edBg').value = editState.bg;
+  document.getElementById('edSize').value = editState.size;
+  document.getElementById('editorTitle').textContent = `Customize: ${editingLogo.category} Logo`;
+  updatePreview();
+  document.getElementById('editorOverlay').classList.remove('hidden');
+}
+
+function closeEditor() {
+  document.getElementById('editorOverlay').classList.add('hidden');
+  editingLogo = null;
+}
+
+function updatePreview() {
+  if (!editingLogo) return;
+  editState.text1 = document.getElementById('edText1').value || editingLogo.text1;
+  editState.text2 = document.getElementById('edText2').value || editingLogo.text2;
+  editState.color1 = document.getElementById('edColor1').value;
+  editState.color2 = document.getElementById('edColor2').value;
+  editState.bg = document.getElementById('edBg').value;
+  editState.size = document.getElementById('edSize').value;
+  document.getElementById('editorPreview').innerHTML = renderSVG(editingLogo, editState.text1, editState.text2, editState.color1, editState.color2, editState.bg, editState.size);
+}
+
+function downloadLogo() {
+  if (!editingLogo) return;
+  const svg = renderSVG(editingLogo, editState.text1, editState.text2, editState.color1, editState.color2, editState.bg, editState.size);
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${editState.text1.toLowerCase()}-logo.svg`;
+  a.click();
+  URL.revokeObjectURL(url);
+  // Save to recent
+  recent = recent.filter(r => r.id !== editingLogo.id);
+  recent.unshift({ id: editingLogo.id, ...editState, time: Date.now() });
+  if (recent.length > 10) recent = recent.slice(0, 10);
+  localStorage.setItem('fl_recent', JSON.stringify(recent));
+  closeEditor();
+}
+
+renderCategories();
+renderLogos();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

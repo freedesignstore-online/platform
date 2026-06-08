@@ -43,6 +43,21 @@ p.subtitle { color: #6b7280; margin-bottom: 24px; }
 .toast.show { opacity: 1; }
 .loading { animation: pulse 1.5s ease-in-out infinite; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+.hf-btn{position:fixed;bottom:40px;right:40px;z-index:1000;background:#ec4899;color:#fff;border:none;padding:8px 18px;border-radius:99px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(236,72,153,.3);transition:transform .15s}.hf-btn:hover{transform:scale(1.05)}
+.hf-panel{position:fixed;bottom:0;left:0;right:0;z-index:1001;background:#fff;border-top:1px solid #e5e7eb;box-shadow:0 -4px 20px rgba(0,0,0,.1);max-height:0;overflow:hidden;transition:max-height .3s ease}.hf-panel.open{max-height:340px}
+.hf-panel-inner{padding:16px 20px;overflow-y:auto;max-height:320px}
+.hf-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.hf-tabs{display:flex;gap:8px}
+.hf-tab{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #e5e7eb;background:#fafafa;font-family:inherit}.hf-tab.active{background:#ec4899;color:#fff;border-color:#ec4899}
+.hf-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:#6b7280;padding:4px 8px}
+.hf-items{display:flex;gap:8px;flex-wrap:wrap}
+.hf-item{background:#fafafa;border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:12px;transition:border-color .15s;position:relative;min-width:150px;max-width:220px}.hf-item:hover{border-color:#ec4899}
+.hf-item .hf-heart{position:absolute;top:4px;right:6px;background:none;border:none;cursor:pointer;font-size:14px;opacity:.5}.hf-item .hf-heart:hover{opacity:1}
+.hf-swatches{display:flex;gap:2px;margin:4px 0}
+.hf-swatches span{width:18px;height:18px;border-radius:3px;display:inline-block}
+.hf-item-title{font-weight:600;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+.hf-item-meta{color:#6b7280;font-size:10px}
+.hf-empty{color:#6b7280;font-size:13px;padding:16px;text-align:center}
 </style>
 </head>
 <body>
@@ -553,6 +568,130 @@ function showToast(msg) {
 document.getElementById('descInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') generateFromText();
 });
+</script>
+<button class="hf-btn" id="hfToggle">History & Favorites</button>
+<div class="hf-panel" id="hfPanel">
+<div class="hf-panel-inner">
+<div class="hf-header">
+<div class="hf-tabs">
+<button class="hf-tab active" data-tab="history" id="hfTabHistory">History (0)</button>
+<button class="hf-tab" data-tab="favorites" id="hfTabFavs">Favorites (0)</button>
+</div>
+<button class="hf-close" id="hfClose">&times;</button>
+</div>
+<div class="hf-items" id="hfItems"></div>
+</div>
+</div>
+
+<script>
+(function(){
+const KEY_H='fds-aicolor-history', KEY_F='fds-aicolor-favorites';
+function load(k){try{return JSON.parse(localStorage.getItem(k))||[];}catch(e){return[];}}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v));}
+
+let currentTab='history';
+
+function getState(){
+  return {
+    description:document.getElementById('descInput').value,
+    colors:[...currentPalette],
+    keywords:[...detectedKeywords],
+    ts:Date.now()
+  };
+}
+
+function addHistory(){
+  if(!currentPalette.length)return;
+  const h=load(KEY_H);
+  const s=getState();
+  if(h.length&&h[0].description===s.description&&JSON.stringify(h[0].colors)===JSON.stringify(s.colors))return;
+  h.unshift(s);
+  if(h.length>10)h.length=10;
+  save(KEY_H,h);
+  updateCounts();
+  if(currentTab==='history')renderItems();
+}
+
+function addFavorite(item){
+  const f=load(KEY_F);
+  const s=item||getState();
+  f.unshift(s);
+  if(f.length>20)f.length=20;
+  save(KEY_F,f);
+  updateCounts();
+  if(currentTab==='favorites')renderItems();
+}
+
+function removeFavorite(idx){
+  const f=load(KEY_F);
+  f.splice(idx,1);
+  save(KEY_F,f);
+  updateCounts();
+  renderItems();
+}
+
+function restoreState(s){
+  document.getElementById('descInput').value=s.description||'';
+  currentPalette=s.colors.slice();
+  detectedKeywords=s.keywords?s.keywords.slice():[];
+  render();
+}
+
+function updateCounts(){
+  const h=load(KEY_H), f=load(KEY_F);
+  document.getElementById('hfTabHistory').textContent='History ('+h.length+')';
+  document.getElementById('hfTabFavs').textContent='Favorites ('+f.length+')';
+}
+
+function fmtTime(ts){const d=new Date(ts);return d.toLocaleDateString()+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+
+function renderItems(){
+  const container=document.getElementById('hfItems');
+  const items=currentTab==='history'?load(KEY_H):load(KEY_F);
+  if(!items.length){container.innerHTML='<div class="hf-empty">No '+(currentTab==='history'?'history':'favorites')+' yet.</div>';return;}
+  container.innerHTML=items.map((it,i)=>{
+    const heartBtn=currentTab==='history'
+      ?`<button class="hf-heart" data-fav="${i}" title="Save to favorites">&hearts;</button>`
+      :`<button class="hf-heart" data-rmfav="${i}" title="Remove">&times;</button>`;
+    const swatches=(it.colors||[]).map(c=>`<span style="background:${c}"></span>`).join('');
+    return `<div class="hf-item" data-restore="${i}">
+      ${heartBtn}
+      <div class="hf-item-title">${it.description||'(no text)'}</div>
+      <div class="hf-swatches">${swatches}</div>
+      <div class="hf-item-meta">${fmtTime(it.ts)}</div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('hfToggle').onclick=()=>document.getElementById('hfPanel').classList.toggle('open');
+document.getElementById('hfClose').onclick=()=>document.getElementById('hfPanel').classList.remove('open');
+
+document.querySelectorAll('.hf-tab').forEach(tab=>{
+  tab.onclick=()=>{
+    document.querySelectorAll('.hf-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    currentTab=tab.dataset.tab;
+    renderItems();
+  };
+});
+
+document.getElementById('hfItems').addEventListener('click',e=>{
+  const favBtn=e.target.closest('[data-fav]');
+  if(favBtn){e.stopPropagation();const items=load(KEY_H);addFavorite(items[+favBtn.dataset.fav]);return;}
+  const rmBtn=e.target.closest('[data-rmfav]');
+  if(rmBtn){e.stopPropagation();removeFavorite(+rmBtn.dataset.rmfav);return;}
+  const item=e.target.closest('[data-restore]');
+  if(item){const items=currentTab==='history'?load(KEY_H):load(KEY_F);restoreState(items[+item.dataset.restore]);}
+});
+
+// Hook into generateFromText to auto-save history
+const origGenerate=generateFromText;
+window.generateFromText=function(){origGenerate();addHistory();};
+const origRegenerate=regenerate;
+window.regenerate=function(){origRegenerate();addHistory();};
+
+updateCounts();
+})();
 </script>
 <script src="/related.js"></script>
 </body>
