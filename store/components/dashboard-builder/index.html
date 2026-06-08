@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Builder - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Manrope',system-ui,sans-serif;background:#fafafa;color:#1a1a1a;min-height:100vh}
+a.back{display:inline-block;margin:24px 24px 0;color:#ec4899;text-decoration:none;font-weight:500}
+a.back:hover{text-decoration:underline}
+h1{font-size:28px;font-weight:700;margin:12px 24px 4px}
+p.sub{color:#6b7280;margin:0 24px 16px;font-size:14px}
+.toolbar{display:flex;gap:8px;margin:0 24px 16px;flex-wrap:wrap;align-items:center}
+.btn{padding:7px 14px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-family:inherit;font-size:13px;transition:all .15s}
+.btn:hover{opacity:.85}
+.btn-p{background:#ec4899;color:#fff}
+.btn-s{background:#f3f4f6;color:#1a1a1a;border:1px solid #e5e7eb}
+.btn-s.active{background:#ec4899;color:#fff;border-color:#ec4899}
+select,input[type="text"],input[type="color"]{font-family:inherit;font-size:13px;padding:7px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fff}
+input[type="color"]{width:36px;height:32px;padding:2px;cursor:pointer}
+.builder{display:flex;gap:0;margin:0 24px 24px;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;min-height:600px;background:#fff}
+/* Widget palette */
+.widget-pal{width:200px;flex-shrink:0;background:#fafafa;border-right:1px solid #e5e7eb;padding:12px;overflow-y:auto}
+.widget-pal h3{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;font-weight:700;margin:8px 0 6px}
+.wid-btn{display:block;width:100%;text-align:left;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:4px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:500;background:#fff;color:#1a1a1a;transition:all .15s}
+.wid-btn:hover{border-color:#ec4899;background:rgba(236,72,153,.04)}
+/* Dashboard preview */
+.dash-preview{flex:1;display:flex;flex-direction:column;overflow:hidden}
+/* Sidebar */
+.dash-sidebar{width:220px;flex-shrink:0;display:flex;flex-direction:column;transition:width .2s}
+.dash-sidebar.collapsed{width:60px}
+.dash-sidebar .sb-header{padding:16px;display:flex;align-items:center;gap:10px}
+.dash-sidebar .sb-logo{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden}
+.dash-sidebar.collapsed .sb-logo{display:none}
+.dash-sidebar .sb-toggle{width:28px;height:28px;border:1px solid rgba(255,255,255,.2);border-radius:6px;background:transparent;color:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.sb-nav{flex:1;padding:0 8px;overflow-y:auto}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:2px;color:inherit;opacity:.7;white-space:nowrap;overflow:hidden}
+.sb-item:hover{opacity:1;background:rgba(255,255,255,.1)}
+.sb-item.active{opacity:1;background:rgba(255,255,255,.15);font-weight:600}
+.sb-item .sb-icon{width:20px;text-align:center;flex-shrink:0;font-size:14px}
+.dash-sidebar.collapsed .sb-item span:not(.sb-icon){display:none}
+.sb-add{display:block;width:calc(100% - 16px);margin:4px 8px 12px;padding:8px;border:1px dashed rgba(255,255,255,.2);border-radius:8px;background:transparent;color:inherit;opacity:.5;cursor:pointer;font-family:inherit;font-size:12px;font-weight:500;text-align:center}
+.sb-add:hover{opacity:.8;border-color:rgba(255,255,255,.4)}
+.dash-sidebar.collapsed .sb-add{font-size:16px}
+/* Main area */
+.dash-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+/* Top bar */
+.dash-topbar{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid #e5e7eb}
+.tb-search{flex:1;max-width:400px;padding:8px 14px;border:1px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:13px;background:#f9fafb}
+.tb-notif{width:36px;height:36px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;position:relative}
+.tb-notif .dot{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;border:2px solid #fff}
+.tb-avatar{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;cursor:pointer}
+/* Content grid */
+.dash-content{flex:1;padding:20px;overflow-y:auto}
+.widget-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.widget{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;position:relative;cursor:pointer;transition:border-color .15s;min-height:120px}
+.widget:hover{border-color:#d1d5db}
+.widget.selected{border-color:#ec4899}
+.widget.dragging{opacity:.4}
+.widget.drag-over{border-color:#ec4899;border-style:dashed}
+.widget-actions{position:absolute;top:8px;right:8px;display:none;gap:4px;z-index:5}
+.widget:hover .widget-actions{display:flex}
+.wa-btn{width:24px;height:24px;border:1px solid #e5e7eb;border-radius:4px;background:#fff;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;color:#6b7280;transition:all .15s;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.wa-btn:hover{border-color:#ec4899;color:#ec4899}
+.wa-btn.del:hover{border-color:#ef4444;color:#ef4444}
+/* Widget types */
+.w-stat .w-stat-label{font-size:13px;color:#6b7280;font-weight:500;margin-bottom:4px}
+.w-stat .w-stat-value{font-size:28px;font-weight:700;margin-bottom:2px}
+.w-stat .w-stat-trend{font-size:13px;font-weight:600;display:flex;align-items:center;gap:4px}
+.w-stat .w-stat-trend.up{color:#22c55e}
+.w-stat .w-stat-trend.down{color:#ef4444}
+.w-chart-title{font-size:14px;font-weight:700;margin-bottom:12px}
+.w-chart canvas{width:100%;height:180px;display:block}
+.w-table{font-size:13px;width:100%}
+.w-table th{text-align:left;padding:8px 10px;font-weight:600;color:#6b7280;font-size:12px;border-bottom:1px solid #e5e7eb}
+.w-table td{padding:8px 10px;border-bottom:1px solid #f3f4f6}
+.w-table-pag{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12px;color:#9ca3af}
+.w-activity{font-size:13px}
+.w-activity-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f3f4f6}
+.w-activity-item:last-child{border-bottom:none}
+.w-activity-dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex-shrink:0}
+.w-activity-text{flex:1}
+.w-activity-time{font-size:11px;color:#9ca3af}
+.w-progress-item{margin-bottom:12px}
+.w-progress-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+.w-progress-bar{height:8px;background:#f3f4f6;border-radius:4px;overflow:hidden}
+.w-progress-fill{height:100%;border-radius:4px;transition:width .3s}
+.w-calendar{font-size:12px}
+.w-calendar table{width:100%;border-collapse:collapse;text-align:center}
+.w-calendar th{padding:6px;font-weight:600;color:#6b7280;font-size:11px}
+.w-calendar td{padding:6px;cursor:pointer;border-radius:6px}
+.w-calendar td:hover{background:#f3f4f6}
+.w-calendar td.today{font-weight:700}
+.w-donut-wrap{display:flex;align-items:center;gap:20px}
+.w-donut-legend{font-size:12px}
+.w-donut-legend-item{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.w-donut-legend-dot{width:10px;height:10px;border-radius:2px}
+.empty-dash{display:flex;align-items:center;justify-content:center;height:300px;color:#9ca3af;font-size:14px}
+/* Dark mode for preview */
+.dash-preview.dark .dash-sidebar{background:#111827;color:#fff}
+.dash-preview.dark .dash-topbar{background:#1f2937;border-color:#374151}
+.dash-preview.dark .tb-search{background:#374151;border-color:#4b5563;color:#fff}
+.dash-preview.dark .tb-notif{background:#1f2937;border-color:#374151;color:#fff}
+.dash-preview.dark .dash-content{background:#111827}
+.dash-preview.dark .widget{background:#1f2937;border-color:#374151;color:#f3f4f6}
+.dash-preview.dark .w-stat .w-stat-label{color:#9ca3af}
+.dash-preview.dark .w-table th{color:#9ca3af;border-color:#374151}
+.dash-preview.dark .w-table td{border-color:#374151}
+.dash-preview.dark .w-activity-item{border-color:#374151}
+.dash-preview.dark .w-progress-bar{background:#374151}
+.dash-preview.dark .w-calendar td:hover{background:#374151}
+.dash-preview.light .dash-sidebar{background:#fff;color:#1a1a1a;border-right:1px solid #e5e7eb}
+.dash-preview.light .sb-item:hover{background:rgba(0,0,0,.05)}
+.dash-preview.light .sb-item.active{background:rgba(0,0,0,.08)}
+.dash-preview.light .sb-toggle{border-color:#e5e7eb}
+.dash-preview.light .sb-add{border-color:#e5e7eb;color:#6b7280}
+
+.export-panel{background:#fff;border:1px solid #e5e7eb;border-radius:12px;margin:0 24px 24px;overflow:hidden}
+.export-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #e5e7eb}
+.export-header h3{font-size:14px;font-weight:700}
+.export-tabs{display:flex;gap:4px}
+.ex-tab{padding:4px 12px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;color:#6b7280;transition:all .15s}
+.ex-tab:hover{border-color:#ec4899;color:#ec4899}
+.ex-tab.active{background:#ec4899;color:#fff;border-color:#ec4899}
+.export-code{padding:16px;font-family:'Courier New',monospace;font-size:12px;line-height:1.6;white-space:pre-wrap;max-height:300px;overflow:auto;background:#fafafa}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:#1a1a1a;color:#fff;padding:8px 20px;border-radius:8px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;z-index:999;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to FreeDesignStore</a>
+<h1>Dashboard Template Builder</h1>
+<p class="sub">Build admin dashboard layouts with sidebar, top bar, and draggable widget grid. Export complete HTML.</p>
+
+<div class="toolbar">
+<label style="font-size:12px;font-weight:600;color:#6b7280">Theme:</label>
+<button class="btn btn-s" id="themeToggle">Dark</button>
+<label style="font-size:12px;font-weight:600;color:#6b7280;margin-left:8px">Accent:</label>
+<input type="color" id="accentColor" value="#ec4899">
+<label style="font-size:12px;font-weight:600;color:#6b7280;margin-left:8px">Preset:</label>
+<select id="presetSelect">
+<option value="">Select preset...</option>
+<option value="analytics">Analytics</option>
+<option value="ecommerce">E-commerce Admin</option>
+<option value="pm">Project Management</option>
+</select>
+<button class="btn btn-p" id="exportBtn">Export HTML</button>
+</div>
+
+<div class="builder">
+<div class="widget-pal" id="widgetPalette"></div>
+<div class="dash-preview dark" id="dashPreview">
+<div style="display:flex;flex:1;overflow:hidden">
+<div class="dash-sidebar" id="sidebar"></div>
+<div class="dash-main">
+<div class="dash-topbar" id="topbar"></div>
+<div class="dash-content" id="content">
+<div class="widget-grid" id="widgetGrid"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="export-panel">
+<div class="export-header">
+<h3>Generated Code</h3>
+<div class="export-tabs" id="exportTabs">
+<button class="ex-tab active" data-fmt="html">HTML + CSS</button>
+<button class="ex-tab" data-fmt="react">React Structure</button>
+</div>
+<button class="btn btn-p" id="copyExport">Copy</button>
+</div>
+<div class="export-code" id="exportCode"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const WIDGET_TYPES = [
+  {type:'stat',label:'Stat Card'},
+  {type:'line',label:'Line Chart'},
+  {type:'bar',label:'Bar Chart'},
+  {type:'donut',label:'Pie/Donut Chart'},
+  {type:'table',label:'Data Table'},
+  {type:'activity',label:'Activity List'},
+  {type:'progress',label:'Progress Bars'},
+  {type:'calendar',label:'Mini Calendar'}
+];
+
+const PRESETS = {
+  analytics: {
+    navItems: [{icon:'&#9632;',label:'Dashboard',active:true},{icon:'&#9650;',label:'Analytics'},{icon:'&#9679;',label:'Reports'},{icon:'&#9733;',label:'Audience'},{icon:'&#9830;',label:'Settings'}],
+    widgets: [{type:'stat',data:{label:'Total Visitors',value:'124,892',trend:'+12.5%',up:true}},{type:'stat',data:{label:'Page Views',value:'891,234',trend:'+8.2%',up:true}},{type:'stat',data:{label:'Bounce Rate',value:'32.1%',trend:'-2.4%',up:true}},{type:'stat',data:{label:'Avg. Session',value:'4m 32s',trend:'+0.8%',up:true}},{type:'line',data:{title:'Visitors Over Time',points:[30,45,35,55,48,62,58,72,65,80,75,90]}},{type:'bar',data:{title:'Top Pages',items:[{label:'Home',value:85},{label:'Pricing',value:62},{label:'Blog',value:48},{label:'Docs',value:35},{label:'About',value:22}]}},{type:'donut',data:{title:'Traffic Sources',segments:[{label:'Organic',value:45,color:'#ec4899'},{label:'Direct',value:25,color:'#8b5cf6'},{label:'Social',value:18,color:'#3b82f6'},{label:'Referral',value:12,color:'#10b981'}]}},{type:'activity',data:{title:'Recent Events',items:[{text:'New user signup: alex@example.com',time:'2m ago',color:'#22c55e'},{text:'Page "Pricing" updated',time:'15m ago',color:'#3b82f6'},{text:'Deploy v2.4.1 completed',time:'1h ago',color:'#8b5cf6'},{text:'Error rate spike detected',time:'3h ago',color:'#ef4444'}]}}]
+  },
+  ecommerce: {
+    navItems: [{icon:'&#9632;',label:'Dashboard',active:true},{icon:'&#9733;',label:'Orders'},{icon:'&#9830;',label:'Products'},{icon:'&#9679;',label:'Customers'},{icon:'&#9650;',label:'Inventory'},{icon:'&#9824;',label:'Settings'}],
+    widgets: [{type:'stat',data:{label:'Revenue',value:'$48,210',trend:'+18.2%',up:true}},{type:'stat',data:{label:'Orders',value:'1,423',trend:'+5.7%',up:true}},{type:'stat',data:{label:'Customers',value:'8,912',trend:'+12.1%',up:true}},{type:'stat',data:{label:'Avg. Order',value:'$33.89',trend:'-1.2%',up:false}},{type:'line',data:{title:'Revenue Trend',points:[22,28,25,32,30,38,35,42,40,48,45,55]}},{type:'table',data:{title:'Recent Orders',headers:['Order','Customer','Amount','Status'],rows:[['#1234','Alex Smith','$129.99','Shipped'],['#1233','Jane Doe','$89.50','Processing'],['#1232','Bob Lee','$249.00','Delivered'],['#1231','Sara Kim','$59.99','Shipped'],['#1230','Mike Chen','$179.00','Processing']]}},{type:'donut',data:{title:'Sales by Category',segments:[{label:'Electronics',value:38,color:'#ec4899'},{label:'Clothing',value:28,color:'#8b5cf6'},{label:'Home',value:20,color:'#3b82f6'},{label:'Other',value:14,color:'#10b981'}]}},{type:'progress',data:{title:'Inventory Status',items:[{label:'Electronics',value:78,color:'#ec4899'},{label:'Clothing',value:45,color:'#f59e0b'},{label:'Home & Garden',value:92,color:'#22c55e'},{label:'Books',value:23,color:'#ef4444'}]}}]
+  },
+  pm: {
+    navItems: [{icon:'&#9632;',label:'Dashboard',active:true},{icon:'&#9733;',label:'Projects'},{icon:'&#9679;',label:'Tasks'},{icon:'&#9650;',label:'Team'},{icon:'&#9830;',label:'Calendar'},{icon:'&#9824;',label:'Settings'}],
+    widgets: [{type:'stat',data:{label:'Active Projects',value:'12',trend:'+2',up:true}},{type:'stat',data:{label:'Open Tasks',value:'147',trend:'-8',up:true}},{type:'stat',data:{label:'Team Members',value:'24',trend:'+1',up:true}},{type:'stat',data:{label:'Completion Rate',value:'87%',trend:'+3.2%',up:true}},{type:'bar',data:{title:'Tasks by Status',items:[{label:'To Do',value:42},{label:'In Progress',value:35},{label:'Review',value:18},{label:'Done',value:52}]}},{type:'activity',data:{title:'Recent Activity',items:[{text:'Sarah completed "Design Review"',time:'5m ago',color:'#22c55e'},{text:'Alex created task "API Integration"',time:'20m ago',color:'#3b82f6'},{text:'Project "Q2 Launch" deadline approaching',time:'1h ago',color:'#f59e0b'},{text:'Mike assigned to "Bug Fix #342"',time:'2h ago',color:'#8b5cf6'}]}},{type:'progress',data:{title:'Project Progress',items:[{label:'Website Redesign',value:85,color:'#22c55e'},{label:'Mobile App',value:62,color:'#3b82f6'},{label:'API v2',value:40,color:'#f59e0b'},{label:'Documentation',value:90,color:'#ec4899'}]}},{type:'calendar',data:{title:'June 2026'}}]
+  }
+};
+
+let theme = 'dark';
+let accent = '#ec4899';
+let sidebarCollapsed = false;
+let navItems = [{icon:'&#9632;',label:'Dashboard',active:true},{icon:'&#9650;',label:'Analytics'},{icon:'&#9679;',label:'Users'},{icon:'&#9733;',label:'Settings'}];
+let widgets = [];
+let selectedWidget = -1;
+let exportFmt = 'html';
+let nextWid = 1;
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function buildPalette() {
+  const pal = document.getElementById('widgetPalette');
+  let h = '<h3>Widgets</h3>';
+  WIDGET_TYPES.forEach(w => {
+    h += `<button class="wid-btn" data-type="${w.type}">${w.label}</button>`;
+  });
+  pal.innerHTML = h;
+  pal.querySelectorAll('.wid-btn').forEach(btn => {
+    btn.onclick = () => addWidget(btn.dataset.type);
+  });
+}
+
+function getDefaultWidgetData(type) {
+  switch (type) {
+    case 'stat': return {label:'Metric',value:'1,234',trend:'+5.2%',up:true};
+    case 'line': return {title:'Line Chart',points:[20,35,28,45,38,52,48,60,55,68,62,75]};
+    case 'bar': return {title:'Bar Chart',items:[{label:'Mon',value:65},{label:'Tue',value:45},{label:'Wed',value:80},{label:'Thu',value:55},{label:'Fri',value:70}]};
+    case 'donut': return {title:'Distribution',segments:[{label:'Segment A',value:40,color:'#ec4899'},{label:'Segment B',value:30,color:'#8b5cf6'},{label:'Segment C',value:20,color:'#3b82f6'},{label:'Segment D',value:10,color:'#10b981'}]};
+    case 'table': return {title:'Data Table',headers:['Name','Email','Role','Status'],rows:[['Alex Smith','alex@co.com','Admin','Active'],['Jane Doe','jane@co.com','Editor','Active'],['Bob Lee','bob@co.com','Viewer','Inactive'],['Sara Kim','sara@co.com','Editor','Active'],['Mike Chen','mike@co.com','Admin','Active']]};
+    case 'activity': return {title:'Recent Activity',items:[{text:'New user registered',time:'2m ago',color:'#22c55e'},{text:'Deployment completed',time:'1h ago',color:'#3b82f6'},{text:'Error detected in API',time:'3h ago',color:'#ef4444'},{text:'New feature released',time:'5h ago',color:'#8b5cf6'}]};
+    case 'progress': return {title:'Progress',items:[{label:'Project Alpha',value:75,color:'#ec4899'},{label:'Project Beta',value:45,color:'#3b82f6'},{label:'Project Gamma',value:90,color:'#22c55e'}]};
+    case 'calendar': return {title:'June 2026'};
+    default: return {};
+  }
+}
+
+function addWidget(type) {
+  widgets.push({id: nextWid++, type, data: getDefaultWidgetData(type)});
+  renderWidgets();
+  updateExport();
+}
+
+function renderSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.className = 'dash-sidebar' + (sidebarCollapsed ? ' collapsed' : '');
+  let h = `<div class="sb-header"><button class="sb-toggle" id="sbToggle">${sidebarCollapsed ? '&#8594;' : '&#8592;'}</button>${sidebarCollapsed ? '' : '<div class="sb-logo">Dashboard</div>'}</div>`;
+  h += '<div class="sb-nav">';
+  navItems.forEach((item, i) => {
+    h += `<div class="sb-item${item.active ? ' active' : ''}" data-idx="${i}"><span class="sb-icon">${item.icon}</span><span>${item.label}</span></div>`;
+  });
+  h += '</div>';
+  h += `<button class="sb-add" id="addNav">${sidebarCollapsed ? '+' : '+ Add Item'}</button>`;
+  sb.innerHTML = h;
+
+  document.getElementById('sbToggle').onclick = () => { sidebarCollapsed = !sidebarCollapsed; renderSidebar(); };
+  document.getElementById('addNav').onclick = () => {
+    const name = prompt('Nav item label:', 'New Item');
+    if (!name) return;
+    navItems.push({icon:'&#9679;',label:name,active:false});
+    renderSidebar(); updateExport();
+  };
+  sb.querySelectorAll('.sb-item').forEach(el => {
+    el.onclick = () => {
+      navItems.forEach(n => n.active = false);
+      navItems[+el.dataset.idx].active = true;
+      renderSidebar();
+    };
+    el.oncontextmenu = e => {
+      e.preventDefault();
+      const idx = +el.dataset.idx;
+      if (confirm(`Remove "${navItems[idx].label}"?`)) {
+        navItems.splice(idx, 1);
+        renderSidebar(); updateExport();
+      }
+    };
+  });
+}
+
+function renderTopbar() {
+  const tb = document.getElementById('topbar');
+  tb.innerHTML = `<input class="tb-search" placeholder="Search..." readonly><div class="tb-notif"><span>&#128276;</span><div class="dot" style="background:${accent}"></div></div><div class="tb-avatar" style="background:${accent}">JS</div>`;
+}
+
+function renderWidgets() {
+  const grid = document.getElementById('widgetGrid');
+  if (widgets.length === 0) {
+    grid.innerHTML = '<div class="empty-dash">Click widgets on the left to add them</div>';
+    return;
+  }
+  grid.innerHTML = '';
+  widgets.forEach((w, i) => {
+    const el = document.createElement('div');
+    el.className = 'widget' + (selectedWidget === i ? ' selected' : '');
+    el.dataset.idx = i;
+    el.innerHTML = renderWidgetContent(w) + `<div class="widget-actions"><button class="wa-btn del" data-action="del" title="Remove">&times;</button></div>`;
+    el.onclick = e => {
+      if (e.target.closest('.widget-actions')) return;
+      selectedWidget = i;
+      renderWidgets();
+    };
+    el.querySelector('.wa-btn').onclick = e => {
+      e.stopPropagation();
+      widgets.splice(i, 1);
+      if (selectedWidget === i) selectedWidget = -1;
+      renderWidgets(); updateExport();
+    };
+    // Drag reorder
+    el.draggable = true;
+    el.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', i); el.classList.add('dragging'); });
+    el.addEventListener('dragend', () => el.classList.remove('dragging'));
+    el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-over'); });
+    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+    el.addEventListener('drop', e => {
+      e.preventDefault(); el.classList.remove('drag-over');
+      const from = +e.dataTransfer.getData('text/plain');
+      if (from !== i) {
+        const item = widgets.splice(from, 1)[0];
+        widgets.splice(i, 0, item);
+        renderWidgets(); updateExport();
+      }
+    });
+    grid.appendChild(el);
+    // Draw canvas charts after DOM insertion
+    if (w.type === 'line' || w.type === 'bar' || w.type === 'donut') {
+      requestAnimationFrame(() => drawChart(el, w));
+    }
+  });
+}
+
+function renderWidgetContent(w) {
+  const d = w.data;
+  switch (w.type) {
+    case 'stat':
+      return `<div class="w-stat"><div class="w-stat-label">${d.label}</div><div class="w-stat-value">${d.value}</div><div class="w-stat-trend ${d.up?'up':'down'}">${d.up?'&#9650;':'&#9660;'} ${d.trend}</div></div>`;
+    case 'line':
+      return `<div class="w-chart-title">${d.title}</div><canvas class="w-canvas" width="500" height="180"></canvas>`;
+    case 'bar':
+      return `<div class="w-chart-title">${d.title}</div><canvas class="w-canvas" width="500" height="180"></canvas>`;
+    case 'donut':
+      return `<div class="w-chart-title">${d.title}</div><div class="w-donut-wrap"><canvas class="w-canvas" width="140" height="140"></canvas><div class="w-donut-legend">${d.segments.map(s=>`<div class="w-donut-legend-item"><div class="w-donut-legend-dot" style="background:${s.color}"></div>${s.label}: ${s.value}%</div>`).join('')}</div></div>`;
+    case 'table':
+      return `<div class="w-chart-title">${d.title}</div><table class="w-table"><thead><tr>${d.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${d.rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table><div class="w-table-pag"><span>Showing 1-${d.rows.length} of ${d.rows.length}</span><span>1 / 1</span></div>`;
+    case 'activity':
+      return `<div class="w-chart-title">${d.title}</div><div class="w-activity">${d.items.map(a=>`<div class="w-activity-item"><div class="w-activity-dot" style="background:${a.color}"></div><div class="w-activity-text">${a.text}<div class="w-activity-time">${a.time}</div></div></div>`).join('')}</div>`;
+    case 'progress':
+      return `<div class="w-chart-title">${d.title}</div>${d.items.map(p=>`<div class="w-progress-item"><div class="w-progress-label"><span>${p.label}</span><span>${p.value}%</span></div><div class="w-progress-bar"><div class="w-progress-fill" style="width:${p.value}%;background:${p.color}"></div></div></div>`).join('')}`;
+    case 'calendar': {
+      const now = new Date();
+      const year = 2026, month = 5; // June 2026
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const today = now.getDate();
+      let cal = `<div class="w-calendar"><div class="w-chart-title">${d.title}</div><table><thead><tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr></thead><tbody><tr>`;
+      let dayCount = 0;
+      for (let i = 0; i < firstDay; i++) { cal += '<td></td>'; dayCount++; }
+      for (let day = 1; day <= daysInMonth; day++) {
+        cal += `<td class="${day===today?'today':''}" style="${day===today?'background:'+accent+';color:#fff;border-radius:6px':''}">${day}</td>`;
+        dayCount++;
+        if (dayCount % 7 === 0 && day < daysInMonth) cal += '</tr><tr>';
+      }
+      while (dayCount % 7 !== 0) { cal += '<td></td>'; dayCount++; }
+      cal += '</tr></tbody></table></div>';
+      return cal;
+    }
+    default: return '<div style="color:#9ca3af">Unknown widget</div>';
+  }
+}
+
+function drawChart(el, w) {
+  const canvas = el.querySelector('.w-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * 2;
+  canvas.height = rect.height * 2;
+  ctx.scale(2, 2);
+  const W = rect.width, H = rect.height;
+  const isDark = theme === 'dark';
+  const gridColor = isDark ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.06)';
+  const textColor = isDark ? 'rgba(255,255,255,.4)' : 'rgba(0,0,0,.3)';
+
+  if (w.type === 'line') {
+    const pts = w.data.points;
+    const maxVal = Math.max(...pts) * 1.1;
+    const pad = {l:30,r:10,t:10,b:25};
+    const plotW = W - pad.l - pad.r;
+    const plotH = H - pad.t - pad.b;
+    // Grid
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i <= 4; i++) {
+      const y = pad.t + plotH * (i / 4);
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
+    }
+    // Line
+    ctx.beginPath();
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    pts.forEach((v, i) => {
+      const x = pad.l + (i / (pts.length - 1)) * plotW;
+      const y = pad.t + plotH - (v / maxVal) * plotH;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    // Fill
+    const lastPt = pts[pts.length - 1];
+    ctx.lineTo(pad.l + plotW, pad.t + plotH);
+    ctx.lineTo(pad.l, pad.t + plotH);
+    ctx.closePath();
+    const grd = ctx.createLinearGradient(0, pad.t, 0, pad.t + plotH);
+    grd.addColorStop(0, accent + '30');
+    grd.addColorStop(1, accent + '00');
+    ctx.fillStyle = grd;
+    ctx.fill();
+    // Dots
+    ctx.fillStyle = accent;
+    pts.forEach((v, i) => {
+      const x = pad.l + (i / (pts.length - 1)) * plotW;
+      const y = pad.t + plotH - (v / maxVal) * plotH;
+      ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill();
+    });
+  } else if (w.type === 'bar') {
+    const items = w.data.items;
+    const maxVal = Math.max(...items.map(it => it.value)) * 1.1;
+    const pad = {l:10,r:10,t:10,b:30};
+    const plotW = W - pad.l - pad.r;
+    const plotH = H - pad.t - pad.b;
+    const barW = (plotW / items.length) * 0.6;
+    const gap = (plotW / items.length) * 0.4;
+    items.forEach((it, i) => {
+      const x = pad.l + (plotW / items.length) * i + gap / 2;
+      const h = (it.value / maxVal) * plotH;
+      const y = pad.t + plotH - h;
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      const r = 4;
+      ctx.moveTo(x, y + r);
+      ctx.arcTo(x, y, x + barW, y, r);
+      ctx.arcTo(x + barW, y, x + barW, y + h, r);
+      ctx.lineTo(x + barW, pad.t + plotH);
+      ctx.lineTo(x, pad.t + plotH);
+      ctx.closePath();
+      ctx.fill();
+      // Label
+      ctx.fillStyle = textColor;
+      ctx.font = '10px Manrope';
+      ctx.textAlign = 'center';
+      ctx.fillText(it.label, x + barW / 2, H - 8);
+    });
+  } else if (w.type === 'donut') {
+    const segments = w.data.segments;
+    const total = segments.reduce((s, seg) => s + seg.value, 0);
+    const cx = 70, cy = 70, outerR = 60, innerR = 38;
+    let startAngle = -Math.PI / 2;
+    segments.forEach(seg => {
+      const sliceAngle = (seg.value / total) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, outerR, startAngle, startAngle + sliceAngle);
+      ctx.arc(cx, cy, innerR, startAngle + sliceAngle, startAngle, true);
+      ctx.closePath();
+      ctx.fillStyle = seg.color;
+      ctx.fill();
+      startAngle += sliceAngle;
+    });
+    // Center text
+    ctx.fillStyle = isDark ? '#f3f4f6' : '#1a1a1a';
+    ctx.font = 'bold 16px Manrope';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(total + '%', cx, cy);
+  }
+}
+
+function applyPreset(name) {
+  const p = PRESETS[name];
+  if (!p) return;
+  navItems = p.navItems.map(n => ({...n}));
+  widgets = p.widgets.map(w => ({id: nextWid++, type: w.type, data: JSON.parse(JSON.stringify(w.data))}));
+  selectedWidget = -1;
+  renderSidebar(); renderTopbar(); renderWidgets(); updateExport();
+  showToast(`Loaded "${name}" preset`);
+}
+
+function updateExport() {
+  const code = document.getElementById('exportCode');
+  if (exportFmt === 'html') {
+    code.textContent = generateHTML();
+  } else {
+    code.textContent = generateReact();
+  }
+}
+
+function generateHTML() {
+  const isDark = theme === 'dark';
+  const bg = isDark ? '#111827' : '#fafafa';
+  const panelBg = isDark ? '#1f2937' : '#ffffff';
+  const border = isDark ? '#374151' : '#e5e7eb';
+  const text = isDark ? '#f3f4f6' : '#1a1a1a';
+  const muted = isDark ? '#9ca3af' : '#6b7280';
+  const sbBg = isDark ? '#111827' : '#ffffff';
+
+  let html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', sans-serif; background: ${bg}; color: ${text}; display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 220px; background: ${sbBg}; ${isDark?'':'border-right: 1px solid '+border+';'} display: flex; flex-direction: column; padding: 16px 0; }
+.sidebar .logo { padding: 0 16px 16px; font-weight: 700; font-size: 15px; }
+.sidebar nav a { display: flex; align-items: center; gap: 10px; padding: 10px 16px; font-size: 13px; color: ${muted}; text-decoration: none; border-radius: 0 8px 8px 0; margin-right: 8px; }
+.sidebar nav a:hover { background: ${isDark?'rgba(255,255,255,.1)':'rgba(0,0,0,.05)'}; color: ${text}; }
+.sidebar nav a.active { background: ${isDark?'rgba(255,255,255,.15)':'rgba(0,0,0,.08)'}; color: ${text}; font-weight: 600; }
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.topbar { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid ${border}; background: ${panelBg}; }
+.topbar input { flex: 1; max-width: 400px; padding: 8px 14px; border: 1px solid ${border}; border-radius: 8px; font-family: inherit; font-size: 13px; background: ${isDark?'#374151':'#f9fafb'}; color: ${text}; }
+.avatar { width: 36px; height: 36px; border-radius: 8px; background: ${accent}; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+.content { flex: 1; padding: 20px; overflow-y: auto; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.card { background: ${panelBg}; border: 1px solid ${border}; border-radius: 12px; padding: 16px; }
+.stat-label { font-size: 13px; color: ${muted}; }
+.stat-value { font-size: 28px; font-weight: 700; margin: 4px 0; }
+.stat-trend { font-size: 13px; font-weight: 600; }
+.stat-trend.up { color: #22c55e; }
+.stat-trend.down { color: #ef4444; }
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="logo">Dashboard</div>
+  <nav>
+${navItems.map(n => `    <a href="#"${n.active?' class="active"':''}>${n.label}</a>`).join('\n')}
+  </nav>
+</div>
+<div class="main">
+  <div class="topbar">
+    <input placeholder="Search..." readonly>
+    <div class="avatar">JS</div>
+  </div>
+  <div class="content">
+    <div class="grid">
+${widgets.map(w => {
+  if (w.type === 'stat') return `      <div class="card">\n        <div class="stat-label">${w.data.label}</div>\n        <div class="stat-value">${w.data.value}</div>\n        <div class="stat-trend ${w.data.up?'up':'down'}">${w.data.trend}</div>\n      </div>`;
+  if (w.type === 'table') return `      <div class="card">\n        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px">${w.data.title}</h3>\n        <table style="width:100%;font-size:13px;border-collapse:collapse">\n          <thead><tr>${w.data.headers.map(h=>`<th style="text-align:left;padding:8px;border-bottom:1px solid ${border}">${h}</th>`).join('')}</tr></thead>\n          <tbody>${w.data.rows.map(r=>`<tr>${r.map(c=>`<td style="padding:8px;border-bottom:1px solid ${isDark?'#374151':'#f3f4f6'}">${c}</td>`).join('')}</tr>`).join('')}</tbody>\n        </table>\n      </div>`;
+  if (w.type === 'activity') return `      <div class="card">\n        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px">${w.data.title}</h3>\n${w.data.items.map(a=>`        <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid ${isDark?'#374151':'#f3f4f6'}">\n          <div style="width:8px;height:8px;border-radius:50%;background:${a.color};margin-top:6px"></div>\n          <div><div>${a.text}</div><div style="font-size:11px;color:${muted}">${a.time}</div></div>\n        </div>`).join('\n')}\n      </div>`;
+  if (w.type === 'progress') return `      <div class="card">\n        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px">${w.data.title}</h3>\n${w.data.items.map(p=>`        <div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>${p.label}</span><span>${p.value}%</span></div><div style="height:8px;background:${isDark?'#374151':'#f3f4f6'};border-radius:4px;overflow:hidden"><div style="width:${p.value}%;height:100%;background:${p.color};border-radius:4px"></div></div></div>`).join('\n')}\n      </div>`;
+  return `      <div class="card"><h3 style="font-size:14px;font-weight:700;margin-bottom:12px">${w.data.title || w.type}</h3><p style="color:${muted};font-size:13px">Chart widget — use a charting library (Chart.js, Recharts) for production.</p></div>`;
+}).join('\n')}
+    </div>
+  </div>
+</div>
+</body>
+</html>`;
+  return html;
+}
+
+function generateReact() {
+  let jsx = `// Dashboard.tsx\nimport React from 'react';\n\nfunction Sidebar() {\n  const items = [\n${navItems.map(n => `    { label: '${n.label}', active: ${n.active||false} },`).join('\n')}\n  ];\n  return (\n    <aside className="w-56 bg-gray-900 text-white flex flex-col py-4">\n      <div className="px-4 pb-4 font-bold text-base">Dashboard</div>\n      <nav className="flex-1">\n        {items.map((item, i) => (\n          <a key={i} href="#" className={\`flex items-center gap-2.5 px-4 py-2.5 text-sm \${item.active ? 'bg-white/15 font-semibold' : 'text-gray-400 hover:bg-white/10'}\`}>\n            {item.label}\n          </a>\n        ))}\n      </nav>\n    </aside>\n  );\n}\n\n`;
+  jsx += `function TopBar() {\n  return (\n    <div className="flex items-center gap-3 px-5 py-3 border-b border-gray-700 bg-gray-800">\n      <input className="flex-1 max-w-sm px-3.5 py-2 border border-gray-600 rounded-lg bg-gray-700 text-sm text-white" placeholder="Search..." />\n      <div className="w-9 h-9 rounded-lg bg-pink-500 text-white flex items-center justify-center font-bold text-sm">JS</div>\n    </div>\n  );\n}\n\n`;
+
+  jsx += `function StatCard({ label, value, trend, up }: { label: string; value: string; trend: string; up: boolean }) {\n  return (\n    <div className="bg-gray-800 border border-gray-700 rounded-xl p-4">\n      <div className="text-sm text-gray-400">{label}</div>\n      <div className="text-2xl font-bold my-1">{value}</div>\n      <div className={\`text-sm font-semibold \${up ? 'text-green-500' : 'text-red-500'}\`}>{trend}</div>\n    </div>\n  );\n}\n\n`;
+
+  jsx += `export default function Dashboard() {\n  return (\n    <div className="flex h-screen bg-gray-900 text-gray-100">\n      <Sidebar />\n      <div className="flex-1 flex flex-col overflow-hidden">\n        <TopBar />\n        <main className="flex-1 p-5 overflow-y-auto">\n          <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">\n`;
+  widgets.forEach(w => {
+    if (w.type === 'stat') {
+      jsx += `            <StatCard label="${w.data.label}" value="${w.data.value}" trend="${w.data.trend}" up={${w.data.up}} />\n`;
+    } else {
+      jsx += `            {/* ${w.type} widget — implement with your preferred chart library */}\n            <div className="bg-gray-800 border border-gray-700 rounded-xl p-4">\n              <h3 className="text-sm font-bold mb-3">${w.data.title || w.type}</h3>\n            </div>\n`;
+    }
+  });
+  jsx += `          </div>\n        </main>\n      </div>\n    </div>\n  );\n}`;
+  return jsx;
+}
+
+// Theme toggle
+document.getElementById('themeToggle').onclick = function() {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  this.textContent = theme === 'dark' ? 'Light' : 'Dark';
+  document.getElementById('dashPreview').className = 'dash-preview ' + theme;
+  renderSidebar(); renderTopbar(); renderWidgets(); updateExport();
+};
+
+// Accent color
+document.getElementById('accentColor').oninput = e => {
+  accent = e.target.value;
+  renderTopbar(); renderWidgets(); updateExport();
+};
+
+// Preset
+document.getElementById('presetSelect').onchange = e => {
+  if (e.target.value) applyPreset(e.target.value);
+};
+
+// Export
+document.getElementById('exportBtn').onclick = () => {
+  navigator.clipboard.writeText(document.getElementById('exportCode').textContent).then(() => showToast('Copied to clipboard!'));
+};
+
+// Export tabs
+document.getElementById('exportTabs').addEventListener('click', e => {
+  if (!e.target.classList.contains('ex-tab')) return;
+  exportFmt = e.target.dataset.fmt;
+  document.querySelectorAll('.ex-tab').forEach(t => t.classList.toggle('active', t === e.target));
+  updateExport();
+});
+
+document.getElementById('copyExport').onclick = () => {
+  navigator.clipboard.writeText(document.getElementById('exportCode').textContent).then(() => showToast('Copied!'));
+};
+
+// Init
+buildPalette();
+applyPreset('analytics');
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

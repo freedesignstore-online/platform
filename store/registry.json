@@ -323,6 +323,33 @@
       "iconBg": "#3b82f6",
       "category": "components",
       "section": "components"
+    },
+    {
+      "id": "form-builder",
+      "name": "Form Builder",
+      "description": "Drag & drop form builder. 16 field types, multi-step wizards, 7 presets. Export HTML, Tailwind, React JSX.",
+      "icon": "📝",
+      "iconBg": "#10b981",
+      "category": "components",
+      "section": "components"
+    },
+    {
+      "id": "landing-builder",
+      "name": "Landing Page Builder",
+      "description": "Stack 17 section types to build pages. Hero, features, pricing, FAQ, CTA. Responsive preview. Export HTML.",
+      "icon": "🏗️",
+      "iconBg": "#f97316",
+      "category": "components",
+      "section": "components"
+    },
+    {
+      "id": "dashboard-builder",
+      "name": "Dashboard Builder",
+      "description": "Admin dashboard templates. Sidebar, charts, tables, widgets. Light/dark theme. Export HTML + React.",
+      "icon": "📊",
+      "iconBg": "#8b5cf6",
+      "category": "components",
+      "section": "components"
     }
   ]
 }

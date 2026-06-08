@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Landing Page Builder - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Manrope',system-ui,sans-serif;background:#fafafa;color:#1a1a1a;min-height:100vh}
+a.back{display:inline-block;margin:24px 24px 0;color:#ec4899;text-decoration:none;font-weight:500}
+a.back:hover{text-decoration:underline}
+h1{font-size:28px;font-weight:700;margin:12px 24px 4px}
+p.sub{color:#6b7280;margin:0 24px 16px;font-size:14px}
+.toolbar{display:flex;gap:8px;margin:0 24px 12px;flex-wrap:wrap;align-items:center}
+.btn{padding:7px 14px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-family:inherit;font-size:13px;transition:all .15s}
+.btn:hover{opacity:.85}
+.btn-p{background:#ec4899;color:#fff}
+.btn-s{background:#f3f4f6;color:#1a1a1a;border:1px solid #e5e7eb}
+.btn-s.active{background:#ec4899;color:#fff;border-color:#ec4899}
+select,input[type="text"],input[type="color"]{font-family:inherit;font-size:13px;padding:7px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fff}
+input[type="color"]{width:36px;height:32px;padding:2px;cursor:pointer}
+.app{display:flex;gap:16px;margin:0 24px 24px;min-height:600px}
+.section-palette{width:220px;flex-shrink:0;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px;overflow-y:auto}
+.section-palette h3{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;font-weight:700;margin:8px 0 6px;padding:0 4px}
+.sec-btn{display:block;width:100%;text-align:left;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:4px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:500;background:#fff;color:#1a1a1a;transition:all .15s}
+.sec-btn:hover{border-color:#ec4899;background:rgba(236,72,153,.04)}
+.canvas-wrap{flex:1;display:flex;flex-direction:column;min-width:0}
+.responsive-bar{display:flex;gap:4px;margin-bottom:8px}
+.resp-btn{padding:4px 10px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;color:#6b7280;transition:all .15s}
+.resp-btn:hover{border-color:#ec4899;color:#ec4899}
+.resp-btn.active{background:#ec4899;color:#fff;border-color:#ec4899}
+.canvas-frame{flex:1;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow-y:auto;transition:max-width .3s;margin:0 auto;width:100%}
+.canvas-frame.tablet{max-width:768px}
+.canvas-frame.phone{max-width:375px}
+.section-item{position:relative;border-bottom:1px solid #f3f4f6;cursor:pointer;transition:outline .15s}
+.section-item:hover{outline:2px solid #ec4899;outline-offset:-2px}
+.section-item.selected{outline:2px solid #ec4899;outline-offset:-2px}
+.section-item.dragging{opacity:.4}
+.section-item.drag-over{border-top:3px solid #ec4899}
+.sec-actions{position:absolute;top:8px;right:8px;display:none;gap:4px;z-index:10}
+.section-item:hover .sec-actions{display:flex}
+.sa-btn{width:26px;height:26px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;color:#6b7280;transition:all .15s;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.sa-btn:hover{border-color:#ec4899;color:#ec4899}
+.sa-btn.del:hover{border-color:#ef4444;color:#ef4444}
+.empty-canvas{display:flex;align-items:center;justify-content:center;min-height:300px;color:#9ca3af;font-size:14px}
+/* Section styles */
+.sec-hero{padding:60px 24px;text-align:center}
+.sec-hero h2{font-size:36px;font-weight:800;margin-bottom:12px;line-height:1.2}
+.sec-hero p{font-size:16px;color:#6b7280;max-width:520px;margin:0 auto 20px;line-height:1.6}
+.sec-hero .hero-btns{display:flex;gap:10px;justify-content:center}
+.sec-hero .hbtn{padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:inherit}
+.sec-hero .hbtn-p{background:var(--brand,#ec4899);color:#fff}
+.sec-hero .hbtn-s{background:#fff;border:1px solid #e5e7eb;color:#374151}
+.sec-hero-split{display:flex;align-items:center;gap:40px;padding:60px 40px}
+.sec-hero-split .text{flex:1}
+.sec-hero-split h2{font-size:32px;font-weight:800;margin-bottom:12px}
+.sec-hero-split p{color:#6b7280;line-height:1.6;margin-bottom:20px}
+.sec-hero-split .img{flex:1;height:280px;border-radius:12px;background:linear-gradient(135deg,var(--brand,#ec4899),#8b5cf6)}
+.sec-hero-video{padding:60px 24px;text-align:center;background:linear-gradient(135deg,#1a1a1a,#374151);color:#fff;position:relative}
+.sec-hero-video h2{font-size:36px;font-weight:800;margin-bottom:12px}
+.sec-hero-video p{color:rgba(255,255,255,.7);max-width:500px;margin:0 auto 20px}
+.sec-hero-gradient{padding:60px 24px;text-align:center;background:linear-gradient(135deg,var(--brand,#ec4899),#8b5cf6);color:#fff}
+.sec-hero-gradient h2{font-size:36px;font-weight:800;margin-bottom:12px}
+.sec-hero-gradient p{color:rgba(255,255,255,.85);max-width:500px;margin:0 auto 20px}
+.sec-features{padding:48px 24px}
+.sec-features h2{text-align:center;font-size:24px;font-weight:700;margin-bottom:8px}
+.sec-features .feat-sub{text-align:center;color:#6b7280;margin-bottom:32px}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:900px;margin:0 auto}
+.feat-card{text-align:center;padding:20px}
+.feat-card .feat-icon{width:48px;height:48px;border-radius:12px;background:rgba(236,72,153,.1);color:var(--brand,#ec4899);display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 12px}
+.feat-card h3{font-size:16px;font-weight:700;margin-bottom:6px}
+.feat-card p{font-size:13px;color:#6b7280;line-height:1.5}
+.sec-features-alt{padding:48px 24px}
+.alt-row{display:flex;align-items:center;gap:40px;max-width:900px;margin:0 auto 32px}
+.alt-row:nth-child(even){flex-direction:row-reverse}
+.alt-row .alt-text{flex:1}
+.alt-row .alt-text h3{font-size:20px;font-weight:700;margin-bottom:8px}
+.alt-row .alt-text p{color:#6b7280;line-height:1.6}
+.alt-row .alt-img{flex:1;height:200px;border-radius:12px;background:linear-gradient(135deg,#f3f4f6,#e5e7eb)}
+.sec-features-icons{padding:48px 24px;text-align:center}
+.icon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;max-width:800px;margin:16px auto 0}
+.icon-item{padding:16px}
+.icon-item .ii{font-size:28px;margin-bottom:8px}
+.icon-item h4{font-size:14px;font-weight:600;margin-bottom:4px}
+.icon-item p{font-size:12px;color:#6b7280}
+.sec-pricing{padding:48px 24px;text-align:center}
+.sec-pricing h2{font-size:24px;font-weight:700;margin-bottom:6px}
+.sec-pricing .price-sub{color:#6b7280;margin-bottom:24px}
+.price-toggle{display:inline-flex;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:24px;overflow:hidden}
+.price-toggle button{padding:8px 18px;border:none;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;background:#fff;color:#6b7280}
+.price-toggle button.active{background:var(--brand,#ec4899);color:#fff}
+.price-cards{display:flex;gap:20px;justify-content:center;flex-wrap:wrap}
+.price-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;width:260px;text-align:center}
+.price-card.featured{border-color:var(--brand,#ec4899);border-width:2px;position:relative}
+.price-card h3{font-size:18px;font-weight:700;margin-bottom:4px}
+.price-card .price-amt{font-size:36px;font-weight:800;margin:8px 0}
+.price-card .price-amt span{font-size:14px;color:#6b7280;font-weight:400}
+.price-card ul{list-style:none;padding:0;margin:16px 0}
+.price-card li{padding:6px 0;font-size:14px;color:#6b7280;border-bottom:1px solid #f3f4f6}
+.price-card .pbtn{display:block;width:100%;padding:10px;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-top:12px}
+.price-card .pbtn-p{background:var(--brand,#ec4899);color:#fff}
+.price-card .pbtn-s{background:#f3f4f6;color:#374151}
+.sec-testimonials{padding:48px 24px}
+.sec-testimonials h2{text-align:center;font-size:24px;font-weight:700;margin-bottom:24px}
+.test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:900px;margin:0 auto}
+.test-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px}
+.test-card p{font-style:italic;font-size:14px;line-height:1.6;margin-bottom:12px;color:#374151}
+.test-card .test-author{display:flex;align-items:center;gap:10px}
+.test-card .ta-avatar{width:36px;height:36px;border-radius:50%;background:var(--brand,#ec4899);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+.test-card .ta-name{font-size:13px;font-weight:600}
+.test-card .ta-role{font-size:11px;color:#9ca3af}
+.sec-test-single{padding:48px 40px;text-align:center;background:#f9fafb;border-radius:0}
+.sec-test-single blockquote{font-size:20px;font-style:italic;line-height:1.6;max-width:600px;margin:0 auto 16px;color:#374151}
+.sec-test-single .ts-name{font-weight:700;font-size:14px}
+.sec-test-single .ts-role{font-size:13px;color:#9ca3af}
+.sec-faq{padding:48px 24px;max-width:700px;margin:0 auto}
+.sec-faq h2{text-align:center;font-size:24px;font-weight:700;margin-bottom:24px}
+.faq-item{border:1px solid #e5e7eb;border-radius:8px;margin-bottom:8px;overflow:hidden}
+.faq-q{padding:14px 16px;font-weight:600;font-size:14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:#fff}
+.faq-q:hover{background:#f9fafb}
+.faq-a{padding:0 16px 14px;font-size:14px;color:#6b7280;line-height:1.6;display:none}
+.faq-item.open .faq-a{display:block}
+.sec-cta{padding:48px 24px;text-align:center;background:var(--brand,#ec4899);color:#fff;border-radius:0}
+.sec-cta h2{font-size:28px;font-weight:800;margin-bottom:8px}
+.sec-cta p{color:rgba(255,255,255,.85);margin-bottom:20px;max-width:400px;margin-left:auto;margin-right:auto}
+.sec-cta-split{display:flex;align-items:center;gap:40px;padding:48px 40px;background:#f9fafb}
+.sec-cta-split .cta-text{flex:1}
+.sec-cta-split h2{font-size:24px;font-weight:800;margin-bottom:8px}
+.sec-cta-split p{color:#6b7280;margin-bottom:16px}
+.sec-cta-split .cta-form{flex:1;display:flex;gap:8px}
+.sec-cta-split .cta-form input{flex:1;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px}
+.sec-cta-split .cta-form button{padding:10px 20px;border:none;border-radius:8px;background:var(--brand,#ec4899);color:#fff;font-weight:600;font-family:inherit;cursor:pointer}
+.sec-stats{padding:48px 24px;text-align:center}
+.stat-grid{display:flex;justify-content:center;gap:40px;flex-wrap:wrap}
+.stat-item .stat-num{font-size:36px;font-weight:800;color:var(--brand,#ec4899)}
+.stat-item .stat-label{font-size:14px;color:#6b7280;font-weight:500}
+.sec-team{padding:48px 24px}
+.sec-team h2{text-align:center;font-size:24px;font-weight:700;margin-bottom:24px}
+.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;max-width:900px;margin:0 auto}
+.team-card{text-align:center}
+.team-card .tm-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--brand,#ec4899),#8b5cf6);margin:0 auto 10px}
+.team-card h4{font-size:14px;font-weight:700}
+.team-card p{font-size:12px;color:#6b7280}
+.sec-logos{padding:32px 24px;text-align:center;background:#f9fafb}
+.sec-logos p{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#9ca3af;margin-bottom:16px}
+.logo-row{display:flex;justify-content:center;gap:40px;align-items:center;flex-wrap:wrap;opacity:.5}
+.logo-item{font-size:18px;font-weight:800;color:#6b7280}
+.sec-footer{padding:40px 24px;background:#1a1a1a;color:#fff}
+.footer-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;max-width:900px;margin:0 auto}
+.footer-col h4{font-size:14px;font-weight:700;margin-bottom:12px}
+.footer-col a{display:block;font-size:13px;color:rgba(255,255,255,.6);text-decoration:none;padding:3px 0}
+.footer-col a:hover{color:#fff}
+.footer-bottom{text-align:center;margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,.1);font-size:12px;color:rgba(255,255,255,.4)}
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to FreeDesignStore</a>
+<h1>Landing Page Section Builder</h1>
+<p class="sub">Build landing pages by stacking pre-made sections. Drag to reorder, edit inline, export complete HTML.</p>
+
+<div class="toolbar">
+<label style="font-size:12px;font-weight:600;color:#6b7280">Brand Color:</label>
+<input type="color" id="brandColor" value="#ec4899">
+<label style="font-size:12px;font-weight:600;color:#6b7280;margin-left:8px">Preset:</label>
+<select id="pagePreset">
+<option value="">Select preset...</option>
+<option value="saas">SaaS</option>
+<option value="agency">Agency</option>
+<option value="product">Product</option>
+<option value="app">App</option>
+<option value="personal">Personal</option>
+</select>
+<button class="btn btn-s" id="saveBtn">Save</button>
+<button class="btn btn-s" id="loadBtn">Load</button>
+<button class="btn btn-p" id="exportBtn">Export HTML</button>
+</div>
+
+<div class="app">
+<div class="section-palette" id="palette">
+<h3>Sections</h3>
+</div>
+<div class="canvas-wrap">
+<div class="responsive-bar">
+<button class="resp-btn active" data-vp="desktop">Desktop</button>
+<button class="resp-btn" data-vp="tablet">Tablet</button>
+<button class="resp-btn" data-vp="phone">Phone</button>
+</div>
+<div class="canvas-frame" id="canvasFrame">
+<div id="canvas"></div>
+</div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SECTION_TYPES = [
+  {id:'hero-centered',cat:'Hero',label:'Hero: Centered'},
+  {id:'hero-split',cat:'Hero',label:'Hero: Split'},
+  {id:'hero-video',cat:'Hero',label:'Hero: Dark/Video'},
+  {id:'hero-gradient',cat:'Hero',label:'Hero: Gradient'},
+  {id:'features-grid',cat:'Features',label:'Features: 3-Col Grid'},
+  {id:'features-alt',cat:'Features',label:'Features: Alternating'},
+  {id:'features-icons',cat:'Features',label:'Features: Icon Grid'},
+  {id:'pricing',cat:'Pricing',label:'Pricing Table'},
+  {id:'testimonials-grid',cat:'Testimonials',label:'Testimonials: Grid'},
+  {id:'testimonial-single',cat:'Testimonials',label:'Testimonial: Single'},
+  {id:'faq',cat:'FAQ',label:'FAQ Accordion'},
+  {id:'cta-centered',cat:'CTA',label:'CTA: Centered'},
+  {id:'cta-split',cat:'CTA',label:'CTA: With Form'},
+  {id:'stats',cat:'Stats',label:'Stats Counter'},
+  {id:'team',cat:'Team',label:'Team Grid'},
+  {id:'logos',cat:'Logos',label:'Logo Bar'},
+  {id:'footer',cat:'Footer',label:'Footer: 4-Col'}
+];
+
+const PAGE_PRESETS = {
+  saas: ['hero-centered','logos','features-grid','pricing','testimonials-grid','faq','cta-centered','footer'],
+  agency: ['hero-split','logos','features-alt','team','testimonials-grid','cta-split','footer'],
+  product: ['hero-gradient','features-icons','stats','pricing','testimonial-single','faq','cta-centered','footer'],
+  app: ['hero-split','features-grid','stats','testimonials-grid','pricing','cta-split','footer'],
+  personal: ['hero-centered','features-icons','testimonial-single','cta-centered','footer']
+};
+
+let sections = [];
+let selectedIdx = -1;
+let brand = '#ec4899';
+let nextSid = 1;
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function buildPalette() {
+  const pal = document.getElementById('palette');
+  let cats = {};
+  SECTION_TYPES.forEach(s => { if (!cats[s.cat]) cats[s.cat] = []; cats[s.cat].push(s); });
+  let h = '';
+  for (const [cat, items] of Object.entries(cats)) {
+    h += `<h3>${cat}</h3>`;
+    items.forEach(s => {
+      h += `<button class="sec-btn" data-type="${s.id}">${s.label}</button>`;
+    });
+  }
+  pal.innerHTML = h;
+  pal.querySelectorAll('.sec-btn').forEach(btn => {
+    btn.onclick = () => addSection(btn.dataset.type);
+  });
+}
+
+function addSection(type) {
+  sections.push({id: nextSid++, type, data: getDefaultData(type)});
+  renderCanvas();
+}
+
+function getDefaultData(type) {
+  switch (type) {
+    case 'hero-centered': return {title:'Build something amazing',sub:'The all-in-one platform that helps you ship faster, scale better, and delight your customers.',cta1:'Get Started Free',cta2:'Watch Demo'};
+    case 'hero-split': return {title:'Ship faster with modern tools',sub:'Powerful features that help your team collaborate, build, and deploy with confidence.',cta:'Get Started'};
+    case 'hero-video': return {title:'The future is here',sub:'Next-generation platform for building incredible products.',cta:'Start Building'};
+    case 'hero-gradient': return {title:'Supercharge your workflow',sub:'Join thousands of teams already using our platform to build better products.',cta:'Try for Free'};
+    case 'features-grid': return {title:'Everything you need',sub:'Powerful features to help you build, ship, and grow.',features:[{icon:'&#9733;',t:'Lightning Fast',d:'Built for speed with optimized performance at every layer.'},{icon:'&#9830;',t:'Secure by Default',d:'Enterprise-grade security with encryption and compliance.'},{icon:'&#9824;',t:'Easy Integration',d:'Connect with your favorite tools in just a few clicks.'},{icon:'&#9827;',t:'Analytics',d:'Deep insights into user behavior and product metrics.'},{icon:'&#9829;',t:'24/7 Support',d:'Our team is always here to help you succeed.'},{icon:'&#9830;',t:'Scalable',d:'Grows with you from startup to enterprise.'}]};
+    case 'features-alt': return {rows:[{t:'Built for developers',d:'A modern API that makes integration a breeze. Full documentation, SDKs, and examples.'},{t:'Designed for teams',d:'Collaborate in real-time with built-in commenting, review workflows, and permissions.'}]};
+    case 'features-icons': return {title:'Why choose us',items:[{icon:'&#9733;',t:'Fast',d:'Sub-100ms response'},{icon:'&#9830;',t:'Secure',d:'SOC2 compliant'},{icon:'&#9824;',t:'Global',d:'30+ regions'},{icon:'&#9829;',t:'Reliable',d:'99.99% uptime'}]};
+    case 'pricing': return {title:'Simple pricing',sub:'No hidden fees. Cancel anytime.',plans:[{name:'Starter',price:'$0',period:'/mo',features:['5 projects','1GB storage','Community support'],featured:false},{name:'Pro',price:'$29',period:'/mo',features:['Unlimited projects','100GB storage','Priority support','Custom domains'],featured:true},{name:'Enterprise',price:'$99',period:'/mo',features:['Everything in Pro','SSO & SAML','Dedicated support','SLA'],featured:false}]};
+    case 'testimonials-grid': return {title:'Loved by thousands',items:[{q:'This product transformed how our team works. Incredible tool.',name:'Sarah L.',role:'CTO, TechCo',initials:'SL'},{q:'The best investment we made this year. ROI was immediate.',name:'Mark R.',role:'Founder, StartupX',initials:'MR'},{q:'Simple, powerful, and beautifully designed. A joy to use.',name:'Emily K.',role:'Designer, Studio',initials:'EK'}]};
+    case 'testimonial-single': return {quote:'We switched six months ago and haven\'t looked back. The platform is incredibly intuitive and the support team is world-class.',name:'Alex Johnson',role:'VP of Engineering, BigCorp'};
+    case 'faq': return {title:'Frequently Asked Questions',items:[{q:'How does the free trial work?',a:'You get full access to all features for 14 days. No credit card required.'},{q:'Can I cancel anytime?',a:'Yes, you can cancel your subscription at any time from your account settings.'},{q:'Do you offer team pricing?',a:'Yes! We offer volume discounts for teams of 10 or more. Contact sales for details.'},{q:'Is my data secure?',a:'Absolutely. We use AES-256 encryption, regular audits, and are SOC2 Type II certified.'}]};
+    case 'cta-centered': return {title:'Ready to get started?',sub:'Join 10,000+ teams already building with us.',cta:'Start Free Trial'};
+    case 'cta-split': return {title:'Stay in the loop',sub:'Get product updates, tips, and exclusive offers delivered to your inbox.',cta:'Subscribe'};
+    case 'stats': return {items:[{num:'10K+',label:'Active Users'},{num:'99.9%',label:'Uptime'},{num:'50M+',label:'API Calls/Day'},{num:'4.9',label:'App Store Rating'}]};
+    case 'team': return {title:'Meet our team',members:[{name:'Jane Smith',role:'CEO'},{name:'Alex Lee',role:'CTO'},{name:'Maria Garcia',role:'Design Lead'},{name:'James Chen',role:'Engineering'}]};
+    case 'logos': return {label:'Trusted by industry leaders',logos:['Acme','Globex','Initech','Umbrella','Stark']};
+    case 'footer': return {cols:[{title:'Product',links:['Features','Pricing','Changelog','Docs']},{title:'Company',links:['About','Blog','Careers','Press']},{title:'Resources',links:['Help Center','Community','API Reference','Status']},{title:'Legal',links:['Privacy','Terms','Security','GDPR']}],copyright:'2026 Company. All rights reserved.'};
+    default: return {};
+  }
+}
+
+function renderSection(sec) {
+  const d = sec.data;
+  const b = brand;
+  switch (sec.type) {
+    case 'hero-centered': return `<div class="sec-hero"><h2 contenteditable="true">${d.title}</h2><p contenteditable="true">${d.sub}</p><div class="hero-btns"><button class="hbtn hbtn-p" style="background:${b}">${d.cta1}</button><button class="hbtn hbtn-s">${d.cta2}</button></div></div>`;
+    case 'hero-split': return `<div class="sec-hero-split"><div class="text"><h2 contenteditable="true">${d.title}</h2><p contenteditable="true">${d.sub}</p><button class="hbtn hbtn-p" style="background:${b};border:none;padding:12px 24px;border-radius:8px;color:#fff;font-weight:600;font-family:inherit;font-size:14px;cursor:pointer">${d.cta}</button></div><div class="img" style="background:linear-gradient(135deg,${b},#8b5cf6)"></div></div>`;
+    case 'hero-video': return `<div class="sec-hero-video"><h2 contenteditable="true">${d.title}</h2><p contenteditable="true">${d.sub}</p><button style="padding:12px 24px;border-radius:8px;border:2px solid #fff;background:transparent;color:#fff;font-weight:600;font-family:inherit;font-size:14px;cursor:pointer">${d.cta}</button></div>`;
+    case 'hero-gradient': return `<div class="sec-hero-gradient" style="background:linear-gradient(135deg,${b},#8b5cf6)"><h2 contenteditable="true">${d.title}</h2><p contenteditable="true">${d.sub}</p><button style="padding:12px 24px;border-radius:8px;border:none;background:#fff;color:#1a1a1a;font-weight:600;font-family:inherit;font-size:14px;cursor:pointer">${d.cta}</button></div>`;
+    case 'features-grid': return `<div class="sec-features"><h2 contenteditable="true">${d.title}</h2><p class="feat-sub" contenteditable="true">${d.sub}</p><div class="feat-grid">${d.features.map(f=>`<div class="feat-card"><div class="feat-icon" style="color:${b};background:${b}15">${f.icon}</div><h3 contenteditable="true">${f.t}</h3><p contenteditable="true">${f.d}</p></div>`).join('')}</div></div>`;
+    case 'features-alt': return `<div class="sec-features-alt">${d.rows.map(r=>`<div class="alt-row"><div class="alt-text"><h3 contenteditable="true">${r.t}</h3><p contenteditable="true">${r.d}</p></div><div class="alt-img"></div></div>`).join('')}</div>`;
+    case 'features-icons': return `<div class="sec-features-icons"><h2 contenteditable="true">${d.title}</h2><div class="icon-grid">${d.items.map(it=>`<div class="icon-item"><div class="ii">${it.icon}</div><h4 contenteditable="true">${it.t}</h4><p contenteditable="true">${it.d}</p></div>`).join('')}</div></div>`;
+    case 'pricing': return `<div class="sec-pricing"><h2 contenteditable="true">${d.title}</h2><p class="price-sub" contenteditable="true">${d.sub}</p><div class="price-cards">${d.plans.map(p=>`<div class="price-card${p.featured?' featured':''}">${p.featured?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:'+b+';color:#fff;padding:3px 14px;border-radius:99px;font-size:12px;font-weight:600">Popular</div>':''}<h3>${p.name}</h3><div class="price-amt">${p.price}<span>${p.period}</span></div><ul>${p.features.map(f=>`<li>${f}</li>`).join('')}</ul><button class="pbtn ${p.featured?'pbtn-p':'pbtn-s'}" ${p.featured?'style="background:'+b+'"':''}>${p.featured?'Get Started':'Choose Plan'}</button></div>`).join('')}</div></div>`;
+    case 'testimonials-grid': return `<div class="sec-testimonials"><h2 contenteditable="true">${d.title}</h2><div class="test-grid">${d.items.map(t=>`<div class="test-card"><p contenteditable="true">"${t.q}"</p><div class="test-author"><div class="ta-avatar" style="background:${b}">${t.initials}</div><div><div class="ta-name">${t.name}</div><div class="ta-role">${t.role}</div></div></div></div>`).join('')}</div></div>`;
+    case 'testimonial-single': return `<div class="sec-test-single"><blockquote contenteditable="true">"${d.quote}"</blockquote><div class="ts-name">${d.name}</div><div class="ts-role">${d.role}</div></div>`;
+    case 'faq': return `<div class="sec-faq"><h2 contenteditable="true">${d.title}</h2>${d.items.map(f=>`<div class="faq-item"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">${f.q} <span>+</span></div><div class="faq-a">${f.a}</div></div>`).join('')}</div>`;
+    case 'cta-centered': return `<div class="sec-cta" style="background:${b}"><h2 contenteditable="true">${d.title}</h2><p contenteditable="true">${d.sub}</p><button style="padding:12px 24px;border-radius:8px;border:none;background:#fff;color:#1a1a1a;font-weight:600;font-family:inherit;font-size:14px;cursor:pointer">${d.cta}</button></div>`;
+    case 'cta-split': return `<div class="sec-cta-split"><div class="cta-text"><h2 contenteditable="true">${d.title}</h2><p contenteditable="true">${d.sub}</p></div><div class="cta-form"><input placeholder="Enter your email" style="font-family:inherit"><button style="background:${b}">${d.cta}</button></div></div>`;
+    case 'stats': return `<div class="sec-stats"><div class="stat-grid">${d.items.map(s=>`<div class="stat-item"><div class="stat-num" style="color:${b}">${s.num}</div><div class="stat-label">${s.label}</div></div>`).join('')}</div></div>`;
+    case 'team': return `<div class="sec-team"><h2 contenteditable="true">${d.title}</h2><div class="team-grid">${d.members.map(m=>`<div class="team-card"><div class="tm-avatar" style="background:linear-gradient(135deg,${b},#8b5cf6)"></div><h4 contenteditable="true">${m.name}</h4><p contenteditable="true">${m.role}</p></div>`).join('')}</div></div>`;
+    case 'logos': return `<div class="sec-logos"><p>${d.label}</p><div class="logo-row">${d.logos.map(l=>`<div class="logo-item">${l}</div>`).join('')}</div></div>`;
+    case 'footer': return `<div class="sec-footer"><div class="footer-grid">${d.cols.map(c=>`<div class="footer-col"><h4>${c.title}</h4>${c.links.map(l=>`<a href="#">${l}</a>`).join('')}</div>`).join('')}</div><div class="footer-bottom">${d.copyright}</div></div>`;
+    default: return '<div style="padding:40px;text-align:center;color:#9ca3af">Unknown section</div>';
+  }
+}
+
+function renderCanvas() {
+  const canvas = document.getElementById('canvas');
+  if (sections.length === 0) {
+    canvas.innerHTML = '<div class="empty-canvas">Add sections from the left panel to build your page</div>';
+    return;
+  }
+  canvas.innerHTML = '';
+  sections.forEach((sec, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'section-item' + (selectedIdx === i ? ' selected' : '');
+    wrap.dataset.idx = i;
+    wrap.innerHTML = renderSection(sec) + `<div class="sec-actions"><button class="sa-btn" data-action="up" title="Move up">&uarr;</button><button class="sa-btn" data-action="down" title="Move down">&darr;</button><button class="sa-btn del" data-action="del" title="Remove">&times;</button></div>`;
+    wrap.onclick = e => { if (e.target.closest('.sec-actions')) return; selectedIdx = i; renderCanvas(); };
+
+    wrap.querySelectorAll('.sa-btn').forEach(btn => {
+      btn.onclick = e => {
+        e.stopPropagation();
+        const action = btn.dataset.action;
+        if (action === 'del') { sections.splice(i, 1); selectedIdx = -1; }
+        else if (action === 'up' && i > 0) { [sections[i-1], sections[i]] = [sections[i], sections[i-1]]; selectedIdx = i - 1; }
+        else if (action === 'down' && i < sections.length - 1) { [sections[i], sections[i+1]] = [sections[i+1], sections[i]]; selectedIdx = i + 1; }
+        renderCanvas();
+      };
+    });
+
+    // Drag reorder
+    wrap.draggable = true;
+    wrap.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', i); wrap.classList.add('dragging'); });
+    wrap.addEventListener('dragend', () => wrap.classList.remove('dragging'));
+    wrap.addEventListener('dragover', e => { e.preventDefault(); wrap.classList.add('drag-over'); });
+    wrap.addEventListener('dragleave', () => wrap.classList.remove('drag-over'));
+    wrap.addEventListener('drop', e => {
+      e.preventDefault(); wrap.classList.remove('drag-over');
+      const from = +e.dataTransfer.getData('text/plain');
+      if (from !== i) {
+        const item = sections.splice(from, 1)[0];
+        sections.splice(i, 0, item);
+        renderCanvas();
+      }
+    });
+
+    canvas.appendChild(wrap);
+  });
+}
+
+// Brand color
+document.getElementById('brandColor').oninput = e => {
+  brand = e.target.value;
+  renderCanvas();
+};
+
+// Responsive
+document.querySelectorAll('.resp-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.resp-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const frame = document.getElementById('canvasFrame');
+    frame.className = 'canvas-frame' + (btn.dataset.vp === 'tablet' ? ' tablet' : btn.dataset.vp === 'phone' ? ' phone' : '');
+  };
+});
+
+// Presets
+document.getElementById('pagePreset').onchange = e => {
+  const key = e.target.value;
+  if (!key || !PAGE_PRESETS[key]) return;
+  sections = PAGE_PRESETS[key].map(type => ({id: nextSid++, type, data: getDefaultData(type)}));
+  selectedIdx = -1;
+  renderCanvas();
+  showToast(`Loaded "${key}" preset`);
+};
+
+// Save / Load
+document.getElementById('saveBtn').onclick = () => {
+  localStorage.setItem('landing-builder', JSON.stringify({sections, brand}));
+  showToast('Project saved');
+};
+document.getElementById('loadBtn').onclick = () => {
+  const data = localStorage.getItem('landing-builder');
+  if (!data) { showToast('No saved project'); return; }
+  const parsed = JSON.parse(data);
+  sections = parsed.sections || [];
+  brand = parsed.brand || '#ec4899';
+  document.getElementById('brandColor').value = brand;
+  selectedIdx = -1;
+  renderCanvas();
+  showToast('Project loaded');
+};
+
+// Export
+document.getElementById('exportBtn').onclick = () => {
+  let html = `<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>Landing Page</title>\n<style>\n*{margin:0;padding:0;box-sizing:border-box}\nbody{font-family:'Manrope',system-ui,sans-serif;color:#1a1a1a}\n`;
+  // Get all style rules from this page that start with .sec-
+  const styles = document.querySelector('style').textContent;
+  const secStyles = styles.split('\n').filter(l => l.trim().startsWith('.sec-') || l.trim().startsWith('.feat-') || l.trim().startsWith('.alt-') || l.trim().startsWith('.icon-') || l.trim().startsWith('.price-') || l.trim().startsWith('.test-') || l.trim().startsWith('.faq-') || l.trim().startsWith('.stat-') || l.trim().startsWith('.team-') || l.trim().startsWith('.logo-') || l.trim().startsWith('.footer-') || l.trim().startsWith('.hero-') || l.trim().startsWith('.cta-') || l.trim().startsWith('.hbtn') || l.trim().startsWith('.pbtn') || l.trim().startsWith('.ts-') || l.trim().startsWith('.ta-') || l.trim().startsWith('.tm-') || l.trim().startsWith('.ii'));
+  html += secStyles.join('\n');
+  html += `\n</style>\n<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">\n</head>\n<body style="--brand:${brand}">\n`;
+  sections.forEach(sec => { html += renderSection(sec) + '\n'; });
+  html += `</body>\n</html>`;
+  // Clean out contenteditable
+  html = html.replace(/ contenteditable="true"/g, '');
+  navigator.clipboard.writeText(html).then(() => showToast('HTML copied to clipboard!'));
+};
+
+// Init
+buildPalette();
+renderCanvas();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>
