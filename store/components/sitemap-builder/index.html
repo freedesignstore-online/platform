@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visual Sitemap Generator - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Manrope',system-ui,sans-serif;background:#fafafa;color:#1a1a1a;min-height:100vh;overflow:hidden}
+a.back{display:inline-block;margin:24px 24px 0;color:#ec4899;text-decoration:none;font-weight:500}
+a.back:hover{text-decoration:underline}
+h1{font-size:28px;font-weight:700;margin:12px 24px 4px}
+p.sub{color:#6b7280;margin:0 24px 16px;font-size:14px}
+:root{--accent:#ec4899;--bg:#fafafa;--text:#1a1a1a;--panel:#ffffff;--line:#e5e7eb;--muted:#6b7280;--radius:8px}
+.toolbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:0 24px 12px}
+.tb-btn{padding:6px 12px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--text)}
+.tb-btn:hover{border-color:var(--accent);color:var(--accent)}
+.tb-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tb-sep{width:1px;height:24px;background:var(--line);margin:0 4px}
+select.tb-select{padding:6px 10px;border:1px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:12px;font-weight:600;background:var(--panel);cursor:pointer}
+.stats{display:flex;gap:16px;align-items:center;font-size:12px;font-weight:600;color:var(--muted);padding:0 24px 12px}
+.stats span{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 10px}
+.app{display:flex;height:calc(100vh - 150px);margin:0 24px 20px;gap:12px}
+.sidebar{width:280px;flex-shrink:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.sidebar h3{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);margin-bottom:4px}
+.edit-field{display:flex;flex-direction:column;gap:4px}
+.edit-field label{font-size:11px;font-weight:600;color:var(--muted)}
+.edit-field input,.edit-field select,.edit-field textarea{padding:7px 10px;border:1px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:13px;background:#fff}
+.edit-field input:focus,.edit-field select:focus,.edit-field textarea:focus{outline:none;border-color:var(--accent)}
+.edit-field textarea{resize:vertical;min-height:50px}
+.no-sel{color:var(--muted);font-size:13px;text-align:center;padding:40px 0}
+.canvas-wrap{flex:1;position:relative;overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+.canvas-inner{min-width:100%;min-height:100%;padding:40px;position:relative}
+/* Tree nodes */
+.tree-node{position:relative;display:flex;flex-direction:column;align-items:center}
+.tree-row{display:flex;gap:0;justify-content:center}
+.tree-branch{display:flex;flex-direction:column;align-items:center;position:relative;padding:0 12px}
+.node-card{background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:10px 14px;min-width:120px;max-width:180px;text-align:center;cursor:pointer;transition:all .15s;position:relative;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.node-card:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.node-card.selected{border-color:var(--accent);outline:2px solid rgba(236,72,153,.2);outline-offset:2px}
+.node-card.depth-0{border-color:#3b82f6;background:#eff6ff}
+.node-card.depth-1{border-color:#22c55e;background:#f0fdf4}
+.node-card.depth-2{border-color:#f59e0b;background:#fffbeb}
+.node-card.depth-3{border-color:#8b5cf6;background:#f5f3ff}
+.node-card.depth-4{border-color:#ec4899;background:#fdf2f8}
+.node-title{font-size:12px;font-weight:700;margin-bottom:2px;word-break:break-word}
+.node-url{font-size:10px;color:var(--muted);word-break:break-all}
+.node-status{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle}
+.node-status.live{background:#22c55e}
+.node-status.planned{background:#3b82f6}
+.node-status.in-progress{background:#f59e0b}
+.node-add{position:absolute;bottom:-24px;left:50%;transform:translateX(-50%);width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:14px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:10;line-height:1}
+.node-card:hover .node-add{display:flex}
+.node-delete{position:absolute;top:-8px;right:-8px;width:18px;height:18px;border-radius:50%;background:#ef4444;color:#fff;border:none;font-size:11px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:10;line-height:1}
+.node-card:hover .node-delete{display:flex}
+.tree-connector{width:2px;height:28px;background:var(--line);margin:0 auto}
+.tree-hline{height:2px;background:var(--line);position:absolute;top:0}
+/* Layout modes */
+.canvas-inner.horizontal{display:flex;flex-direction:column;align-items:center}
+.canvas-inner.vertical{display:flex;flex-direction:row;align-items:flex-start}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9998;display:none;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:24px;max-width:440px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:12px}
+.modal textarea{width:100%;min-height:120px;padding:10px;border:1px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:13px;resize:vertical}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:#1a1a1a;color:#fff;padding:8px 20px;border-radius:8px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;z-index:9999;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to FreeDesignStore</a>
+<h1>Visual Sitemap Generator</h1>
+<p class="sub">Build a visual tree of your website's page hierarchy. Export as SVG, PNG, XML sitemap, or markdown.</p>
+
+<div class="toolbar">
+  <button class="tb-btn active" id="hLayoutBtn">Horizontal Tree</button>
+  <button class="tb-btn" id="vLayoutBtn">Vertical Tree</button>
+  <div class="tb-sep"></div>
+  <select class="tb-select" id="templateSelect">
+    <option value="">Load Template...</option>
+    <option value="saas">SaaS Site</option>
+    <option value="ecommerce">E-commerce</option>
+    <option value="blog">Blog</option>
+    <option value="portfolio">Portfolio</option>
+    <option value="docs">Documentation</option>
+  </select>
+  <button class="tb-btn" id="importBtn">Import URLs</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" id="expSvg">Export SVG</button>
+  <button class="tb-btn" id="expPng">Export PNG</button>
+  <button class="tb-btn" id="expXml">XML Sitemap</button>
+  <button class="tb-btn" id="expMd">Markdown</button>
+  <button class="tb-btn" id="expJson">JSON</button>
+  <div class="tb-sep"></div>
+  <select class="tb-select" id="saveSelect"><option value="">Saved...</option></select>
+  <button class="tb-btn" id="saveBtn">Save</button>
+  <button class="tb-btn" id="loadBtn">Load</button>
+</div>
+
+<div class="stats" id="stats"></div>
+
+<div class="app">
+  <div class="canvas-wrap">
+    <div class="canvas-inner horizontal" id="canvas"></div>
+  </div>
+  <div class="sidebar" id="sidebar">
+    <h3>Page Details</h3>
+    <div class="no-sel" id="noSel">Click a page node to edit</div>
+    <div id="editPanel" style="display:none">
+      <div class="edit-field"><label>Page Name</label><input type="text" id="editName"></div>
+      <div class="edit-field"><label>URL Path</label><input type="text" id="editUrl" placeholder="/about"></div>
+      <div class="edit-field"><label>Description</label><textarea id="editDesc" placeholder="Page purpose..."></textarea></div>
+      <div class="edit-field"><label>Status</label><select id="editStatus"><option value="planned">Planned</option><option value="in-progress">In Progress</option><option value="live">Live</option></select></div>
+      <div style="margin-top:8px"><button class="tb-btn" id="editDelete" style="color:#ef4444;border-color:#ef4444">Delete Page</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="importModal">
+  <div class="modal">
+    <h3>Import URLs</h3>
+    <p style="font-size:13px;color:#6b7280;margin-bottom:8px">Paste URLs (one per line). Hierarchy is built from paths.</p>
+    <textarea id="importUrls" placeholder="https://example.com/&#10;https://example.com/about&#10;https://example.com/products&#10;https://example.com/products/widget"></textarea>
+    <div class="modal-btns">
+      <button class="tb-btn" onclick="document.getElementById('importModal').classList.remove('open')">Cancel</button>
+      <button class="tb-btn active" style="background:var(--accent);color:#fff;border-color:var(--accent)" id="importConfirm">Import</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const LS_KEY = 'sitemap-data';
+let tree = null;
+let selectedId = null;
+let layout = 'horizontal';
+let nextId = 1;
+
+function genId() { return 's' + (nextId++); }
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1800); }
+function save() { localStorage.setItem(LS_KEY, JSON.stringify({ tree, nextId })); updateSaveList(); }
+
+function defaultTree() {
+  return { id: genId(), name: 'Home', url: '/', desc: '', status: 'planned', children: [] };
+}
+
+function findNode(node, id) {
+  if (node.id === id) return node;
+  for (const c of node.children) { const found = findNode(c, id); if (found) return found; }
+  return null;
+}
+
+function findParent(node, id, parent) {
+  if (node.id === id) return parent;
+  for (const c of node.children) { const found = findParent(c, id, node); if (found) return found; }
+  return null;
+}
+
+function countNodes(node) { return 1 + node.children.reduce((s, c) => s + countNodes(c), 0); }
+function maxDepth(node, d) { return node.children.length ? Math.max(...node.children.map(c => maxDepth(c, d + 1))) : d; }
+
+function updateStats() {
+  const count = countNodes(tree);
+  const depth = maxDepth(tree, 0);
+  document.getElementById('stats').innerHTML = `<span>Pages: ${count}</span><span>Max Depth: ${depth}</span>`;
+}
+
+function renderTree() {
+  const canvas = document.getElementById('canvas');
+  canvas.innerHTML = '';
+  canvas.className = 'canvas-inner ' + layout;
+
+  function buildNode(node, depth) {
+    const branch = document.createElement('div');
+    branch.className = 'tree-branch';
+
+    const card = document.createElement('div');
+    card.className = 'node-card depth-' + Math.min(depth, 4) + (selectedId === node.id ? ' selected' : '');
+    card.innerHTML = `
+      <span class="node-status ${node.status}"></span>
+      <div class="node-title">${node.name}</div>
+      ${node.url ? '<div class="node-url">' + node.url + '</div>' : ''}
+      <button class="node-add" title="Add child">+</button>
+      ${node.id !== tree.id ? '<button class="node-delete" title="Delete">&times;</button>' : ''}`;
+
+    card.onclick = (e) => {
+      if (e.target.classList.contains('node-add') || e.target.classList.contains('node-delete')) return;
+      selectedId = node.id;
+      showEditPanel(node);
+      renderTree();
+    };
+
+    card.querySelector('.node-add').onclick = (e) => {
+      e.stopPropagation();
+      const name = prompt('Page name:', 'New Page');
+      if (!name) return;
+      node.children.push({ id: genId(), name, url: '', desc: '', status: 'planned', children: [] });
+      save(); renderTree(); updateStats();
+    };
+
+    const delBtn = card.querySelector('.node-delete');
+    if (delBtn) delBtn.onclick = (e) => {
+      e.stopPropagation();
+      const parent = findParent(tree, node.id, null);
+      if (parent) { parent.children = parent.children.filter(c => c.id !== node.id); if (selectedId === node.id) { selectedId = null; hideEditPanel(); } save(); renderTree(); updateStats(); }
+    };
+
+    // Drag to reparent
+    card.draggable = true;
+    card.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text/plain', node.id); e.dataTransfer.effectAllowed = 'move'; });
+    card.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; card.style.borderColor = '#ec4899'; });
+    card.addEventListener('dragleave', () => { card.style.borderColor = ''; });
+    card.addEventListener('drop', (e) => {
+      e.preventDefault(); card.style.borderColor = '';
+      const dragId = e.dataTransfer.getData('text/plain');
+      if (dragId === node.id) return;
+      const dragNode = findNode(tree, dragId);
+      if (!dragNode) return;
+      // Prevent dropping parent into own child
+      if (findNode(dragNode, node.id)) return;
+      const oldParent = findParent(tree, dragId, null);
+      if (oldParent) { oldParent.children = oldParent.children.filter(c => c.id !== dragId); }
+      node.children.push(dragNode);
+      save(); renderTree(); updateStats();
+    });
+
+    branch.appendChild(card);
+
+    if (node.children.length) {
+      const connector = document.createElement('div');
+      connector.className = 'tree-connector';
+      branch.appendChild(connector);
+
+      const row = document.createElement('div');
+      row.className = 'tree-row';
+      node.children.forEach(child => row.appendChild(buildNode(child, depth + 1)));
+      branch.appendChild(row);
+    }
+
+    return branch;
+  }
+
+  canvas.appendChild(buildNode(tree, 0));
+  updateStats();
+}
+
+function showEditPanel(node) {
+  document.getElementById('noSel').style.display = 'none';
+  const panel = document.getElementById('editPanel');
+  panel.style.display = 'flex';
+  panel.style.flexDirection = 'column';
+  panel.style.gap = '10px';
+  document.getElementById('editName').value = node.name;
+  document.getElementById('editUrl').value = node.url || '';
+  document.getElementById('editDesc').value = node.desc || '';
+  document.getElementById('editStatus').value = node.status || 'planned';
+
+  document.getElementById('editName').oninput = function () { node.name = this.value; save(); renderTree(); };
+  document.getElementById('editUrl').oninput = function () { node.url = this.value; save(); renderTree(); };
+  document.getElementById('editDesc').oninput = function () { node.desc = this.value; save(); };
+  document.getElementById('editStatus').onchange = function () { node.status = this.value; save(); renderTree(); };
+  document.getElementById('editDelete').onclick = () => {
+    if (node.id === tree.id) { toast('Cannot delete root'); return; }
+    const parent = findParent(tree, node.id, null);
+    if (parent) { parent.children = parent.children.filter(c => c.id !== node.id); selectedId = null; hideEditPanel(); save(); renderTree(); updateStats(); }
+  };
+}
+
+function hideEditPanel() {
+  document.getElementById('editPanel').style.display = 'none';
+  document.getElementById('noSel').style.display = 'block';
+}
+
+// Layout toggle
+document.getElementById('hLayoutBtn').onclick = function () { layout = 'horizontal'; this.classList.add('active'); document.getElementById('vLayoutBtn').classList.remove('active'); renderTree(); };
+document.getElementById('vLayoutBtn').onclick = function () { layout = 'vertical'; this.classList.add('active'); document.getElementById('hLayoutBtn').classList.remove('active'); renderTree(); };
+
+// Templates
+document.getElementById('templateSelect').onchange = function () {
+  if (!this.value) return;
+  if (countNodes(tree) > 1 && !confirm('Replace current sitemap with template?')) { this.value = ''; return; }
+  nextId = 1;
+  const t = this.value;
+  if (t === 'saas') {
+    tree = { id: genId(), name: 'Home', url: '/', desc: 'Landing page', status: 'live', children: [
+      { id: genId(), name: 'Features', url: '/features', desc: '', status: 'live', children: [] },
+      { id: genId(), name: 'Pricing', url: '/pricing', desc: '', status: 'live', children: [] },
+      { id: genId(), name: 'About', url: '/about', desc: '', status: 'planned', children: [
+        { id: genId(), name: 'Team', url: '/about/team', desc: '', status: 'planned', children: [] },
+        { id: genId(), name: 'Careers', url: '/about/careers', desc: '', status: 'planned', children: [] }
+      ]},
+      { id: genId(), name: 'Blog', url: '/blog', desc: '', status: 'live', children: [] },
+      { id: genId(), name: 'Docs', url: '/docs', desc: '', status: 'in-progress', children: [
+        { id: genId(), name: 'Getting Started', url: '/docs/start', desc: '', status: 'in-progress', children: [] },
+        { id: genId(), name: 'API Reference', url: '/docs/api', desc: '', status: 'planned', children: [] }
+      ]},
+      { id: genId(), name: 'Contact', url: '/contact', desc: '', status: 'planned', children: [] }
+    ]};
+  } else if (t === 'ecommerce') {
+    tree = { id: genId(), name: 'Home', url: '/', desc: '', status: 'live', children: [
+      { id: genId(), name: 'Shop', url: '/shop', desc: '', status: 'live', children: [
+        { id: genId(), name: 'Category A', url: '/shop/category-a', desc: '', status: 'live', children: [] },
+        { id: genId(), name: 'Category B', url: '/shop/category-b', desc: '', status: 'live', children: [] },
+        { id: genId(), name: 'Sale', url: '/shop/sale', desc: '', status: 'in-progress', children: [] }
+      ]},
+      { id: genId(), name: 'Cart', url: '/cart', desc: '', status: 'live', children: [] },
+      { id: genId(), name: 'Checkout', url: '/checkout', desc: '', status: 'live', children: [] },
+      { id: genId(), name: 'Account', url: '/account', desc: '', status: 'planned', children: [
+        { id: genId(), name: 'Orders', url: '/account/orders', desc: '', status: 'planned', children: [] },
+        { id: genId(), name: 'Wishlist', url: '/account/wishlist', desc: '', status: 'planned', children: [] }
+      ]},
+      { id: genId(), name: 'About', url: '/about', desc: '', status: 'planned', children: [] }
+    ]};
+  } else if (t === 'blog') {
+    tree = { id: genId(), name: 'Home', url: '/', desc: '', status: 'live', children: [
+      { id: genId(), name: 'Articles', url: '/articles', desc: '', status: 'live', children: [
+        { id: genId(), name: 'Category', url: '/articles/category', desc: '', status: 'live', children: [] },
+        { id: genId(), name: 'Archive', url: '/articles/archive', desc: '', status: 'planned', children: [] }
+      ]},
+      { id: genId(), name: 'About', url: '/about', desc: '', status: 'live', children: [] },
+      { id: genId(), name: 'Contact', url: '/contact', desc: '', status: 'planned', children: [] },
+      { id: genId(), name: 'Newsletter', url: '/newsletter', desc: '', status: 'in-progress', children: [] }
+    ]};
+  } else if (t === 'portfolio') {
+    tree = { id: genId(), name: 'Home', url: '/', desc: '', status: 'live', children: [
+      { id: genId(), name: 'Work', url: '/work', desc: '', status: 'live', children: [
+        { id: genId(), name: 'Project A', url: '/work/project-a', desc: '', status: 'live', children: [] },
+        { id: genId(), name: 'Project B', url: '/work/project-b', desc: '', status: 'live', children: [] }
+      ]},
+      { id: genId(), name: 'About', url: '/about', desc: '', status: 'live', children: [] },
+      { id: genId(), name: 'Resume', url: '/resume', desc: '', status: 'planned', children: [] },
+      { id: genId(), name: 'Contact', url: '/contact', desc: '', status: 'live', children: [] }
+    ]};
+  } else if (t === 'docs') {
+    tree = { id: genId(), name: 'Docs Home', url: '/docs', desc: '', status: 'live', children: [
+      { id: genId(), name: 'Getting Started', url: '/docs/start', desc: '', status: 'live', children: [
+        { id: genId(), name: 'Installation', url: '/docs/start/install', desc: '', status: 'live', children: [] },
+        { id: genId(), name: 'Quick Start', url: '/docs/start/quick', desc: '', status: 'live', children: [] }
+      ]},
+      { id: genId(), name: 'Guides', url: '/docs/guides', desc: '', status: 'in-progress', children: [
+        { id: genId(), name: 'Authentication', url: '/docs/guides/auth', desc: '', status: 'live', children: [] },
+        { id: genId(), name: 'Deployment', url: '/docs/guides/deploy', desc: '', status: 'planned', children: [] }
+      ]},
+      { id: genId(), name: 'API Reference', url: '/docs/api', desc: '', status: 'planned', children: [] },
+      { id: genId(), name: 'Changelog', url: '/docs/changelog', desc: '', status: 'live', children: [] }
+    ]};
+  }
+  save(); renderTree(); this.value = '';
+};
+
+// Import URLs
+document.getElementById('importBtn').onclick = () => document.getElementById('importModal').classList.add('open');
+document.getElementById('importConfirm').onclick = () => {
+  const text = document.getElementById('importUrls').value.trim();
+  if (!text) return;
+  const urls = text.split('\n').map(u => u.trim()).filter(Boolean);
+  nextId = 1;
+  tree = { id: genId(), name: 'Home', url: '/', desc: '', status: 'planned', children: [] };
+
+  urls.forEach(raw => {
+    try {
+      const u = new URL(raw.startsWith('http') ? raw : 'https://' + raw);
+      const parts = u.pathname.split('/').filter(Boolean);
+      let current = tree;
+      parts.forEach((part, i) => {
+        const path = '/' + parts.slice(0, i + 1).join('/');
+        let child = current.children.find(c => c.url === path);
+        if (!child) {
+          child = { id: genId(), name: part.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), url: path, desc: '', status: 'planned', children: [] };
+          current.children.push(child);
+        }
+        current = child;
+      });
+    } catch (e) { /* skip invalid */ }
+  });
+
+  save(); renderTree();
+  document.getElementById('importModal').classList.remove('open');
+  toast('Imported ' + urls.length + ' URLs');
+};
+
+// Save / Load
+function updateSaveList() {
+  const sel = document.getElementById('saveSelect');
+  const saved = JSON.parse(localStorage.getItem('sitemap-saves') || '{}');
+  sel.innerHTML = '<option value="">Saved...</option>';
+  Object.keys(saved).forEach(name => { sel.innerHTML += `<option value="${name}">${name}</option>`; });
+}
+document.getElementById('saveBtn').onclick = () => {
+  const name = prompt('Save as:', 'My Sitemap');
+  if (!name) return;
+  const saved = JSON.parse(localStorage.getItem('sitemap-saves') || '{}');
+  saved[name] = { tree, nextId };
+  localStorage.setItem('sitemap-saves', JSON.stringify(saved));
+  updateSaveList(); toast('Saved: ' + name);
+};
+document.getElementById('loadBtn').onclick = () => {
+  const name = document.getElementById('saveSelect').value;
+  if (!name) return;
+  const saved = JSON.parse(localStorage.getItem('sitemap-saves') || '{}');
+  if (saved[name]) { tree = saved[name].tree; nextId = saved[name].nextId || 1; selectedId = null; hideEditPanel(); save(); renderTree(); toast('Loaded: ' + name); }
+};
+
+// Export SVG
+document.getElementById('expSvg').onclick = () => {
+  const nodeW = 140, nodeH = 50, gapX = 30, gapY = 60;
+  const positions = [];
+  function measure(node, depth, index, siblings) {
+    const leaves = node.children.length ? node.children.reduce((s, c) => s + (c.children.length ? measure(c, 0, 0, 0).leaves : 1), 0) : 1;
+    return { leaves };
+  }
+  let xCursor = 0;
+  function layout2(node, depth) {
+    if (!node.children.length) {
+      positions.push({ node, x: xCursor, y: depth * (nodeH + gapY) });
+      xCursor += nodeW + gapX;
+      return { x: xCursor - nodeW - gapX + nodeW / 2 };
+    }
+    const childCenters = node.children.map(c => layout2(c, depth + 1));
+    const cx = (childCenters[0].x + childCenters[childCenters.length - 1].x) / 2;
+    positions.push({ node, x: cx - nodeW / 2, y: depth * (nodeH + gapY) });
+    return { x: cx };
+  }
+  layout2(tree, 0);
+  const maxX = Math.max(...positions.map(p => p.x + nodeW)) + 40;
+  const maxY = Math.max(...positions.map(p => p.y + nodeH)) + 40;
+  const pad = 20;
+  const depthColors = ['#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6', '#ec4899'];
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${maxX + pad * 2}" height="${maxY + pad * 2}" viewBox="0 0 ${maxX + pad * 2} ${maxY + pad * 2}">`;
+  svg += `<rect width="100%" height="100%" fill="#fff"/>`;
+
+  // Lines
+  function drawLines(node, depth) {
+    const pos = positions.find(p => p.node === node);
+    node.children.forEach(child => {
+      const cpos = positions.find(p => p.node === child);
+      if (pos && cpos) {
+        svg += `<line x1="${pos.x + nodeW / 2 + pad}" y1="${pos.y + nodeH + pad}" x2="${cpos.x + nodeW / 2 + pad}" y2="${cpos.y + pad}" stroke="#e5e7eb" stroke-width="2"/>`;
+      }
+      drawLines(child, depth + 1);
+    });
+  }
+  drawLines(tree, 0);
+
+  // Nodes
+  positions.forEach(({ node, x, y }) => {
+    const depth = Math.round(y / (nodeH + gapY));
+    const color = depthColors[Math.min(depth, 4)];
+    svg += `<rect x="${x + pad}" y="${y + pad}" width="${nodeW}" height="${nodeH}" rx="8" fill="#fff" stroke="${color}" stroke-width="2"/>`;
+    svg += `<text x="${x + nodeW / 2 + pad}" y="${y + 22 + pad}" font-family="Manrope,sans-serif" font-size="12" font-weight="700" fill="#1a1a1a" text-anchor="middle">${node.name}</text>`;
+    if (node.url) svg += `<text x="${x + nodeW / 2 + pad}" y="${y + 38 + pad}" font-family="Manrope,sans-serif" font-size="9" fill="#6b7280" text-anchor="middle">${node.url}</text>`;
+  });
+
+  svg += '</svg>';
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  const a = document.createElement('a'); a.download = 'sitemap.svg'; a.href = URL.createObjectURL(blob); a.click();
+  toast('Exported SVG');
+};
+
+// Export PNG
+document.getElementById('expPng').onclick = () => {
+  // Use same layout as SVG, render to canvas
+  const nodeW = 140, nodeH = 50, gapX = 30, gapY = 60;
+  const positions = [];
+  let xCursor = 0;
+  function layout2(node, depth) {
+    if (!node.children.length) { positions.push({ node, x: xCursor, y: depth * (nodeH + gapY) }); xCursor += nodeW + gapX; return { x: xCursor - nodeW - gapX + nodeW / 2 }; }
+    const childCenters = node.children.map(c => layout2(c, depth + 1));
+    const cx = (childCenters[0].x + childCenters[childCenters.length - 1].x) / 2;
+    positions.push({ node, x: cx - nodeW / 2, y: depth * (nodeH + gapY) });
+    return { x: cx };
+  }
+  layout2(tree, 0);
+  const pad = 40, maxX = Math.max(...positions.map(p => p.x + nodeW)), maxY = Math.max(...positions.map(p => p.y + nodeH));
+  const canvas = document.createElement('canvas');
+  canvas.width = (maxX + pad * 2) * 2; canvas.height = (maxY + pad * 2) * 2;
+  const ctx = canvas.getContext('2d'); ctx.scale(2, 2);
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, maxX + pad * 2, maxY + pad * 2);
+  const depthColors = ['#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6', '#ec4899'];
+
+  function drawLines(node) {
+    const pos = positions.find(p => p.node === node);
+    node.children.forEach(child => {
+      const cpos = positions.find(p => p.node === child);
+      if (pos && cpos) { ctx.beginPath(); ctx.moveTo(pos.x + nodeW / 2 + pad, pos.y + nodeH + pad); ctx.lineTo(cpos.x + nodeW / 2 + pad, cpos.y + pad); ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 2; ctx.stroke(); }
+      drawLines(child);
+    });
+  }
+  drawLines(tree);
+
+  positions.forEach(({ node, x, y }) => {
+    const depth = Math.round(y / (nodeH + gapY));
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = depthColors[Math.min(depth, 4)]; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.roundRect(x + pad, y + pad, nodeW, nodeH, 8); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#1a1a1a'; ctx.font = 'bold 12px Manrope,sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(node.name, x + nodeW / 2 + pad, y + 22 + pad);
+    if (node.url) { ctx.fillStyle = '#6b7280'; ctx.font = '9px Manrope,sans-serif'; ctx.fillText(node.url, x + nodeW / 2 + pad, y + 38 + pad); }
+  });
+
+  const a = document.createElement('a'); a.download = 'sitemap.png'; a.href = canvas.toDataURL('image/png'); a.click();
+  toast('Exported PNG');
+};
+
+// Export XML
+document.getElementById('expXml').onclick = () => {
+  const baseUrl = prompt('Base URL for sitemap:', 'https://example.com');
+  if (!baseUrl) return;
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+  function addUrl(node) {
+    const loc = baseUrl.replace(/\/$/, '') + (node.url || '/');
+    xml += `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n  </url>\n`;
+    node.children.forEach(addUrl);
+  }
+  addUrl(tree);
+  xml += '</urlset>';
+  const blob = new Blob([xml], { type: 'application/xml' });
+  const a = document.createElement('a'); a.download = 'sitemap.xml'; a.href = URL.createObjectURL(blob); a.click();
+  toast('Exported XML sitemap');
+};
+
+// Export Markdown
+document.getElementById('expMd').onclick = () => {
+  let md = '# Sitemap\n\n';
+  function addLine(node, depth) {
+    md += '  '.repeat(depth) + '- **' + node.name + '**' + (node.url ? ' `' + node.url + '`' : '') + (node.desc ? ' - ' + node.desc : '') + '\n';
+    node.children.forEach(c => addLine(c, depth + 1));
+  }
+  addLine(tree, 0);
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const a = document.createElement('a'); a.download = 'sitemap.md'; a.href = URL.createObjectURL(blob); a.click();
+  toast('Exported Markdown');
+};
+
+// Export JSON
+document.getElementById('expJson').onclick = () => {
+  function clean(node) {
+    const obj = { name: node.name, url: node.url || undefined, description: node.desc || undefined, status: node.status };
+    if (node.children.length) obj.children = node.children.map(clean);
+    return obj;
+  }
+  const json = JSON.stringify(clean(tree), null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const a = document.createElement('a'); a.download = 'sitemap.json'; a.href = URL.createObjectURL(blob); a.click();
+  toast('Exported JSON');
+};
+
+// Init
+const saved = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+if (saved && saved.tree) { tree = saved.tree; nextId = saved.nextId || 1; } else { tree = defaultTree(); }
+updateSaveList();
+renderTree();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

@@ -312,7 +312,7 @@
       "description": "50+ copy-paste HTML/CSS components. Buttons, cards, forms, tables, modals. HTML, Tailwind, React JSX export.",
       "icon": "🧩",
       "iconBg": "#6366f1",
-      "category": "components",
+      "category": "uiux",
       "section": "components"
     },
     {
@@ -321,7 +321,7 @@
       "description": "Visual Grid + Flexbox editor. Drag cells, set fr/px/%, named areas. Export CSS, Tailwind, HTML.",
       "icon": "📐",
       "iconBg": "#3b82f6",
-      "category": "components",
+      "category": "uiux",
       "section": "components"
     },
     {
@@ -330,7 +330,7 @@
       "description": "Drag & drop form builder. 16 field types, multi-step wizards, 7 presets. Export HTML, Tailwind, React JSX.",
       "icon": "📝",
       "iconBg": "#10b981",
-      "category": "components",
+      "category": "uiux",
       "section": "components"
     },
     {
@@ -339,7 +339,7 @@
       "description": "Stack 17 section types to build pages. Hero, features, pricing, FAQ, CTA. Responsive preview. Export HTML.",
       "icon": "🏗️",
       "iconBg": "#f97316",
-      "category": "components",
+      "category": "uiux",
       "section": "components"
     },
     {
@@ -348,7 +348,7 @@
       "description": "Admin dashboard templates. Sidebar, charts, tables, widgets. Light/dark theme. Export HTML + React.",
       "icon": "📊",
       "iconBg": "#8b5cf6",
-      "category": "components",
+      "category": "uiux",
       "section": "components"
     },
     {
@@ -357,7 +357,7 @@
       "description": "Freeform canvas for visual inspiration. Drag images, colors, fonts, shapes. Export PNG.",
       "icon": "🎯",
       "iconBg": "#ec4899",
-      "category": "components",
+      "category": "uiux",
       "section": "components"
     }
   ]
