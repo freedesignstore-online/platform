@@ -224,6 +224,15 @@
       "iconBg": "#f59e0b",
       "category": "images",
       "section": "images"
+    },
+    {
+      "id": "asset-manager",
+      "name": "Personal Asset Manager",
+      "description": "Local-first design library. Upload, organize, tag, search, export. All stored on YOUR device (IndexedDB).",
+      "icon": "📁",
+      "iconBg": "#6366f1",
+      "category": "images",
+      "section": "images"
     }
   ]
 }

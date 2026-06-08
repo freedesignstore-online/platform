@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Asset Manager - FreeDesignStore</title>
+<link rel="icon" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a { color: #ec4899; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; font-size: 14px; color: #6b7280; }
+.back:hover { color: #ec4899; text-decoration: none; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.subtitle { color: #6b7280; margin-bottom: 24px; font-size: 15px; }
+.container { max-width: 1200px; margin: 0 auto; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
+.btn { padding: 8px 16px; border-radius: 8px; border: none; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-primary:hover { background: #db2777; }
+.btn-secondary { background: #fff; border: 1px solid #e5e7eb; color: #1a1a1a; }
+.btn-secondary:hover { border-color: #ec4899; color: #ec4899; }
+.btn-sm { padding: 6px 10px; font-size: 12px; }
+.btn-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+.btn-danger:hover { background: #fecaca; }
+.privacy-note { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; font-size: 12px; color: #166534; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.privacy-note::before { content: ''; display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; flex-shrink: 0; }
+.top-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+.search-input { flex: 1; min-width: 200px; padding: 10px 16px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; }
+.search-input:focus { outline: none; border-color: #ec4899; }
+.storage-bar { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #6b7280; }
+.storage-track { width: 100px; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden; }
+.storage-fill { height: 100%; background: #ec4899; border-radius: 3px; transition: width .3s; }
+.tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
+.tab { padding: 8px 16px; border-radius: 8px 8px 0 0; border: none; background: transparent; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 500; color: #6b7280; }
+.tab.active { color: #ec4899; border-bottom: 2px solid #ec4899; }
+.section { display: none; }
+.section.active { display: block; }
+.drop-zone { border: 2px dashed #e5e7eb; border-radius: 12px; padding: 40px; text-align: center; color: #6b7280; transition: all .2s; margin-bottom: 16px; cursor: pointer; }
+.drop-zone.dragover { border-color: #ec4899; background: #fdf2f8; }
+.drop-zone h3 { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; }
+.drop-zone p { font-size: 13px; }
+.asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
+@media (max-width: 600px) { .asset-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); } }
+.asset-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; position: relative; cursor: pointer; transition: all .15s; }
+.asset-card:hover { border-color: #ec4899; box-shadow: 0 4px 16px rgba(236,72,153,.08); transform: translateY(-1px); }
+.asset-card .thumb { width: 100%; aspect-ratio: 1; object-fit: contain; background: #f9fafb; display: flex; align-items: center; justify-content: center; padding: 8px; }
+.asset-card .thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.asset-card .thumb .file-icon { font-size: 32px; color: #9ca3af; }
+.asset-card .info { padding: 8px 10px; border-top: 1px solid #f3f4f6; }
+.asset-card .info .name { font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.asset-card .info .meta { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+.asset-card .star-btn { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border-radius: 50%; border: none; background: rgba(255,255,255,.9); cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .15s; }
+.asset-card:hover .star-btn { opacity: 1; }
+.asset-card .star-btn.active { opacity: 1; background: #ec4899; color: #fff; }
+.asset-card .copied { position: absolute; inset: 0; background: rgba(236,72,153,.9); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; border-radius: 10px; animation: fadeout 1.2s forwards; }
+@keyframes fadeout { 0%,60% { opacity: 1; } 100% { opacity: 0; pointer-events: none; } }
+.tags-row { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+.tag { padding: 1px 6px; border-radius: 10px; background: #fdf2f8; color: #ec4899; font-size: 10px; }
+.tag .remove { cursor: pointer; margin-left: 3px; }
+.collections-list { display: flex; flex-direction: column; gap: 10px; }
+.collection-item { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 10px; cursor: pointer; transition: border-color .15s; }
+.collection-item:hover { border-color: #ec4899; }
+.collection-item .col-icon { width: 48px; height: 48px; border-radius: 8px; background: linear-gradient(135deg, #ec4899, #8b5cf6); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; flex-shrink: 0; }
+.collection-item .col-info { flex: 1; }
+.collection-item .col-info .col-name { font-weight: 600; font-size: 14px; }
+.collection-item .col-info .col-count { font-size: 12px; color: #6b7280; }
+.collection-item .col-actions { display: flex; gap: 6px; }
+.new-collection { display: flex; gap: 8px; margin-bottom: 16px; }
+.new-collection input { flex: 1; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 13px; }
+.history-list { display: flex; flex-direction: column; gap: 8px; }
+.history-item { display: flex; align-items: center; gap: 12px; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; }
+.history-item .hist-thumb { width: 40px; height: 40px; border-radius: 6px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+.history-item .hist-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.history-item .hist-info { flex: 1; }
+.history-item .hist-info .hist-name { font-size: 13px; font-weight: 500; }
+.history-item .hist-info .hist-time { font-size: 11px; color: #9ca3af; }
+.history-item .hist-action { font-size: 11px; color: #ec4899; font-weight: 500; }
+.empty-state { text-align: center; padding: 40px; color: #9ca3af; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+.modal-overlay.hidden { display: none; }
+.modal { background: #fff; border-radius: 16px; width: 100%; max-width: 500px; padding: 28px; }
+.modal h3 { font-size: 18px; margin-bottom: 16px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+.tag-input-row { display: flex; gap: 6px; margin-top: 12px; }
+.tag-input-row input { flex: 1; padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 12px; }
+.detail-view { display: flex; gap: 20px; flex-wrap: wrap; }
+.detail-view .preview { flex: 1; min-width: 200px; max-height: 300px; display: flex; align-items: center; justify-content: center; background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb; padding: 16px; }
+.detail-view .preview img { max-width: 100%; max-height: 260px; object-fit: contain; }
+.detail-view .details { flex: 1; min-width: 200px; }
+.detail-view .details h3 { margin-bottom: 12px; }
+.detail-view .details .meta-list { font-size: 12px; color: #6b7280; }
+.detail-view .details .meta-list div { margin-bottom: 6px; }
+.detail-view .details .meta-list strong { color: #1a1a1a; }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="back">&larr; Back to FreeDesignStore</a>
+  <h1>Personal Asset Manager</h1>
+  <p class="subtitle">Your local-first design asset library. Organize, tag, and access images, SVGs, and icons — all stored on your device.</p>
+
+  <div class="privacy-note">All files stay on YOUR device. Nothing is uploaded anywhere. Data is stored in your browser's IndexedDB.</div>
+
+  <div class="panel">
+    <div class="top-bar">
+      <input class="search-input" type="text" id="searchInput" placeholder="Search by name or tag..." oninput="filterAssets()">
+      <div class="storage-bar">
+        <span id="storageLabel">0 KB used</span>
+        <div class="storage-track"><div class="storage-fill" id="storageFill" style="width:0%"></div></div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="exportAll()">Export ZIP</button>
+      <button class="btn btn-primary btn-sm" onclick="document.getElementById('bulkInput').click()">Import</button>
+      <input type="file" id="bulkInput" multiple accept="image/*,.svg" style="display:none" onchange="handleBulkImport(this.files)">
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="library" onclick="switchTab('library')">Library</button>
+      <button class="tab" data-tab="favorites" onclick="switchTab('favorites')">Favorites</button>
+      <button class="tab" data-tab="collections" onclick="switchTab('collections')">Collections</button>
+      <button class="tab" data-tab="history" onclick="switchTab('history')">History</button>
+    </div>
+
+    <div class="section active" id="sec-library">
+      <div class="drop-zone" id="dropZone">
+        <h3>Drop files here to upload</h3>
+        <p>Images, SVGs, icons — drag & drop or click to browse</p>
+        <input type="file" id="fileInput" multiple accept="image/*,.svg" style="display:none">
+      </div>
+      <div class="asset-grid" id="assetGrid"></div>
+      <p class="empty-state" id="libEmpty">No assets yet. Drop files above to start building your library.</p>
+    </div>
+
+    <div class="section" id="sec-favorites">
+      <div class="asset-grid" id="favGrid"></div>
+      <p class="empty-state" id="favEmpty">No favorites yet. Star assets from your library to see them here.</p>
+    </div>
+
+    <div class="section" id="sec-collections">
+      <div class="new-collection">
+        <input type="text" id="newColName" placeholder="New collection name...">
+        <button class="btn btn-primary btn-sm" onclick="createCollection()">Create</button>
+      </div>
+      <div class="collections-list" id="collectionsList"></div>
+      <p class="empty-state" id="colEmpty">No collections yet. Create one above to organize your assets.</p>
+    </div>
+
+    <div class="section" id="sec-history">
+      <div class="history-list" id="historyList"></div>
+      <p class="empty-state" id="histEmpty">No activity yet. Upload and interact with assets to see history here.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="detailModal" onclick="if(event.target===this)closeDetail()">
+  <div class="modal" style="max-width:650px;">
+    <div class="detail-view" id="detailView"></div>
+    <div class="tag-input-row">
+      <input type="text" id="detailTagInput" placeholder="Add tags (comma separated)">
+      <button class="btn btn-sm btn-primary" onclick="addDetailTags()">Add Tags</button>
+    </div>
+    <div class="modal-actions">
+      <select id="addToCollection" style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;">
+        <option value="">Add to collection...</option>
+      </select>
+      <button class="btn btn-sm btn-secondary" onclick="addToCol()">Add</button>
+      <button class="btn btn-sm btn-secondary" onclick="copyAsset()">Copy to Clipboard</button>
+      <button class="btn btn-sm btn-primary" onclick="downloadAsset()">Download</button>
+      <button class="btn btn-sm btn-danger" onclick="deleteAsset()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let db = null;
+let allAssets = [];
+let collections = JSON.parse(localStorage.getItem('am_collections') || '[]');
+let history = JSON.parse(localStorage.getItem('am_history') || '[]');
+let currentAssetId = null;
+let totalSize = 0;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('AssetManagerDB', 2);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('assets')) {
+        const store = d.createObjectStore('assets', { keyPath: 'id' });
+        store.createIndex('name', 'name', { unique: false });
+        store.createIndex('starred', 'starred', { unique: false });
+      }
+    };
+    req.onsuccess = e => { db = e.target.result; resolve(db); };
+    req.onerror = e => reject(e);
+  });
+}
+
+async function init() {
+  await openDB();
+  await loadAssets();
+  setupDragDrop();
+  renderLibrary();
+  updateStorage();
+}
+
+function loadAssets() {
+  return new Promise(resolve => {
+    const tx = db.transaction('assets', 'readonly');
+    const req = tx.objectStore('assets').getAll();
+    req.onsuccess = () => { allAssets = req.result; resolve(); };
+  });
+}
+
+function setupDragDrop() {
+  const zone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  zone.onclick = () => fileInput.click();
+  zone.ondragover = e => { e.preventDefault(); zone.classList.add('dragover'); };
+  zone.ondragleave = () => zone.classList.remove('dragover');
+  zone.ondrop = e => { e.preventDefault(); zone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); };
+  fileInput.onchange = e => handleFiles(e.target.files);
+}
+
+function handleFiles(files) {
+  const promises = Array.from(files).map(file => new Promise(resolve => {
+    if (!file.type.startsWith('image/') && !file.name.endsWith('.svg')) { resolve(); return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const asset = {
+        id: 'asset-' + Date.now() + '-' + Math.random().toString(36).slice(2,8),
+        name: file.name,
+        type: file.type || 'image/svg+xml',
+        size: file.size,
+        data: ev.target.result,
+        tags: [],
+        starred: false,
+        collections: [],
+        created: Date.now(),
+        lastUsed: Date.now()
+      };
+      const tx = db.transaction('assets', 'readwrite');
+      tx.objectStore('assets').add(asset);
+      tx.oncomplete = () => {
+        allAssets.push(asset);
+        addHistory('upload', asset.name, asset.id);
+        resolve();
+      };
+    };
+    reader.readAsDataURL(file);
+  }));
+  Promise.all(promises).then(() => { renderLibrary(); updateStorage(); });
+}
+
+function handleBulkImport(files) { handleFiles(files); }
+
+function renderLibrary() {
+  const query = document.getElementById('searchInput').value.toLowerCase().trim();
+  let filtered = allAssets;
+  if (query) {
+    filtered = allAssets.filter(a => a.name.toLowerCase().includes(query) || a.tags.some(t => t.toLowerCase().includes(query)));
+  }
+  const grid = document.getElementById('assetGrid');
+  const empty = document.getElementById('libEmpty');
+  if (filtered.length === 0) { grid.innerHTML = ''; empty.style.display = allAssets.length === 0 ? '' : 'none'; if (allAssets.length > 0 && filtered.length === 0) grid.innerHTML = '<p class="empty-state">No assets match your search.</p>'; return; }
+  empty.style.display = 'none';
+  grid.innerHTML = filtered.map(a => renderAssetCard(a)).join('');
+}
+
+function renderAssetCard(a) {
+  const isImg = a.type.startsWith('image/');
+  return `<div class="asset-card" onclick="openDetail('${a.id}')">
+    <div class="thumb">${isImg ? `<img src="${a.data}" alt="${a.name}" loading="lazy">` : `<div class="file-icon">&#9776;</div>`}</div>
+    <div class="info">
+      <div class="name" title="${a.name}">${a.name}</div>
+      <div class="meta">${formatSize(a.size)}</div>
+      ${a.tags.length ? `<div class="tags-row">${a.tags.slice(0,3).map(t => `<span class="tag">${t}</span>`).join('')}</div>` : ''}
+    </div>
+    <button class="star-btn ${a.starred ? 'active' : ''}" onclick="toggleStar('${a.id}',event)" title="Favorite">&#9733;</button>
+  </div>`;
+}
+
+function filterAssets() { renderLibrary(); }
+
+function toggleStar(id, e) {
+  e.stopPropagation();
+  const asset = allAssets.find(a => a.id === id);
+  if (!asset) return;
+  asset.starred = !asset.starred;
+  const tx = db.transaction('assets', 'readwrite');
+  tx.objectStore('assets').put(asset);
+  tx.oncomplete = () => { renderLibrary(); if (document.getElementById('sec-favorites').classList.contains('active')) renderFavorites(); };
+}
+
+function renderFavorites() {
+  const favs = allAssets.filter(a => a.starred);
+  const grid = document.getElementById('favGrid');
+  const empty = document.getElementById('favEmpty');
+  if (favs.length === 0) { grid.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  grid.innerHTML = favs.map(a => renderAssetCard(a)).join('');
+}
+
+function renderCollections() {
+  const list = document.getElementById('collectionsList');
+  const empty = document.getElementById('colEmpty');
+  if (collections.length === 0) { list.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  list.innerHTML = collections.map(col => {
+    const count = allAssets.filter(a => a.collections.includes(col.id)).length;
+    return `<div class="collection-item" onclick="viewCollection('${col.id}')">
+      <div class="col-icon">&#9776;</div>
+      <div class="col-info">
+        <div class="col-name">${col.name}</div>
+        <div class="col-count">${count} asset${count !== 1 ? 's' : ''}</div>
+      </div>
+      <div class="col-actions">
+        <button class="btn btn-sm btn-danger" onclick="deleteCollection('${col.id}',event)">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function createCollection() {
+  const name = document.getElementById('newColName').value.trim();
+  if (!name) return;
+  collections.push({ id: 'col-' + Date.now(), name });
+  localStorage.setItem('am_collections', JSON.stringify(collections));
+  document.getElementById('newColName').value = '';
+  renderCollections();
+}
+
+function deleteCollection(id, e) {
+  e.stopPropagation();
+  if (!confirm('Delete this collection? Assets will not be removed.')) return;
+  collections = collections.filter(c => c.id !== id);
+  localStorage.setItem('am_collections', JSON.stringify(collections));
+  allAssets.forEach(a => { a.collections = a.collections.filter(c => c !== id); });
+  const tx = db.transaction('assets', 'readwrite');
+  allAssets.forEach(a => tx.objectStore('assets').put(a));
+  tx.oncomplete = () => renderCollections();
+}
+
+function viewCollection(id) {
+  const col = collections.find(c => c.id === id);
+  if (!col) return;
+  const items = allAssets.filter(a => a.collections.includes(id));
+  const grid = document.getElementById('collectionsList');
+  if (items.length === 0) { grid.innerHTML = `<p class="empty-state">"${col.name}" is empty. Add assets from the detail view.</p><button class="btn btn-sm btn-secondary" onclick="renderCollections()">Back</button>`; return; }
+  grid.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;"><button class="btn btn-sm btn-secondary" onclick="renderCollections()">&larr; Back</button><h3>${col.name}</h3></div><div class="asset-grid">${items.map(a => renderAssetCard(a)).join('')}</div>`;
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  const empty = document.getElementById('histEmpty');
+  if (history.length === 0) { list.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  list.innerHTML = history.slice(0, 30).map(h => {
+    const asset = allAssets.find(a => a.id === h.assetId);
+    const thumbHtml = asset ? `<img src="${asset.data}" alt="">` : `<span style="font-size:16px;color:#9ca3af;">?</span>`;
+    return `<div class="history-item">
+      <div class="hist-thumb">${thumbHtml}</div>
+      <div class="hist-info">
+        <div class="hist-name">${h.name}</div>
+        <div class="hist-time">${new Date(h.time).toLocaleString()}</div>
+      </div>
+      <div class="hist-action">${h.action}</div>
+    </div>`;
+  }).join('');
+}
+
+function addHistory(action, name, assetId) {
+  history.unshift({ action, name, assetId, time: Date.now() });
+  if (history.length > 100) history = history.slice(0, 100);
+  localStorage.setItem('am_history', JSON.stringify(history));
+}
+
+// Detail modal
+function openDetail(id) {
+  currentAssetId = id;
+  const asset = allAssets.find(a => a.id === id);
+  if (!asset) return;
+  asset.lastUsed = Date.now();
+  const tx = db.transaction('assets', 'readwrite');
+  tx.objectStore('assets').put(asset);
+  const view = document.getElementById('detailView');
+  view.innerHTML = `
+    <div class="preview"><img src="${asset.data}" alt="${asset.name}"></div>
+    <div class="details">
+      <h3>${asset.name}</h3>
+      <div class="meta-list">
+        <div><strong>Type:</strong> ${asset.type}</div>
+        <div><strong>Size:</strong> ${formatSize(asset.size)}</div>
+        <div><strong>Added:</strong> ${new Date(asset.created).toLocaleDateString()}</div>
+        <div><strong>Last used:</strong> ${new Date(asset.lastUsed).toLocaleString()}</div>
+      </div>
+      <div class="tags-row" style="margin-top:10px;" id="detailTags">
+        ${asset.tags.map(t => `<span class="tag">${t} <span class="remove" onclick="removeTag('${asset.id}','${t}')">&times;</span></span>`).join('')}
+      </div>
+    </div>
+  `;
+  // Populate collection dropdown
+  const sel = document.getElementById('addToCollection');
+  sel.innerHTML = '<option value="">Add to collection...</option>' + collections.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  document.getElementById('detailModal').classList.remove('hidden');
+  addHistory('viewed', asset.name, asset.id);
+}
+
+function closeDetail() {
+  document.getElementById('detailModal').classList.add('hidden');
+  currentAssetId = null;
+}
+
+function addDetailTags() {
+  if (!currentAssetId) return;
+  const input = document.getElementById('detailTagInput');
+  const tags = input.value.split(',').map(t => t.trim()).filter(Boolean);
+  if (tags.length === 0) return;
+  const asset = allAssets.find(a => a.id === currentAssetId);
+  asset.tags = [...new Set([...asset.tags, ...tags])];
+  const tx = db.transaction('assets', 'readwrite');
+  tx.objectStore('assets').put(asset);
+  tx.oncomplete = () => { input.value = ''; openDetail(currentAssetId); renderLibrary(); };
+}
+
+function removeTag(assetId, tag) {
+  const asset = allAssets.find(a => a.id === assetId);
+  asset.tags = asset.tags.filter(t => t !== tag);
+  const tx = db.transaction('assets', 'readwrite');
+  tx.objectStore('assets').put(asset);
+  tx.oncomplete = () => { openDetail(assetId); renderLibrary(); };
+}
+
+function addToCol() {
+  const colId = document.getElementById('addToCollection').value;
+  if (!colId || !currentAssetId) return;
+  const asset = allAssets.find(a => a.id === currentAssetId);
+  if (!asset.collections.includes(colId)) {
+    asset.collections.push(colId);
+    const tx = db.transaction('assets', 'readwrite');
+    tx.objectStore('assets').put(asset);
+    tx.oncomplete = () => {
+      const col = collections.find(c => c.id === colId);
+      addHistory('added to ' + col.name, asset.name, asset.id);
+      alert(`Added to "${col.name}"`);
+    };
+  }
+}
+
+async function copyAsset() {
+  if (!currentAssetId) return;
+  const asset = allAssets.find(a => a.id === currentAssetId);
+  try {
+    if (asset.type === 'image/svg+xml' || asset.name.endsWith('.svg')) {
+      const text = atob(asset.data.split(',')[1]);
+      await navigator.clipboard.writeText(text);
+    } else {
+      await navigator.clipboard.writeText(asset.data);
+    }
+    addHistory('copied', asset.name, asset.id);
+    alert('Copied to clipboard as data URL');
+  } catch (err) {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = asset.data;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    addHistory('copied', asset.name, asset.id);
+    alert('Copied to clipboard');
+  }
+}
+
+function downloadAsset() {
+  if (!currentAssetId) return;
+  const asset = allAssets.find(a => a.id === currentAssetId);
+  const a = document.createElement('a');
+  a.href = asset.data;
+  a.download = asset.name;
+  a.click();
+  addHistory('downloaded', asset.name, asset.id);
+}
+
+function deleteAsset() {
+  if (!currentAssetId) return;
+  if (!confirm('Permanently delete this asset?')) return;
+  const asset = allAssets.find(a => a.id === currentAssetId);
+  const tx = db.transaction('assets', 'readwrite');
+  tx.objectStore('assets').delete(currentAssetId);
+  tx.oncomplete = () => {
+    allAssets = allAssets.filter(a => a.id !== currentAssetId);
+    addHistory('deleted', asset.name, null);
+    closeDetail();
+    renderLibrary();
+    updateStorage();
+  };
+}
+
+async function exportAll() {
+  if (allAssets.length === 0) { alert('No assets to export.'); return; }
+  // Simple export: create a JSON manifest + individual download links
+  // Since we can't include JSZip without CDN, we do a multi-download approach
+  // Actually, let's build a simple ZIP manually using data URIs concatenation
+  // Better: just download a JSON backup
+  const backup = allAssets.map(a => ({ name: a.name, type: a.type, tags: a.tags, collections: a.collections, data: a.data }));
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `asset-library-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  addHistory('export', `Exported ${allAssets.length} assets`, null);
+  alert(`Exported ${allAssets.length} assets as JSON backup. To restore, use Import.`);
+}
+
+function updateStorage() {
+  totalSize = allAssets.reduce((sum, a) => sum + (a.size || 0), 0);
+  const label = document.getElementById('storageLabel');
+  const fill = document.getElementById('storageFill');
+  label.textContent = formatSize(totalSize) + ' used';
+  // Estimate: 50MB soft limit for IndexedDB per origin
+  const pct = Math.min((totalSize / (50 * 1024 * 1024)) * 100, 100);
+  fill.style.width = pct + '%';
+  if (pct > 80) fill.style.background = '#ef4444';
+  else if (pct > 50) fill.style.background = '#f59e0b';
+  else fill.style.background = '#ec4899';
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(`sec-${tab}`).classList.add('active');
+  if (tab === 'favorites') renderFavorites();
+  if (tab === 'collections') renderCollections();
+  if (tab === 'history') renderHistory();
+}
+
+init();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>
