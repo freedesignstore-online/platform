@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color Contrast Checker - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
+a.back:hover { text-decoration: underline; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+p.subtitle { color: #6b7280; margin-bottom: 24px; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
+h2 { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 6px; }
+input[type="text"], textarea { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+textarea { resize: vertical; min-height: 80px; }
+input[type="color"] { width: 48px; height: 40px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 2px; cursor: pointer; }
+.btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 13px; transition: opacity .2s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
+.color-inputs { display: grid; grid-template-columns: 1fr 1fr auto; gap: 16px; align-items: end; margin-bottom: 24px; }
+@media (max-width: 600px) { .color-inputs { grid-template-columns: 1fr; } }
+.color-field { display: flex; gap: 8px; align-items: flex-end; }
+.color-field input[type="text"] { flex: 1; }
+.ratio-display { text-align: center; padding: 24px; border-radius: 12px; margin-bottom: 24px; }
+.ratio-number { font-size: 48px; font-weight: 700; }
+.ratio-label { font-size: 14px; color: #6b7280; margin-top: 4px; }
+.results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+@media (max-width: 600px) { .results-grid { grid-template-columns: 1fr; } }
+.result-item { padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; }
+.result-item .level { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.result-item .status { font-size: 13px; font-weight: 700; }
+.result-item .status.pass { color: #16a34a; }
+.result-item .status.fail { color: #dc2626; }
+.result-item .req { font-size: 12px; color: #6b7280; margin-top: 2px; }
+.preview-section { margin-bottom: 24px; }
+.preview-box { padding: 32px; border-radius: 12px; border: 1px solid #e5e7eb; }
+.preview-box .large { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+.preview-box .normal { font-size: 16px; margin-bottom: 8px; }
+.preview-box .small { font-size: 12px; }
+.suggestions { margin-top: 16px; }
+.suggestion-item { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 8px; cursor: pointer; transition: border-color .15s; }
+.suggestion-item:hover { border-color: #ec4899; }
+.suggestion-swatch { width: 32px; height: 32px; border-radius: 6px; border: 1px solid #e5e7eb; }
+.suggestion-info { font-size: 13px; }
+.suggestion-info .hex { font-weight: 600; }
+.batch-section { margin-top: 24px; }
+.batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin-top: 12px; }
+.batch-item { padding: 10px; border-radius: 8px; border: 1px solid #e5e7eb; font-size: 12px; text-align: center; }
+.batch-item .combo { font-weight: 600; margin-bottom: 2px; }
+.batch-item .batch-ratio { font-size: 11px; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<h1>Color Contrast Checker</h1>
+<p class="subtitle">Check WCAG contrast ratios, preview accessibility, and find accessible alternatives.</p>
+
+<div class="panel">
+<h2>Check Contrast</h2>
+<div class="color-inputs">
+<div>
+<label>Foreground Color</label>
+<div class="color-field">
+<input type="color" id="fgPicker" value="#1a1a1a">
+<input type="text" id="fgHex" value="#1a1a1a" placeholder="#000000">
+</div>
+</div>
+<div>
+<label>Background Color</label>
+<div class="color-field">
+<input type="color" id="bgPicker" value="#ffffff">
+<input type="text" id="bgHex" value="#ffffff" placeholder="#ffffff">
+</div>
+</div>
+<div>
+<button class="btn btn-secondary" id="swapBtn" title="Swap colors">Swap</button>
+</div>
+</div>
+
+<div class="ratio-display" id="ratioDisplay">
+<div class="ratio-number" id="ratioNumber">21.0:1</div>
+<div class="ratio-label">Contrast Ratio</div>
+</div>
+
+<div class="results-grid" id="results"></div>
+
+<div class="preview-section">
+<h3>Live Preview</h3>
+<div class="preview-box" id="previewBox">
+<div class="large">Large text (24px bold)</div>
+<div class="normal">Normal body text at 16px for regular reading.</div>
+<div class="small">Small text at 12px for captions and metadata.</div>
+</div>
+</div>
+
+<div class="suggestions" id="suggestions"></div>
+</div>
+
+<div class="panel batch-section">
+<h2>Batch Check</h2>
+<p class="subtitle" style="margin-bottom:12px;">Paste hex colors (one per line or comma-separated) to check all combinations.</p>
+<textarea id="batchInput" placeholder="#1a1a1a, #ffffff, #ec4899, #3b82f6, #10b981">#1a1a1a, #ffffff, #ec4899, #3b82f6, #10b981</textarea>
+<button class="btn btn-primary" id="batchBtn" style="margin-top:12px;">Check All Combinations</button>
+<div class="batch-grid" id="batchGrid"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function parseColor(str) {
+  str = str.trim().toLowerCase();
+  // hex
+  if (str.startsWith('#')) {
+    let hex = str.slice(1);
+    if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    if (hex.length === 6) {
+      return { r: parseInt(hex.slice(0,2),16), g: parseInt(hex.slice(2,4),16), b: parseInt(hex.slice(4,6),16) };
+    }
+  }
+  // rgb(r,g,b)
+  const rgbMatch = str.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/);
+  if (rgbMatch) return { r: +rgbMatch[1], g: +rgbMatch[2], b: +rgbMatch[3] };
+  return null;
+}
+
+function toHex(color) {
+  if (!color) return '#000000';
+  return '#' + [color.r, color.g, color.b].map(c => c.toString(16).padStart(2,'0')).join('');
+}
+
+function relativeLuminance(color) {
+  const [rs, gs, bs] = [color.r/255, color.g/255, color.b/255].map(c =>
+    c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+  );
+  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+function contrastRatio(c1, c2) {
+  const l1 = relativeLuminance(c1);
+  const l2 = relativeLuminance(c2);
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function checkWCAG(ratio) {
+  return {
+    aaNormal: ratio >= 4.5,
+    aaLarge: ratio >= 3.0,
+    aaaNormal: ratio >= 7.0,
+    aaaLarge: ratio >= 4.5
+  };
+}
+
+function suggestAccessible(fg, bg) {
+  const suggestions = [];
+  const ratio = contrastRatio(fg, bg);
+  if (ratio >= 4.5) return [];
+
+  // Try adjusting fg darker/lighter
+  for (let step = 1; step <= 20; step++) {
+    const darkerFg = { r: Math.max(0, fg.r - step*10), g: Math.max(0, fg.g - step*10), b: Math.max(0, fg.b - step*10) };
+    if (contrastRatio(darkerFg, bg) >= 4.5) {
+      suggestions.push({ color: darkerFg, ratio: contrastRatio(darkerFg, bg), label: 'Darker foreground' });
+      break;
+    }
+  }
+  for (let step = 1; step <= 20; step++) {
+    const lighterFg = { r: Math.min(255, fg.r + step*10), g: Math.min(255, fg.g + step*10), b: Math.min(255, fg.b + step*10) };
+    if (contrastRatio(lighterFg, bg) >= 4.5) {
+      suggestions.push({ color: lighterFg, ratio: contrastRatio(lighterFg, bg), label: 'Lighter foreground' });
+      break;
+    }
+  }
+  for (let step = 1; step <= 20; step++) {
+    const lighterBg = { r: Math.min(255, bg.r + step*10), g: Math.min(255, bg.g + step*10), b: Math.min(255, bg.b + step*10) };
+    if (contrastRatio(fg, lighterBg) >= 4.5) {
+      suggestions.push({ color: lighterBg, ratio: contrastRatio(fg, lighterBg), label: 'Lighter background' });
+      break;
+    }
+  }
+  for (let step = 1; step <= 20; step++) {
+    const darkerBg = { r: Math.max(0, bg.r - step*10), g: Math.max(0, bg.g - step*10), b: Math.max(0, bg.b - step*10) };
+    if (contrastRatio(fg, darkerBg) >= 4.5) {
+      suggestions.push({ color: darkerBg, ratio: contrastRatio(fg, darkerBg), label: 'Darker background' });
+      break;
+    }
+  }
+  return suggestions;
+}
+
+function update() {
+  const fgStr = document.getElementById('fgHex').value;
+  const bgStr = document.getElementById('bgHex').value;
+  const fg = parseColor(fgStr);
+  const bg = parseColor(bgStr);
+  if (!fg || !bg) return;
+
+  document.getElementById('fgPicker').value = toHex(fg);
+  document.getElementById('bgPicker').value = toHex(bg);
+
+  const ratio = contrastRatio(fg, bg);
+  const wcag = checkWCAG(ratio);
+
+  document.getElementById('ratioNumber').textContent = ratio.toFixed(2) + ':1';
+  const display = document.getElementById('ratioDisplay');
+  display.style.background = toHex(bg);
+  display.style.color = toHex(fg);
+
+  const resultsHTML = [
+    { level: 'AA Normal Text', pass: wcag.aaNormal, req: 'Requires 4.5:1' },
+    { level: 'AA Large Text', pass: wcag.aaLarge, req: 'Requires 3.0:1' },
+    { level: 'AAA Normal Text', pass: wcag.aaaNormal, req: 'Requires 7.0:1' },
+    { level: 'AAA Large Text', pass: wcag.aaaLarge, req: 'Requires 4.5:1' }
+  ].map(r => `<div class="result-item"><div class="level">${r.level}</div><div class="status ${r.pass?'pass':'fail'}">${r.pass?'PASS':'FAIL'}</div><div class="req">${r.req}</div></div>`).join('');
+  document.getElementById('results').innerHTML = resultsHTML;
+
+  const preview = document.getElementById('previewBox');
+  preview.style.background = toHex(bg);
+  preview.style.color = toHex(fg);
+
+  // Suggestions
+  const suggestions = suggestAccessible(fg, bg);
+  const sugEl = document.getElementById('suggestions');
+  if (suggestions.length > 0) {
+    sugEl.innerHTML = '<h3>Accessible Alternatives</h3>' + suggestions.map(s =>
+      `<div class="suggestion-item" data-hex="${toHex(s.color)}" data-type="${s.label.includes('background')?'bg':'fg'}">
+        <div class="suggestion-swatch" style="background:${toHex(s.color)}"></div>
+        <div class="suggestion-info"><span class="hex">${toHex(s.color)}</span> - ${s.label} (${s.ratio.toFixed(2)}:1)</div>
+      </div>`
+    ).join('');
+    sugEl.querySelectorAll('.suggestion-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const hex = item.dataset.hex;
+        if (item.dataset.type === 'fg') { document.getElementById('fgHex').value = hex; }
+        else { document.getElementById('bgHex').value = hex; }
+        update();
+      });
+    });
+  } else {
+    sugEl.innerHTML = '';
+  }
+}
+
+// Sync pickers
+document.getElementById('fgPicker').addEventListener('input', e => { document.getElementById('fgHex').value = e.target.value; update(); });
+document.getElementById('bgPicker').addEventListener('input', e => { document.getElementById('bgHex').value = e.target.value; update(); });
+document.getElementById('fgHex').addEventListener('input', update);
+document.getElementById('bgHex').addEventListener('input', update);
+
+document.getElementById('swapBtn').addEventListener('click', () => {
+  const fg = document.getElementById('fgHex').value;
+  const bg = document.getElementById('bgHex').value;
+  document.getElementById('fgHex').value = bg;
+  document.getElementById('bgHex').value = fg;
+  update();
+});
+
+// Batch check
+document.getElementById('batchBtn').addEventListener('click', () => {
+  const input = document.getElementById('batchInput').value;
+  const colors = input.split(/[,\n]+/).map(s => s.trim()).filter(s => s);
+  const parsed = colors.map(c => ({ hex: c, color: parseColor(c) })).filter(p => p.color);
+  if (parsed.length < 2) { showToast('Need at least 2 colors'); return; }
+
+  const grid = document.getElementById('batchGrid');
+  let html = '';
+  for (let i = 0; i < parsed.length; i++) {
+    for (let j = 0; j < parsed.length; j++) {
+      if (i === j) continue;
+      const ratio = contrastRatio(parsed[i].color, parsed[j].color);
+      const pass = ratio >= 4.5;
+      html += `<div class="batch-item" style="background:${parsed[j].hex};color:${parsed[i].hex};border-color:${pass?'#16a34a':'#fecaca'}">
+        <div class="combo">${parsed[i].hex} on ${parsed[j].hex}</div>
+        <div class="batch-ratio">${ratio.toFixed(2)}:1 ${pass?'AA':'Fail'}</div>
+      </div>`;
+    }
+  }
+  grid.innerHTML = html;
+  showToast(`Checked ${parsed.length * (parsed.length - 1)} combinations`);
+});
+
+update();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

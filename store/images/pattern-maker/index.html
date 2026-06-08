@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seamless Pattern Generator - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
+a.back:hover { text-decoration: underline; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+p.subtitle { color: #6b7280; margin-bottom: 24px; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
+h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 6px; }
+select, input[type="number"] { width: 100%; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+input[type="range"] { width: 100%; accent-color: #ec4899; }
+input[type="color"] { width: 48px; height: 36px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 2px; cursor: pointer; }
+.btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 13px; transition: opacity .2s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
+.layout { display: grid; grid-template-columns: 300px 1fr; gap: 24px; }
+@media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+.field { margin-bottom: 16px; }
+.field-row { display: flex; gap: 12px; align-items: flex-end; }
+.field-row > div { flex: 1; }
+.layers { margin-top: 16px; border-top: 1px solid #e5e7eb; padding-top: 16px; }
+.layer-item { padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 8px; position: relative; }
+.layer-item .remove { position: absolute; top: 8px; right: 8px; background: none; border: none; color: #dc2626; cursor: pointer; font-size: 16px; }
+.preview-tile { width: 100%; aspect-ratio: 1; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
+.preview-tile canvas { width: 100%; height: 100%; }
+.presets-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
+@media (max-width: 600px) { .presets-grid { grid-template-columns: repeat(4, 1fr); } }
+.preset-btn { aspect-ratio: 1; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; overflow: hidden; transition: border-color .15s; background: #fff; padding: 0; }
+.preset-btn:hover, .preset-btn.active { border-color: #ec4899; }
+.preset-btn canvas { width: 100%; height: 100%; pointer-events: none; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.css-output { margin-top: 12px; font-family: monospace; font-size: 12px; padding: 12px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; word-break: break-all; max-height: 100px; overflow-y: auto; cursor: pointer; }
+.range-val { font-size: 12px; color: #6b7280; text-align: right; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<h1>Seamless Pattern Generator</h1>
+<p class="subtitle">Create tileable patterns with multiple layers. Export as SVG, PNG, or CSS background.</p>
+
+<div class="panel">
+<h3>Presets</h3>
+<div class="presets-grid" id="presetsGrid"></div>
+</div>
+
+<div class="layout">
+<div>
+<div class="panel">
+<h3>Pattern Settings</h3>
+<div id="layersContainer"></div>
+<button class="btn btn-secondary" id="addLayerBtn" style="width:100%;margin-top:12px;">+ Add Layer</button>
+</div>
+</div>
+<div>
+<div class="panel">
+<h3>Preview (4x4 tile)</h3>
+<div class="preview-tile"><canvas id="previewCanvas" width="512" height="512"></canvas></div>
+<div class="actions">
+<button class="btn btn-primary" id="dlSvg">Download SVG</button>
+<button class="btn btn-primary" id="dlPng">Download PNG</button>
+<button class="btn btn-secondary" id="copyCSS">Copy CSS</button>
+</div>
+<div class="css-output" id="cssOutput" style="display:none;"></div>
+</div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+const SHAPES = ['dots','lines','chevrons','waves','circles','triangles','hexagons'];
+
+let layers = [{ shape: 'dots', size: 20, spacing: 40, rotation: 0, color: '#ec4899', opacity: 1 }];
+
+const PRESETS = [
+  [{ shape:'dots', size:8, spacing:24, rotation:0, color:'#1a1a1a', opacity:0.6 }],
+  [{ shape:'lines', size:2, spacing:16, rotation:45, color:'#3b82f6', opacity:0.4 }],
+  [{ shape:'chevrons', size:12, spacing:32, rotation:0, color:'#10b981', opacity:0.7 }],
+  [{ shape:'waves', size:6, spacing:20, rotation:0, color:'#8b5cf6', opacity:0.5 }],
+  [{ shape:'circles', size:16, spacing:40, rotation:0, color:'#f59e0b', opacity:0.3 }],
+  [{ shape:'triangles', size:10, spacing:28, rotation:0, color:'#ec4899', opacity:0.6 }],
+  [{ shape:'hexagons', size:18, spacing:44, rotation:0, color:'#06b6d4', opacity:0.5 }],
+  [{ shape:'dots', size:4, spacing:12, rotation:0, color:'#dc2626', opacity:0.4 },{ shape:'dots', size:8, spacing:24, rotation:0, color:'#dc2626', opacity:0.2 }],
+  [{ shape:'lines', size:1, spacing:8, rotation:0, color:'#64748b', opacity:0.3 },{ shape:'lines', size:1, spacing:8, rotation:90, color:'#64748b', opacity:0.3 }],
+  [{ shape:'dots', size:6, spacing:20, rotation:0, color:'#1a1a1a', opacity:0.5 },{ shape:'lines', size:1, spacing:40, rotation:45, color:'#1a1a1a', opacity:0.2 }],
+  [{ shape:'chevrons', size:8, spacing:24, rotation:0, color:'#6366f1', opacity:0.5 },{ shape:'dots', size:3, spacing:24, rotation:0, color:'#6366f1', opacity:0.3 }],
+  [{ shape:'waves', size:4, spacing:16, rotation:0, color:'#059669', opacity:0.4 },{ shape:'waves', size:4, spacing:16, rotation:180, color:'#059669', opacity:0.4 }],
+  [{ shape:'hexagons', size:12, spacing:32, rotation:0, color:'#7c3aed', opacity:0.4 }],
+  [{ shape:'triangles', size:6, spacing:18, rotation:0, color:'#ea580c', opacity:0.5 },{ shape:'triangles', size:6, spacing:18, rotation:180, color:'#ea580c', opacity:0.3 }],
+  [{ shape:'circles', size:20, spacing:48, rotation:0, color:'#0ea5e9', opacity:0.2 },{ shape:'dots', size:4, spacing:48, rotation:0, color:'#0ea5e9', opacity:0.6 }],
+  [{ shape:'lines', size:2, spacing:12, rotation:30, color:'#be185d', opacity:0.3 }],
+  [{ shape:'dots', size:3, spacing:10, rotation:0, color:'#374151', opacity:0.8 }],
+  [{ shape:'waves', size:8, spacing:24, rotation:45, color:'#0369a1', opacity:0.4 }],
+  [{ shape:'hexagons', size:24, spacing:56, rotation:30, color:'#4f46e5', opacity:0.3 },{ shape:'dots', size:4, spacing:56, rotation:0, color:'#4f46e5', opacity:0.5 }],
+  [{ shape:'chevrons', size:16, spacing:40, rotation:90, color:'#b91c1c', opacity:0.4 }]
+];
+
+function drawShape(ctx, shape, x, y, size, rotation, color, opacity) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rotation * Math.PI / 180);
+  ctx.globalAlpha = opacity;
+  ctx.fillStyle = color;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = Math.max(1, size * 0.15);
+
+  switch (shape) {
+    case 'dots':
+      ctx.beginPath(); ctx.arc(0, 0, size/2, 0, Math.PI*2); ctx.fill(); break;
+    case 'lines':
+      ctx.beginPath(); ctx.moveTo(-size, 0); ctx.lineTo(size, 0); ctx.stroke(); break;
+    case 'chevrons':
+      ctx.beginPath(); ctx.moveTo(-size/2, size/3); ctx.lineTo(0, -size/3); ctx.lineTo(size/2, size/3); ctx.stroke(); break;
+    case 'waves':
+      ctx.beginPath();
+      ctx.moveTo(-size, 0);
+      ctx.quadraticCurveTo(-size/2, -size/2, 0, 0);
+      ctx.quadraticCurveTo(size/2, size/2, size, 0);
+      ctx.stroke(); break;
+    case 'circles':
+      ctx.beginPath(); ctx.arc(0, 0, size/2, 0, Math.PI*2); ctx.stroke(); break;
+    case 'triangles':
+      ctx.beginPath();
+      ctx.moveTo(0, -size/2); ctx.lineTo(size/2, size/2); ctx.lineTo(-size/2, size/2); ctx.closePath(); ctx.fill(); break;
+    case 'hexagons':
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = Math.PI/3 * i - Math.PI/6;
+        const px = Math.cos(a) * size/2, py = Math.sin(a) * size/2;
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath(); ctx.stroke(); break;
+  }
+  ctx.restore();
+}
+
+function renderTile(ctx, tileSize, layers) {
+  ctx.clearRect(0, 0, tileSize, tileSize);
+  for (const layer of layers) {
+    const sp = layer.spacing || 40;
+    for (let y = -sp; y < tileSize + sp; y += sp) {
+      for (let x = -sp; x < tileSize + sp; x += sp) {
+        drawShape(ctx, layer.shape, x, y, layer.size, layer.rotation, layer.color, layer.opacity);
+      }
+    }
+  }
+}
+
+function renderPreview() {
+  const canvas = document.getElementById('previewCanvas');
+  const ctx = canvas.getContext('2d');
+  const tileSize = 128;
+  // Render one tile to offscreen
+  const offscreen = document.createElement('canvas');
+  offscreen.width = tileSize; offscreen.height = tileSize;
+  const octx = offscreen.getContext('2d');
+  octx.fillStyle = '#ffffff';
+  octx.fillRect(0, 0, tileSize, tileSize);
+  renderTile(octx, tileSize, layers);
+  // Tile 4x4
+  ctx.clearRect(0, 0, 512, 512);
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
+    ctx.drawImage(offscreen, c * tileSize, r * tileSize);
+  }
+}
+
+function renderLayerUI() {
+  const container = document.getElementById('layersContainer');
+  container.innerHTML = '';
+  layers.forEach((layer, idx) => {
+    const div = document.createElement('div');
+    div.className = 'layer-item';
+    div.innerHTML = `
+      <button class="remove" data-idx="${idx}">&times;</button>
+      <div class="field"><label>Shape</label>
+        <select data-idx="${idx}" data-prop="shape">${SHAPES.map(s=>`<option value="${s}" ${s===layer.shape?'selected':''}>${s}</option>`).join('')}</select>
+      </div>
+      <div class="field-row">
+        <div><label>Size: <span class="range-val">${layer.size}</span></label><input type="range" min="2" max="40" value="${layer.size}" data-idx="${idx}" data-prop="size"></div>
+        <div><label>Spacing: <span class="range-val">${layer.spacing}</span></label><input type="range" min="8" max="80" value="${layer.spacing}" data-idx="${idx}" data-prop="spacing"></div>
+      </div>
+      <div class="field-row">
+        <div><label>Rotation: <span class="range-val">${layer.rotation}&deg;</span></label><input type="range" min="0" max="360" value="${layer.rotation}" data-idx="${idx}" data-prop="rotation"></div>
+        <div><label>Opacity: <span class="range-val">${layer.opacity.toFixed(1)}</span></label><input type="range" min="0" max="10" value="${Math.round(layer.opacity*10)}" data-idx="${idx}" data-prop="opacity"></div>
+      </div>
+      <div class="field-row">
+        <div><label>Color</label><input type="color" value="${layer.color}" data-idx="${idx}" data-prop="color"></div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  container.querySelectorAll('select, input[type="range"], input[type="color"]').forEach(el => {
+    el.addEventListener('input', e => {
+      const idx = +e.target.dataset.idx;
+      const prop = e.target.dataset.prop;
+      let val = e.target.value;
+      if (prop === 'size' || prop === 'spacing' || prop === 'rotation') val = +val;
+      if (prop === 'opacity') val = +val / 10;
+      layers[idx][prop] = val;
+      renderLayerUI();
+      renderPreview();
+    });
+  });
+
+  container.querySelectorAll('.remove').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const idx = +e.target.dataset.idx;
+      if (layers.length <= 1) return;
+      layers.splice(idx, 1);
+      renderLayerUI();
+      renderPreview();
+    });
+  });
+}
+
+document.getElementById('addLayerBtn').addEventListener('click', () => {
+  if (layers.length >= 3) { showToast('Max 3 layers'); return; }
+  layers.push({ shape: 'lines', size: 12, spacing: 32, rotation: 0, color: '#3b82f6', opacity: 0.5 });
+  renderLayerUI();
+  renderPreview();
+});
+
+// Presets
+function renderPresets() {
+  const grid = document.getElementById('presetsGrid');
+  PRESETS.forEach((preset, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn';
+    const c = document.createElement('canvas');
+    c.width = 64; c.height = 64;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 64, 64);
+    renderTile(ctx, 64, preset);
+    btn.appendChild(c);
+    btn.addEventListener('click', () => {
+      layers = JSON.parse(JSON.stringify(preset));
+      renderLayerUI();
+      renderPreview();
+      grid.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+    grid.appendChild(btn);
+  });
+}
+
+// Export SVG
+document.getElementById('dlSvg').addEventListener('click', () => {
+  const tileSize = 128;
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${tileSize}" height="${tileSize}" viewBox="0 0 ${tileSize} ${tileSize}">`;
+  svg += `<rect width="${tileSize}" height="${tileSize}" fill="#ffffff"/>`;
+  for (const layer of layers) {
+    const sp = layer.spacing;
+    for (let y = -sp; y < tileSize + sp; y += sp) {
+      for (let x = -sp; x < tileSize + sp; x += sp) {
+        svg += shapeToSVG(layer.shape, x, y, layer.size, layer.rotation, layer.color, layer.opacity);
+      }
+    }
+  }
+  svg += '</svg>';
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  const link = document.createElement('a'); link.download = 'pattern.svg'; link.href = URL.createObjectURL(blob); link.click();
+  showToast('SVG downloaded');
+});
+
+function shapeToSVG(shape, x, y, size, rotation, color, opacity) {
+  const t = `transform="translate(${x},${y}) rotate(${rotation})" opacity="${opacity}"`;
+  switch (shape) {
+    case 'dots': return `<circle cx="0" cy="0" r="${size/2}" fill="${color}" ${t}/>`;
+    case 'lines': return `<line x1="${-size}" y1="0" x2="${size}" y2="0" stroke="${color}" stroke-width="${Math.max(1,size*0.15)}" ${t}/>`;
+    case 'chevrons': return `<polyline points="${-size/2},${size/3} 0,${-size/3} ${size/2},${size/3}" fill="none" stroke="${color}" stroke-width="${Math.max(1,size*0.15)}" ${t}/>`;
+    case 'waves': return `<path d="M${-size},0 Q${-size/2},${-size/2} 0,0 Q${size/2},${size/2} ${size},0" fill="none" stroke="${color}" stroke-width="${Math.max(1,size*0.15)}" ${t}/>`;
+    case 'circles': return `<circle cx="0" cy="0" r="${size/2}" fill="none" stroke="${color}" stroke-width="${Math.max(1,size*0.15)}" ${t}/>`;
+    case 'triangles': return `<polygon points="0,${-size/2} ${size/2},${size/2} ${-size/2},${size/2}" fill="${color}" ${t}/>`;
+    case 'hexagons': {
+      const pts = Array.from({length:6},(_,i)=>{const a=Math.PI/3*i-Math.PI/6;return `${Math.cos(a)*size/2},${Math.sin(a)*size/2}`;}).join(' ');
+      return `<polygon points="${pts}" fill="none" stroke="${color}" stroke-width="${Math.max(1,size*0.15)}" ${t}/>`;
+    }
+    default: return '';
+  }
+}
+
+// Export PNG
+document.getElementById('dlPng').addEventListener('click', () => {
+  const tileSize = 256;
+  const c = document.createElement('canvas'); c.width = tileSize; c.height = tileSize;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, tileSize, tileSize);
+  renderTile(ctx, tileSize, layers);
+  const link = document.createElement('a'); link.download = 'pattern.png'; link.href = c.toDataURL('image/png'); link.click();
+  showToast('PNG downloaded');
+});
+
+// Copy CSS
+document.getElementById('copyCSS').addEventListener('click', () => {
+  const tileSize = 128;
+  const c = document.createElement('canvas'); c.width = tileSize; c.height = tileSize;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, tileSize, tileSize);
+  renderTile(ctx, tileSize, layers);
+  const dataURL = c.toDataURL('image/png');
+  const css = `background-image: url("${dataURL}");\nbackground-repeat: repeat;\nbackground-size: ${tileSize}px ${tileSize}px;`;
+  navigator.clipboard.writeText(css).then(() => showToast('CSS copied to clipboard'));
+  const output = document.getElementById('cssOutput');
+  output.style.display = 'block';
+  output.textContent = css;
+});
+
+renderPresets();
+renderLayerUI();
+renderPreview();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

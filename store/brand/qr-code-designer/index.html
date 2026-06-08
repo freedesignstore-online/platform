@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Code Designer - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
+a.back:hover { text-decoration: underline; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+p.subtitle { color: #6b7280; margin-bottom: 24px; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
+.layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 6px; }
+input[type="text"], input[type="url"], select { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+input[type="color"] { width: 48px; height: 36px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 2px; cursor: pointer; }
+.row { display: flex; gap: 12px; align-items: flex-end; margin-bottom: 16px; }
+.row > div { flex: 1; }
+.btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 14px; transition: opacity .2s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
+.field { margin-bottom: 16px; }
+.size-presets { display: flex; gap: 8px; margin-bottom: 16px; }
+.size-presets button { padding: 6px 14px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 500; }
+.size-presets button.active { background: #ec4899; color: #fff; border-color: #ec4899; }
+.canvas-wrap { display: flex; justify-content: center; align-items: center; min-height: 300px; }
+canvas { border-radius: 8px; max-width: 100%; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.logo-upload { margin-top: 8px; }
+.logo-upload input { display: none; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<h1>QR Code Designer</h1>
+<p class="subtitle">Generate customizable QR codes with colors, corner styles, and logo overlay.</p>
+
+<div class="layout">
+<div>
+<div class="panel">
+<div class="field">
+<label>Content (URL or text)</label>
+<input type="text" id="qrInput" value="https://freeappstore.online" placeholder="Enter URL or text...">
+</div>
+<div class="field">
+<label>Error Correction Level</label>
+<select id="ecLevel">
+<option value="L">L - Low (7%)</option>
+<option value="M" selected>M - Medium (15%)</option>
+<option value="Q">Q - Quartile (25%)</option>
+<option value="H">H - High (30%)</option>
+</select>
+</div>
+<div class="row">
+<div>
+<label>Foreground</label>
+<input type="color" id="fgColor" value="#1a1a1a">
+</div>
+<div>
+<label>Background</label>
+<input type="color" id="bgColor" value="#ffffff">
+</div>
+<div>
+<label>Corner Style</label>
+<select id="cornerStyle">
+<option value="square">Square</option>
+<option value="round">Rounded</option>
+<option value="dots">Dots</option>
+</select>
+</div>
+</div>
+<div class="field">
+<label>Size Preset</label>
+<div class="size-presets">
+<button data-size="256" class="active">Small (256)</button>
+<button data-size="512">Medium (512)</button>
+<button data-size="1024">Large (1024)</button>
+</div>
+</div>
+<div class="field">
+<label>Logo (center overlay)</label>
+<div class="logo-upload">
+<button class="btn btn-secondary" id="logoBtn">Upload Logo</button>
+<input type="file" id="logoInput" accept="image/*">
+<button class="btn btn-secondary" id="removeLogo" style="display:none; margin-top:8px;">Remove Logo</button>
+</div>
+</div>
+<button class="btn btn-primary" id="generateBtn" style="width:100%;">Generate QR Code</button>
+</div>
+</div>
+<div>
+<div class="panel">
+<div class="canvas-wrap">
+<canvas id="qrCanvas"></canvas>
+</div>
+<div class="actions">
+<button class="btn btn-primary" id="dlPng">Download PNG</button>
+<button class="btn btn-secondary" id="dlSvg">Download SVG</button>
+</div>
+</div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// Minimal QR Code Generator (based on QR code spec, supports alphanumeric+byte mode)
+const QR = (() => {
+  const ECL = { L: 1, M: 0, Q: 3, H: 2 };
+  const MODE_BYTE = 4;
+  const ECC_CODEWORDS = [
+    [],
+    [7,10,13,17],[10,16,22,28],[15,26,36,44],[20,36,52,64],[26,48,72,88],
+    [36,64,96,112],[40,72,108,130],[48,86,132,156],[60,100,160,192],[72,122,192,224],
+    [80,140,224,264],[96,158,260,308],[104,180,288,352],[120,196,320,384],[132,224,360,432],
+    [144,244,408,480],[168,270,448,532],[180,300,504,588],[196,318,546,650],[224,348,600,700],
+    [224,382,644,750],[252,403,690,816],[270,439,750,900],[300,461,810,960],[312,509,870,1050],
+    [336,535,952,1110],[360,593,1020,1200],[390,625,1050,1260],[420,658,1140,1350],[450,698,1200,1440],
+    [480,742,1290,1530],[510,790,1350,1620],[540,842,1440,1710],[570,898,1530,1800],[570,958,1620,1890],
+    [600,1018,1710,1980],[630,1058,1800,2100],[660,1108,1890,2220],[720,1168,1980,2310],[750,1228,2100,2430]
+  ];
+  const DATA_CODEWORDS = [
+    [],
+    [19,16,13,9],[34,28,22,16],[55,44,34,26],[80,64,48,36],[108,86,62,46],
+    [136,108,76,60],[156,124,88,66],[194,154,110,86],[232,182,132,100],[274,216,154,122],
+    [324,254,180,140],[370,290,206,158],[428,334,244,180],[461,365,261,197],[523,415,295,223],
+    [589,453,325,253],[647,507,367,283],[721,563,397,313],[795,627,445,341],[861,669,485,385],
+    [932,714,512,406],[1006,782,568,442],[1094,860,614,464],[1174,914,664,514],[1276,1000,718,538],
+    [1370,1062,754,596],[1468,1128,808,628],[1531,1193,871,661],[1631,1267,911,701],[1735,1373,985,745],
+    [1843,1455,1033,793],[1955,1541,1115,845],[2071,1631,1171,901],[2191,1725,1231,961],[2306,1812,1286,986],
+    [2434,1914,1354,1054],[2566,1992,1426,1096],[2702,2102,1502,1142],[2812,2216,1582,1222],[2956,2334,1666,1276]
+  ];
+  const ALIGN_POSITIONS = [
+    [],[], [6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],
+    [6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],
+    [6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],
+    [6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],
+    [6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],
+    [6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],
+    [6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166]
+  ];
+
+  function getVersion(dataLen, ecl) {
+    for (let v = 1; v <= 40; v++) {
+      if (DATA_CODEWORDS[v][ecl] >= dataLen) return v;
+    }
+    return 40;
+  }
+
+  function getSize(version) { return 17 + version * 4; }
+
+  function encodeData(text, ecl) {
+    const bytes = new TextEncoder().encode(text);
+    const eclIdx = ecl;
+    const version = getVersion(bytes.length + 3, eclIdx);
+    const totalData = DATA_CODEWORDS[version][eclIdx];
+
+    const bits = [];
+    function pushBits(val, len) { for (let i = len - 1; i >= 0; i--) bits.push((val >> i) & 1); }
+
+    pushBits(MODE_BYTE, 4);
+    const ccLen = version <= 9 ? 8 : 16;
+    pushBits(bytes.length, ccLen);
+    for (const b of bytes) pushBits(b, 8);
+    pushBits(0, Math.min(4, totalData * 8 - bits.length));
+    while (bits.length % 8 !== 0) bits.push(0);
+    const pads = [0xEC, 0x11];
+    let pi = 0;
+    while (bits.length < totalData * 8) { pushBits(pads[pi % 2], 8); pi++; }
+
+    const codewords = [];
+    for (let i = 0; i < bits.length; i += 8) {
+      codewords.push(bits.slice(i, i + 8).reduce((a, b) => (a << 1) | b, 0));
+    }
+
+    return { version, codewords, eclIdx };
+  }
+
+  // GF(256) arithmetic for Reed-Solomon
+  const GF_EXP = new Uint8Array(512);
+  const GF_LOG = new Uint8Array(256);
+  (() => {
+    let x = 1;
+    for (let i = 0; i < 255; i++) {
+      GF_EXP[i] = x; GF_LOG[x] = i;
+      x = (x << 1) ^ (x >= 128 ? 0x11D : 0);
+    }
+    for (let i = 255; i < 512; i++) GF_EXP[i] = GF_EXP[i - 255];
+  })();
+
+  function gfMul(a, b) { return a === 0 || b === 0 ? 0 : GF_EXP[GF_LOG[a] + GF_LOG[b]]; }
+
+  function rsEncode(data, nsym) {
+    const gen = [1];
+    for (let i = 0; i < nsym; i++) {
+      const newGen = new Array(gen.length + 1).fill(0);
+      for (let j = 0; j < gen.length; j++) {
+        newGen[j] ^= gen[j];
+        newGen[j + 1] ^= gfMul(gen[j], GF_EXP[i]);
+      }
+      gen.length = newGen.length;
+      for (let j = 0; j < newGen.length; j++) gen[j] = newGen[j];
+    }
+    const remainder = new Uint8Array(nsym);
+    for (const b of data) {
+      const coef = b ^ remainder[0];
+      remainder.copyWithin(0, 1);
+      remainder[nsym - 1] = 0;
+      for (let i = 0; i < nsym; i++) remainder[i] ^= gfMul(gen[i + 1], coef);
+    }
+    return remainder;
+  }
+
+  function getECCBlockInfo(version, eclIdx) {
+    const totalCodewords = Math.floor((getSize(version) ** 2 - (version <= 1 ? 202 : 192)) / 8);
+    const ecCodewords = ECC_CODEWORDS[version][eclIdx];
+    const dataCodewords = DATA_CODEWORDS[version][eclIdx];
+    const eccPerBlock = Math.floor(ecCodewords / (version <= 2 ? 1 : Math.ceil(ecCodewords / 30)));
+    const numBlocks = Math.ceil(ecCodewords / eccPerBlock);
+    return { totalCodewords, ecCodewords, dataCodewords, eccPerBlock: Math.floor(ecCodewords / numBlocks), numBlocks };
+  }
+
+  function generate(text, eclLevel) {
+    const ecl = ECL[eclLevel] || 0;
+    const { version, codewords, eclIdx } = encodeData(text, ecl);
+    const size = getSize(version);
+    const eccCount = ECC_CODEWORDS[version][eclIdx];
+    const eccPerBlock = eccCount;
+    const ecBytes = rsEncode(new Uint8Array(codewords), Math.min(eccCount, 30));
+
+    const allData = [...codewords, ...ecBytes];
+    const modules = Array.from({ length: size }, () => new Uint8Array(size));
+    const reserved = Array.from({ length: size }, () => new Uint8Array(size));
+
+    // Place finder patterns
+    function placeFinder(row, col) {
+      for (let r = -1; r <= 7; r++) for (let c = -1; c <= 7; c++) {
+        const rr = row + r, cc = col + c;
+        if (rr < 0 || rr >= size || cc < 0 || cc >= size) continue;
+        const inOuter = r === 0 || r === 6 || c === 0 || c === 6;
+        const inInner = r >= 2 && r <= 4 && c >= 2 && c <= 4;
+        modules[rr][cc] = (inOuter || inInner) ? 1 : 0;
+        reserved[rr][cc] = 1;
+      }
+    }
+    placeFinder(0, 0); placeFinder(0, size - 7); placeFinder(size - 7, 0);
+
+    // Timing patterns
+    for (let i = 8; i < size - 8; i++) {
+      modules[6][i] = i % 2 === 0 ? 1 : 0; reserved[6][i] = 1;
+      modules[i][6] = i % 2 === 0 ? 1 : 0; reserved[i][6] = 1;
+    }
+
+    // Alignment patterns
+    if (version >= 2) {
+      const pos = ALIGN_POSITIONS[version];
+      for (const r of pos) for (const c of pos) {
+        if ((r < 9 && c < 9) || (r < 9 && c > size - 10) || (r > size - 10 && c < 9)) continue;
+        for (let dr = -2; dr <= 2; dr++) for (let dc = -2; dc <= 2; dc++) {
+          modules[r + dr][c + dc] = (Math.abs(dr) === 2 || Math.abs(dc) === 2 || (dr === 0 && dc === 0)) ? 1 : 0;
+          reserved[r + dr][c + dc] = 1;
+        }
+      }
+    }
+
+    // Reserve format info areas
+    for (let i = 0; i < 8; i++) {
+      reserved[8][i] = 1; reserved[8][size - 1 - i] = 1;
+      reserved[i][8] = 1; reserved[size - 1 - i][8] = 1;
+    }
+    reserved[8][8] = 1;
+    modules[size - 8][8] = 1; reserved[size - 8][8] = 1; // Dark module
+
+    // Reserve version info
+    if (version >= 7) {
+      for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) {
+        reserved[i][size - 11 + j] = 1;
+        reserved[size - 11 + j][i] = 1;
+      }
+    }
+
+    // Place data bits
+    let bitIdx = 0;
+    const dataBits = [];
+    for (const byte of allData) for (let b = 7; b >= 0; b--) dataBits.push((byte >> b) & 1);
+
+    let col = size - 1;
+    let goingUp = true;
+    while (col >= 0) {
+      if (col === 6) col--;
+      const rows = goingUp ? Array.from({ length: size }, (_, i) => size - 1 - i) : Array.from({ length: size }, (_, i) => i);
+      for (const row of rows) {
+        for (let c = 0; c < 2; c++) {
+          const cc = col - c;
+          if (cc < 0) continue;
+          if (reserved[row][cc]) continue;
+          modules[row][cc] = bitIdx < dataBits.length ? dataBits[bitIdx] : 0;
+          bitIdx++;
+        }
+      }
+      col -= 2;
+      goingUp = !goingUp;
+    }
+
+    // Apply mask (mask 0: (row+col)%2==0)
+    for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) {
+      if (!reserved[r][c] && (r + c) % 2 === 0) modules[r][c] ^= 1;
+    }
+
+    // Format info (mask 0, ecl)
+    const formatBits = getFormatBits(eclIdx, 0);
+    for (let i = 0; i < 6; i++) modules[8][i] = formatBits[i];
+    modules[8][7] = formatBits[6]; modules[8][8] = formatBits[7]; modules[7][8] = formatBits[8];
+    for (let i = 0; i < 6; i++) modules[5 - i][8] = formatBits[9 + i];
+    for (let i = 0; i < 8; i++) modules[8][size - 8 + i] = formatBits[i];
+    for (let i = 0; i < 7; i++) modules[size - 1 - i][8] = formatBits[8 + i];
+
+    return { modules, size, version };
+  }
+
+  function getFormatBits(ecl, mask) {
+    const data = (ecl << 3) | mask;
+    let rem = data;
+    for (let i = 0; i < 10; i++) { if (rem & (1 << (i + 4))) rem ^= 0x537 << (i - (10 - 5)); rem = data << 10; }
+    // BCH encoding
+    rem = data << 10;
+    for (let i = 4; i >= 0; i--) { if (rem & (1 << (i + 10))) rem ^= 0x537 << i; }
+    const bits15 = ((data << 10) | rem) ^ 0x5412;
+    const result = [];
+    for (let i = 14; i >= 0; i--) result.push((bits15 >> i) & 1);
+    return result;
+  }
+
+  return { generate };
+})();
+
+let currentSize = 256;
+let logoImg = null;
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function generateQR() {
+  const text = document.getElementById('qrInput').value.trim();
+  if (!text) { showToast('Please enter content'); return; }
+  const ecl = document.getElementById('ecLevel').value;
+  const fgColor = document.getElementById('fgColor').value;
+  const bgColor = document.getElementById('bgColor').value;
+  const style = document.getElementById('cornerStyle').value;
+  const canvas = document.getElementById('qrCanvas');
+  const ctx = canvas.getContext('2d');
+
+  let qr;
+  try { qr = QR.generate(text, ecl); } catch(e) { showToast('Error generating QR'); return; }
+
+  const size = currentSize;
+  canvas.width = size; canvas.height = size;
+  const cellSize = size / (qr.size + 8);
+  const offset = cellSize * 4;
+
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = fgColor;
+
+  const radius = cellSize * 0.4;
+
+  for (let r = 0; r < qr.size; r++) {
+    for (let c = 0; c < qr.size; c++) {
+      if (!qr.modules[r][c]) continue;
+      const x = offset + c * cellSize;
+      const y = offset + r * cellSize;
+
+      if (style === 'dots') {
+        ctx.beginPath();
+        ctx.arc(x + cellSize / 2, y + cellSize / 2, cellSize * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (style === 'round') {
+        ctx.beginPath();
+        ctx.roundRect(x, y, cellSize + 0.5, cellSize + 0.5, radius);
+        ctx.fill();
+      } else {
+        ctx.fillRect(x, y, cellSize + 0.5, cellSize + 0.5);
+      }
+    }
+  }
+
+  if (logoImg) {
+    const logoSize = size * 0.2;
+    const lx = (size - logoSize) / 2;
+    const ly = (size - logoSize) / 2;
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(lx - 4, ly - 4, logoSize + 8, logoSize + 8);
+    ctx.drawImage(logoImg, lx, ly, logoSize, logoSize);
+  }
+}
+
+function downloadPNG() {
+  const canvas = document.getElementById('qrCanvas');
+  const link = document.createElement('a');
+  link.download = 'qr-code.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  showToast('PNG downloaded');
+}
+
+function downloadSVG() {
+  const text = document.getElementById('qrInput').value.trim();
+  if (!text) return;
+  const ecl = document.getElementById('ecLevel').value;
+  const fgColor = document.getElementById('fgColor').value;
+  const bgColor = document.getElementById('bgColor').value;
+  const style = document.getElementById('cornerStyle').value;
+  let qr;
+  try { qr = QR.generate(text, ecl); } catch(e) { return; }
+
+  const cellSize = 10;
+  const padding = 40;
+  const svgSize = qr.size * cellSize + padding * 2;
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgSize}" height="${svgSize}" viewBox="0 0 ${svgSize} ${svgSize}">`;
+  svg += `<rect width="${svgSize}" height="${svgSize}" fill="${bgColor}"/>`;
+
+  for (let r = 0; r < qr.size; r++) {
+    for (let c = 0; c < qr.size; c++) {
+      if (!qr.modules[r][c]) continue;
+      const x = padding + c * cellSize;
+      const y = padding + r * cellSize;
+      if (style === 'dots') {
+        svg += `<circle cx="${x + cellSize/2}" cy="${y + cellSize/2}" r="${cellSize*0.4}" fill="${fgColor}"/>`;
+      } else if (style === 'round') {
+        svg += `<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" rx="3" fill="${fgColor}"/>`;
+      } else {
+        svg += `<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" fill="${fgColor}"/>`;
+      }
+    }
+  }
+  svg += '</svg>';
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  const link = document.createElement('a');
+  link.download = 'qr-code.svg';
+  link.href = URL.createObjectURL(blob);
+  link.click();
+  showToast('SVG downloaded');
+}
+
+// Size presets
+document.querySelectorAll('.size-presets button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.size-presets button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentSize = parseInt(btn.dataset.size);
+    generateQR();
+  });
+});
+
+// Logo upload
+document.getElementById('logoBtn').addEventListener('click', () => document.getElementById('logoInput').click());
+document.getElementById('logoInput').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const img = new Image();
+  img.onload = () => { logoImg = img; document.getElementById('removeLogo').style.display = 'inline-block'; generateQR(); };
+  img.src = URL.createObjectURL(file);
+});
+document.getElementById('removeLogo').addEventListener('click', () => {
+  logoImg = null;
+  document.getElementById('removeLogo').style.display = 'none';
+  document.getElementById('logoInput').value = '';
+  generateQR();
+});
+
+document.getElementById('generateBtn').addEventListener('click', generateQR);
+document.getElementById('dlPng').addEventListener('click', downloadPNG);
+document.getElementById('dlSvg').addEventListener('click', downloadSVG);
+
+// Auto-generate on input change
+['qrInput', 'ecLevel', 'fgColor', 'bgColor', 'cornerStyle'].forEach(id => {
+  document.getElementById(id).addEventListener('change', generateQR);
+});
+document.getElementById('qrInput').addEventListener('input', generateQR);
+
+generateQR();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

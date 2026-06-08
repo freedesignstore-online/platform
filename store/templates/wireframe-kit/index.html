@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe Builder - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
+a.back:hover { text-decoration: underline; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+p.subtitle { color: #6b7280; margin-bottom: 24px; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
+.layout { display: grid; grid-template-columns: 220px 1fr; gap: 24px; }
+@media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+.btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 13px; transition: opacity .2s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
+.sidebar h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+.component-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+.component-item { padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; cursor: grab; font-size: 13px; background: #fff; user-select: none; transition: border-color .15s; display: flex; align-items: center; gap: 8px; }
+.component-item:hover { border-color: #ec4899; }
+.component-item .icon { width: 20px; text-align: center; color: #6b7280; }
+.presets { display: flex; flex-direction: column; gap: 6px; }
+.presets button { width: 100%; text-align: left; }
+.canvas-container { position: relative; overflow: hidden; }
+.canvas-area { width: 100%; min-height: 600px; background: #f8f9fa; border: 2px dashed #d1d5db; border-radius: 12px; position: relative; background-image: linear-gradient(rgba(0,0,0,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,.03) 1px, transparent 1px); background-size: 8px 8px; }
+.wf-element { position: absolute; border: 2px solid #94a3b8; background: #e2e8f0; border-radius: 4px; cursor: move; user-select: none; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+.wf-element.selected { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,.3); }
+.wf-element .resize-handle { position: absolute; bottom: -4px; right: -4px; width: 10px; height: 10px; background: #3b82f6; border-radius: 2px; cursor: nwse-resize; display: none; }
+.wf-element.selected .resize-handle { display: block; }
+.wf-element .delete-btn { position: absolute; top: -8px; right: -8px; width: 18px; height: 18px; background: #ef4444; color: #fff; border-radius: 50%; font-size: 10px; display: none; align-items: center; justify-content: center; cursor: pointer; line-height: 1; }
+.wf-element.selected .delete-btn { display: flex; }
+.toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<h1>Wireframe Builder</h1>
+<p class="subtitle">Drag-and-drop wireframe components. Snap to grid, resize, export as SVG or PNG.</p>
+
+<div class="layout">
+<div class="sidebar">
+<div class="panel">
+<h3>Components</h3>
+<div class="component-list">
+<div class="component-item" draggable="true" data-type="header"><span class="icon">---</span> Header</div>
+<div class="component-item" draggable="true" data-type="nav"><span class="icon">|||</span> Navigation</div>
+<div class="component-item" draggable="true" data-type="hero"><span class="icon">[ ]</span> Hero</div>
+<div class="component-item" draggable="true" data-type="card"><span class="icon">[ ]</span> Card</div>
+<div class="component-item" draggable="true" data-type="list"><span class="icon">---</span> List</div>
+<div class="component-item" draggable="true" data-type="form"><span class="icon">[_]</span> Form</div>
+<div class="component-item" draggable="true" data-type="button"><span class="icon">btn</span> Button</div>
+<div class="component-item" draggable="true" data-type="image"><span class="icon">img</span> Image</div>
+<div class="component-item" draggable="true" data-type="text"><span class="icon">Aa</span> Text Block</div>
+<div class="component-item" draggable="true" data-type="footer"><span class="icon">___</span> Footer</div>
+<div class="component-item" draggable="true" data-type="sidebar"><span class="icon">|_|</span> Sidebar</div>
+</div>
+<h3>Page Presets</h3>
+<div class="presets">
+<button class="btn btn-secondary" data-preset="landing">Landing Page</button>
+<button class="btn btn-secondary" data-preset="dashboard">Dashboard</button>
+<button class="btn btn-secondary" data-preset="blog">Blog Post</button>
+</div>
+</div>
+</div>
+<div>
+<div class="toolbar">
+<button class="btn btn-secondary" id="clearBtn">Clear All</button>
+<button class="btn btn-primary" id="exportSvg">Export SVG</button>
+<button class="btn btn-primary" id="exportPng">Export PNG</button>
+</div>
+<div class="panel canvas-container">
+<div class="canvas-area" id="canvas"></div>
+</div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const GRID = 8;
+const canvas = document.getElementById('canvas');
+let elements = [];
+let selectedEl = null;
+let dragging = null;
+let resizing = null;
+let dragOffset = { x: 0, y: 0 };
+let idCounter = 0;
+
+const COMPONENT_DEFAULTS = {
+  header: { w: 600, h: 56, label: 'Header', bg: '#cbd5e1' },
+  nav: { w: 600, h: 40, label: 'Navigation', bg: '#e2e8f0' },
+  hero: { w: 600, h: 200, label: 'Hero Section', bg: '#bfdbfe' },
+  card: { w: 200, h: 160, label: 'Card', bg: '#e2e8f0' },
+  list: { w: 280, h: 200, label: 'List', bg: '#f1f5f9' },
+  form: { w: 300, h: 240, label: 'Form', bg: '#fef3c7' },
+  button: { w: 120, h: 40, label: 'Button', bg: '#93c5fd' },
+  image: { w: 200, h: 160, label: 'Image', bg: '#d1d5db' },
+  text: { w: 300, h: 80, label: 'Text Block', bg: '#f1f5f9' },
+  footer: { w: 600, h: 64, label: 'Footer', bg: '#cbd5e1' },
+  sidebar: { w: 160, h: 400, label: 'Sidebar', bg: '#e2e8f0' }
+};
+
+function snap(val) { return Math.round(val / GRID) * GRID; }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function addElement(type, x, y) {
+  const def = COMPONENT_DEFAULTS[type];
+  const id = 'el-' + (++idCounter);
+  const el = { id, type, x: snap(x), y: snap(y), w: def.w, h: def.h, label: def.label, bg: def.bg };
+  elements.push(el);
+  renderElement(el);
+  return el;
+}
+
+function renderElement(el) {
+  let dom = document.getElementById(el.id);
+  if (!dom) {
+    dom = document.createElement('div');
+    dom.id = el.id;
+    dom.className = 'wf-element';
+    dom.innerHTML = `<span class="label"></span><div class="resize-handle"></div><div class="delete-btn">x</div>`;
+    canvas.appendChild(dom);
+
+    dom.addEventListener('mousedown', e => {
+      if (e.target.classList.contains('resize-handle')) {
+        resizing = el;
+        e.stopPropagation();
+        return;
+      }
+      if (e.target.classList.contains('delete-btn')) {
+        removeElement(el.id);
+        e.stopPropagation();
+        return;
+      }
+      selectElement(el.id);
+      dragging = el;
+      const rect = dom.getBoundingClientRect();
+      dragOffset.x = e.clientX - rect.left;
+      dragOffset.y = e.clientY - rect.top;
+      e.stopPropagation();
+    });
+  }
+  dom.style.left = el.x + 'px';
+  dom.style.top = el.y + 'px';
+  dom.style.width = el.w + 'px';
+  dom.style.height = el.h + 'px';
+  dom.style.background = el.bg;
+  dom.querySelector('.label').textContent = el.label;
+}
+
+function selectElement(id) {
+  document.querySelectorAll('.wf-element').forEach(d => d.classList.remove('selected'));
+  selectedEl = elements.find(e => e.id === id) || null;
+  if (selectedEl) document.getElementById(selectedEl.id).classList.add('selected');
+}
+
+function removeElement(id) {
+  const dom = document.getElementById(id);
+  if (dom) dom.remove();
+  elements = elements.filter(e => e.id !== id);
+  selectedEl = null;
+}
+
+canvas.addEventListener('mousedown', e => {
+  if (e.target === canvas) selectElement(null);
+});
+
+document.addEventListener('mousemove', e => {
+  if (dragging) {
+    const rect = canvas.getBoundingClientRect();
+    dragging.x = snap(e.clientX - rect.left - dragOffset.x);
+    dragging.y = snap(e.clientY - rect.top - dragOffset.y);
+    dragging.x = Math.max(0, dragging.x);
+    dragging.y = Math.max(0, dragging.y);
+    renderElement(dragging);
+  }
+  if (resizing) {
+    const rect = canvas.getBoundingClientRect();
+    const dom = document.getElementById(resizing.id);
+    const newW = snap(e.clientX - rect.left - resizing.x);
+    const newH = snap(e.clientY - rect.top - resizing.y);
+    resizing.w = Math.max(GRID * 4, newW);
+    resizing.h = Math.max(GRID * 4, newH);
+    renderElement(resizing);
+  }
+});
+
+document.addEventListener('mouseup', () => { dragging = null; resizing = null; });
+
+// Drag from sidebar
+document.querySelectorAll('.component-item').forEach(item => {
+  item.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('type', item.dataset.type);
+  });
+});
+
+canvas.addEventListener('dragover', e => e.preventDefault());
+canvas.addEventListener('drop', e => {
+  e.preventDefault();
+  const type = e.dataTransfer.getData('type');
+  if (!type) return;
+  const rect = canvas.getBoundingClientRect();
+  addElement(type, e.clientX - rect.left - 50, e.clientY - rect.top - 20);
+});
+
+// Presets
+const PRESETS = {
+  landing: [
+    { type: 'header', x: 16, y: 16 },
+    { type: 'nav', x: 16, y: 80 },
+    { type: 'hero', x: 16, y: 136 },
+    { type: 'card', x: 16, y: 352 },
+    { type: 'card', x: 232, y: 352 },
+    { type: 'card', x: 448, y: 352 },
+    { type: 'text', x: 16, y: 528 },
+    { type: 'button', x: 16, y: 624 },
+    { type: 'footer', x: 16, y: 680 }
+  ],
+  dashboard: [
+    { type: 'header', x: 16, y: 16 },
+    { type: 'sidebar', x: 16, y: 80 },
+    { type: 'card', x: 192, y: 80 },
+    { type: 'card', x: 408, y: 80 },
+    { type: 'list', x: 192, y: 256 },
+    { type: 'form', x: 488, y: 256 }
+  ],
+  blog: [
+    { type: 'header', x: 16, y: 16 },
+    { type: 'nav', x: 16, y: 80 },
+    { type: 'image', x: 100, y: 136 },
+    { type: 'text', x: 100, y: 312 },
+    { type: 'text', x: 100, y: 408 },
+    { type: 'text', x: 100, y: 504 },
+    { type: 'footer', x: 16, y: 600 }
+  ]
+};
+
+document.querySelectorAll('.presets button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    clearAll();
+    const preset = PRESETS[btn.dataset.preset];
+    preset.forEach(p => addElement(p.type, p.x, p.y));
+    showToast(btn.textContent + ' loaded');
+  });
+});
+
+document.getElementById('clearBtn').addEventListener('click', clearAll);
+function clearAll() {
+  elements.forEach(el => { const d = document.getElementById(el.id); if (d) d.remove(); });
+  elements = [];
+  selectedEl = null;
+}
+
+// Export SVG
+document.getElementById('exportSvg').addEventListener('click', () => {
+  if (!elements.length) { showToast('Canvas is empty'); return; }
+  const maxW = Math.max(...elements.map(e => e.x + e.w)) + 32;
+  const maxH = Math.max(...elements.map(e => e.y + e.h)) + 32;
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${maxW}" height="${maxH}" viewBox="0 0 ${maxW} ${maxH}">`;
+  svg += `<rect width="${maxW}" height="${maxH}" fill="#f8f9fa"/>`;
+  // Grid
+  svg += `<defs><pattern id="grid" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M 8 0 L 0 0 0 8" fill="none" stroke="rgba(0,0,0,0.04)" stroke-width="0.5"/></pattern></defs>`;
+  svg += `<rect width="${maxW}" height="${maxH}" fill="url(#grid)"/>`;
+  for (const el of elements) {
+    svg += `<rect x="${el.x}" y="${el.y}" width="${el.w}" height="${el.h}" fill="${el.bg}" stroke="#94a3b8" stroke-width="2" rx="4"/>`;
+    svg += `<text x="${el.x + el.w/2}" y="${el.y + el.h/2 + 4}" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#64748b" font-weight="500">${el.label}</text>`;
+  }
+  svg += '</svg>';
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  const link = document.createElement('a');
+  link.download = 'wireframe.svg'; link.href = URL.createObjectURL(blob); link.click();
+  showToast('SVG exported');
+});
+
+// Export PNG
+document.getElementById('exportPng').addEventListener('click', () => {
+  if (!elements.length) { showToast('Canvas is empty'); return; }
+  const maxW = Math.max(...elements.map(e => e.x + e.w)) + 32;
+  const maxH = Math.max(...elements.map(e => e.y + e.h)) + 32;
+  const c = document.createElement('canvas');
+  c.width = maxW * 2; c.height = maxH * 2;
+  const ctx = c.getContext('2d');
+  ctx.scale(2, 2);
+  ctx.fillStyle = '#f8f9fa'; ctx.fillRect(0, 0, maxW, maxH);
+  // Grid
+  ctx.strokeStyle = 'rgba(0,0,0,0.04)'; ctx.lineWidth = 0.5;
+  for (let x = 0; x < maxW; x += 8) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, maxH); ctx.stroke(); }
+  for (let y = 0; y < maxH; y += 8) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(maxW, y); ctx.stroke(); }
+
+  for (const el of elements) {
+    ctx.fillStyle = el.bg;
+    ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.roundRect(el.x, el.y, el.w, el.h, 4); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#64748b'; ctx.font = '500 11px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(el.label, el.x + el.w/2, el.y + el.h/2 + 4);
+  }
+  const link = document.createElement('a');
+  link.download = 'wireframe.png'; link.href = c.toDataURL('image/png'); link.click();
+  showToast('PNG exported');
+});
+
+// Keyboard delete
+document.addEventListener('keydown', e => {
+  if ((e.key === 'Delete' || e.key === 'Backspace') && selectedEl && document.activeElement.tagName !== 'INPUT') {
+    removeElement(selectedEl.id);
+  }
+});
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

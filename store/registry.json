@@ -161,6 +161,51 @@
       "iconBg": "#06b6d4",
       "category": "templates",
       "section": "templates"
+    },
+    {
+      "id": "qr-code-designer",
+      "name": "QR Code Designer",
+      "description": "Generate QR codes with custom colors, corner styles, logo overlay. Download PNG or SVG.",
+      "icon": "📷",
+      "iconBg": "#1a1a1a",
+      "category": "brand",
+      "section": "brand"
+    },
+    {
+      "id": "wireframe-kit",
+      "name": "Wireframe Builder",
+      "description": "Drag-and-drop wireframe components. Snap to grid, resize, 3 page presets. Export SVG/PNG.",
+      "icon": "📐",
+      "iconBg": "#6b7280",
+      "category": "templates",
+      "section": "templates"
+    },
+    {
+      "id": "contrast-checker",
+      "name": "Contrast Checker",
+      "description": "WCAG contrast ratio calculator. AA/AAA pass/fail, accessible alternatives, batch palette check.",
+      "icon": "👁️",
+      "iconBg": "#10b981",
+      "category": "brand",
+      "section": "brand"
+    },
+    {
+      "id": "pattern-maker",
+      "name": "Pattern Generator",
+      "description": "Seamless patterns: dots, lines, waves, hexagons. Layers, 20 presets. Download SVG/PNG/CSS.",
+      "icon": "🔲",
+      "iconBg": "#8b5cf6",
+      "category": "images",
+      "section": "images"
+    },
+    {
+      "id": "storybook-maker",
+      "name": "Story Book Maker",
+      "description": "Create page-based zines/books. 5 layouts, image upload, flipbook preview. Export printable HTML.",
+      "icon": "📖",
+      "iconBg": "#f59e0b",
+      "category": "templates",
+      "section": "templates"
     }
   ]
 }

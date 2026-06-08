@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Story Book Maker - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
+a.back:hover { text-decoration: underline; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+p.subtitle { color: #6b7280; margin-bottom: 24px; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
+h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 6px; }
+input[type="text"], textarea, select { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+textarea { resize: vertical; min-height: 80px; }
+input[type="color"] { width: 48px; height: 36px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 2px; cursor: pointer; }
+.btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 13px; transition: opacity .2s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
+.btn-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+.layout { display: grid; grid-template-columns: 260px 1fr; gap: 24px; }
+@media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+.page-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; max-height: 400px; overflow-y: auto; }
+.page-item { padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; align-items: center; transition: border-color .15s; }
+.page-item:hover { border-color: #ec4899; }
+.page-item.active { border-color: #ec4899; background: #fdf2f8; }
+.page-item .num { font-weight: 600; color: #ec4899; margin-right: 8px; }
+.page-item .actions { display: flex; gap: 4px; }
+.page-item .actions button { background: none; border: none; cursor: pointer; font-size: 14px; color: #6b7280; padding: 2px 4px; }
+.page-item .actions button:hover { color: #ec4899; }
+.field { margin-bottom: 16px; }
+.field-row { display: flex; gap: 12px; align-items: flex-end; margin-bottom: 16px; }
+.field-row > div { flex: 1; }
+.editor-actions { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.preview-container { display: flex; flex-direction: column; align-items: center; }
+.flipbook { position: relative; width: 100%; max-width: 500px; aspect-ratio: 148.5/210; background: #fff; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,.12); overflow: hidden; }
+.flipbook-page { position: absolute; inset: 0; display: flex; padding: 32px; transition: opacity .3s; }
+.flipbook-page.hidden { opacity: 0; pointer-events: none; }
+.flipbook-page.layout-full-text { flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+.flipbook-page.layout-text-image { flex-direction: row; gap: 16px; }
+.flipbook-page.layout-text-image .page-text { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.flipbook-page.layout-text-image .page-img { flex: 1; display: flex; align-items: center; justify-content: center; }
+.flipbook-page.layout-full-image { padding: 0; }
+.flipbook-page.layout-full-image img { width: 100%; height: 100%; object-fit: cover; }
+.flipbook-page.layout-title { flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+.flipbook-page.layout-end { flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+.flipbook-page .page-title { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+.flipbook-page .page-body { font-size: 14px; line-height: 1.6; }
+.flipbook-page .page-img img { max-width: 100%; max-height: 100%; border-radius: 8px; object-fit: cover; }
+.flipbook-nav { display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 16px; }
+.flipbook-nav button { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: border-color .15s; }
+.flipbook-nav button:hover { border-color: #ec4899; }
+.flipbook-nav .page-indicator { font-size: 13px; color: #6b7280; }
+.image-upload { margin-top: 8px; }
+.image-upload input { display: none; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<h1>Story Book / Zine Maker</h1>
+<p class="subtitle">Create a multi-page flipbook. Choose layouts, add text and images, export as printable HTML.</p>
+
+<div class="layout">
+<div>
+<div class="panel">
+<h3>Pages</h3>
+<div class="page-list" id="pageList"></div>
+<div style="display:flex;gap:8px;">
+<button class="btn btn-primary" id="addPageBtn" style="flex:1;">+ Add Page</button>
+</div>
+</div>
+<div class="panel">
+<h3>Export</h3>
+<button class="btn btn-primary" id="exportBtn" style="width:100%;">Export as HTML</button>
+<p style="font-size:12px;color:#6b7280;margin-top:8px;">Self-contained, printable A5 format.</p>
+</div>
+</div>
+<div>
+<div class="panel" id="editorPanel">
+<h3>Edit Page</h3>
+<div class="field">
+<label>Layout</label>
+<select id="pageLayout">
+<option value="full-text">Full Text</option>
+<option value="text-image">Text + Image (side by side)</option>
+<option value="full-image">Full Image</option>
+<option value="title">Title Page</option>
+<option value="end">End Page</option>
+</select>
+</div>
+<div class="field">
+<label>Title</label>
+<input type="text" id="pageTitle" placeholder="Page title...">
+</div>
+<div class="field">
+<label>Body Text</label>
+<textarea id="pageBody" placeholder="Write your story here..."></textarea>
+</div>
+<div class="field-row">
+<div>
+<label>Background Color</label>
+<input type="color" id="pageBg" value="#ffffff">
+</div>
+<div>
+<label>Text Color</label>
+<input type="color" id="pageTextColor" value="#1a1a1a">
+</div>
+</div>
+<div class="field">
+<label>Image</label>
+<div class="image-upload">
+<button class="btn btn-secondary" id="imgUploadBtn">Upload Image</button>
+<input type="file" id="imgInput" accept="image/*">
+<button class="btn btn-secondary" id="removeImgBtn" style="display:none;margin-top:8px;">Remove Image</button>
+</div>
+</div>
+</div>
+<div class="panel">
+<h3>Preview</h3>
+<div class="preview-container">
+<div class="flipbook" id="flipbook"></div>
+<div class="flipbook-nav">
+<button id="prevPage">&#8592;</button>
+<span class="page-indicator" id="pageIndicator">1 / 1</span>
+<button id="nextPage">&#8594;</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+let pages = [
+  { layout: 'title', title: 'My Story', body: 'A short tale', bg: '#ffffff', textColor: '#1a1a1a', image: null },
+  { layout: 'full-text', title: 'Chapter 1', body: 'Once upon a time, in a land far away...', bg: '#ffffff', textColor: '#1a1a1a', image: null },
+  { layout: 'end', title: 'The End', body: 'Thank you for reading!', bg: '#fdf2f8', textColor: '#1a1a1a', image: null }
+];
+let currentPage = 0;
+let previewPage = 0;
+
+function renderPageList() {
+  const list = document.getElementById('pageList');
+  list.innerHTML = '';
+  pages.forEach((page, idx) => {
+    const div = document.createElement('div');
+    div.className = 'page-item' + (idx === currentPage ? ' active' : '');
+    div.innerHTML = `
+      <span><span class="num">${idx + 1}</span>${page.title || page.layout}</span>
+      <span class="actions">
+        ${idx > 0 ? `<button data-action="up" data-idx="${idx}" title="Move up">&#8593;</button>` : ''}
+        ${idx < pages.length - 1 ? `<button data-action="down" data-idx="${idx}" title="Move down">&#8595;</button>` : ''}
+        ${pages.length > 1 ? `<button data-action="delete" data-idx="${idx}" title="Delete">&times;</button>` : ''}
+      </span>
+    `;
+    div.addEventListener('click', e => {
+      if (e.target.dataset.action) return;
+      currentPage = idx;
+      previewPage = idx;
+      loadEditor();
+      renderPageList();
+      renderPreview();
+    });
+    list.appendChild(div);
+  });
+
+  list.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const idx = +btn.dataset.idx;
+      const action = btn.dataset.action;
+      if (action === 'up' && idx > 0) { [pages[idx], pages[idx-1]] = [pages[idx-1], pages[idx]]; currentPage = idx - 1; }
+      if (action === 'down' && idx < pages.length - 1) { [pages[idx], pages[idx+1]] = [pages[idx+1], pages[idx]]; currentPage = idx + 1; }
+      if (action === 'delete') { pages.splice(idx, 1); currentPage = Math.min(currentPage, pages.length - 1); }
+      previewPage = currentPage;
+      loadEditor();
+      renderPageList();
+      renderPreview();
+    });
+  });
+}
+
+function loadEditor() {
+  const page = pages[currentPage];
+  document.getElementById('pageLayout').value = page.layout;
+  document.getElementById('pageTitle').value = page.title;
+  document.getElementById('pageBody').value = page.body;
+  document.getElementById('pageBg').value = page.bg;
+  document.getElementById('pageTextColor').value = page.textColor;
+  document.getElementById('removeImgBtn').style.display = page.image ? 'inline-block' : 'none';
+}
+
+function saveEditor() {
+  const page = pages[currentPage];
+  page.layout = document.getElementById('pageLayout').value;
+  page.title = document.getElementById('pageTitle').value;
+  page.body = document.getElementById('pageBody').value;
+  page.bg = document.getElementById('pageBg').value;
+  page.textColor = document.getElementById('pageTextColor').value;
+  renderPageList();
+  renderPreview();
+}
+
+function renderPreview() {
+  const flipbook = document.getElementById('flipbook');
+  flipbook.innerHTML = '';
+  pages.forEach((page, idx) => {
+    const div = document.createElement('div');
+    div.className = `flipbook-page layout-${page.layout}` + (idx !== previewPage ? ' hidden' : '');
+    div.style.background = page.bg;
+    div.style.color = page.textColor;
+
+    let html = '';
+    if (page.layout === 'full-text' || page.layout === 'title' || page.layout === 'end') {
+      html = `<div class="page-title">${page.title}</div><div class="page-body">${page.body.replace(/\n/g,'<br>')}</div>`;
+    } else if (page.layout === 'text-image') {
+      html = `<div class="page-text"><div class="page-title">${page.title}</div><div class="page-body">${page.body.replace(/\n/g,'<br>')}</div></div>`;
+      html += `<div class="page-img">${page.image ? `<img src="${page.image}">` : '<div style="width:100%;height:100%;background:#e5e7eb;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#9ca3af;">Image</div>'}</div>`;
+    } else if (page.layout === 'full-image') {
+      html = page.image ? `<img src="${page.image}">` : '<div style="width:100%;height:100%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:18px;">Upload an image</div>';
+    }
+    div.innerHTML = html;
+    flipbook.appendChild(div);
+  });
+  document.getElementById('pageIndicator').textContent = `${previewPage + 1} / ${pages.length}`;
+}
+
+// Editor events
+['pageLayout','pageTitle','pageBody','pageBg','pageTextColor'].forEach(id => {
+  document.getElementById(id).addEventListener('input', saveEditor);
+});
+
+// Image upload
+document.getElementById('imgUploadBtn').addEventListener('click', () => document.getElementById('imgInput').click());
+document.getElementById('imgInput').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    pages[currentPage].image = ev.target.result;
+    document.getElementById('removeImgBtn').style.display = 'inline-block';
+    renderPreview();
+  };
+  reader.readAsDataURL(file);
+});
+document.getElementById('removeImgBtn').addEventListener('click', () => {
+  pages[currentPage].image = null;
+  document.getElementById('removeImgBtn').style.display = 'none';
+  document.getElementById('imgInput').value = '';
+  renderPreview();
+});
+
+// Add page
+document.getElementById('addPageBtn').addEventListener('click', () => {
+  pages.push({ layout: 'full-text', title: 'New Page', body: '', bg: '#ffffff', textColor: '#1a1a1a', image: null });
+  currentPage = pages.length - 1;
+  previewPage = currentPage;
+  loadEditor();
+  renderPageList();
+  renderPreview();
+});
+
+// Navigation
+document.getElementById('prevPage').addEventListener('click', () => {
+  if (previewPage > 0) { previewPage--; renderPreview(); }
+});
+document.getElementById('nextPage').addEventListener('click', () => {
+  if (previewPage < pages.length - 1) { previewPage++; renderPreview(); }
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+  if (e.key === 'ArrowLeft' && previewPage > 0) { previewPage--; renderPreview(); }
+  if (e.key === 'ArrowRight' && previewPage < pages.length - 1) { previewPage++; renderPreview(); }
+});
+
+// Export HTML
+document.getElementById('exportBtn').addEventListener('click', () => {
+  let html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Storybook</title><style>
+@page { size: A5; margin: 0; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Georgia, serif; }
+.page { width: 148.5mm; height: 210mm; padding: 15mm; display: flex; page-break-after: always; position: relative; overflow: hidden; }
+.page:last-child { page-break-after: auto; }
+.page.layout-full-text, .page.layout-title, .page.layout-end { flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+.page.layout-text-image { flex-direction: row; gap: 10mm; }
+.page.layout-text-image .text { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.page.layout-text-image .img { flex: 1; display: flex; align-items: center; justify-content: center; }
+.page.layout-full-image { padding: 0; }
+.page.layout-full-image img { width: 100%; height: 100%; object-fit: cover; }
+.page .title { font-size: 24pt; font-weight: bold; margin-bottom: 8mm; }
+.page .body { font-size: 12pt; line-height: 1.6; }
+.page .img img { max-width: 100%; max-height: 100%; border-radius: 4mm; }
+@media screen { body { background: #eee; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; } .page { box-shadow: 0 2px 10px rgba(0,0,0,.15); background: #fff; } }
+</style></head><body>`;
+
+  for (const page of pages) {
+    html += `<div class="page layout-${page.layout}" style="background:${page.bg};color:${page.textColor};">`;
+    if (page.layout === 'full-text' || page.layout === 'title' || page.layout === 'end') {
+      html += `<div class="title">${esc(page.title)}</div><div class="body">${esc(page.body).replace(/\n/g,'<br>')}</div>`;
+    } else if (page.layout === 'text-image') {
+      html += `<div class="text"><div class="title">${esc(page.title)}</div><div class="body">${esc(page.body).replace(/\n/g,'<br>')}</div></div>`;
+      html += `<div class="img">${page.image ? `<img src="${page.image}">` : ''}</div>`;
+    } else if (page.layout === 'full-image') {
+      html += page.image ? `<img src="${page.image}">` : '';
+    }
+    html += '</div>';
+  }
+  html += '</body></html>';
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const link = document.createElement('a');
+  link.download = 'storybook.html';
+  link.href = URL.createObjectURL(blob);
+  link.click();
+  showToast('Storybook exported');
+});
+
+function esc(str) { return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Init
+loadEditor();
+renderPageList();
+renderPreview();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>
