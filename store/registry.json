@@ -350,6 +350,15 @@
       "iconBg": "#8b5cf6",
       "category": "components",
       "section": "components"
+    },
+    {
+      "id": "moodboard",
+      "name": "Moodboard Builder",
+      "description": "Freeform canvas for visual inspiration. Drag images, colors, fonts, shapes. Export PNG.",
+      "icon": "🎯",
+      "iconBg": "#ec4899",
+      "category": "components",
+      "section": "components"
     }
   ]
 }

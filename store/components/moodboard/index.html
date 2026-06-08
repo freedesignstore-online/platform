@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moodboard Builder - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Manrope',system-ui,sans-serif;background:#fafafa;color:#1a1a1a;min-height:100vh;overflow:hidden}
+a.back{display:inline-block;margin:24px 24px 0;color:#ec4899;text-decoration:none;font-weight:500}
+a.back:hover{text-decoration:underline}
+h1{font-size:28px;font-weight:700;margin:12px 24px 4px}
+p.sub{color:#6b7280;margin:0 24px 16px;font-size:14px}
+:root{--accent:#ec4899;--bg:#fafafa;--text:#1a1a1a;--panel:#ffffff;--line:#e5e7eb;--muted:#6b7280;--radius:8px}
+.app{display:flex;height:calc(100vh - 110px);margin:0 24px 20px;gap:0}
+.toolbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:0 24px 12px}
+.tb-btn{padding:6px 12px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--text)}
+.tb-btn:hover{border-color:var(--accent);color:var(--accent)}
+.tb-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tb-sep{width:1px;height:24px;background:var(--line);margin:0 4px}
+select.tb-select{padding:6px 10px;border:1px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:12px;font-weight:600;background:var(--panel);cursor:pointer}
+.sidebar{width:220px;flex-shrink:0;background:var(--panel);border:1px solid var(--line);border-radius:12px 0 0 12px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.sidebar h3{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:8px 0 4px;padding:0 4px}
+.sb-btn{display:block;width:100%;text-align:left;padding:8px 10px;border:none;background:none;border-radius:6px;font-family:inherit;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;transition:all .15s}
+.sb-btn:hover{background:#f3f4f6}
+.sb-btn.active{background:var(--accent);color:#fff}
+.board-list{display:flex;flex-direction:column;gap:2px;flex:1;overflow-y:auto}
+.board-item{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:6px;font-size:12px;cursor:pointer;transition:all .15s}
+.board-item:hover{background:#f3f4f6}
+.board-item.active{background:rgba(236,72,153,.1);color:var(--accent);font-weight:600}
+.board-item button{border:none;background:none;cursor:pointer;color:var(--muted);font-size:14px;padding:0 2px}
+.board-item button:hover{color:#ef4444}
+.canvas-wrap{flex:1;position:relative;overflow:hidden;border:1px solid var(--line);border-left:none;border-radius:0 12px 12px 0;background:#fff}
+.canvas-bg{position:absolute;inset:0;transition:background .2s}
+.canvas-bg.bg-white{background:#fff}
+.canvas-bg.bg-light{background:#f3f4f6}
+.canvas-bg.bg-dark{background:#1a1a1a}
+.canvas-bg.bg-custom{background:var(--canvas-bg)}
+.canvas-inner{position:absolute;transform-origin:0 0;width:2800px;height:1800px}
+.grid-overlay{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .2s}
+.grid-overlay.on{opacity:1}
+.grid-overlay.on{background-image:linear-gradient(rgba(0,0,0,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.04) 1px,transparent 1px);background-size:20px 20px}
+.mb-item{position:absolute;cursor:move;user-select:none;transition:box-shadow .15s}
+.mb-item:hover{z-index:100}
+.mb-item.selected{outline:2px solid var(--accent);outline-offset:2px}
+.mb-item .delete-btn{position:absolute;top:-10px;right:-10px;width:20px;height:20px;border-radius:50%;background:#ef4444;color:#fff;border:none;font-size:12px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:10;line-height:1}
+.mb-item:hover .delete-btn,.mb-item.selected .delete-btn{display:flex}
+.mb-item .resize-handle{position:absolute;bottom:-4px;right:-4px;width:12px;height:12px;background:var(--accent);border-radius:2px;cursor:se-resize;opacity:0;transition:opacity .15s}
+.mb-item:hover .resize-handle,.mb-item.selected .resize-handle{opacity:1}
+.mb-item .rotate-handle{position:absolute;top:-18px;left:50%;transform:translateX(-50%);width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:grab;opacity:0;transition:opacity .15s}
+.mb-item:hover .rotate-handle,.mb-item.selected .rotate-handle{opacity:1}
+.mb-item .zorder-btns{position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);display:none;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:1px 3px}
+.mb-item.selected .zorder-btns{display:flex}
+.zorder-btns button{border:none;background:none;cursor:pointer;font-size:10px;padding:1px 4px;color:var(--muted)}
+.zorder-btns button:hover{color:var(--accent)}
+.mb-img{border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.12);overflow:hidden;display:flex}
+.mb-img img{width:100%;height:100%;object-fit:cover;pointer-events:none}
+.mb-swatch{border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;overflow:hidden}
+.mb-swatch .swatch-color{flex:1;width:100%;border-radius:8px 8px 0 0}
+.mb-swatch .swatch-label{padding:4px 8px;font-size:10px;font-weight:600;color:var(--muted);background:#fff;width:100%;text-align:center;border-radius:0 0 8px 8px}
+.mb-note{background:rgba(255,245,157,.9);border-radius:4px;padding:10px 12px;font-size:13px;line-height:1.4;box-shadow:0 2px 8px rgba(0,0,0,.08);min-width:100px;min-height:60px;overflow:hidden;white-space:pre-wrap;word-break:break-word}
+.mb-note[contenteditable]{outline:none;cursor:text}
+.mb-font{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;box-shadow:0 2px 10px rgba(0,0,0,.06);min-width:120px}
+.mb-font .font-sample{font-size:24px;line-height:1.3;margin-bottom:4px}
+.mb-font .font-name{font-size:10px;color:var(--muted);font-weight:600;font-family:'Manrope',sans-serif}
+.mb-shape{opacity:.7}
+.mb-shape-rect{border-radius:6px}
+.mb-shape-circle{border-radius:50%}
+.drop-zone{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(236,72,153,.08);border:3px dashed var(--accent);z-index:9999;font-size:18px;font-weight:700;color:var(--accent)}
+.drop-zone.over{display:flex}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:#1a1a1a;color:#fff;padding:8px 20px;border-radius:8px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;z-index:9999;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9998;display:none;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:24px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:12px}
+.modal input[type="text"],.modal input[type="color"]{width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px;margin-bottom:10px}
+.modal input[type="color"]{height:40px;padding:4px;cursor:pointer}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to FreeDesignStore</a>
+<h1>Moodboard Builder</h1>
+<p class="sub">Freeform canvas for collecting visual inspiration. Drag images, add colors, notes, fonts, and shapes.</p>
+
+<div class="toolbar" id="toolbar">
+  <button class="tb-btn" id="addImgBtn">Upload Image</button>
+  <button class="tb-btn" id="addSwatchBtn">Add Swatch</button>
+  <button class="tb-btn" id="addFontBtn">Add Font</button>
+  <button class="tb-btn" id="addShapeBtn">Rectangle</button>
+  <button class="tb-btn" id="addCircleBtn">Circle</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" id="gridToggle">Grid Snap</button>
+  <select class="tb-select" id="bgSelect">
+    <option value="white">White BG</option>
+    <option value="light">Light Gray BG</option>
+    <option value="dark">Dark BG</option>
+    <option value="custom">Custom BG</option>
+  </select>
+  <input type="color" id="bgColor" value="#ffffff" style="width:32px;height:28px;border:1px solid var(--line);border-radius:6px;padding:2px;cursor:pointer;display:none">
+  <div class="tb-sep"></div>
+  <select class="tb-select" id="templateSelect">
+    <option value="">Template...</option>
+    <option value="empty">Empty Canvas</option>
+    <option value="brand">Brand Mood</option>
+    <option value="ui">UI Inspiration</option>
+    <option value="photo">Photography</option>
+  </select>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" id="exportPng">Export PNG</button>
+  <button class="tb-btn" id="exportHtml">Export HTML</button>
+</div>
+
+<div class="app">
+  <div class="sidebar">
+    <h3>Moodboards</h3>
+    <button class="sb-btn" id="newBoardBtn">+ New Board</button>
+    <div class="board-list" id="boardList"></div>
+  </div>
+  <div class="canvas-wrap" id="canvasWrap">
+    <div class="canvas-bg bg-white" id="canvasBg">
+      <div class="grid-overlay" id="gridOverlay"></div>
+      <div class="canvas-inner" id="canvasInner"></div>
+    </div>
+    <div class="drop-zone" id="dropZone">Drop images here</div>
+  </div>
+</div>
+
+<div class="modal-bg" id="fontModal">
+  <div class="modal">
+    <h3>Add Font Sample</h3>
+    <input type="text" id="fontText" placeholder="Sample text..." value="The quick brown fox">
+    <input type="text" id="fontFamily" placeholder="Google Font name" value="Playfair Display">
+    <div class="modal-btns">
+      <button class="tb-btn" onclick="document.getElementById('fontModal').classList.remove('open')">Cancel</button>
+      <button class="tb-btn tb-btn active" style="background:var(--accent);color:#fff;border-color:var(--accent)" id="fontConfirm">Add</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept="image/*" multiple hidden>
+<input type="color" id="swatchPicker" style="position:absolute;visibility:hidden">
+<div class="toast" id="toast"></div>
+
+<script>
+const LS_KEY = 'moodboard-data';
+let boards = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || [{ id: genId(), name: 'My Moodboard', bg: 'white', bgCustom: '#ffffff', items: [] }];
+let activeBoard = 0;
+let selectedId = null;
+let gridSnap = false;
+let nextZ = 100;
+let panX = 0, panY = 0, zoom = 1;
+let isPanning = false, panStart = { x: 0, y: 0 }, panOrig = { x: 0, y: 0 };
+
+function genId() { return Math.random().toString(36).slice(2, 9); }
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1800); }
+function save() { localStorage.setItem(LS_KEY, JSON.stringify(boards)); }
+function board() { return boards[activeBoard]; }
+function snap(v) { return gridSnap ? Math.round(v / 20) * 20 : v; }
+
+function renderBoardList() {
+  const el = document.getElementById('boardList');
+  el.innerHTML = '';
+  boards.forEach((b, i) => {
+    const d = document.createElement('div');
+    d.className = 'board-item' + (i === activeBoard ? ' active' : '');
+    d.innerHTML = `<span>${b.name}</span>${boards.length > 1 ? '<button title="Delete">&times;</button>' : ''}`;
+    d.querySelector('span').onclick = () => { activeBoard = i; renderBoardList(); renderCanvas(); applyBg(); };
+    const del = d.querySelector('button');
+    if (del) del.onclick = (e) => { e.stopPropagation(); boards.splice(i, 1); if (activeBoard >= boards.length) activeBoard = boards.length - 1; save(); renderBoardList(); renderCanvas(); };
+    el.appendChild(d);
+  });
+}
+
+document.getElementById('newBoardBtn').onclick = () => {
+  const name = prompt('Board name:', 'New Board');
+  if (!name) return;
+  boards.push({ id: genId(), name, bg: 'white', bgCustom: '#ffffff', items: [] });
+  activeBoard = boards.length - 1;
+  save(); renderBoardList(); renderCanvas(); applyBg();
+};
+
+function applyBg() {
+  const bg = document.getElementById('canvasBg');
+  bg.className = 'canvas-bg bg-' + board().bg;
+  if (board().bg === 'custom') bg.style.setProperty('--canvas-bg', board().bgCustom);
+}
+
+document.getElementById('bgSelect').onchange = function () {
+  board().bg = this.value;
+  document.getElementById('bgColor').style.display = this.value === 'custom' ? 'block' : 'none';
+  if (this.value === 'custom') board().bgCustom = document.getElementById('bgColor').value;
+  applyBg(); save();
+};
+document.getElementById('bgColor').oninput = function () {
+  board().bgCustom = this.value; applyBg(); save();
+};
+document.getElementById('gridToggle').onclick = function () {
+  gridSnap = !gridSnap;
+  this.classList.toggle('active', gridSnap);
+  document.getElementById('gridOverlay').classList.toggle('on', gridSnap);
+};
+
+// Pan & zoom
+const canvasWrap = document.getElementById('canvasWrap');
+const canvasInner = document.getElementById('canvasInner');
+
+function updateTransform() {
+  canvasInner.style.transform = `translate(${panX}px,${panY}px) scale(${zoom})`;
+}
+
+canvasWrap.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? -0.05 : 0.05;
+  zoom = Math.max(0.2, Math.min(3, zoom + delta));
+  updateTransform();
+}, { passive: false });
+
+canvasWrap.addEventListener('mousedown', (e) => {
+  if (e.target === document.getElementById('canvasBg') || e.target === document.getElementById('gridOverlay') || e.target === canvasInner) {
+    if (e.button === 1 || (e.button === 0 && e.altKey)) {
+      isPanning = true; panStart = { x: e.clientX, y: e.clientY }; panOrig = { x: panX, y: panY };
+      canvasWrap.style.cursor = 'grabbing'; e.preventDefault();
+    } else if (e.button === 0) {
+      selectedId = null; renderCanvas();
+    }
+  }
+});
+window.addEventListener('mousemove', (e) => {
+  if (isPanning) { panX = panOrig.x + (e.clientX - panStart.x); panY = panOrig.y + (e.clientY - panStart.y); updateTransform(); }
+});
+window.addEventListener('mouseup', () => { if (isPanning) { isPanning = false; canvasWrap.style.cursor = ''; } });
+
+// Double-click to add note
+canvasInner.addEventListener('dblclick', (e) => {
+  if (e.target !== canvasInner) return;
+  const rect = canvasInner.getBoundingClientRect();
+  const x = snap((e.clientX - rect.left) / zoom);
+  const y = snap((e.clientY - rect.top) / zoom);
+  board().items.push({ id: genId(), type: 'note', x, y, w: 180, h: 100, rot: 0, z: nextZ++, text: 'New note...' });
+  save(); renderCanvas();
+});
+
+// Drag & drop images
+canvasWrap.addEventListener('dragover', (e) => { e.preventDefault(); document.getElementById('dropZone').classList.add('over'); });
+canvasWrap.addEventListener('dragleave', (e) => { if (!canvasWrap.contains(e.relatedTarget)) document.getElementById('dropZone').classList.remove('over'); });
+canvasWrap.addEventListener('drop', (e) => {
+  e.preventDefault(); document.getElementById('dropZone').classList.remove('over');
+  const files = [...e.dataTransfer.files].filter(f => f.type.startsWith('image/'));
+  const rect = canvasInner.getBoundingClientRect();
+  let ox = (e.clientX - rect.left) / zoom, oy = (e.clientY - rect.top) / zoom;
+  files.forEach((f, i) => { loadImageFile(f, snap(ox + i * 30), snap(oy + i * 30)); });
+});
+
+function loadImageFile(file, x, y) {
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const img = new Image();
+    img.onload = () => {
+      const maxW = 300, scale = img.width > maxW ? maxW / img.width : 1;
+      board().items.push({ id: genId(), type: 'image', x, y, w: Math.round(img.width * scale), h: Math.round(img.height * scale), rot: 0, z: nextZ++, src: ev.target.result });
+      save(); renderCanvas();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+document.getElementById('addImgBtn').onclick = () => document.getElementById('fileInput').click();
+document.getElementById('fileInput').onchange = function () {
+  [...this.files].forEach((f, i) => loadImageFile(f, 100 + i * 40, 100 + i * 40));
+  this.value = '';
+};
+
+// Add swatch
+document.getElementById('addSwatchBtn').onclick = () => {
+  const picker = document.getElementById('swatchPicker');
+  picker.click();
+  picker.oninput = () => {
+    board().items.push({ id: genId(), type: 'swatch', x: 100 + Math.random() * 200, y: 100 + Math.random() * 200, w: 80, h: 100, rot: 0, z: nextZ++, color: picker.value });
+    save(); renderCanvas();
+    picker.oninput = null;
+  };
+};
+
+// Add font
+document.getElementById('addFontBtn').onclick = () => document.getElementById('fontModal').classList.add('open');
+document.getElementById('fontConfirm').onclick = () => {
+  const text = document.getElementById('fontText').value || 'Sample';
+  const family = document.getElementById('fontFamily').value || 'Playfair Display';
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:wght@400;700&display=swap`;
+  document.head.appendChild(link);
+  board().items.push({ id: genId(), type: 'font', x: 150 + Math.random() * 100, y: 150 + Math.random() * 100, w: 220, h: 80, rot: 0, z: nextZ++, text, family });
+  save(); renderCanvas();
+  document.getElementById('fontModal').classList.remove('open');
+};
+
+// Add shapes
+document.getElementById('addShapeBtn').onclick = () => {
+  board().items.push({ id: genId(), type: 'shape', shape: 'rect', x: 200 + Math.random() * 100, y: 200 + Math.random() * 100, w: 120, h: 80, rot: 0, z: nextZ++, color: '#ec4899' });
+  save(); renderCanvas();
+};
+document.getElementById('addCircleBtn').onclick = () => {
+  board().items.push({ id: genId(), type: 'shape', shape: 'circle', x: 200 + Math.random() * 100, y: 200 + Math.random() * 100, w: 100, h: 100, rot: 0, z: nextZ++, color: '#8b5cf6' });
+  save(); renderCanvas();
+};
+
+// Render
+function renderCanvas() {
+  const inner = document.getElementById('canvasInner');
+  inner.innerHTML = '';
+  const items = board().items;
+  items.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'mb-item' + (selectedId === item.id ? ' selected' : '');
+    el.style.cssText = `left:${item.x}px;top:${item.y}px;width:${item.w}px;height:${item.h}px;z-index:${item.z};transform:rotate(${item.rot || 0}deg)`;
+    el.dataset.id = item.id;
+
+    let content = '';
+    if (item.type === 'image') {
+      el.classList.add('mb-img');
+      content = `<img src="${item.src}" alt="moodboard image">`;
+    } else if (item.type === 'swatch') {
+      el.classList.add('mb-swatch');
+      content = `<div class="swatch-color" style="background:${item.color}"></div><div class="swatch-label">${item.color}</div>`;
+    } else if (item.type === 'note') {
+      el.classList.add('mb-note');
+      el.contentEditable = 'true';
+      el.textContent = item.text;
+      el.onblur = () => { item.text = el.textContent; save(); };
+      el.style.width = item.w + 'px'; el.style.minHeight = item.h + 'px'; el.style.height = 'auto';
+    } else if (item.type === 'font') {
+      el.classList.add('mb-font');
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(item.family)}:wght@400;700&display=swap`;
+      document.head.appendChild(link);
+      content = `<div class="font-sample" style="font-family:'${item.family}',serif">${item.text}</div><div class="font-name">${item.family}</div>`;
+    } else if (item.type === 'shape') {
+      el.classList.add('mb-shape', 'mb-shape-' + item.shape);
+      el.style.background = item.color;
+    }
+
+    if (item.type !== 'note') el.innerHTML = content;
+
+    // Controls
+    const delBtn = document.createElement('button');
+    delBtn.className = 'delete-btn';
+    delBtn.innerHTML = '&times;';
+    delBtn.onclick = (e) => { e.stopPropagation(); board().items = board().items.filter(it => it.id !== item.id); save(); renderCanvas(); };
+    el.appendChild(delBtn);
+
+    const resH = document.createElement('div');
+    resH.className = 'resize-handle';
+    el.appendChild(resH);
+
+    const rotH = document.createElement('div');
+    rotH.className = 'rotate-handle';
+    el.appendChild(rotH);
+
+    if (selectedId === item.id) {
+      const zBtns = document.createElement('div');
+      zBtns.className = 'zorder-btns';
+      zBtns.innerHTML = '<button data-z="front" title="Bring front">&#9650;</button><button data-z="back" title="Send back">&#9660;</button>';
+      zBtns.querySelectorAll('button').forEach(b => {
+        b.onclick = (e) => { e.stopPropagation(); if (b.dataset.z === 'front') { item.z = ++nextZ; } else { item.z = Math.max(0, Math.min(...items.map(i => i.z)) - 1); } save(); renderCanvas(); };
+      });
+      el.appendChild(zBtns);
+    }
+
+    // Drag
+    let dragState = null;
+    el.addEventListener('mousedown', (e) => {
+      if (e.target === resH || e.target === rotH || e.target.classList.contains('delete-btn') || e.target.closest('.zorder-btns')) return;
+      if (item.type === 'note' && selectedId === item.id) return; // allow editing
+      e.preventDefault(); e.stopPropagation();
+      selectedId = item.id;
+      dragState = { startX: e.clientX, startY: e.clientY, origX: item.x, origY: item.y };
+      renderCanvas();
+    });
+
+    // Resize
+    resH.addEventListener('mousedown', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const startX = e.clientX, startY = e.clientY, origW = item.w, origH = item.h;
+      const onMove = (ev) => { item.w = Math.max(40, snap(origW + (ev.clientX - startX) / zoom)); item.h = Math.max(40, snap(origH + (ev.clientY - startY) / zoom)); renderCanvas(); };
+      const onUp = () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); save(); };
+      window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp);
+    });
+
+    // Rotate
+    rotH.addEventListener('mousedown', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const cx = item.x + item.w / 2, cy = item.y + item.h / 2;
+      const onMove = (ev) => {
+        const rect = canvasInner.getBoundingClientRect();
+        const mx = (ev.clientX - rect.left) / zoom, my = (ev.clientY - rect.top) / zoom;
+        let angle = Math.atan2(my - cy, mx - cx) * 180 / Math.PI + 90;
+        if (gridSnap) angle = Math.round(angle / 15) * 15;
+        item.rot = Math.round(angle);
+        renderCanvas();
+      };
+      const onUp = () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); save(); };
+      window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (dragState && selectedId === item.id) {
+        item.x = snap(dragState.origX + (e.clientX - dragState.startX) / zoom);
+        item.y = snap(dragState.origY + (e.clientY - dragState.startY) / zoom);
+        el.style.left = item.x + 'px'; el.style.top = item.y + 'px';
+      }
+    });
+    window.addEventListener('mouseup', () => { if (dragState && selectedId === item.id) { dragState = null; save(); } });
+
+    inner.appendChild(el);
+  });
+}
+
+// Delete key
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Delete' || e.key === 'Backspace') {
+    if (selectedId && document.activeElement.contentEditable !== 'true' && document.activeElement.tagName !== 'INPUT') {
+      board().items = board().items.filter(i => i.id !== selectedId);
+      selectedId = null; save(); renderCanvas();
+    }
+  }
+});
+
+// Templates
+document.getElementById('templateSelect').onchange = function () {
+  if (!this.value) return;
+  const tpl = this.value;
+  if (board().items.length > 0 && !confirm('Replace current items with template?')) { this.value = ''; return; }
+  board().items = [];
+  if (tpl === 'brand') {
+    board().bg = 'light';
+    board().items.push(
+      { id: genId(), type: 'swatch', x: 80, y: 80, w: 80, h: 100, rot: 0, z: nextZ++, color: '#1a1a1a' },
+      { id: genId(), type: 'swatch', x: 180, y: 80, w: 80, h: 100, rot: 0, z: nextZ++, color: '#ec4899' },
+      { id: genId(), type: 'swatch', x: 280, y: 80, w: 80, h: 100, rot: 0, z: nextZ++, color: '#f3f4f6' },
+      { id: genId(), type: 'swatch', x: 380, y: 80, w: 80, h: 100, rot: 0, z: nextZ++, color: '#8b5cf6' },
+      { id: genId(), type: 'font', x: 80, y: 220, w: 280, h: 80, rot: 0, z: nextZ++, text: 'Brand Name', family: 'Playfair Display' },
+      { id: genId(), type: 'font', x: 80, y: 320, w: 280, h: 60, rot: 0, z: nextZ++, text: 'Body text sample here', family: 'Inter' },
+      { id: genId(), type: 'note', x: 500, y: 80, w: 200, h: 120, rot: -2, z: nextZ++, text: 'Brand values:\n- Modern\n- Playful\n- Trustworthy' },
+      { id: genId(), type: 'shape', shape: 'rect', x: 500, y: 260, w: 200, h: 120, rot: 0, z: nextZ++, color: 'rgba(236,72,153,0.15)' }
+    );
+  } else if (tpl === 'ui') {
+    board().bg = 'white';
+    board().items.push(
+      { id: genId(), type: 'note', x: 60, y: 60, w: 200, h: 80, rot: 0, z: nextZ++, text: 'Navigation ideas' },
+      { id: genId(), type: 'note', x: 300, y: 60, w: 200, h: 80, rot: 0, z: nextZ++, text: 'Dashboard layout' },
+      { id: genId(), type: 'note', x: 540, y: 60, w: 200, h: 80, rot: 0, z: nextZ++, text: 'Color palette' },
+      { id: genId(), type: 'shape', shape: 'rect', x: 60, y: 180, w: 200, h: 150, rot: 0, z: nextZ++, color: '#e5e7eb' },
+      { id: genId(), type: 'shape', shape: 'rect', x: 300, y: 180, w: 200, h: 150, rot: 0, z: nextZ++, color: '#dbeafe' },
+      { id: genId(), type: 'shape', shape: 'rect', x: 540, y: 180, w: 200, h: 150, rot: 0, z: nextZ++, color: '#fce7f3' },
+      { id: genId(), type: 'swatch', x: 60, y: 370, w: 60, h: 80, rot: 0, z: nextZ++, color: '#3b82f6' },
+      { id: genId(), type: 'swatch', x: 140, y: 370, w: 60, h: 80, rot: 0, z: nextZ++, color: '#10b981' },
+      { id: genId(), type: 'swatch', x: 220, y: 370, w: 60, h: 80, rot: 0, z: nextZ++, color: '#f59e0b' }
+    );
+  } else if (tpl === 'photo') {
+    board().bg = 'dark';
+    board().items.push(
+      { id: genId(), type: 'note', x: 60, y: 60, w: 250, h: 80, rot: 1, z: nextZ++, text: 'Mood: warm, golden hour\nTone: intimate, nostalgic' },
+      { id: genId(), type: 'swatch', x: 60, y: 180, w: 70, h: 90, rot: 0, z: nextZ++, color: '#d97706' },
+      { id: genId(), type: 'swatch', x: 150, y: 180, w: 70, h: 90, rot: 0, z: nextZ++, color: '#92400e' },
+      { id: genId(), type: 'swatch', x: 240, y: 180, w: 70, h: 90, rot: 0, z: nextZ++, color: '#fbbf24' },
+      { id: genId(), type: 'shape', shape: 'rect', x: 400, y: 60, w: 250, h: 180, rot: 2, z: nextZ++, color: 'rgba(251,191,36,0.2)' },
+      { id: genId(), type: 'note', x: 400, y: 280, w: 250, h: 60, rot: -1, z: nextZ++, text: 'Film grain, shallow DOF, natural light only' }
+    );
+  }
+  applyBg(); save(); renderCanvas();
+  this.value = '';
+};
+
+// Export PNG
+document.getElementById('exportPng').onclick = () => {
+  const canvas = document.createElement('canvas');
+  const items = board().items;
+  if (!items.length) { toast('Nothing to export'); return; }
+  let minX = Infinity, minY = Infinity, maxX = 0, maxY = 0;
+  items.forEach(i => { minX = Math.min(minX, i.x); minY = Math.min(minY, i.y); maxX = Math.max(maxX, i.x + i.w); maxY = Math.max(maxY, i.y + i.h); });
+  const pad = 40;
+  canvas.width = (maxX - minX) + pad * 2; canvas.height = (maxY - minY) + pad * 2;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = board().bg === 'dark' ? '#1a1a1a' : board().bg === 'light' ? '#f3f4f6' : board().bg === 'custom' ? board().bgCustom : '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  let loaded = 0, total = items.filter(i => i.type === 'image').length;
+  if (total === 0) { finishExport(); return; }
+
+  items.forEach(item => {
+    if (item.type === 'image') {
+      const img = new Image();
+      img.onload = () => { loaded++; if (loaded === total) finishExport(); };
+      img.onerror = () => { loaded++; if (loaded === total) finishExport(); };
+      img.src = item.src;
+    }
+  });
+
+  function finishExport() {
+    items.sort((a, b) => a.z - b.z).forEach(item => {
+      const x = item.x - minX + pad, y = item.y - minY + pad;
+      ctx.save();
+      if (item.rot) { ctx.translate(x + item.w / 2, y + item.h / 2); ctx.rotate(item.rot * Math.PI / 180); ctx.translate(-(x + item.w / 2), -(y + item.h / 2)); }
+      if (item.type === 'image') {
+        const img = new Image(); img.src = item.src;
+        ctx.drawImage(img, x, y, item.w, item.h);
+      } else if (item.type === 'swatch') {
+        ctx.fillStyle = item.color; ctx.beginPath(); ctx.roundRect(x, y, item.w, item.h * 0.7, 6); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.fillRect(x, y + item.h * 0.7, item.w, item.h * 0.3);
+        ctx.fillStyle = '#6b7280'; ctx.font = '10px Manrope, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(item.color, x + item.w / 2, y + item.h - 6);
+      } else if (item.type === 'note') {
+        ctx.fillStyle = 'rgba(255,245,157,0.9)'; ctx.beginPath(); ctx.roundRect(x, y, item.w, item.h, 4); ctx.fill();
+        ctx.fillStyle = '#1a1a1a'; ctx.font = '13px Manrope, sans-serif'; ctx.textAlign = 'left';
+        const lines = item.text.split('\n');
+        lines.forEach((line, li) => ctx.fillText(line, x + 10, y + 20 + li * 18));
+      } else if (item.type === 'font') {
+        ctx.fillStyle = '#fff'; ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.roundRect(x, y, item.w, item.h, 8); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#1a1a1a'; ctx.font = `24px '${item.family}', serif`;
+        ctx.fillText(item.text, x + 14, y + 36);
+        ctx.fillStyle = '#6b7280'; ctx.font = '10px Manrope, sans-serif';
+        ctx.fillText(item.family, x + 14, y + item.h - 10);
+      } else if (item.type === 'shape') {
+        ctx.fillStyle = item.color;
+        if (item.shape === 'circle') { ctx.beginPath(); ctx.arc(x + item.w / 2, y + item.h / 2, Math.min(item.w, item.h) / 2, 0, Math.PI * 2); ctx.fill(); }
+        else { ctx.beginPath(); ctx.roundRect(x, y, item.w, item.h, 6); ctx.fill(); }
+      }
+      ctx.restore();
+    });
+    const a = document.createElement('a');
+    a.download = (board().name || 'moodboard') + '.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+    toast('Exported PNG');
+  }
+};
+
+// Export HTML
+document.getElementById('exportHtml').onclick = () => {
+  const items = board().items;
+  if (!items.length) { toast('Nothing to export'); return; }
+  let minX = Infinity, minY = Infinity, maxX = 0, maxY = 0;
+  items.forEach(i => { minX = Math.min(minX, i.x); minY = Math.min(minY, i.y); maxX = Math.max(maxX, i.x + i.w); maxY = Math.max(maxY, i.y + i.h); });
+  const pad = 40, W = maxX - minX + pad * 2, H = maxY - minY + pad * 2;
+  const bgCol = board().bg === 'dark' ? '#1a1a1a' : board().bg === 'light' ? '#f3f4f6' : board().bg === 'custom' ? board().bgCustom : '#fff';
+  let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${board().name}</title></head><body style="margin:0;background:${bgCol};position:relative;width:${W}px;height:${H}px;font-family:sans-serif">\n`;
+  items.sort((a, b) => a.z - b.z).forEach(item => {
+    const x = item.x - minX + pad, y = item.y - minY + pad;
+    const rot = item.rot ? `transform:rotate(${item.rot}deg);` : '';
+    if (item.type === 'image') html += `<img src="${item.src}" style="position:absolute;left:${x}px;top:${y}px;width:${item.w}px;height:${item.h}px;object-fit:cover;border-radius:6px;${rot}">\n`;
+    else if (item.type === 'swatch') html += `<div style="position:absolute;left:${x}px;top:${y}px;width:${item.w}px;height:${item.h}px;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1);${rot}"><div style="background:${item.color};height:70%"></div><div style="background:#fff;height:30%;text-align:center;font-size:10px;padding:4px;color:#6b7280">${item.color}</div></div>\n`;
+    else if (item.type === 'note') html += `<div style="position:absolute;left:${x}px;top:${y}px;width:${item.w}px;min-height:${item.h}px;background:rgba(255,245,157,.9);border-radius:4px;padding:10px 12px;font-size:13px;white-space:pre-wrap;${rot}">${item.text}</div>\n`;
+    else if (item.type === 'font') html += `<div style="position:absolute;left:${x}px;top:${y}px;width:${item.w}px;height:${item.h}px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px;${rot}"><div style="font-family:'${item.family}',serif;font-size:24px">${item.text}</div><div style="font-size:10px;color:#6b7280;margin-top:4px">${item.family}</div></div>\n`;
+    else if (item.type === 'shape') {
+      const br = item.shape === 'circle' ? '50%' : '6px';
+      html += `<div style="position:absolute;left:${x}px;top:${y}px;width:${item.w}px;height:${item.h}px;background:${item.color};border-radius:${br};opacity:.7;${rot}"></div>\n`;
+    }
+  });
+  html += '</body></html>';
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.download = (board().name || 'moodboard') + '.html';
+  a.href = URL.createObjectURL(blob);
+  a.click();
+  toast('Exported HTML');
+};
+
+// Init
+renderBoardList();
+renderCanvas();
+applyBg();
+updateTransform();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>
