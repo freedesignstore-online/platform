@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Token Generator - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a { color: #ec4899; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.back { display: inline-block; margin-bottom: 24px; color: #ec4899; font-weight: 500; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.subtitle { color: #6b7280; margin-bottom: 24px; font-size: 15px; }
+.container { max-width: 1100px; margin: 0 auto; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
+.panel h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+.btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 13px; transition: all .15s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #fff; border: 1px solid #e5e7eb; color: #1a1a1a; }
+.btn-secondary:hover { border-color: #ec4899; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+.input-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+.input-group { display: flex; flex-direction: column; gap: 6px; }
+.input-group label { font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .5px; }
+.input-group input[type="color"] { width: 100%; height: 44px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 4px; cursor: pointer; }
+.input-group input[type="text"], .input-group input[type="number"], .input-group select { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; }
+.input-group input:focus, .input-group select:focus { outline: none; border-color: #ec4899; box-shadow: 0 0 0 3px #ec489920; }
+.color-preview { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.color-preview .swatch { width: 20px; height: 20px; border-radius: 4px; border: 1px solid #e5e7eb; }
+.color-preview code { font-size: 12px; color: #6b7280; }
+
+.format-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
+.format-tab { padding: 8px 14px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; font-size: 13px; font-weight: 500; font-family: inherit; transition: all .15s; }
+.format-tab:hover { border-color: #ec4899; }
+.format-tab.active { background: #ec4899; color: #fff; border-color: #ec4899; }
+
+.output-area { position: relative; }
+.output-area textarea { width: 100%; height: 280px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; line-height: 1.5; padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; resize: vertical; background: #f9fafb; color: #1a1a1a; }
+.output-area textarea:focus { outline: none; border-color: #ec4899; }
+.output-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+.preview-section { margin-top: 20px; }
+.preview-section h4 { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #6b7280; }
+.preview-components { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+.preview-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; }
+.preview-card .card-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+.preview-card .card-body { font-size: 13px; color: #6b7280; margin-bottom: 12px; }
+.preview-btn { display: inline-block; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; }
+.preview-input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid; font-size: 14px; font-family: inherit; }
+.preview-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 1000; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<div class="container">
+<h1>Design Token Generator</h1>
+<p class="subtitle">Define your design tokens and export them in CSS, Tailwind, SCSS, JSON, Swift, or Kotlin format.</p>
+
+<!-- Input Section -->
+<div class="panel">
+  <h3>Colors</h3>
+  <div class="input-grid">
+    <div class="input-group">
+      <label>Primary</label>
+      <input type="color" id="colorPrimary" value="#3b82f6" oninput="generate()">
+    </div>
+    <div class="input-group">
+      <label>Secondary</label>
+      <input type="color" id="colorSecondary" value="#8b5cf6" oninput="generate()">
+    </div>
+    <div class="input-group">
+      <label>Accent</label>
+      <input type="color" id="colorAccent" value="#f59e0b" oninput="generate()">
+    </div>
+    <div class="input-group">
+      <label>Neutral</label>
+      <input type="color" id="colorNeutral" value="#6b7280" oninput="generate()">
+    </div>
+    <div class="input-group">
+      <label>Success</label>
+      <input type="color" id="colorSuccess" value="#10b981" oninput="generate()">
+    </div>
+    <div class="input-group">
+      <label>Error</label>
+      <input type="color" id="colorError" value="#ef4444" oninput="generate()">
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <h3>Typography & Spacing</h3>
+  <div class="input-grid">
+    <div class="input-group">
+      <label>Heading Font</label>
+      <select id="fontHeading" onchange="generate()">
+        <option value="Inter">Inter</option>
+        <option value="Manrope">Manrope</option>
+        <option value="Poppins">Poppins</option>
+        <option value="Space Grotesk">Space Grotesk</option>
+        <option value="DM Sans">DM Sans</option>
+        <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+        <option value="Outfit">Outfit</option>
+        <option value="system-ui">System UI</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label>Body Font</label>
+      <select id="fontBody" onchange="generate()">
+        <option value="Inter">Inter</option>
+        <option value="Manrope">Manrope</option>
+        <option value="DM Sans">DM Sans</option>
+        <option value="Nunito">Nunito</option>
+        <option value="Source Sans 3">Source Sans 3</option>
+        <option value="Lato">Lato</option>
+        <option value="system-ui">System UI</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label>Base Font Size (px)</label>
+      <input type="number" id="fontSize" value="16" min="12" max="24" onchange="generate()">
+    </div>
+    <div class="input-group">
+      <label>Spacing Unit (px)</label>
+      <input type="number" id="spacingBase" value="4" min="2" max="12" onchange="generate()">
+    </div>
+    <div class="input-group">
+      <label>Border Radius (px)</label>
+      <input type="number" id="radiusBase" value="8" min="0" max="24" onchange="generate()">
+    </div>
+  </div>
+</div>
+
+<!-- Output Section -->
+<div class="panel">
+  <h3>Generated Tokens</h3>
+  <div class="format-tabs">
+    <button class="format-tab active" onclick="switchFormat('css')">CSS Variables</button>
+    <button class="format-tab" onclick="switchFormat('tailwind')">Tailwind</button>
+    <button class="format-tab" onclick="switchFormat('scss')">SCSS</button>
+    <button class="format-tab" onclick="switchFormat('json')">JSON</button>
+    <button class="format-tab" onclick="switchFormat('swift')">Swift</button>
+    <button class="format-tab" onclick="switchFormat('kotlin')">Kotlin</button>
+  </div>
+  <div class="output-area">
+    <textarea id="output" readonly></textarea>
+  </div>
+  <div class="output-actions">
+    <button class="btn btn-primary" onclick="copyOutput()">Copy to Clipboard</button>
+    <button class="btn btn-secondary" onclick="downloadAll()">Download All Formats</button>
+  </div>
+</div>
+
+<!-- Preview Section -->
+<div class="panel">
+  <h3>Live Preview</h3>
+  <div class="preview-section">
+    <h4>Components styled with your tokens</h4>
+    <div class="preview-components" id="previewArea"></div>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let currentFormat = 'css';
+let tokens = {};
+
+function getInputs() {
+  return {
+    colors: {
+      primary: document.getElementById('colorPrimary').value,
+      secondary: document.getElementById('colorSecondary').value,
+      accent: document.getElementById('colorAccent').value,
+      neutral: document.getElementById('colorNeutral').value,
+      success: document.getElementById('colorSuccess').value,
+      error: document.getElementById('colorError').value
+    },
+    fonts: {
+      heading: document.getElementById('fontHeading').value,
+      body: document.getElementById('fontBody').value
+    },
+    fontSize: parseInt(document.getElementById('fontSize').value) || 16,
+    spacingBase: parseInt(document.getElementById('spacingBase').value) || 4,
+    radiusBase: parseInt(document.getElementById('radiusBase').value) || 8
+  };
+}
+
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  return { r, g, b };
+}
+
+function lighten(hex, pct) {
+  const { r, g, b } = hexToRgb(hex);
+  const f = pct / 100;
+  const nr = Math.min(255, Math.round(r + (255 - r) * f));
+  const ng = Math.min(255, Math.round(g + (255 - g) * f));
+  const nb = Math.min(255, Math.round(b + (255 - b) * f));
+  return `#${nr.toString(16).padStart(2,'0')}${ng.toString(16).padStart(2,'0')}${nb.toString(16).padStart(2,'0')}`;
+}
+
+function darken(hex, pct) {
+  const { r, g, b } = hexToRgb(hex);
+  const f = 1 - pct / 100;
+  const nr = Math.round(r * f);
+  const ng = Math.round(g * f);
+  const nb = Math.round(b * f);
+  return `#${nr.toString(16).padStart(2,'0')}${ng.toString(16).padStart(2,'0')}${nb.toString(16).padStart(2,'0')}`;
+}
+
+function generateCSS(inp) {
+  const s = inp.spacingBase;
+  const lines = [
+    ':root {',
+    `  /* Colors */`,
+    `  --color-primary: ${inp.colors.primary};`,
+    `  --color-primary-light: ${lighten(inp.colors.primary, 30)};`,
+    `  --color-primary-dark: ${darken(inp.colors.primary, 20)};`,
+    `  --color-secondary: ${inp.colors.secondary};`,
+    `  --color-secondary-light: ${lighten(inp.colors.secondary, 30)};`,
+    `  --color-secondary-dark: ${darken(inp.colors.secondary, 20)};`,
+    `  --color-accent: ${inp.colors.accent};`,
+    `  --color-accent-light: ${lighten(inp.colors.accent, 30)};`,
+    `  --color-neutral-50: ${lighten(inp.colors.neutral, 80)};`,
+    `  --color-neutral-100: ${lighten(inp.colors.neutral, 60)};`,
+    `  --color-neutral-300: ${lighten(inp.colors.neutral, 30)};`,
+    `  --color-neutral-500: ${inp.colors.neutral};`,
+    `  --color-neutral-700: ${darken(inp.colors.neutral, 30)};`,
+    `  --color-neutral-900: ${darken(inp.colors.neutral, 60)};`,
+    `  --color-success: ${inp.colors.success};`,
+    `  --color-error: ${inp.colors.error};`,
+    ``,
+    `  /* Typography */`,
+    `  --font-heading: '${inp.fonts.heading}', system-ui, sans-serif;`,
+    `  --font-body: '${inp.fonts.body}', system-ui, sans-serif;`,
+    `  --font-size-xs: ${inp.fontSize * 0.75}px;`,
+    `  --font-size-sm: ${inp.fontSize * 0.875}px;`,
+    `  --font-size-base: ${inp.fontSize}px;`,
+    `  --font-size-lg: ${inp.fontSize * 1.125}px;`,
+    `  --font-size-xl: ${inp.fontSize * 1.25}px;`,
+    `  --font-size-2xl: ${inp.fontSize * 1.5}px;`,
+    `  --font-size-3xl: ${inp.fontSize * 2}px;`,
+    `  --font-size-4xl: ${inp.fontSize * 2.5}px;`,
+    ``,
+    `  /* Spacing */`,
+    `  --space-1: ${s}px;`,
+    `  --space-2: ${s * 2}px;`,
+    `  --space-3: ${s * 3}px;`,
+    `  --space-4: ${s * 4}px;`,
+    `  --space-6: ${s * 6}px;`,
+    `  --space-8: ${s * 8}px;`,
+    `  --space-12: ${s * 12}px;`,
+    `  --space-16: ${s * 16}px;`,
+    ``,
+    `  /* Border Radius */`,
+    `  --radius-sm: ${Math.round(inp.radiusBase * 0.5)}px;`,
+    `  --radius-md: ${inp.radiusBase}px;`,
+    `  --radius-lg: ${Math.round(inp.radiusBase * 1.5)}px;`,
+    `  --radius-xl: ${inp.radiusBase * 2}px;`,
+    `  --radius-full: 9999px;`,
+    '}'
+  ];
+  return lines.join('\n');
+}
+
+function generateTailwind(inp) {
+  const s = inp.spacingBase;
+  return `/** @type {import('tailwindcss').Config} */
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          DEFAULT: '${inp.colors.primary}',
+          light: '${lighten(inp.colors.primary, 30)}',
+          dark: '${darken(inp.colors.primary, 20)}',
+        },
+        secondary: {
+          DEFAULT: '${inp.colors.secondary}',
+          light: '${lighten(inp.colors.secondary, 30)}',
+          dark: '${darken(inp.colors.secondary, 20)}',
+        },
+        accent: {
+          DEFAULT: '${inp.colors.accent}',
+          light: '${lighten(inp.colors.accent, 30)}',
+        },
+        neutral: {
+          50: '${lighten(inp.colors.neutral, 80)}',
+          100: '${lighten(inp.colors.neutral, 60)}',
+          300: '${lighten(inp.colors.neutral, 30)}',
+          500: '${inp.colors.neutral}',
+          700: '${darken(inp.colors.neutral, 30)}',
+          900: '${darken(inp.colors.neutral, 60)}',
+        },
+        success: '${inp.colors.success}',
+        error: '${inp.colors.error}',
+      },
+      fontFamily: {
+        heading: ['${inp.fonts.heading}', 'system-ui', 'sans-serif'],
+        body: ['${inp.fonts.body}', 'system-ui', 'sans-serif'],
+      },
+      fontSize: {
+        xs: '${inp.fontSize * 0.75}px',
+        sm: '${inp.fontSize * 0.875}px',
+        base: '${inp.fontSize}px',
+        lg: '${inp.fontSize * 1.125}px',
+        xl: '${inp.fontSize * 1.25}px',
+        '2xl': '${inp.fontSize * 1.5}px',
+        '3xl': '${inp.fontSize * 2}px',
+        '4xl': '${inp.fontSize * 2.5}px',
+      },
+      spacing: {
+        1: '${s}px',
+        2: '${s * 2}px',
+        3: '${s * 3}px',
+        4: '${s * 4}px',
+        6: '${s * 6}px',
+        8: '${s * 8}px',
+        12: '${s * 12}px',
+        16: '${s * 16}px',
+      },
+      borderRadius: {
+        sm: '${Math.round(inp.radiusBase * 0.5)}px',
+        md: '${inp.radiusBase}px',
+        lg: '${Math.round(inp.radiusBase * 1.5)}px',
+        xl: '${inp.radiusBase * 2}px',
+      },
+    },
+  },
+};`;
+}
+
+function generateSCSS(inp) {
+  const s = inp.spacingBase;
+  const lines = [
+    '// Colors',
+    `$color-primary: ${inp.colors.primary};`,
+    `$color-primary-light: ${lighten(inp.colors.primary, 30)};`,
+    `$color-primary-dark: ${darken(inp.colors.primary, 20)};`,
+    `$color-secondary: ${inp.colors.secondary};`,
+    `$color-secondary-light: ${lighten(inp.colors.secondary, 30)};`,
+    `$color-secondary-dark: ${darken(inp.colors.secondary, 20)};`,
+    `$color-accent: ${inp.colors.accent};`,
+    `$color-accent-light: ${lighten(inp.colors.accent, 30)};`,
+    `$color-neutral-50: ${lighten(inp.colors.neutral, 80)};`,
+    `$color-neutral-100: ${lighten(inp.colors.neutral, 60)};`,
+    `$color-neutral-300: ${lighten(inp.colors.neutral, 30)};`,
+    `$color-neutral-500: ${inp.colors.neutral};`,
+    `$color-neutral-700: ${darken(inp.colors.neutral, 30)};`,
+    `$color-neutral-900: ${darken(inp.colors.neutral, 60)};`,
+    `$color-success: ${inp.colors.success};`,
+    `$color-error: ${inp.colors.error};`,
+    '',
+    '// Typography',
+    `$font-heading: '${inp.fonts.heading}', system-ui, sans-serif;`,
+    `$font-body: '${inp.fonts.body}', system-ui, sans-serif;`,
+    `$font-size-xs: ${inp.fontSize * 0.75}px;`,
+    `$font-size-sm: ${inp.fontSize * 0.875}px;`,
+    `$font-size-base: ${inp.fontSize}px;`,
+    `$font-size-lg: ${inp.fontSize * 1.125}px;`,
+    `$font-size-xl: ${inp.fontSize * 1.25}px;`,
+    `$font-size-2xl: ${inp.fontSize * 1.5}px;`,
+    `$font-size-3xl: ${inp.fontSize * 2}px;`,
+    `$font-size-4xl: ${inp.fontSize * 2.5}px;`,
+    '',
+    '// Spacing',
+    `$space-1: ${s}px;`,
+    `$space-2: ${s * 2}px;`,
+    `$space-3: ${s * 3}px;`,
+    `$space-4: ${s * 4}px;`,
+    `$space-6: ${s * 6}px;`,
+    `$space-8: ${s * 8}px;`,
+    `$space-12: ${s * 12}px;`,
+    `$space-16: ${s * 16}px;`,
+    '',
+    '// Border Radius',
+    `$radius-sm: ${Math.round(inp.radiusBase * 0.5)}px;`,
+    `$radius-md: ${inp.radiusBase}px;`,
+    `$radius-lg: ${Math.round(inp.radiusBase * 1.5)}px;`,
+    `$radius-xl: ${inp.radiusBase * 2}px;`,
+    `$radius-full: 9999px;`
+  ];
+  return lines.join('\n');
+}
+
+function generateJSON(inp) {
+  const s = inp.spacingBase;
+  const obj = {
+    color: {
+      primary: { value: inp.colors.primary },
+      'primary-light': { value: lighten(inp.colors.primary, 30) },
+      'primary-dark': { value: darken(inp.colors.primary, 20) },
+      secondary: { value: inp.colors.secondary },
+      'secondary-light': { value: lighten(inp.colors.secondary, 30) },
+      'secondary-dark': { value: darken(inp.colors.secondary, 20) },
+      accent: { value: inp.colors.accent },
+      'accent-light': { value: lighten(inp.colors.accent, 30) },
+      'neutral-50': { value: lighten(inp.colors.neutral, 80) },
+      'neutral-100': { value: lighten(inp.colors.neutral, 60) },
+      'neutral-300': { value: lighten(inp.colors.neutral, 30) },
+      'neutral-500': { value: inp.colors.neutral },
+      'neutral-700': { value: darken(inp.colors.neutral, 30) },
+      'neutral-900': { value: darken(inp.colors.neutral, 60) },
+      success: { value: inp.colors.success },
+      error: { value: inp.colors.error }
+    },
+    font: {
+      heading: { value: `'${inp.fonts.heading}', system-ui, sans-serif` },
+      body: { value: `'${inp.fonts.body}', system-ui, sans-serif` }
+    },
+    fontSize: {
+      xs: { value: `${inp.fontSize * 0.75}px` },
+      sm: { value: `${inp.fontSize * 0.875}px` },
+      base: { value: `${inp.fontSize}px` },
+      lg: { value: `${inp.fontSize * 1.125}px` },
+      xl: { value: `${inp.fontSize * 1.25}px` },
+      '2xl': { value: `${inp.fontSize * 1.5}px` },
+      '3xl': { value: `${inp.fontSize * 2}px` },
+      '4xl': { value: `${inp.fontSize * 2.5}px` }
+    },
+    spacing: {
+      1: { value: `${s}px` },
+      2: { value: `${s * 2}px` },
+      3: { value: `${s * 3}px` },
+      4: { value: `${s * 4}px` },
+      6: { value: `${s * 6}px` },
+      8: { value: `${s * 8}px` },
+      12: { value: `${s * 12}px` },
+      16: { value: `${s * 16}px` }
+    },
+    borderRadius: {
+      sm: { value: `${Math.round(inp.radiusBase * 0.5)}px` },
+      md: { value: `${inp.radiusBase}px` },
+      lg: { value: `${Math.round(inp.radiusBase * 1.5)}px` },
+      xl: { value: `${inp.radiusBase * 2}px` },
+      full: { value: '9999px' }
+    }
+  };
+  return JSON.stringify(obj, null, 2);
+}
+
+function generateSwift(inp) {
+  function hexToSwift(hex) {
+    const { r, g, b } = hexToRgb(hex);
+    return `UIColor(red: ${(r/255).toFixed(3)}, green: ${(g/255).toFixed(3)}, blue: ${(b/255).toFixed(3)}, alpha: 1.0)`;
+  }
+  const lines = [
+    'import UIKit',
+    '',
+    'struct DesignTokens {',
+    '    // MARK: - Colors',
+    `    static let colorPrimary = ${hexToSwift(inp.colors.primary)}`,
+    `    static let colorPrimaryLight = ${hexToSwift(lighten(inp.colors.primary, 30))}`,
+    `    static let colorPrimaryDark = ${hexToSwift(darken(inp.colors.primary, 20))}`,
+    `    static let colorSecondary = ${hexToSwift(inp.colors.secondary)}`,
+    `    static let colorSecondaryLight = ${hexToSwift(lighten(inp.colors.secondary, 30))}`,
+    `    static let colorSecondaryDark = ${hexToSwift(darken(inp.colors.secondary, 20))}`,
+    `    static let colorAccent = ${hexToSwift(inp.colors.accent)}`,
+    `    static let colorSuccess = ${hexToSwift(inp.colors.success)}`,
+    `    static let colorError = ${hexToSwift(inp.colors.error)}`,
+    `    static let colorNeutral500 = ${hexToSwift(inp.colors.neutral)}`,
+    '',
+    '    // MARK: - Typography',
+    `    static let fontHeading = "${inp.fonts.heading}"`,
+    `    static let fontBody = "${inp.fonts.body}"`,
+    `    static let fontSizeBase: CGFloat = ${inp.fontSize}`,
+    `    static let fontSizeSm: CGFloat = ${inp.fontSize * 0.875}`,
+    `    static let fontSizeLg: CGFloat = ${inp.fontSize * 1.125}`,
+    `    static let fontSizeXl: CGFloat = ${inp.fontSize * 1.25}`,
+    `    static let fontSize2xl: CGFloat = ${inp.fontSize * 1.5}`,
+    `    static let fontSize3xl: CGFloat = ${inp.fontSize * 2}`,
+    '',
+    '    // MARK: - Spacing',
+    `    static let space1: CGFloat = ${inp.spacingBase}`,
+    `    static let space2: CGFloat = ${inp.spacingBase * 2}`,
+    `    static let space3: CGFloat = ${inp.spacingBase * 3}`,
+    `    static let space4: CGFloat = ${inp.spacingBase * 4}`,
+    `    static let space6: CGFloat = ${inp.spacingBase * 6}`,
+    `    static let space8: CGFloat = ${inp.spacingBase * 8}`,
+    `    static let space12: CGFloat = ${inp.spacingBase * 12}`,
+    `    static let space16: CGFloat = ${inp.spacingBase * 16}`,
+    '',
+    '    // MARK: - Border Radius',
+    `    static let radiusSm: CGFloat = ${Math.round(inp.radiusBase * 0.5)}`,
+    `    static let radiusMd: CGFloat = ${inp.radiusBase}`,
+    `    static let radiusLg: CGFloat = ${Math.round(inp.radiusBase * 1.5)}`,
+    `    static let radiusXl: CGFloat = ${inp.radiusBase * 2}`,
+    '}'
+  ];
+  return lines.join('\n');
+}
+
+function generateKotlin(inp) {
+  function hexToKotlin(hex) {
+    return `Color(0xFF${hex.slice(1).toUpperCase()})`;
+  }
+  const lines = [
+    'import androidx.compose.ui.graphics.Color',
+    'import androidx.compose.ui.unit.dp',
+    'import androidx.compose.ui.unit.sp',
+    '',
+    'object DesignTokens {',
+    '    // Colors',
+    `    val colorPrimary = ${hexToKotlin(inp.colors.primary)}`,
+    `    val colorPrimaryLight = ${hexToKotlin(lighten(inp.colors.primary, 30))}`,
+    `    val colorPrimaryDark = ${hexToKotlin(darken(inp.colors.primary, 20))}`,
+    `    val colorSecondary = ${hexToKotlin(inp.colors.secondary)}`,
+    `    val colorSecondaryLight = ${hexToKotlin(lighten(inp.colors.secondary, 30))}`,
+    `    val colorSecondaryDark = ${hexToKotlin(darken(inp.colors.secondary, 20))}`,
+    `    val colorAccent = ${hexToKotlin(inp.colors.accent)}`,
+    `    val colorSuccess = ${hexToKotlin(inp.colors.success)}`,
+    `    val colorError = ${hexToKotlin(inp.colors.error)}`,
+    `    val colorNeutral500 = ${hexToKotlin(inp.colors.neutral)}`,
+    '',
+    '    // Typography',
+    `    val fontHeading = "${inp.fonts.heading}"`,
+    `    val fontBody = "${inp.fonts.body}"`,
+    `    val fontSizeBase = ${inp.fontSize}.sp`,
+    `    val fontSizeSm = ${inp.fontSize * 0.875}.sp`,
+    `    val fontSizeLg = ${inp.fontSize * 1.125}.sp`,
+    `    val fontSizeXl = ${inp.fontSize * 1.25}.sp`,
+    `    val fontSize2xl = ${inp.fontSize * 1.5}.sp`,
+    `    val fontSize3xl = ${inp.fontSize * 2.0}.sp`,
+    '',
+    '    // Spacing',
+    `    val space1 = ${inp.spacingBase}.dp`,
+    `    val space2 = ${inp.spacingBase * 2}.dp`,
+    `    val space3 = ${inp.spacingBase * 3}.dp`,
+    `    val space4 = ${inp.spacingBase * 4}.dp`,
+    `    val space6 = ${inp.spacingBase * 6}.dp`,
+    `    val space8 = ${inp.spacingBase * 8}.dp`,
+    `    val space12 = ${inp.spacingBase * 12}.dp`,
+    `    val space16 = ${inp.spacingBase * 16}.dp`,
+    '',
+    '    // Border Radius',
+    `    val radiusSm = ${Math.round(inp.radiusBase * 0.5)}.dp`,
+    `    val radiusMd = ${inp.radiusBase}.dp`,
+    `    val radiusLg = ${Math.round(inp.radiusBase * 1.5)}.dp`,
+    `    val radiusXl = ${inp.radiusBase * 2}.dp`,
+    '}'
+  ];
+  return lines.join('\n');
+}
+
+function generate() {
+  const inp = getInputs();
+  tokens = {
+    css: generateCSS(inp),
+    tailwind: generateTailwind(inp),
+    scss: generateSCSS(inp),
+    json: generateJSON(inp),
+    swift: generateSwift(inp),
+    kotlin: generateKotlin(inp)
+  };
+  document.getElementById('output').value = tokens[currentFormat];
+  renderPreview(inp);
+}
+
+function switchFormat(fmt) {
+  currentFormat = fmt;
+  document.querySelectorAll('.format-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.format-tab[onclick="switchFormat('${fmt}')"]`).classList.add('active');
+  document.getElementById('output').value = tokens[fmt] || '';
+}
+
+function copyOutput() {
+  const text = document.getElementById('output').value;
+  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard'));
+}
+
+function downloadAll() {
+  const inp = getInputs();
+  const parts = [
+    '/* === CSS Custom Properties === */\n' + tokens.css,
+    '\n\n/* === Tailwind Config === */\n' + tokens.tailwind,
+    '\n\n/* === SCSS Variables === */\n' + tokens.scss,
+    '\n\n/* === JSON (Style Dictionary) === */\n' + tokens.json,
+    '\n\n/* === Swift UIColor === */\n' + tokens.swift,
+    '\n\n/* === Kotlin Compose === */\n' + tokens.kotlin
+  ];
+  const blob = new Blob([parts.join('\n')], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'design-tokens-all-formats.txt';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Downloaded all formats');
+}
+
+function renderPreview(inp) {
+  const area = document.getElementById('previewArea');
+  area.innerHTML = `
+    <div class="preview-card" style="border-color:${lighten(inp.colors.primary, 60)};">
+      <div class="card-title" style="font-family:'${inp.fonts.heading}',system-ui;color:${darken(inp.colors.neutral, 60)};">Button Component</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+        <button class="preview-btn" style="background:${inp.colors.primary};color:#fff;border-radius:${inp.radiusBase}px;">Primary</button>
+        <button class="preview-btn" style="background:${inp.colors.secondary};color:#fff;border-radius:${inp.radiusBase}px;">Secondary</button>
+        <button class="preview-btn" style="background:transparent;color:${inp.colors.primary};border:2px solid ${inp.colors.primary};border-radius:${inp.radiusBase}px;">Outline</button>
+      </div>
+    </div>
+    <div class="preview-card" style="border-color:${lighten(inp.colors.primary, 60)};">
+      <div class="card-title" style="font-family:'${inp.fonts.heading}',system-ui;color:${darken(inp.colors.neutral, 60)};">Input Component</div>
+      <input class="preview-input" style="border-color:${lighten(inp.colors.neutral, 30)};border-radius:${inp.radiusBase}px;font-family:'${inp.fonts.body}',system-ui;" placeholder="Type something..." readonly>
+      <div style="margin-top:12px;">
+        <span class="preview-badge" style="background:${lighten(inp.colors.success, 70)};color:${darken(inp.colors.success, 20)};border-radius:${inp.radiusBase * 2}px;">Success</span>
+        <span class="preview-badge" style="background:${lighten(inp.colors.error, 70)};color:${darken(inp.colors.error, 20)};border-radius:${inp.radiusBase * 2}px;margin-left:6px;">Error</span>
+        <span class="preview-badge" style="background:${lighten(inp.colors.accent, 70)};color:${darken(inp.colors.accent, 20)};border-radius:${inp.radiusBase * 2}px;margin-left:6px;">Accent</span>
+      </div>
+    </div>
+    <div class="preview-card" style="border-color:${lighten(inp.colors.primary, 60)};">
+      <div class="card-title" style="font-family:'${inp.fonts.heading}',system-ui;color:${darken(inp.colors.neutral, 60)};">Card Component</div>
+      <div style="background:${lighten(inp.colors.primary, 80)};border-radius:${inp.radiusBase}px;padding:${inp.spacingBase * 4}px;margin-top:8px;">
+        <div style="font-family:'${inp.fonts.heading}',system-ui;font-weight:700;font-size:${inp.fontSize * 1.125}px;color:${darken(inp.colors.neutral, 60)};">Card Title</div>
+        <div style="font-family:'${inp.fonts.body}',system-ui;font-size:${inp.fontSize * 0.875}px;color:${inp.colors.neutral};margin-top:${inp.spacingBase * 2}px;">Sample body text using your design tokens.</div>
+      </div>
+    </div>
+  `;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Initialize
+generate();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

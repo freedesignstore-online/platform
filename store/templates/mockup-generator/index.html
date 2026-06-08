@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Device Mockup Generator - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a { color: #ec4899; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.back { display: inline-block; margin-bottom: 24px; color: #ec4899; font-weight: 500; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.subtitle { color: #6b7280; margin-bottom: 24px; font-size: 15px; }
+.container { max-width: 1200px; margin: 0 auto; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
+.panel h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+.btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 13px; transition: all .15s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #fff; border: 1px solid #e5e7eb; color: #1a1a1a; }
+.btn-secondary:hover { border-color: #ec4899; }
+
+.layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
+@media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+
+.sidebar { display: flex; flex-direction: column; gap: 16px; }
+.field-group { display: flex; flex-direction: column; gap: 6px; }
+.field-group label { font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .5px; }
+.field-group select, .field-group input[type="range"], .field-group input[type="color"] { width: 100%; }
+.field-group select { padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+.field-group select:focus { outline: none; border-color: #ec4899; }
+.field-group input[type="color"] { height: 40px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 4px; cursor: pointer; }
+.field-group input[type="range"] { accent-color: #ec4899; }
+.range-val { font-size: 12px; color: #6b7280; text-align: right; }
+
+.upload-zone { border: 2px dashed #e5e7eb; border-radius: 12px; padding: 32px 16px; text-align: center; cursor: pointer; transition: all .15s; position: relative; }
+.upload-zone:hover, .upload-zone.dragover { border-color: #ec4899; background: #fdf2f8; }
+.upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.upload-zone .icon { font-size: 32px; margin-bottom: 8px; }
+.upload-zone .text { font-size: 14px; color: #6b7280; }
+.upload-zone .text strong { color: #ec4899; }
+
+.device-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.device-option { border: 2px solid #e5e7eb; border-radius: 8px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all .15s; font-size: 12px; }
+.device-option:hover { border-color: #ec4899; }
+.device-option.active { border-color: #ec4899; background: #fdf2f8; }
+.device-option .dev-icon { font-size: 22px; margin-bottom: 4px; }
+
+.canvas-area { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 500px; border-radius: 12px; position: relative; }
+#preview { max-width: 100%; border-radius: 8px; }
+.empty-state { text-align: center; color: #9ca3af; }
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+
+.actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+
+.layout-options { display: flex; gap: 6px; }
+.layout-opt { padding: 6px 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all .15s; font-family: inherit; background: #fff; }
+.layout-opt:hover { border-color: #ec4899; }
+.layout-opt.active { background: #ec4899; color: #fff; border-color: #ec4899; }
+
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 1000; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<div class="container">
+<h1>Device Mockup Generator</h1>
+<p class="subtitle">Upload a screenshot and place it inside a realistic device frame. Download as PNG.</p>
+
+<div class="layout">
+  <!-- Sidebar Controls -->
+  <div class="sidebar">
+    <div class="panel" style="padding:16px;">
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" accept="image/*" id="fileInput" onchange="handleUpload(event)">
+        <div class="icon">&#x1F5BC;</div>
+        <div class="text">Drop image or <strong>browse</strong></div>
+      </div>
+    </div>
+
+    <div class="panel" style="padding:16px;">
+      <h3 style="font-size:14px; margin-bottom:12px;">Device</h3>
+      <div class="device-grid">
+        <div class="device-option active" data-device="iphone" onclick="selectDevice('iphone')">
+          <div class="dev-icon">&#x1F4F1;</div>
+          iPhone
+        </div>
+        <div class="device-option" data-device="android" onclick="selectDevice('android')">
+          <div class="dev-icon">&#x1F4F1;</div>
+          Android
+        </div>
+        <div class="device-option" data-device="macbook" onclick="selectDevice('macbook')">
+          <div class="dev-icon">&#x1F4BB;</div>
+          MacBook
+        </div>
+        <div class="device-option" data-device="ipad" onclick="selectDevice('ipad')">
+          <div class="dev-icon">&#x1F4F2;</div>
+          iPad
+        </div>
+        <div class="device-option" data-device="browser" onclick="selectDevice('browser')">
+          <div class="dev-icon">&#x1F310;</div>
+          Browser
+        </div>
+        <div class="device-option" data-device="watch" onclick="selectDevice('watch')">
+          <div class="dev-icon">&#x231A;</div>
+          Watch
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="padding:16px;">
+      <h3 style="font-size:14px; margin-bottom:12px;">Settings</h3>
+      <div class="field-group">
+        <label>Angle</label>
+        <select id="angleSelect" onchange="renderMockup()">
+          <option value="straight">Straight</option>
+          <option value="tilt-left">Tilt Left</option>
+          <option value="tilt-right">Tilt Right</option>
+        </select>
+      </div>
+      <div class="field-group" style="margin-top:12px;">
+        <label>Shadow Intensity</label>
+        <input type="range" id="shadowRange" min="0" max="100" value="50" oninput="renderMockup()">
+        <div class="range-val" id="shadowVal">50%</div>
+      </div>
+      <div class="field-group" style="margin-top:12px;">
+        <label>Background Color</label>
+        <input type="color" id="bgColor" value="#f0f0f0" oninput="renderMockup()">
+      </div>
+      <div class="field-group" style="margin-top:12px;">
+        <label>Layout</label>
+        <div class="layout-options">
+          <button class="layout-opt active" data-layout="single" onclick="selectLayout('single')">Single</button>
+          <button class="layout-opt" data-layout="side" onclick="selectLayout('side')">Side by Side</button>
+          <button class="layout-opt" data-layout="float" onclick="selectLayout('float')">Floating</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Canvas Area -->
+  <div class="panel">
+    <div class="canvas-area" id="canvasArea">
+      <div class="empty-state" id="emptyState">
+        <div class="icon">&#x1F4F1;</div>
+        <p>Upload a screenshot to get started</p>
+      </div>
+      <canvas id="preview" style="display:none;"></canvas>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="downloadPNG()" id="downloadBtn" disabled>Download PNG</button>
+      <button class="btn btn-secondary" onclick="downloadPNG(2)" id="download2xBtn" disabled>Download 2x</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let uploadedImage = null;
+let currentDevice = 'iphone';
+let currentLayout = 'single';
+
+const DEVICES = {
+  iphone: { w: 390, h: 844, bezel: 20, radius: 50, notch: true, ratio: 390/844 },
+  android: { w: 412, h: 892, bezel: 12, radius: 30, notch: false, ratio: 412/892 },
+  macbook: { w: 1440, h: 900, bezel: 14, radius: 12, notch: false, lid: true, ratio: 1440/900 },
+  ipad: { w: 820, h: 1180, bezel: 24, radius: 20, notch: false, ratio: 820/1180 },
+  browser: { w: 1280, h: 800, bezel: 0, radius: 12, toolbar: true, ratio: 1280/800 },
+  watch: { w: 198, h: 242, bezel: 16, radius: 80, notch: false, ratio: 198/242 }
+};
+
+function handleUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const img = new Image();
+  img.onload = () => { uploadedImage = img; renderMockup(); };
+  img.src = URL.createObjectURL(file);
+}
+
+// Drag and drop
+const zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    const img = new Image();
+    img.onload = () => { uploadedImage = img; renderMockup(); };
+    img.src = URL.createObjectURL(file);
+  }
+});
+
+function selectDevice(dev) {
+  currentDevice = dev;
+  document.querySelectorAll('.device-option').forEach(o => o.classList.remove('active'));
+  document.querySelector(`[data-device="${dev}"]`).classList.add('active');
+  renderMockup();
+}
+
+function selectLayout(layout) {
+  currentLayout = layout;
+  document.querySelectorAll('.layout-opt').forEach(o => o.classList.remove('active'));
+  document.querySelector(`[data-layout="${layout}"]`).classList.add('active');
+  renderMockup();
+}
+
+function renderMockup(scale) {
+  if (!uploadedImage) return;
+
+  const canvas = document.getElementById('preview');
+  const ctx = canvas.getContext('2d');
+  const bg = document.getElementById('bgColor').value;
+  const shadow = parseInt(document.getElementById('shadowRange').value);
+  const angle = document.getElementById('angleSelect').value;
+  document.getElementById('shadowVal').textContent = shadow + '%';
+
+  const s = scale || 1;
+  const dev = DEVICES[currentDevice];
+  const padding = 80 * s;
+
+  let deviceW, deviceH;
+  if (currentDevice === 'macbook' || currentDevice === 'browser') {
+    deviceW = 600 * s;
+    deviceH = deviceW / dev.ratio + (dev.lid ? 30 * s : 0) + (dev.toolbar ? 36 * s : 0);
+  } else if (currentDevice === 'watch') {
+    deviceW = 180 * s;
+    deviceH = deviceW / dev.ratio;
+  } else {
+    deviceW = 280 * s;
+    deviceH = deviceW / dev.ratio;
+  }
+
+  let canvasW, canvasH;
+  if (currentLayout === 'single') {
+    canvasW = deviceW + padding * 2;
+    canvasH = deviceH + padding * 2;
+  } else if (currentLayout === 'side') {
+    canvasW = deviceW * 2 + padding * 3;
+    canvasH = deviceH + padding * 2;
+  } else {
+    canvasW = deviceW * 2.2 + padding * 2;
+    canvasH = deviceH * 1.3 + padding * 2;
+  }
+
+  canvas.width = canvasW;
+  canvas.height = canvasH;
+  canvas.style.display = 'block';
+  document.getElementById('emptyState').style.display = 'none';
+
+  // Background
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, canvasW, canvasH);
+
+  const positions = [];
+  if (currentLayout === 'single') {
+    positions.push({ x: padding, y: padding, rot: 0 });
+  } else if (currentLayout === 'side') {
+    positions.push({ x: padding, y: padding, rot: 0 });
+    positions.push({ x: padding * 2 + deviceW, y: padding, rot: 0 });
+  } else {
+    positions.push({ x: padding, y: padding * 1.5, rot: -8 });
+    positions.push({ x: padding + deviceW * 0.8, y: padding * 0.7, rot: 5 });
+  }
+
+  positions.forEach(pos => {
+    ctx.save();
+    const cx = pos.x + deviceW / 2;
+    const cy = pos.y + deviceH / 2;
+    let rotDeg = pos.rot;
+    if (angle === 'tilt-left') rotDeg -= 5;
+    if (angle === 'tilt-right') rotDeg += 5;
+
+    ctx.translate(cx, cy);
+    ctx.rotate(rotDeg * Math.PI / 180);
+    ctx.translate(-cx, -cy);
+
+    // Shadow
+    if (shadow > 0) {
+      ctx.shadowColor = `rgba(0,0,0,${shadow * 0.006})`;
+      ctx.shadowBlur = shadow * 0.6 * s;
+      ctx.shadowOffsetY = shadow * 0.3 * s;
+    }
+
+    drawDevice(ctx, pos.x, pos.y, deviceW, deviceH, dev, s);
+    ctx.restore();
+  });
+
+  document.getElementById('downloadBtn').disabled = false;
+  document.getElementById('download2xBtn').disabled = false;
+}
+
+function drawDevice(ctx, x, y, w, h, dev, s) {
+  const bezel = dev.bezel * s * (w / (dev.w * 0.7));
+  const radius = dev.radius * s * (w / (dev.w * 0.7));
+
+  if (currentDevice === 'browser') {
+    const toolbarH = 36 * s;
+    // Browser frame
+    ctx.fillStyle = '#e5e7eb';
+    roundRect(ctx, x, y, w, h, radius);
+    ctx.fill();
+    // Toolbar
+    ctx.fillStyle = '#f3f4f6';
+    roundRect(ctx, x, y, w, toolbarH, radius, true);
+    ctx.fill();
+    // Dots
+    const dotY = y + toolbarH / 2;
+    const dotR = 5 * s;
+    [['#ef4444', 0], ['#f59e0b', 1], ['#10b981', 2]].forEach(([color, i]) => {
+      ctx.beginPath();
+      ctx.arc(x + 16 * s + i * 18 * s, dotY, dotR, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+    });
+    // URL bar
+    ctx.fillStyle = '#fff';
+    roundRect(ctx, x + 80 * s, y + 8 * s, w - 120 * s, toolbarH - 16 * s, 6 * s);
+    ctx.fill();
+    // Screen
+    const screenY = y + toolbarH;
+    const screenH = h - toolbarH;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, screenY, w, screenH);
+    ctx.clip();
+    ctx.drawImage(uploadedImage, x, screenY, w, screenH);
+    ctx.restore();
+  } else if (currentDevice === 'macbook') {
+    const lidH = 20 * s;
+    const screenH = h - lidH;
+    // Screen bezel
+    ctx.fillStyle = '#1a1a1a';
+    roundRect(ctx, x, y, w, screenH, radius);
+    ctx.fill();
+    // Screen
+    const sx = x + bezel;
+    const sy = y + bezel;
+    const sw = w - bezel * 2;
+    const sh = screenH - bezel * 2;
+    ctx.save();
+    ctx.beginPath();
+    roundRect(ctx, sx, sy, sw, sh, 4 * s);
+    ctx.clip();
+    ctx.drawImage(uploadedImage, sx, sy, sw, sh);
+    ctx.restore();
+    // Lid / base
+    ctx.fillStyle = '#d1d5db';
+    ctx.beginPath();
+    ctx.moveTo(x - 20 * s, y + screenH);
+    ctx.lineTo(x + w + 20 * s, y + screenH);
+    ctx.lineTo(x + w + 10 * s, y + h);
+    ctx.lineTo(x - 10 * s, y + h);
+    ctx.closePath();
+    ctx.fill();
+    // Hinge line
+    ctx.fillStyle = '#9ca3af';
+    ctx.fillRect(x - 20 * s, y + screenH, w + 40 * s, 3 * s);
+  } else if (currentDevice === 'watch') {
+    // Watch body
+    ctx.fillStyle = '#1a1a1a';
+    roundRect(ctx, x, y, w, h, radius);
+    ctx.fill();
+    // Crown button
+    ctx.fillStyle = '#4b5563';
+    ctx.fillRect(x + w, y + h * 0.35, 6 * s, 20 * s);
+    // Screen
+    const sx = x + bezel;
+    const sy = y + bezel;
+    const sw = w - bezel * 2;
+    const sh = h - bezel * 2;
+    ctx.save();
+    ctx.beginPath();
+    roundRect(ctx, sx, sy, sw, sh, radius * 0.6);
+    ctx.clip();
+    ctx.drawImage(uploadedImage, sx, sy, sw, sh);
+    ctx.restore();
+    // Band indicators
+    ctx.fillStyle = '#374151';
+    roundRect(ctx, x + w * 0.25, y - 30 * s, w * 0.5, 32 * s, 8 * s);
+    ctx.fill();
+    roundRect(ctx, x + w * 0.25, y + h - 2 * s, w * 0.5, 32 * s, 8 * s);
+    ctx.fill();
+  } else {
+    // Phone body (iPhone, Android, iPad)
+    ctx.fillStyle = '#1a1a1a';
+    roundRect(ctx, x, y, w, h, radius);
+    ctx.fill();
+    // Screen
+    const sx = x + bezel;
+    const sy = y + bezel;
+    const sw = w - bezel * 2;
+    const sh = h - bezel * 2;
+    ctx.save();
+    ctx.beginPath();
+    roundRect(ctx, sx, sy, sw, sh, radius * 0.6);
+    ctx.clip();
+    ctx.drawImage(uploadedImage, sx, sy, sw, sh);
+    ctx.restore();
+    // Notch (iPhone)
+    if (dev.notch) {
+      ctx.fillStyle = '#1a1a1a';
+      const notchW = w * 0.35;
+      const notchH = 24 * s;
+      const notchX = x + (w - notchW) / 2;
+      roundRect(ctx, notchX, y + bezel - 2 * s, notchW, notchH, 12 * s, false, true);
+      ctx.fill();
+    }
+    // Side buttons
+    if (currentDevice === 'iphone') {
+      ctx.fillStyle = '#374151';
+      ctx.fillRect(x + w, y + h * 0.2, 3 * s, 30 * s); // power
+      ctx.fillRect(x - 3 * s, y + h * 0.15, 3 * s, 20 * s); // mute
+      ctx.fillRect(x - 3 * s, y + h * 0.25, 3 * s, 30 * s); // vol up
+      ctx.fillRect(x - 3 * s, y + h * 0.35, 3 * s, 30 * s); // vol down
+    }
+  }
+}
+
+function roundRect(ctx, x, y, w, h, r, topOnly, bottomOnly) {
+  ctx.beginPath();
+  if (topOnly) {
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.lineTo(x + w, y + h);
+    ctx.lineTo(x, y + h);
+    ctx.arcTo(x, y, x + w, y, r);
+  } else if (bottomOnly) {
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + w, y);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+  } else {
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+  }
+  ctx.closePath();
+}
+
+function downloadPNG(multiplier) {
+  if (!uploadedImage) return;
+  const scale = multiplier || 1;
+  // Render at higher resolution
+  const canvas = document.createElement('canvas');
+  const origCanvas = document.getElementById('preview');
+  const tempCanvas = document.getElementById('preview');
+
+  // Re-render at scale
+  const prevW = tempCanvas.width;
+  const prevH = tempCanvas.height;
+  renderMockup(scale);
+
+  const link = document.createElement('a');
+  link.download = `mockup-${currentDevice}${scale > 1 ? '@' + scale + 'x' : ''}.png`;
+  link.href = tempCanvas.toDataURL('image/png');
+  link.click();
+  showToast(`Downloaded ${scale > 1 ? scale + 'x ' : ''}PNG`);
+
+  // Restore normal render
+  if (scale !== 1) setTimeout(() => renderMockup(1), 100);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

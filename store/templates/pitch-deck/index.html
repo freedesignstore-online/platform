@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pitch Deck Generator - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a { color: #ec4899; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.back { display: inline-block; margin-bottom: 24px; color: #ec4899; font-weight: 500; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.subtitle { color: #6b7280; margin-bottom: 24px; font-size: 15px; }
+.container { max-width: 1100px; margin: 0 auto; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
+.btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 14px; transition: all .15s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #fff; border: 1px solid #e5e7eb; color: #1a1a1a; }
+.btn-secondary:hover { border-color: #ec4899; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+.form-group textarea { resize: vertical; min-height: 80px; }
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #ec4899; box-shadow: 0 0 0 3px #ec489920; }
+.type-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.type-card { border: 2px solid #e5e7eb; border-radius: 12px; padding: 20px 16px; text-align: center; cursor: pointer; transition: all .15s; }
+.type-card:hover { border-color: #ec4899; }
+.type-card.active { border-color: #ec4899; background: #fdf2f8; }
+.type-card .icon { font-size: 28px; margin-bottom: 8px; }
+.type-card .name { font-weight: 600; font-size: 14px; }
+.type-card .desc { font-size: 12px; color: #6b7280; margin-top: 4px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 700px) { .form-grid { grid-template-columns: 1fr; } }
+.step-indicator { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.step { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: #f3f4f6; color: #6b7280; }
+.step.active { background: #ec4899; color: #fff; }
+.step.done { background: #10b981; color: #fff; }
+.step-line { flex: 1; height: 2px; background: #e5e7eb; }
+
+/* Slideshow */
+.slideshow-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; z-index: 1000; display: none; flex-direction: column; }
+.slideshow-overlay.visible { display: flex; }
+.slideshow-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; background: rgba(0,0,0,.8); }
+.slideshow-toolbar span { color: #fff; font-size: 14px; }
+.slideshow-toolbar button { background: rgba(255,255,255,.15); border: none; color: #fff; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 13px; }
+.slideshow-toolbar button:hover { background: rgba(255,255,255,.25); }
+.slideshow-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; position: relative; }
+.slide-container { width: 100%; max-width: 960px; aspect-ratio: 16/9; border-radius: 12px; overflow: hidden; position: relative; }
+.slide { width: 100%; height: 100%; padding: 60px; display: flex; flex-direction: column; justify-content: center; position: absolute; top: 0; left: 0; opacity: 0; transition: opacity .4s; }
+.slide.active { opacity: 1; }
+.slide h2 { font-size: 42px; font-weight: 800; margin-bottom: 16px; line-height: 1.2; }
+.slide h3 { font-size: 24px; font-weight: 600; margin-bottom: 12px; opacity: .9; }
+.slide p { font-size: 20px; line-height: 1.6; opacity: .85; }
+.slide ul { list-style: none; padding: 0; }
+.slide ul li { font-size: 20px; padding: 8px 0; opacity: .85; position: relative; padding-left: 28px; }
+.slide ul li::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; border-radius: 50%; background: currentColor; opacity: .5; }
+.slide .big-number { font-size: 64px; font-weight: 800; margin-bottom: 8px; }
+.slide-nav { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+.slide-nav button { width: 40px; height: 40px; border-radius: 50%; border: 2px solid rgba(255,255,255,.4); background: rgba(255,255,255,.1); color: #fff; font-size: 18px; cursor: pointer; transition: all .15s; }
+.slide-nav button:hover { background: rgba(255,255,255,.25); border-color: rgba(255,255,255,.7); }
+.slide-dots { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
+.slide-dots .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.3); cursor: pointer; transition: all .15s; }
+.slide-dots .dot.active { background: #fff; transform: scale(1.3); }
+
+.preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+.preview-thumb { aspect-ratio: 16/9; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; padding: 16px; font-size: 10px; cursor: pointer; transition: transform .15s; border: 2px solid transparent; }
+.preview-thumb:hover { transform: scale(1.03); border-color: #ec4899; }
+.preview-thumb h4 { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+.preview-thumb p { opacity: .7; line-height: 1.3; }
+.hidden { display: none; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 2000; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<div class="container">
+<h1>Pitch Deck Generator</h1>
+<p class="subtitle">Build beautiful presentation decks from structured content. Choose a type, fill in the details, generate slides.</p>
+
+<div class="step-indicator">
+  <div class="step active" id="s1">1</div>
+  <div class="step-line"></div>
+  <div class="step" id="s2">2</div>
+  <div class="step-line"></div>
+  <div class="step" id="s3">3</div>
+</div>
+
+<!-- Step 1: Choose Type -->
+<div class="panel" id="stepType">
+  <h3 style="margin-bottom:16px; font-size:18px;">Choose Deck Type</h3>
+  <div class="type-grid">
+    <div class="type-card" data-type="startup" onclick="selectType('startup')">
+      <div class="icon">&#x1F680;</div>
+      <div class="name">Startup Pitch</div>
+      <div class="desc">Problem, Solution, Market, Model, Traction, Team, Ask</div>
+    </div>
+    <div class="type-card" data-type="sales" onclick="selectType('sales')">
+      <div class="icon">&#x1F4B0;</div>
+      <div class="name">Sales Deck</div>
+      <div class="desc">Pain, Product, Benefits, Pricing, Proof, CTA</div>
+    </div>
+    <div class="type-card" data-type="proposal" onclick="selectType('proposal')">
+      <div class="icon">&#x1F4CB;</div>
+      <div class="name">Project Proposal</div>
+      <div class="desc">Context, Scope, Timeline, Budget, Deliverables, Next Steps</div>
+    </div>
+    <div class="type-card" data-type="update" onclick="selectType('update')">
+      <div class="icon">&#x1F4C8;</div>
+      <div class="name">Investor Update</div>
+      <div class="desc">Highlights, Metrics, Challenges, Roadmap, Ask</div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 2: Form -->
+<div class="panel hidden" id="stepForm">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <h3 style="font-size:18px;" id="formTitle">Fill In Details</h3>
+    <button class="btn btn-secondary" onclick="goBack()">Back</button>
+  </div>
+  <div id="formFields"></div>
+  <div style="margin-top:20px; display:flex; gap:12px;">
+    <button class="btn btn-primary" onclick="generateDeck()">Generate Deck</button>
+  </div>
+</div>
+
+<!-- Step 3: Preview & Present -->
+<div class="panel hidden" id="stepPreview">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+    <h3 style="font-size:18px;">Your Deck</h3>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="btn btn-secondary" onclick="goBackToForm()">Edit Content</button>
+      <button class="btn btn-secondary" onclick="presentDeck()">Present Fullscreen</button>
+      <button class="btn btn-primary" onclick="downloadDeck()">Download HTML</button>
+    </div>
+  </div>
+  <div class="preview-grid" id="previewGrid"></div>
+</div>
+</div>
+
+<!-- Slideshow overlay -->
+<div class="slideshow-overlay" id="slideshow">
+  <div class="slideshow-toolbar">
+    <span id="slideCounter">1 / 10</span>
+    <div style="display:flex; gap:8px;">
+      <button onclick="toggleFullscreen()">Fullscreen</button>
+      <button onclick="closeSlideshow()">Close (Esc)</button>
+    </div>
+  </div>
+  <div class="slideshow-main">
+    <div class="slide-container" id="slideContainer"></div>
+    <div class="slide-dots" id="slideDots"></div>
+    <div class="slide-nav">
+      <button onclick="prevSlide()">&#8592;</button>
+      <button onclick="nextSlide()">&#8594;</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TYPES = {
+  startup: {
+    name: 'Startup Pitch',
+    fields: [
+      { id: 'company', label: 'Company Name', type: 'input', placeholder: 'Acme Inc.' },
+      { id: 'tagline', label: 'One-liner / Tagline', type: 'input', placeholder: 'We make X easy for Y' },
+      { id: 'problem', label: 'Problem', type: 'textarea', placeholder: 'What pain point does your target audience face?' },
+      { id: 'solution', label: 'Solution', type: 'textarea', placeholder: 'How does your product solve this?' },
+      { id: 'market', label: 'Market Size', type: 'textarea', placeholder: 'TAM, SAM, SOM numbers and context' },
+      { id: 'model', label: 'Business Model', type: 'textarea', placeholder: 'How do you make money? Pricing, revenue streams' },
+      { id: 'traction', label: 'Traction / Milestones', type: 'textarea', placeholder: 'Users, revenue, partnerships, growth rate' },
+      { id: 'team', label: 'Team', type: 'textarea', placeholder: 'Key team members and their relevant experience' },
+      { id: 'ask', label: 'The Ask', type: 'textarea', placeholder: 'How much are you raising? What will you use it for?' }
+    ]
+  },
+  sales: {
+    name: 'Sales Deck',
+    fields: [
+      { id: 'company', label: 'Company / Product Name', type: 'input', placeholder: 'ProductName' },
+      { id: 'tagline', label: 'Tagline', type: 'input', placeholder: 'The fastest way to...' },
+      { id: 'pain', label: 'Pain Point', type: 'textarea', placeholder: 'What problem does your buyer face daily?' },
+      { id: 'product', label: 'Product Overview', type: 'textarea', placeholder: 'What is your product and how does it work?' },
+      { id: 'benefits', label: 'Key Benefits (one per line)', type: 'textarea', placeholder: '50% faster onboarding\n3x more conversions\nZero maintenance' },
+      { id: 'pricing', label: 'Pricing', type: 'textarea', placeholder: 'Tiers, pricing model, free trial details' },
+      { id: 'proof', label: 'Social Proof', type: 'textarea', placeholder: 'Testimonials, case studies, logos, numbers' },
+      { id: 'cta', label: 'Call to Action', type: 'textarea', placeholder: 'What should the prospect do next?' }
+    ]
+  },
+  proposal: {
+    name: 'Project Proposal',
+    fields: [
+      { id: 'title', label: 'Project Title', type: 'input', placeholder: 'Website Redesign' },
+      { id: 'client', label: 'Client / Audience', type: 'input', placeholder: 'Acme Corp' },
+      { id: 'context', label: 'Context / Background', type: 'textarea', placeholder: 'Why is this project needed? What prompted it?' },
+      { id: 'scope', label: 'Scope of Work', type: 'textarea', placeholder: 'What will be delivered? List key items.' },
+      { id: 'timeline', label: 'Timeline', type: 'textarea', placeholder: 'Phases and milestones with dates' },
+      { id: 'budget', label: 'Budget', type: 'textarea', placeholder: 'Total cost, payment schedule, what is included' },
+      { id: 'deliverables', label: 'Key Deliverables (one per line)', type: 'textarea', placeholder: 'Design mockups\nDevelopment\nQA testing\nLaunch support' },
+      { id: 'next', label: 'Next Steps', type: 'textarea', placeholder: 'What happens after approval?' }
+    ]
+  },
+  update: {
+    name: 'Investor Update',
+    fields: [
+      { id: 'company', label: 'Company Name', type: 'input', placeholder: 'Acme Inc.' },
+      { id: 'period', label: 'Reporting Period', type: 'input', placeholder: 'Q2 2026' },
+      { id: 'highlights', label: 'Highlights / Wins', type: 'textarea', placeholder: 'Top 3-5 wins this period' },
+      { id: 'metrics', label: 'Key Metrics', type: 'textarea', placeholder: 'MRR: $50k\nUsers: 10,000\nChurn: 3%' },
+      { id: 'challenges', label: 'Challenges', type: 'textarea', placeholder: 'What went wrong? What are you working through?' },
+      { id: 'roadmap', label: 'Roadmap / Next Quarter', type: 'textarea', placeholder: 'Key priorities for next period' },
+      { id: 'ask', label: 'Asks / How Investors Can Help', type: 'textarea', placeholder: 'Introductions, hiring, advice needed' }
+    ]
+  }
+};
+
+const GRADIENTS = [
+  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+  'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
+  'linear-gradient(135deg, #141e30 0%, #243b55 100%)',
+  'linear-gradient(135deg, #232526 0%, #414345 100%)',
+  'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
+  'linear-gradient(135deg, #2c3e50 0%, #3498db 100%)',
+  'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)',
+  'linear-gradient(135deg, #200122 0%, #6f0000 100%)',
+  'linear-gradient(135deg, #1a2a6c 0%, #b21f1f 50%, #fdbb2d 100%)',
+  'linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #2d2d44 100%)',
+  'linear-gradient(135deg, #360033 0%, #0b8793 100%)',
+  'linear-gradient(135deg, #141414 0%, #2a2a2a 100%)'
+];
+
+let selectedType = null;
+let slides = [];
+let currentSlide = 0;
+
+function selectType(type) {
+  selectedType = type;
+  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('active'));
+  document.querySelector(`[data-type="${type}"]`).classList.add('active');
+  showForm();
+}
+
+function showForm() {
+  const config = TYPES[selectedType];
+  document.getElementById('formTitle').textContent = config.name;
+  const container = document.getElementById('formFields');
+  const grid = config.fields.length > 4;
+  container.innerHTML = config.fields.map(f => `
+    <div class="form-group">
+      <label for="field_${f.id}">${f.label}</label>
+      ${f.type === 'textarea'
+        ? `<textarea id="field_${f.id}" placeholder="${f.placeholder}"></textarea>`
+        : `<input type="text" id="field_${f.id}" placeholder="${f.placeholder}">`}
+    </div>
+  `).join('');
+
+  document.getElementById('stepType').classList.add('hidden');
+  document.getElementById('stepForm').classList.remove('hidden');
+  document.getElementById('stepPreview').classList.add('hidden');
+  document.getElementById('s1').className = 'step done';
+  document.getElementById('s2').className = 'step active';
+  document.getElementById('s3').className = 'step';
+}
+
+function goBack() {
+  document.getElementById('stepType').classList.remove('hidden');
+  document.getElementById('stepForm').classList.add('hidden');
+  document.getElementById('s1').className = 'step active';
+  document.getElementById('s2').className = 'step';
+}
+
+function goBackToForm() {
+  document.getElementById('stepForm').classList.remove('hidden');
+  document.getElementById('stepPreview').classList.add('hidden');
+  document.getElementById('s2').className = 'step active';
+  document.getElementById('s3').className = 'step';
+}
+
+function getFieldValue(id) {
+  const el = document.getElementById('field_' + id);
+  return el ? el.value.trim() : '';
+}
+
+function textToList(text) {
+  return text.split('\n').map(l => l.trim()).filter(Boolean);
+}
+
+function generateDeck() {
+  const data = {};
+  TYPES[selectedType].fields.forEach(f => { data[f.id] = getFieldValue(f.id); });
+
+  slides = [];
+  if (selectedType === 'startup') {
+    slides.push({ title: data.company || 'Startup Pitch', subtitle: data.tagline, type: 'title' });
+    slides.push({ title: 'The Problem', body: data.problem, type: 'text' });
+    slides.push({ title: 'Our Solution', body: data.solution, type: 'text' });
+    slides.push({ title: 'Market Opportunity', body: data.market, type: 'text' });
+    slides.push({ title: 'Business Model', body: data.model, type: 'text' });
+    slides.push({ title: 'Traction', body: data.traction, type: 'list' });
+    slides.push({ title: 'The Team', body: data.team, type: 'list' });
+    slides.push({ title: 'The Ask', body: data.ask, type: 'text' });
+    slides.push({ title: 'Thank You', subtitle: data.company + (data.tagline ? ' | ' + data.tagline : ''), type: 'title' });
+    slides.push({ title: 'Q&A', subtitle: 'We\'d love to answer your questions', type: 'title' });
+  } else if (selectedType === 'sales') {
+    slides.push({ title: data.company || 'Sales Deck', subtitle: data.tagline, type: 'title' });
+    slides.push({ title: 'The Challenge', body: data.pain, type: 'text' });
+    slides.push({ title: 'Introducing ' + (data.company || 'Our Product'), body: data.product, type: 'text' });
+    const benefits = textToList(data.benefits);
+    slides.push({ title: 'Why Choose Us', items: benefits.length ? benefits : ['Better', 'Faster', 'Simpler'], type: 'bullets' });
+    slides.push({ title: 'Pricing', body: data.pricing, type: 'text' });
+    slides.push({ title: 'Social Proof', body: data.proof, type: 'text' });
+    slides.push({ title: 'What Others Say', body: data.proof, type: 'quote' });
+    slides.push({ title: 'Next Steps', body: data.cta, type: 'text' });
+    slides.push({ title: 'Let\'s Talk', subtitle: data.cta || 'Ready to get started?', type: 'title' });
+    slides.push({ title: 'Thank You', subtitle: data.company, type: 'title' });
+  } else if (selectedType === 'proposal') {
+    slides.push({ title: data.title || 'Project Proposal', subtitle: 'Prepared for ' + (data.client || 'Client'), type: 'title' });
+    slides.push({ title: 'Background', body: data.context, type: 'text' });
+    slides.push({ title: 'Scope of Work', body: data.scope, type: 'text' });
+    const deliverables = textToList(data.deliverables);
+    slides.push({ title: 'Deliverables', items: deliverables.length ? deliverables : ['Deliverable 1'], type: 'bullets' });
+    slides.push({ title: 'Timeline', body: data.timeline, type: 'text' });
+    slides.push({ title: 'Investment', body: data.budget, type: 'text' });
+    slides.push({ title: 'Next Steps', body: data.next, type: 'text' });
+    slides.push({ title: 'Let\'s Build Together', subtitle: data.title, type: 'title' });
+    slides.push({ title: 'Thank You', subtitle: 'Prepared for ' + (data.client || ''), type: 'title' });
+    slides.push({ title: 'Questions?', subtitle: 'We\'re happy to discuss details', type: 'title' });
+  } else if (selectedType === 'update') {
+    slides.push({ title: data.company || 'Investor Update', subtitle: data.period || 'This Quarter', type: 'title' });
+    slides.push({ title: 'Highlights', body: data.highlights, type: 'list' });
+    slides.push({ title: 'Key Metrics', body: data.metrics, type: 'list' });
+    const metrics = textToList(data.metrics);
+    if (metrics.length > 0) {
+      const first = metrics[0];
+      const match = first.match(/([\d,.]+[kKmMbB%]*)/);
+      if (match) slides.push({ title: '', number: match[1], subtitle: first.replace(match[1], '').replace(/[:]\s*/, ''), type: 'metric' });
+      else slides.push({ title: 'By the Numbers', body: data.metrics, type: 'text' });
+    }
+    slides.push({ title: 'Challenges', body: data.challenges, type: 'text' });
+    slides.push({ title: 'Roadmap', body: data.roadmap, type: 'list' });
+    slides.push({ title: 'How You Can Help', body: data.ask, type: 'text' });
+    slides.push({ title: 'Onward', subtitle: data.company + ' | ' + (data.period || ''), type: 'title' });
+    slides.push({ title: 'Thank You', subtitle: 'Questions welcome', type: 'title' });
+  }
+
+  // Remove slides with no meaningful content (except title slides)
+  slides = slides.filter(s => {
+    if (s.type === 'title') return true;
+    if (s.type === 'bullets') return s.items && s.items.length > 0;
+    if (s.type === 'metric') return s.number;
+    return s.body;
+  });
+
+  showPreview();
+}
+
+function showPreview() {
+  document.getElementById('stepForm').classList.add('hidden');
+  document.getElementById('stepPreview').classList.remove('hidden');
+  document.getElementById('s2').className = 'step done';
+  document.getElementById('s3').className = 'step active';
+
+  const grid = document.getElementById('previewGrid');
+  grid.innerHTML = slides.map((s, i) => {
+    const bg = GRADIENTS[i % GRADIENTS.length];
+    return `<div class="preview-thumb" style="background:${bg}; color:#fff;" onclick="presentDeck(${i})">
+      <h4>${s.title || ''}</h4>
+      <p>${s.subtitle || s.body?.substring(0, 60) || ''}</p>
+    </div>`;
+  }).join('');
+}
+
+function presentDeck(startAt) {
+  currentSlide = startAt || 0;
+  const container = document.getElementById('slideContainer');
+  container.innerHTML = slides.map((s, i) => {
+    const bg = GRADIENTS[i % GRADIENTS.length];
+    let content = '';
+    if (s.type === 'title') {
+      content = `<h2>${s.title}</h2>${s.subtitle ? `<h3>${s.subtitle}</h3>` : ''}`;
+    } else if (s.type === 'text' || s.type === 'list') {
+      const lines = textToList(s.body || '');
+      if (lines.length > 1) {
+        content = `<h3>${s.title}</h3><ul>${lines.map(l => `<li>${l}</li>`).join('')}</ul>`;
+      } else {
+        content = `<h3>${s.title}</h3><p>${s.body || ''}</p>`;
+      }
+    } else if (s.type === 'bullets') {
+      content = `<h3>${s.title}</h3><ul>${(s.items||[]).map(l => `<li>${l}</li>`).join('')}</ul>`;
+    } else if (s.type === 'quote') {
+      const lines = textToList(s.body || '');
+      content = `<h3>${s.title}</h3><p style="font-style:italic;font-size:24px;opacity:.9;">"${lines[0] || s.body || ''}"</p>`;
+    } else if (s.type === 'metric') {
+      content = `<div class="big-number">${s.number}</div><h3>${s.subtitle || ''}</h3>`;
+    }
+    return `<div class="slide ${i === currentSlide ? 'active' : ''}" style="background:${bg}; color:#fff;">${content}</div>`;
+  }).join('');
+
+  const dots = document.getElementById('slideDots');
+  dots.innerHTML = slides.map((_, i) => `<div class="dot ${i === currentSlide ? 'active' : ''}" onclick="goToSlide(${i})"></div>`).join('');
+
+  updateSlideCounter();
+  document.getElementById('slideshow').classList.add('visible');
+}
+
+function closeSlideshow() {
+  document.getElementById('slideshow').classList.remove('visible');
+  if (document.fullscreenElement) document.exitFullscreen();
+}
+
+function nextSlide() {
+  if (currentSlide < slides.length - 1) goToSlide(currentSlide + 1);
+}
+
+function prevSlide() {
+  if (currentSlide > 0) goToSlide(currentSlide - 1);
+}
+
+function goToSlide(idx) {
+  currentSlide = idx;
+  document.querySelectorAll('#slideContainer .slide').forEach((s, i) => s.classList.toggle('active', i === idx));
+  document.querySelectorAll('#slideDots .dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+  updateSlideCounter();
+}
+
+function updateSlideCounter() {
+  document.getElementById('slideCounter').textContent = `${currentSlide + 1} / ${slides.length}`;
+}
+
+function toggleFullscreen() {
+  const el = document.getElementById('slideshow');
+  if (!document.fullscreenElement) el.requestFullscreen();
+  else document.exitFullscreen();
+}
+
+function downloadDeck() {
+  let html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${slides[0]?.title || 'Pitch Deck'}</title><style>`;
+  html += `*{margin:0;padding:0;box-sizing:border-box;}body{background:#000;font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;}`;
+  html += `.slide{width:100vw;height:100vh;display:none;flex-direction:column;justify-content:center;padding:80px;color:#fff;position:relative;}`;
+  html += `.slide.active{display:flex;}`;
+  html += `.slide h2{font-size:56px;font-weight:800;margin-bottom:16px;line-height:1.1;}`;
+  html += `.slide h3{font-size:28px;font-weight:600;margin-bottom:16px;opacity:.9;}`;
+  html += `.slide p{font-size:22px;line-height:1.7;opacity:.85;max-width:700px;}`;
+  html += `.slide ul{list-style:none;padding:0;}.slide li{font-size:22px;padding:10px 0;opacity:.85;padding-left:28px;position:relative;}`;
+  html += `.slide li::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;background:currentColor;opacity:.5;}`;
+  html += `.slide .big-number{font-size:80px;font-weight:800;margin-bottom:8px;}`;
+  html += `.nav{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:10;}`;
+  html += `.nav button{width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1);color:#fff;font-size:20px;cursor:pointer;}`;
+  html += `.nav button:hover{background:rgba(255,255,255,.2);}`;
+  html += `.counter{position:fixed;top:20px;right:30px;color:rgba(255,255,255,.6);font-size:14px;font-family:inherit;}`;
+  html += `</style></head><body>`;
+
+  slides.forEach((s, i) => {
+    const bg = GRADIENTS[i % GRADIENTS.length];
+    let content = '';
+    if (s.type === 'title') {
+      content = `<h2>${esc(s.title)}</h2>${s.subtitle ? `<h3>${esc(s.subtitle)}</h3>` : ''}`;
+    } else if (s.type === 'text' || s.type === 'list') {
+      const lines = textToList(s.body || '');
+      if (lines.length > 1) content = `<h3>${esc(s.title)}</h3><ul>${lines.map(l => `<li>${esc(l)}</li>`).join('')}</ul>`;
+      else content = `<h3>${esc(s.title)}</h3><p>${esc(s.body || '')}</p>`;
+    } else if (s.type === 'bullets') {
+      content = `<h3>${esc(s.title)}</h3><ul>${(s.items||[]).map(l => `<li>${esc(l)}</li>`).join('')}</ul>`;
+    } else if (s.type === 'quote') {
+      content = `<h3>${esc(s.title)}</h3><p style="font-style:italic;font-size:26px;">"${esc(s.body || '')}"</p>`;
+    } else if (s.type === 'metric') {
+      content = `<div class="big-number">${esc(s.number || '')}</div><h3>${esc(s.subtitle || '')}</h3>`;
+    }
+    html += `<div class="slide${i === 0 ? ' active' : ''}" style="background:${bg};">${content}</div>`;
+  });
+
+  html += `<div class="counter"><span id="c">1</span> / ${slides.length}</div>`;
+  html += `<div class="nav"><button onclick="go(-1)">&#8592;</button><button onclick="go(1)">&#8594;</button></div>`;
+  html += `<script>let cur=0,total=${slides.length};function go(d){const sl=document.querySelectorAll('.slide');sl[cur].classList.remove('active');cur=Math.max(0,Math.min(total-1,cur+d));sl[cur].classList.add('active');document.getElementById('c').textContent=cur+1;}document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')go(1);if(e.key==='ArrowLeft')go(-1);if(e.key==='Escape'){}});document.addEventListener('click',e=>{if(!e.target.closest('.nav'))go(1);});<\/script>`;
+  html += `</body></html>`;
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (slides[0]?.title || 'pitch-deck').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Deck downloaded as HTML');
+}
+
+function esc(str) {
+  return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('slideshow').classList.contains('visible')) return;
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+  if (e.key === 'Escape') closeSlideshow();
+});
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

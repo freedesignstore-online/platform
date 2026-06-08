@@ -134,6 +134,33 @@
       "iconBg": "#10b981",
       "category": "images",
       "section": "images"
+    },
+    {
+      "id": "pitch-deck",
+      "name": "Pitch Deck Generator",
+      "description": "Choose deck type (Startup/Sales/Investor), fill a form, get 10 pro slides auto-generated. Fullscreen present mode.",
+      "icon": "📊",
+      "iconBg": "#f59e0b",
+      "category": "templates",
+      "section": "templates"
+    },
+    {
+      "id": "design-tokens",
+      "name": "Design Token Generator",
+      "description": "Pick colors + fonts → export as CSS vars, Tailwind, SCSS, JSON, Swift, Kotlin. Live component preview.",
+      "icon": "🎯",
+      "iconBg": "#6366f1",
+      "category": "brand",
+      "section": "brand"
+    },
+    {
+      "id": "mockup-generator",
+      "name": "Device Mockup Generator",
+      "description": "Upload screenshot, choose device (iPhone, MacBook, iPad, Watch). Adjust angle, shadow. Download PNG.",
+      "icon": "📱",
+      "iconBg": "#06b6d4",
+      "category": "templates",
+      "section": "templates"
     }
   ]
 }
