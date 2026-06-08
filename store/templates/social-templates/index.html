@@ -5,295 +5,649 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Social Media Template Editor - FreeDesignStore</title>
 <link rel="icon" href="/favicon.ico">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@700;900&family=Inter:wght@400;600;700;900&family=Space+Grotesk:wght@500;700&family=DM+Sans:wght@400;500;700&family=Sora:wght@400;600;700;800&family=Outfit:wght@400;600;700;800&family=Poppins:wght@400;600;700;800;900&family=Raleway:wght@400;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; }
 a { color: #ec4899; text-decoration: none; }
 a:hover { text-decoration: underline; }
-.back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; font-size: 14px; color: #6b7280; }
-.back:hover { color: #ec4899; }
-h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
-.subtitle { color: #6b7280; margin-bottom: 24px; font-size: 15px; }
-.container { max-width: 1200px; margin: 0 auto; }
-.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
-.layout { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
-@media (max-width: 850px) { .layout { grid-template-columns: 1fr; } }
-.canvas-area { display: flex; align-items: center; justify-content: center; background: repeating-conic-gradient(#e5e7eb 0% 25%, transparent 0% 50%) 50%/20px 20px; border-radius: 12px; padding: 24px; min-height: 400px; }
-#canvas { border-radius: 4px; box-shadow: 0 4px 20px rgba(0,0,0,.15); }
-label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 4px; margin-top: 14px; }
+.topbar { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 10px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; }
+.back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #6b7280; text-decoration: none; }
+.back:hover { color: #ec4899; text-decoration: none; }
+.topbar h1 { font-size: 16px; font-weight: 700; flex: 1; }
+.topbar-actions { display: flex; gap: 8px; }
+.app { display: grid; grid-template-columns: 280px 1fr 300px; height: calc(100vh - 49px); }
+@media (max-width: 1100px) { .app { grid-template-columns: 240px 1fr 260px; } }
+@media (max-width: 860px) { .app { grid-template-columns: 1fr; height: auto; } }
+.left-panel { background: #fff; border-right: 1px solid #e5e7eb; overflow-y: auto; padding: 16px; }
+.left-panel h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #6b7280; margin-bottom: 12px; }
+.platform-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 16px; }
+.platform-tab { padding: 5px 10px; border-radius: 6px; border: 1px solid #e5e7eb; background: #fff; font-size: 11px; font-weight: 600; cursor: pointer; color: #6b7280; transition: all .15s; font-family: inherit; }
+.platform-tab:hover { border-color: #ec4899; color: #ec4899; }
+.platform-tab.active { background: #ec4899; color: #fff; border-color: #ec4899; }
+.tpl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tpl-card { border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; overflow: hidden; transition: all .15s; background: #fff; }
+.tpl-card:hover { border-color: #ec4899; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(236,72,153,.12); }
+.tpl-card.active { border-color: #ec4899; box-shadow: 0 0 0 2px rgba(236,72,153,.2); }
+.tpl-card canvas { width: 100%; display: block; }
+.tpl-card .tpl-name { padding: 4px 6px; font-size: 10px; font-weight: 600; color: #6b7280; text-align: center; }
+.center-panel { background: repeating-conic-gradient(#f0f0f0 0% 25%, transparent 0% 50%) 50%/20px 20px; display: flex; align-items: center; justify-content: center; overflow: auto; padding: 32px; position: relative; }
+#mainCanvas { border-radius: 4px; box-shadow: 0 8px 40px rgba(0,0,0,.18); cursor: crosshair; }
+.right-panel { background: #fff; border-left: 1px solid #e5e7eb; overflow-y: auto; padding: 16px; }
+.section { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #f3f4f6; }
+.section:last-child { border-bottom: none; }
+.section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #9ca3af; margin-bottom: 10px; }
+label { display: block; font-size: 12px; font-weight: 500; color: #6b7280; margin-bottom: 3px; margin-top: 10px; }
 label:first-child { margin-top: 0; }
-select, input[type="text"], textarea { width: 100%; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
-textarea { resize: vertical; min-height: 60px; }
-input[type="color"] { width: 100%; height: 38px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 3px; cursor: pointer; }
-.color-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.templates-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
-.tpl-btn { aspect-ratio: 1; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 4px; font-weight: 600; color: #6b7280; transition: all .15s; }
-.tpl-btn:hover, .tpl-btn.active { border-color: #ec4899; color: #ec4899; }
-.btn { padding: 10px 18px; border-radius: 8px; border: none; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s; }
-.btn-primary { background: #ec4899; color: #fff; width: 100%; margin-top: 20px; }
+select, input[type="text"], input[type="number"], textarea { width: 100%; padding: 7px 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-family: inherit; font-size: 13px; background: #fff; outline: none; transition: border-color .15s; }
+select:focus, input:focus, textarea:focus { border-color: #ec4899; }
+textarea { resize: vertical; min-height: 50px; }
+input[type="color"] { width: 100%; height: 32px; border: 1px solid #e5e7eb; border-radius: 6px; padding: 2px; cursor: pointer; }
+input[type="range"] { width: 100%; accent-color: #ec4899; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.btn { padding: 8px 14px; border-radius: 8px; border: none; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.btn-primary { background: #ec4899; color: #fff; }
 .btn-primary:hover { background: #db2777; }
-.btn-secondary { background: #fff; border: 1px solid #e5e7eb; color: #1a1a1a; width: 100%; margin-top: 8px; }
-.btn-secondary:hover { border-color: #ec4899; }
+.btn-sm { padding: 5px 10px; font-size: 11px; border-radius: 6px; }
+.btn-outline { background: #fff; border: 1px solid #e5e7eb; color: #1a1a1a; }
+.btn-outline:hover { border-color: #ec4899; color: #ec4899; }
+.btn-block { width: 100%; }
+.btn-ghost { background: transparent; border: 1px solid transparent; color: #6b7280; padding: 6px 10px; }
+.btn-ghost:hover { color: #ec4899; background: #fdf2f8; }
+.grad-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 6px; }
+.grad-swatch { width: 100%; aspect-ratio: 1; border-radius: 6px; border: 2px solid transparent; cursor: pointer; transition: all .12s; }
+.grad-swatch:hover, .grad-swatch.active { border-color: #ec4899; transform: scale(1.1); }
+.pos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 4px; }
+.pos-btn { padding: 4px; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 10px; text-align: center; cursor: pointer; background: #fff; font-family: inherit; color: #6b7280; }
+.pos-btn:hover, .pos-btn.active { border-color: #ec4899; color: #ec4899; background: #fdf2f8; }
+.history-list { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+.history-thumb { aspect-ratio: 1; border: 2px solid #e5e7eb; border-radius: 6px; cursor: pointer; overflow: hidden; transition: all .12s; }
+.history-thumb:hover { border-color: #ec4899; }
+.history-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; display: none; align-items: center; justify-content: center; padding: 24px; }
+.modal-overlay.open { display: flex; }
+.modal { background: #fff; border-radius: 16px; max-width: 900px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 32px; }
+.modal h2 { font-size: 20px; margin-bottom: 16px; }
+.batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin: 16px 0; }
+.batch-card { border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; cursor: pointer; }
+.batch-card canvas { width: 100%; display: block; }
+.batch-card .batch-label { padding: 6px 8px; font-size: 11px; font-weight: 600; color: #6b7280; text-align: center; background: #f9fafb; }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1a1a1a; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; z-index: 300; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.toast.show { opacity: 1; }
 </style>
 </head>
 <body>
-<div class="container">
-  <a href="/" class="back">&larr; Back to FreeDesignStore</a>
+<div class="topbar">
+  <a href="/" class="back">&larr; Back</a>
   <h1>Social Media Template Editor</h1>
-  <p class="subtitle">Create platform-perfect social media graphics. Choose a template, customize, and download.</p>
-
-  <div class="layout">
-    <div class="panel canvas-area">
-      <canvas id="canvas"></canvas>
-    </div>
-    <div class="panel">
-      <label>Platform</label>
-      <select id="platform">
-        <option value="ig-post">Instagram Post (1080x1080)</option>
-        <option value="ig-story">Instagram Story (1080x1920)</option>
-        <option value="twitter">X / Twitter (1200x675)</option>
-        <option value="linkedin">LinkedIn (1200x627)</option>
-        <option value="facebook">Facebook (1200x630)</option>
-      </select>
-
-      <label>Layout Template</label>
-      <div class="templates-row" id="templatesRow"></div>
-
-      <label>Heading</label>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost btn-sm" id="historyBtn">History</button>
+    <button class="btn btn-ghost btn-sm" id="brandBtn">Brand Kit</button>
+    <button class="btn btn-ghost btn-sm" id="batchBtn">All Sizes</button>
+    <button class="btn btn-outline btn-sm" id="copyBtn">Copy</button>
+    <button class="btn btn-outline btn-sm" id="jpegBtn">JPEG</button>
+    <button class="btn btn-primary btn-sm" id="downloadBtn">PNG</button>
+  </div>
+</div>
+<div class="app">
+  <div class="left-panel">
+    <h2>Platform</h2>
+    <div class="platform-tabs" id="platformTabs"></div>
+    <h2>Templates</h2>
+    <div class="tpl-grid" id="tplGrid"></div>
+  </div>
+  <div class="center-panel"><canvas id="mainCanvas"></canvas></div>
+  <div class="right-panel">
+    <div class="section">
+      <div class="section-title">Heading</div>
       <input type="text" id="heading" value="Your Headline Here" maxlength="80">
-
-      <label>Subheading</label>
+      <div class="row" style="margin-top:8px">
+        <div><label>Font</label><select id="headingFont"></select></div>
+        <div><label>Weight</label><select id="headingWeight">
+          <option value="400">Regular</option><option value="600">Semi</option>
+          <option value="700" selected>Bold</option><option value="800">Extra</option><option value="900">Black</option>
+        </select></div>
+      </div>
+      <div class="row">
+        <div><label>Size</label><input type="range" id="headingSize" min="24" max="120" value="64"></div>
+        <div><label>Color</label><input type="color" id="headingColor" value="#ffffff"></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Subheading</div>
       <input type="text" id="subheading" value="Supporting text goes here" maxlength="120">
-
-      <label>Body Text</label>
-      <textarea id="bodyText">Add your message or call to action</textarea>
-
-      <div class="color-row">
-        <div>
-          <label>Background</label>
-          <input type="color" id="bgColor" value="#1a1a1a">
-        </div>
-        <div>
-          <label>Text Color</label>
-          <input type="color" id="textColor" value="#ffffff">
-        </div>
+      <div class="row">
+        <div><label>Size</label><input type="range" id="subSize" min="14" max="60" value="28"></div>
+        <div><label>Color</label><input type="color" id="subColor" value="#ffffff"></div>
       </div>
-      <div class="color-row">
-        <div>
-          <label>Accent</label>
-          <input type="color" id="accentColor" value="#ec4899">
-        </div>
-        <div>
-          <label>Background Image</label>
-          <input type="file" id="bgImage" accept="image/*" style="margin-top:4px;font-size:12px;border:none;padding:0;">
-        </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Body Text</div>
+      <textarea id="bodyText" rows="2">Add your message or call to action</textarea>
+      <div class="row">
+        <div><label>Size</label><input type="range" id="bodySize" min="12" max="48" value="20"></div>
+        <div><label>Color</label><input type="color" id="bodyColor" value="#ffffffcc"></div>
       </div>
-
-      <button class="btn btn-primary" id="downloadBtn">Download PNG</button>
-      <button class="btn btn-secondary" id="resetBtn">Reset</button>
+    </div>
+    <div class="section">
+      <div class="section-title">Background</div>
+      <select id="bgType">
+        <option value="solid">Solid Color</option><option value="linear">Linear Gradient</option>
+        <option value="radial">Radial Gradient</option><option value="image">Upload Image</option>
+        <option value="preset">Preset Gradient</option>
+      </select>
+      <div id="bgSolidOpts"><label>Color</label><input type="color" id="bgSolid" value="#1a1a1a"></div>
+      <div id="bgLinearOpts" hidden>
+        <div class="row"><div><label>Color 1</label><input type="color" id="gradC1" value="#ec4899"></div>
+        <div><label>Color 2</label><input type="color" id="gradC2" value="#8b5cf6"></div></div>
+        <label>Angle</label><input type="range" id="gradAngle" min="0" max="360" value="135">
+      </div>
+      <div id="bgRadialOpts" hidden>
+        <div class="row"><div><label>Inner</label><input type="color" id="radC1" value="#ec4899"></div>
+        <div><label>Outer</label><input type="color" id="radC2" value="#1a1a1a"></div></div>
+      </div>
+      <div id="bgImageOpts" hidden>
+        <label>Upload</label><input type="file" id="bgImage" accept="image/*" style="font-size:12px;border:none;padding:0">
+        <label>Dim</label><input type="range" id="imgDim" min="0" max="90" value="40">
+        <label>Overlay Color</label><input type="color" id="imgDimColor" value="#000000">
+      </div>
+      <div id="bgPresetOpts" hidden><div class="grad-grid" id="presetGrid"></div></div>
+    </div>
+    <div class="section">
+      <div class="section-title">Elements</div>
+      <div class="row" style="gap:4px">
+        <button class="btn btn-outline btn-sm" onclick="addShape('rect')">Rect</button>
+        <button class="btn btn-outline btn-sm" onclick="addShape('circle')">Circle</button>
+        <button class="btn btn-outline btn-sm" onclick="addShape('line')">Line</button>
+        <button class="btn btn-outline btn-sm" onclick="S.shapes=[];render()">Clear</button>
+      </div>
+      <div class="row"><div><label>Color</label><input type="color" id="shapeColor" value="#ec4899"></div>
+      <div><label>Opacity</label><input type="range" id="shapeOpacity" min="10" max="100" value="30"></div></div>
+      <label style="margin-top:12px">Brand Logo</label>
+      <input type="file" id="logoUpload" accept="image/*" style="font-size:12px;border:none;padding:0">
+      <label>Position</label>
+      <div class="pos-grid">
+        <button class="pos-btn" data-pos="tl">TL</button><button class="pos-btn" data-pos="tc">Top</button><button class="pos-btn" data-pos="tr">TR</button>
+        <button class="pos-btn" data-pos="ml">Left</button><button class="pos-btn" data-pos="mc">Mid</button><button class="pos-btn" data-pos="mr">Right</button>
+        <button class="pos-btn" data-pos="bl">BL</button><button class="pos-btn" data-pos="bc">Bot</button><button class="pos-btn active" data-pos="br">BR</button>
+      </div>
+      <label>Logo Scale</label><input type="range" id="logoScale" min="5" max="40" value="12">
+      <label style="margin-top:10px">Watermark</label>
+      <input type="text" id="watermark" placeholder="@yourbrand" maxlength="40">
+    </div>
+    <div class="section">
+      <div class="section-title">Chrome AI</div>
+      <button class="btn btn-outline btn-sm btn-block" id="aiCaptionBtn">AI Caption</button>
+      <button class="btn btn-outline btn-sm btn-block" style="margin-top:4px" id="aiLayoutBtn">AI Layout Suggestion</button>
+      <div id="aiOutput" hidden style="margin-top:8px;padding:8px;background:#f9fafb;border-radius:6px;font-size:12px;color:#374151;white-space:pre-wrap;max-height:120px;overflow-y:auto"></div>
+    </div>
+    <div class="section" id="jpegSection" hidden>
+      <div class="section-title">JPEG Quality</div>
+      <input type="range" id="jpegQuality" min="10" max="100" value="92">
+      <div style="font-size:11px;color:#9ca3af;margin-top:2px">Quality: <span id="jpegQualityVal">92</span>%</div>
+    </div>
+    <div class="section" id="historySection" hidden>
+      <div class="section-title">Recent Designs (last 10)</div>
+      <div class="history-list" id="historyList"></div>
     </div>
   </div>
 </div>
+<div class="modal-overlay" id="batchModal">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h2>All Platform Sizes</h2>
+      <button class="btn btn-outline btn-sm" onclick="closeBatch()">Close</button>
+    </div>
+    <p style="color:#6b7280;font-size:13px;margin-bottom:8px">Your design adapted to every platform. Click any card to download individually.</p>
+    <div class="batch-grid" id="batchGrid"></div>
+    <div style="text-align:right"><button class="btn btn-primary" id="downloadAllBtn">Download All as ZIP</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
 
 <script>
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const platformSel = document.getElementById('platform');
-const headingInput = document.getElementById('heading');
-const subheadingInput = document.getElementById('subheading');
-const bodyTextInput = document.getElementById('bodyText');
-const bgColorInput = document.getElementById('bgColor');
-const textColorInput = document.getElementById('textColor');
-const accentColorInput = document.getElementById('accentColor');
-const bgImageInput = document.getElementById('bgImage');
-const templatesRow = document.getElementById('templatesRow');
-const downloadBtn = document.getElementById('downloadBtn');
-const resetBtn = document.getElementById('resetBtn');
+const PLATFORMS = [
+  { id:'ig-post', name:'Instagram Post', w:1080, h:1080 },
+  { id:'ig-story', name:'Instagram Story', w:1080, h:1920 },
+  { id:'twitter', name:'X / Twitter', w:1200, h:675 },
+  { id:'linkedin', name:'LinkedIn', w:1200, h:627 },
+  { id:'facebook', name:'Facebook', w:1200, h:630 },
+  { id:'youtube', name:'YouTube Thumb', w:1280, h:720 },
+  { id:'pinterest', name:'Pinterest', w:1000, h:1500 },
+  { id:'tiktok', name:'TikTok', w:1080, h:1920 },
+];
+const FONTS = ['Manrope','Playfair Display','Inter','Space Grotesk','DM Sans','Sora','Outfit','Poppins','Raleway','Bebas Neue'];
+const STYLES = ['Minimal','Bold','Gradient','Photo Overlay','Split'];
+const PRESETS = [
+  ['#ec4899','#8b5cf6',135],['#f97316','#ef4444',135],['#06b6d4','#3b82f6',135],
+  ['#10b981','#059669',180],['#f59e0b','#ef4444',90],['#8b5cf6','#3b82f6',180],
+  ['#ec4899','#f97316',45],['#1a1a1a','#374151',180],['#fbbf24','#f59e0b',135],
+  ['#14b8a6','#06b6d4',135],['#e11d48','#be123c',180],['#7c3aed','#c084fc',135],
+  ['#0ea5e9','#2dd4bf',135],['#f43f5e','#fb923c',90],['#6366f1','#ec4899',135],
+  ['#059669','#34d399',135],['#dc2626','#1a1a1a',180],['#fde68a','#fca5a5',135],
+  ['#a78bfa','#f0abfc',90],['#1e3a5f','#0ea5e9',135],
+];
 
-const sizes = {
-  'ig-post': [1080, 1080],
-  'ig-story': [1080, 1920],
-  'twitter': [1200, 675],
-  'linkedin': [1200, 627],
-  'facebook': [1200, 630]
+let S = {
+  platform:0, template:0,
+  heading:'Your Headline Here', headingFont:'Manrope', headingWeight:'700', headingSize:64, headingColor:'#ffffff',
+  sub:'Supporting text goes here', subSize:28, subColor:'#ffffff',
+  body:'Add your message or call to action', bodySize:20, bodyColor:'#ffffffcc',
+  bgType:'solid', bgSolid:'#1a1a1a',
+  gradC1:'#ec4899', gradC2:'#8b5cf6', gradAngle:135,
+  radC1:'#ec4899', radC2:'#1a1a1a',
+  imgDim:40, imgDimColor:'#000000', presetIdx:0,
+  shapes:[], shapeColor:'#ec4899', shapeOpacity:30,
+  logoPos:'br', logoScale:12, watermark:'',
 };
+let bgImg = null, logoImg = null;
+const $ = id => document.getElementById(id);
+const canvas = $('mainCanvas'), ctx = canvas.getContext('2d');
 
-const layouts = {
-  'ig-post': ['Center','Bottom','Split','Minimal'],
-  'ig-story': ['Center','Top','Gradient','Bold'],
-  'twitter': ['Left','Center','Banner','Quote'],
-  'linkedin': ['Professional','Center','Split','Minimal'],
-  'facebook': ['Center','Overlay','Side','Bold']
-};
+// --- Font selector populate ---
+const fontSel = $('headingFont');
+FONTS.forEach(f => { const o = document.createElement('option'); o.value = f; o.textContent = f; fontSel.appendChild(o); });
 
-let currentLayout = 0;
-let bgImg = null;
-
-function getSize() { return sizes[platformSel.value]; }
-
-function renderTemplateButtons() {
-  const names = layouts[platformSel.value];
-  templatesRow.innerHTML = names.map((n, i) =>
-    `<div class="tpl-btn ${i === currentLayout ? 'active' : ''}" data-i="${i}">${n}</div>`
+// --- Platform tabs ---
+function renderPlatformTabs() {
+  $('platformTabs').innerHTML = PLATFORMS.map((p,i) =>
+    `<button class="platform-tab${i===S.platform?' active':''}" data-i="${i}">${p.name}</button>`
   ).join('');
 }
+$('platformTabs').addEventListener('click', e => {
+  const b = e.target.closest('.platform-tab'); if (!b) return;
+  S.platform = +b.dataset.i; S.template = 0;
+  renderPlatformTabs(); renderTemplateGrid(); render();
+});
 
-function wrapText(text, x, y, maxWidth, lineHeight, align) {
-  ctx.textAlign = align || 'center';
-  const words = text.split(' ');
-  let line = '';
-  let lines = [];
-  words.forEach(word => {
-    const test = line + word + ' ';
-    if (ctx.measureText(test).width > maxWidth && line) {
-      lines.push(line.trim());
-      line = word + ' ';
-    } else {
-      line = test;
-    }
+// --- Template thumbnails ---
+function drawThumb(tc, tw, th, si, p) {
+  tc.canvas.width = tw; tc.canvas.height = th;
+  const sx = tw/p.w, sy = th/p.h;
+  tc.scale(sx, sy);
+  const w = p.w, h = p.h, fs = w*0.06, sfs = w*0.03;
+  if (si===0) { tc.fillStyle='#fafafa'; tc.fillRect(0,0,w,h); tc.fillStyle='#1a1a1a'; tc.font=`700 ${fs}px Manrope`; tc.textAlign='center'; tc.fillText('Headline',w/2,h*.45); tc.fillStyle='#6b7280'; tc.font=`400 ${sfs}px Manrope`; tc.fillText('Subheading',w/2,h*.55); }
+  else if (si===1) { tc.fillStyle='#ec4899'; tc.fillRect(0,0,w,h); tc.fillStyle='#fff'; tc.font=`900 ${w*.09}px Manrope`; tc.textAlign='center'; tc.fillText('BOLD',w/2,h*.48); tc.font=`600 ${sfs}px Manrope`; tc.fillText('STATEMENT',w/2,h*.58); }
+  else if (si===2) { const g=tc.createLinearGradient(0,0,w,h); g.addColorStop(0,'#8b5cf6'); g.addColorStop(1,'#ec4899'); tc.fillStyle=g; tc.fillRect(0,0,w,h); tc.fillStyle='#fff'; tc.font=`700 ${fs}px Manrope`; tc.textAlign='center'; tc.fillText('Gradient',w/2,h*.45); tc.font=`400 ${sfs}px Manrope`; tc.fillText('Beautiful colors',w/2,h*.55); }
+  else if (si===3) { tc.fillStyle='#374151'; tc.fillRect(0,0,w,h); tc.fillStyle='rgba(0,0,0,.45)'; tc.fillRect(0,0,w,h); tc.fillStyle='#fff'; tc.font=`700 ${fs}px Manrope`; tc.textAlign='center'; tc.fillText('Overlay',w/2,h*.45); tc.fillStyle='#ffffffcc'; tc.font=`400 ${sfs}px Manrope`; tc.fillText('Text on image',w/2,h*.55); }
+  else { tc.fillStyle='#1a1a1a'; tc.fillRect(0,0,w/2,h); tc.fillStyle='#ec4899'; tc.fillRect(w/2,0,w/2,h); tc.fillStyle='#fff'; tc.font=`700 ${w*.05}px Manrope`; tc.textAlign='center'; tc.fillText('Split',w*.25,h*.48); tc.fillText('Layout',w*.75,h*.48); }
+  tc.setTransform(1,0,0,1,0,0);
+}
+function renderTemplateGrid() {
+  const grid = $('tplGrid'), p = PLATFORMS[S.platform];
+  grid.innerHTML = '';
+  STYLES.forEach((name,i) => {
+    const card = document.createElement('div');
+    card.className = 'tpl-card'+(i===S.template?' active':'');
+    card.dataset.i = i;
+    const c = document.createElement('canvas');
+    c.style.aspectRatio = `${p.w}/${p.h}`;
+    card.appendChild(c);
+    const lbl = document.createElement('div'); lbl.className='tpl-name'; lbl.textContent=name;
+    card.appendChild(lbl); grid.appendChild(card);
+    drawThumb(c.getContext('2d'), 200, Math.round(200*p.h/p.w), i, p);
   });
+}
+$('tplGrid').addEventListener('click', e => {
+  const c = e.target.closest('.tpl-card'); if (!c) return;
+  S.template = +c.dataset.i; applyDefaults(S.template);
+  renderTemplateGrid(); syncInputs(); render();
+});
+
+function applyDefaults(idx) {
+  const defs = [
+    { bgType:'solid',bgSolid:'#fafafa',headingColor:'#1a1a1a',subColor:'#6b7280',bodyColor:'#9ca3afcc',headingWeight:'700',headingFont:'Manrope',headingSize:64 },
+    { bgType:'solid',bgSolid:'#ec4899',headingColor:'#ffffff',subColor:'#ffffffdd',bodyColor:'#ffffffbb',headingWeight:'900',headingFont:'Bebas Neue',headingSize:80 },
+    { bgType:'linear',gradC1:'#8b5cf6',gradC2:'#ec4899',gradAngle:135,headingColor:'#ffffff',subColor:'#ffffffdd',bodyColor:'#ffffffbb',headingWeight:'700',headingFont:'Sora',headingSize:64 },
+    { bgType:'solid',bgSolid:'#374151',headingColor:'#ffffff',subColor:'#ffffffcc',bodyColor:'#ffffff99',headingWeight:'700',headingFont:'Playfair Display',imgDim:45,headingSize:64 },
+    { bgType:'solid',bgSolid:'#1a1a1a',headingColor:'#ffffff',subColor:'#ffffffdd',bodyColor:'#ffffffbb',headingWeight:'700',headingFont:'Space Grotesk',headingSize:64 },
+  ];
+  Object.assign(S, defs[idx]);
+}
+
+// --- Sync UI from state ---
+function syncInputs() {
+  $('heading').value=S.heading; $('headingFont').value=S.headingFont; $('headingWeight').value=S.headingWeight;
+  $('headingSize').value=S.headingSize; $('headingColor').value=S.headingColor.slice(0,7);
+  $('subheading').value=S.sub; $('subSize').value=S.subSize; $('subColor').value=S.subColor.slice(0,7);
+  $('bodyText').value=S.body; $('bodySize').value=S.bodySize; $('bodyColor').value=S.bodyColor.slice(0,7);
+  $('bgType').value=S.bgType; $('bgSolid').value=S.bgSolid;
+  $('gradC1').value=S.gradC1; $('gradC2').value=S.gradC2; $('gradAngle').value=S.gradAngle;
+  $('radC1').value=S.radC1; $('radC2').value=S.radC2;
+  $('imgDim').value=S.imgDim; $('imgDimColor').value=S.imgDimColor;
+  $('shapeColor').value=S.shapeColor; $('shapeOpacity').value=S.shapeOpacity;
+  $('logoScale').value=S.logoScale; $('watermark').value=S.watermark;
+  toggleBgOpts();
+}
+
+// --- Input bindings ---
+function bind(id, key, parse) {
+  const el=$(id); if(!el) return;
+  el.addEventListener('input', () => { S[key]=parse?parse(el.value):el.value; render(); });
+}
+['heading','heading'],['headingFont','headingFont'],['headingWeight','headingWeight'],
+['headingSize','headingSize',Number],['headingColor','headingColor'],
+['subheading','sub'],['subSize','subSize',Number],['subColor','subColor'],
+['bodyText','body'],['bodySize','bodySize',Number],['bodyColor','bodyColor'],
+['bgSolid','bgSolid'],['gradC1','gradC1'],['gradC2','gradC2'],['gradAngle','gradAngle',Number],
+['radC1','radC1'],['radC2','radC2'],['imgDim','imgDim',Number],['imgDimColor','imgDimColor'],
+['shapeColor','shapeColor'],['shapeOpacity','shapeOpacity',Number],
+['logoScale','logoScale',Number],['watermark','watermark']
+].forEach(a => bind(...a));
+
+// --- BG type toggle ---
+function toggleBgOpts() {
+  ['bgSolidOpts','bgLinearOpts','bgRadialOpts','bgImageOpts','bgPresetOpts'].forEach(id => $(id).hidden=true);
+  ({solid:'bgSolidOpts',linear:'bgLinearOpts',radial:'bgRadialOpts',image:'bgImageOpts',preset:'bgPresetOpts'})[S.bgType]
+    && ($(({solid:'bgSolidOpts',linear:'bgLinearOpts',radial:'bgRadialOpts',image:'bgImageOpts',preset:'bgPresetOpts'})[S.bgType]).hidden=false);
+}
+$('bgType').addEventListener('change', e => { S.bgType=e.target.value; toggleBgOpts(); render(); });
+
+// --- Gradient presets ---
+function renderPresets() {
+  $('presetGrid').innerHTML = PRESETS.map((p,i) =>
+    `<div class="grad-swatch${i===S.presetIdx?' active':''}" data-i="${i}" style="background:linear-gradient(${p[2]}deg,${p[0]},${p[1]})"></div>`
+  ).join('');
+}
+$('presetGrid').addEventListener('click', e => {
+  const sw=e.target.closest('.grad-swatch'); if(!sw) return;
+  const i=+sw.dataset.i; S.presetIdx=i;
+  S.gradC1=PRESETS[i][0]; S.gradC2=PRESETS[i][1]; S.gradAngle=PRESETS[i][2];
+  S.bgType='linear'; $('bgType').value='linear'; toggleBgOpts();
+  renderPresets(); syncInputs(); render();
+});
+
+// --- File uploads ---
+$('bgImage').addEventListener('change', e => {
+  const f=e.target.files[0]; if(!f) return;
+  const img=new Image(); img.onload=()=>{bgImg=img;render()}; img.src=URL.createObjectURL(f);
+});
+$('logoUpload').addEventListener('change', e => {
+  const f=e.target.files[0]; if(!f) return;
+  const img=new Image(); img.onload=()=>{logoImg=img;render()}; img.src=URL.createObjectURL(f);
+});
+
+// --- Logo position ---
+document.querySelectorAll('.pos-btn').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('.pos-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); S.logoPos=btn.dataset.pos; render();
+}));
+
+// --- Shapes ---
+function addShape(type) {
+  const p=PLATFORMS[S.platform];
+  S.shapes.push({type,x:p.w*.1+Math.random()*p.w*.3,y:p.h*.1+Math.random()*p.h*.3,w:p.w*.2,h:p.h*.15,color:S.shapeColor,opacity:S.shapeOpacity});
+  render();
+}
+
+// --- Core text helper ---
+function wrapText(c, text, x, y, maxW, lineH, align) {
+  c.textAlign = align||'center';
+  const words=text.split(' '); let line='', lines=[];
+  for (const w of words) { const t=line+w+' '; if(c.measureText(t).width>maxW&&line){lines.push(line.trim());line=w+' ';}else line=t; }
   lines.push(line.trim());
-  lines.forEach((l, i) => ctx.fillText(l, x, y + i * lineHeight));
-  return lines.length * lineHeight;
+  lines.forEach((l,i)=>c.fillText(l,x,y+i*lineH));
+  return lines.length*lineH;
 }
 
+// --- Draw the full design onto any context ---
+function drawDesign(c, w, h) {
+  const sc = w/1080; // scale factor relative to 1080 base
+  // Background
+  if (S.bgType==='solid') { c.fillStyle=S.bgSolid; c.fillRect(0,0,w,h); }
+  else if (S.bgType==='linear'||S.bgType==='preset') {
+    const rad=S.gradAngle*Math.PI/180, cx=w/2, cy=h/2, len=Math.max(w,h);
+    const g=c.createLinearGradient(cx-Math.cos(rad)*len,cy-Math.sin(rad)*len,cx+Math.cos(rad)*len,cy+Math.sin(rad)*len);
+    g.addColorStop(0,S.gradC1); g.addColorStop(1,S.gradC2); c.fillStyle=g; c.fillRect(0,0,w,h);
+  } else if (S.bgType==='radial') {
+    const g=c.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)*.6);
+    g.addColorStop(0,S.radC1); g.addColorStop(1,S.radC2); c.fillStyle=g; c.fillRect(0,0,w,h);
+  } else { c.fillStyle=S.bgSolid; c.fillRect(0,0,w,h); }
+
+  // BG image (image mode or photo-overlay template)
+  if (bgImg && (S.bgType==='image'||S.template===3)) {
+    const ir=bgImg.width/bgImg.height, cr=w/h;
+    let sw=bgImg.width,sh=bgImg.height,sx=0,sy=0;
+    if(ir>cr){sw=bgImg.height*cr;sx=(bgImg.width-sw)/2;}else{sh=bgImg.width/cr;sy=(bgImg.height-sh)/2;}
+    c.drawImage(bgImg,sx,sy,sw,sh,0,0,w,h);
+    const dim=S.imgDim/100;
+    c.fillStyle=S.imgDimColor+Math.round(dim*255).toString(16).padStart(2,'0');
+    c.fillRect(0,0,w,h);
+  }
+
+  // Shapes
+  for (const s of S.shapes) {
+    c.globalAlpha=s.opacity/100; c.fillStyle=s.color;
+    if(s.type==='rect') c.fillRect(s.x,s.y,s.w,s.h);
+    else if(s.type==='circle'){c.beginPath();c.arc(s.x+s.w/2,s.y+s.h/2,Math.min(s.w,s.h)/2,0,Math.PI*2);c.fill();}
+    else{c.strokeStyle=s.color;c.lineWidth=4;c.beginPath();c.moveTo(s.x,s.y+s.h/2);c.lineTo(s.x+s.w,s.y+s.h/2);c.stroke();}
+    c.globalAlpha=1;
+  }
+
+  const pad=w*.08, hfs=S.headingSize*sc, sfs=S.subSize*sc, bfs=S.bodySize*sc;
+  const font = `'${S.headingFont}', sans-serif`;
+
+  // --- Template layouts ---
+  if (S.template===0) { // Minimal — centered, clean
+    c.fillStyle=S.headingColor; c.font=`${S.headingWeight} ${hfs}px ${font}`;
+    const hh=wrapText(c,S.heading,w/2,h*.35+hfs,w-pad*2,hfs*1.15,'center');
+    c.fillStyle=S.subColor; c.font=`500 ${sfs}px ${font}`;
+    const sh=wrapText(c,S.sub,w/2,h*.35+hfs+hh+sfs*1.5,w-pad*2,sfs*1.3,'center');
+    c.fillStyle=S.bodyColor; c.font=`400 ${bfs}px ${font}`;
+    wrapText(c,S.body,w/2,h*.35+hfs+hh+sh+bfs*2.5,w-pad*2,bfs*1.4,'center');
+  } else if (S.template===1) { // Bold — uppercase, big
+    c.fillStyle=S.headingColor; c.font=`${S.headingWeight} ${hfs*1.2}px ${font}`;
+    const hh=wrapText(c,S.heading.toUpperCase(),w/2,h*.42,w-pad*2,hfs*1.25,'center');
+    c.fillStyle='#ffffff44'; c.fillRect(w*.3,h*.42+hh+10,w*.4,3);
+    c.fillStyle=S.subColor; c.font=`600 ${sfs}px ${font}`;
+    wrapText(c,S.sub.toUpperCase(),w/2,h*.42+hh+sfs*2.2,w-pad*2,sfs*1.3,'center');
+  } else if (S.template===2) { // Gradient — centered with CTA pill
+    c.fillStyle=S.headingColor; c.font=`${S.headingWeight} ${hfs}px ${font}`;
+    const hh=wrapText(c,S.heading,w/2,h*.38,w-pad*2,hfs*1.15,'center');
+    c.fillStyle=S.subColor; c.font=`400 ${sfs}px ${font}`;
+    const sh=wrapText(c,S.sub,w/2,h*.38+hh+sfs*1.5,w-pad*2,sfs*1.3,'center');
+    if (S.body) {
+      c.font=`600 ${bfs}px ${font}`; const tw=c.measureText(S.body).width+50*sc;
+      const py=h*.38+hh+sh+bfs*3;
+      c.fillStyle='#ffffff22'; c.beginPath(); c.roundRect((w-tw)/2,py-bfs*.8,tw,bfs*2,bfs); c.fill();
+      c.fillStyle=S.bodyColor; c.textAlign='center'; c.fillText(S.body,w/2,py+bfs*.4);
+    }
+  } else if (S.template===3) { // Photo Overlay — centered text, bottom bar
+    c.fillStyle=S.headingColor; c.font=`${S.headingWeight} ${hfs}px ${font}`;
+    const hh=wrapText(c,S.heading,w/2,h*.4,w-pad*2,hfs*1.15,'center');
+    c.fillStyle=S.subColor; c.font=`400 ${sfs}px ${font}`;
+    wrapText(c,S.sub,w/2,h*.4+hh+sfs*1.5,w-pad*2,sfs*1.3,'center');
+    c.fillStyle='#ffffff11'; c.fillRect(0,h*.85,w,h*.15);
+    c.fillStyle=S.bodyColor; c.font=`500 ${bfs}px ${font}`; c.textAlign='center';
+    c.fillText(S.body,w/2,h*.93);
+  } else { // Split — left text, right accent
+    c.fillStyle=(S.headingColor==='#ffffff'?'#ec4899':S.headingColor+'33');
+    c.fillRect(w/2,0,w/2,h);
+    c.fillStyle=S.headingColor; c.font=`${S.headingWeight} ${hfs}px ${font}`; c.textAlign='left';
+    const hh=wrapText(c,S.heading,pad,h*.38,w/2-pad*1.5,hfs*1.15,'left');
+    c.fillStyle=S.subColor; c.font=`400 ${sfs}px ${font}`;
+    wrapText(c,S.sub,pad,h*.38+hh+sfs*1.5,w/2-pad*1.5,sfs*1.3,'left');
+    c.fillStyle='#ffffffdd'; c.font=`500 ${bfs}px ${font}`; c.textAlign='center';
+    wrapText(c,S.body,w*.75,h*.5,w/2-pad*2,bfs*1.4,'center');
+  }
+
+  // Logo
+  if (logoImg) {
+    const ls=(S.logoScale/100)*w, lw=ls, lh=ls*(logoImg.height/logoImg.width), m=w*.04;
+    const pos={tl:[m,m],tc:[(w-lw)/2,m],tr:[w-lw-m,m],ml:[m,(h-lh)/2],mc:[(w-lw)/2,(h-lh)/2],mr:[w-lw-m,(h-lh)/2],bl:[m,h-lh-m],bc:[(w-lw)/2,h-lh-m],br:[w-lw-m,h-lh-m]};
+    const [lx,ly]=pos[S.logoPos]||pos.br;
+    c.drawImage(logoImg,lx,ly,lw,lh);
+  }
+
+  // Watermark
+  if (S.watermark) {
+    c.globalAlpha=.35; c.fillStyle=S.headingColor;
+    c.font=`500 ${Math.round(w*.022)}px ${font}`; c.textAlign='right';
+    c.fillText(S.watermark,w-w*.04,h-w*.03); c.globalAlpha=1;
+  }
+}
+
+// --- Main render to screen ---
 function render() {
-  const [w, h] = getSize();
-  const scale = Math.min(600 / w, 500 / h, 1);
-  canvas.width = w;
-  canvas.height = h;
-  canvas.style.width = w * scale + 'px';
-  canvas.style.height = h * scale + 'px';
-
-  const bg = bgColorInput.value;
-  const tc = textColorInput.value;
-  const ac = accentColorInput.value;
-  const heading = headingInput.value;
-  const sub = subheadingInput.value;
-  const body = bodyTextInput.value;
-  const layout = currentLayout;
-
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, w, h);
-
-  if (bgImg) {
-    const ir = bgImg.width / bgImg.height;
-    const cr = w / h;
-    let sw = bgImg.width, sh = bgImg.height, sx = 0, sy = 0;
-    if (ir > cr) { sw = bgImg.height * cr; sx = (bgImg.width - sw) / 2; }
-    else { sh = bgImg.width / cr; sy = (bgImg.height - sh) / 2; }
-    ctx.drawImage(bgImg, sx, sy, sw, sh, 0, 0, w, h);
-    ctx.fillStyle = bg + '99';
-    ctx.fillRect(0, 0, w, h);
-  }
-
-  const pad = w * 0.08;
-  const headSize = Math.round(w * 0.065);
-  const subSize = Math.round(w * 0.035);
-  const bodySize = Math.round(w * 0.028);
-
-  if (layout === 0) { // Center
-    ctx.fillStyle = tc;
-    ctx.font = `800 ${headSize}px Manrope, system-ui`;
-    wrapText(heading, w/2, h*0.38, w - pad*2, headSize*1.2, 'center');
-    ctx.font = `500 ${subSize}px Manrope, system-ui`;
-    ctx.fillStyle = ac;
-    wrapText(sub, w/2, h*0.55, w - pad*2, subSize*1.3, 'center');
-    ctx.font = `400 ${bodySize}px Manrope, system-ui`;
-    ctx.fillStyle = tc + 'cc';
-    wrapText(body, w/2, h*0.68, w - pad*2, bodySize*1.4, 'center');
-  } else if (layout === 1) { // Bottom/Top
-    const yStart = layout === 1 ? h * 0.6 : h * 0.15;
-    ctx.fillStyle = ac;
-    ctx.fillRect(pad, yStart - headSize*0.5, w*0.12, 4);
-    ctx.fillStyle = tc;
-    ctx.font = `800 ${headSize}px Manrope, system-ui`;
-    const hh = wrapText(heading, pad, yStart + headSize, w - pad*2, headSize*1.2, 'left');
-    ctx.font = `500 ${subSize}px Manrope, system-ui`;
-    ctx.fillStyle = tc + 'bb';
-    wrapText(sub, pad, yStart + headSize + hh + subSize, w - pad*2, subSize*1.3, 'left');
-  } else if (layout === 2) { // Split/Gradient
-    const grad = ctx.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0, ac + '44');
-    grad.addColorStop(1, bg);
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = tc;
-    ctx.font = `800 ${headSize}px Manrope, system-ui`;
-    wrapText(heading, w/2, h*0.35, w - pad*2, headSize*1.2, 'center');
-    ctx.font = `400 ${subSize}px Manrope, system-ui`;
-    ctx.fillStyle = tc + 'cc';
-    wrapText(sub, w/2, h*0.58, w - pad*2, subSize*1.3, 'center');
-    ctx.fillStyle = ac;
-    const btnW = Math.min(ctx.measureText(body).width + 60, w - pad*2);
-    ctx.beginPath();
-    ctx.roundRect((w - btnW)/2, h*0.72, btnW, subSize*2.2, subSize*1.1);
-    ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.font = `600 ${bodySize}px Manrope, system-ui`;
-    ctx.fillText(body, w/2, h*0.72 + subSize*1.4);
-  } else { // Minimal/Bold
-    ctx.fillStyle = ac;
-    ctx.fillRect(0, 0, w, h * 0.01);
-    ctx.fillRect(0, h * 0.99, w, h * 0.01);
-    ctx.fillStyle = tc;
-    ctx.font = `800 ${Math.round(headSize*1.3)}px Manrope, system-ui`;
-    wrapText(heading, w/2, h*0.45, w - pad*2, headSize*1.5, 'center');
-    ctx.font = `500 ${subSize}px Manrope, system-ui`;
-    ctx.fillStyle = ac;
-    ctx.fillText(sub, w/2, h*0.7);
-  }
+  const p=PLATFORMS[S.platform], w=p.w, h=p.h;
+  canvas.width=w; canvas.height=h;
+  const cp=document.querySelector('.center-panel');
+  const scale=Math.min((cp.clientWidth-64)/w,(cp.clientHeight-64)/h,1);
+  canvas.style.width=Math.round(w*scale)+'px'; canvas.style.height=Math.round(h*scale)+'px';
+  drawDesign(ctx,w,h);
+  saveHistory();
 }
 
-platformSel.addEventListener('change', () => { currentLayout = 0; renderTemplateButtons(); render(); });
-templatesRow.addEventListener('click', e => {
-  const btn = e.target.closest('.tpl-btn');
-  if (!btn) return;
-  currentLayout = parseInt(btn.dataset.i);
-  renderTemplateButtons();
-  render();
+// --- Export helpers ---
+function makeExport(fmt,q) {
+  const p=PLATFORMS[S.platform], c=document.createElement('canvas');
+  c.width=p.w; c.height=p.h; drawDesign(c.getContext('2d'),p.w,p.h);
+  return c.toDataURL(fmt||'image/png',q||1);
+}
+function dl(name,dataUrl) { const a=document.createElement('a'); a.download=name; a.href=dataUrl; a.click(); }
+
+$('downloadBtn').addEventListener('click', () => {
+  const p=PLATFORMS[S.platform];
+  dl(`social-${p.id}-${Date.now()}.png`, makeExport('image/png'));
+  toast('PNG downloaded');
+});
+$('jpegBtn').addEventListener('click', () => {
+  const sec=$('jpegSection');
+  if(sec.hidden){sec.hidden=false;return;}
+  const p=PLATFORMS[S.platform];
+  dl(`social-${p.id}-${Date.now()}.jpg`, makeExport('image/jpeg',+$('jpegQuality').value/100));
+  toast('JPEG downloaded');
+});
+$('jpegQuality').addEventListener('input', e => { $('jpegQualityVal').textContent=e.target.value; });
+
+$('copyBtn').addEventListener('click', async () => {
+  try {
+    const p=PLATFORMS[S.platform], c=document.createElement('canvas');
+    c.width=p.w; c.height=p.h; drawDesign(c.getContext('2d'),p.w,p.h);
+    c.toBlob(async b => {
+      await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);
+      toast('Copied to clipboard');
+    });
+  } catch { toast('Copy failed'); }
 });
 
-[headingInput, subheadingInput, bodyTextInput].forEach(el => el.addEventListener('input', render));
-[bgColorInput, textColorInput, accentColorInput].forEach(el => el.addEventListener('input', render));
+// --- Batch ---
+$('batchBtn').addEventListener('click', () => {
+  const grid=$('batchGrid'); grid.innerHTML='';
+  for (const p of PLATFORMS) {
+    const card=document.createElement('div'); card.className='batch-card';
+    const c=document.createElement('canvas'); c.width=p.w; c.height=p.h;
+    c.style.aspectRatio=`${p.w}/${p.h}`;
+    drawDesign(c.getContext('2d'),p.w,p.h);
+    card.appendChild(c);
+    const lbl=document.createElement('div'); lbl.className='batch-label';
+    lbl.textContent=`${p.name} (${p.w}x${p.h})`; card.appendChild(lbl);
+    card.addEventListener('click',()=>dl(`social-${p.id}.png`,c.toDataURL('image/png')));
+    grid.appendChild(card);
+  }
+  $('batchModal').classList.add('open');
+});
+function closeBatch(){$('batchModal').classList.remove('open');}
+$('batchModal').addEventListener('click',e=>{if(e.target===$('batchModal'))closeBatch();});
 
-bgImageInput.addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const img = new Image();
-  img.onload = () => { bgImg = img; render(); };
-  img.src = URL.createObjectURL(file);
+$('downloadAllBtn').addEventListener('click', async () => {
+  toast('Generating ZIP...');
+  if (!window.JSZip) {
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/jszip@3/dist/jszip.min.js';
+    document.head.appendChild(s); await new Promise(r=>s.onload=r);
+  }
+  const zip=new JSZip();
+  for (const p of PLATFORMS) {
+    const c=document.createElement('canvas'); c.width=p.w; c.height=p.h;
+    drawDesign(c.getContext('2d'),p.w,p.h);
+    zip.file(`social-${p.id}-${p.w}x${p.h}.png`,c.toDataURL('image/png').split(',')[1],{base64:true});
+  }
+  const blob=await zip.generateAsync({type:'blob'});
+  dl(`social-all-platforms-${Date.now()}.zip`,URL.createObjectURL(blob));
+  toast('ZIP downloaded');
 });
 
-downloadBtn.addEventListener('click', () => {
-  const [w, h] = getSize();
-  const offscreen = document.createElement('canvas');
-  offscreen.width = w; offscreen.height = h;
-  const octx = offscreen.getContext('2d');
-  octx.drawImage(canvas, 0, 0);
-  const link = document.createElement('a');
-  link.download = `social-${platformSel.value}-${Date.now()}.png`;
-  link.href = canvas.toDataURL('image/png');
-  link.click();
+// --- Brand Kit ---
+$('brandBtn').addEventListener('click', () => {
+  const brand=JSON.parse(localStorage.getItem('fds-brand-kit')||'null');
+  if (!brand){toast('No brand kit found. Set one up in the Brand Kit tool first.');return;}
+  if(brand.primaryColor){S.headingColor=brand.primaryColor;S.gradC1=brand.primaryColor;}
+  if(brand.secondaryColor){S.subColor=brand.secondaryColor;S.gradC2=brand.secondaryColor;}
+  if(brand.accentColor)S.bgSolid=brand.accentColor;
+  if(brand.font)S.headingFont=brand.font;
+  if(brand.logoUrl){const img=new Image();img.crossOrigin='anonymous';img.onload=()=>{logoImg=img;render()};img.src=brand.logoUrl;}
+  syncInputs(); render(); toast('Brand kit applied');
 });
 
-resetBtn.addEventListener('click', () => {
-  headingInput.value = 'Your Headline Here';
-  subheadingInput.value = 'Supporting text goes here';
-  bodyTextInput.value = 'Add your message or call to action';
-  bgColorInput.value = '#1a1a1a';
-  textColorInput.value = '#ffffff';
-  accentColorInput.value = '#ec4899';
-  bgImg = null;
-  bgImageInput.value = '';
-  currentLayout = 0;
-  renderTemplateButtons();
-  render();
+// --- Chrome AI ---
+async function getNano() {
+  if(window.ai&&window.ai.languageModel) try{return await window.ai.languageModel.create();}catch{}
+  return null;
+}
+$('aiCaptionBtn').addEventListener('click', async () => {
+  const out=$('aiOutput'); out.hidden=false; out.textContent='Generating caption...';
+  const nano=await getNano();
+  if(!nano){out.textContent='Chrome AI not available. Use Chrome 138+ with Nano model.';return;}
+  try {
+    const p=PLATFORMS[S.platform];
+    out.textContent=await nano.prompt(`Write a short engaging social media caption for a ${p.name} post. Heading: "${S.heading}", Sub: "${S.sub}". Include 2-3 hashtags. Under 200 chars.`);
+  } catch(e){out.textContent='Error: '+e.message;}
+});
+$('aiLayoutBtn').addEventListener('click', async () => {
+  const out=$('aiOutput'); out.hidden=false; out.textContent='Analyzing...';
+  const nano=await getNano();
+  if(!nano){out.textContent='Chrome AI not available. Use Chrome 138+ with Nano model.';return;}
+  try {
+    const p=PLATFORMS[S.platform];
+    out.textContent=await nano.prompt(`For a ${p.name} post (${p.w}x${p.h}), heading "${S.heading}", template "${STYLES[S.template]}": suggest best text placement, font size, and style in 2-3 sentences.`);
+  } catch(e){out.textContent='Error: '+e.message;}
 });
 
-renderTemplateButtons();
-render();
+// --- History ---
+const HIST_KEY='fds-social-history';
+let histTimer=null;
+function saveHistory() {
+  clearTimeout(histTimer);
+  histTimer=setTimeout(()=>{
+    try {
+      const thumb=canvas.toDataURL('image/jpeg',.35);
+      let hist=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');
+      if(hist.length&&Date.now()-hist[0].ts<3000) hist.shift();
+      hist.unshift({state:JSON.parse(JSON.stringify(S)),thumb,ts:Date.now()});
+      hist=hist.slice(0,10);
+      localStorage.setItem(HIST_KEY,JSON.stringify(hist));
+    } catch{}
+  },1500);
+}
+function renderHistory() {
+  const list=$('historyList');
+  const hist=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');
+  if(!hist.length){list.innerHTML='<div style="font-size:12px;color:#9ca3af">No saved designs yet</div>';return;}
+  list.innerHTML=hist.map((h,i)=>
+    `<div class="history-thumb" data-i="${i}" title="${new Date(h.ts).toLocaleString()}"><img src="${h.thumb}" alt="Design ${i+1}"></div>`
+  ).join('');
+}
+$('historyBtn').addEventListener('click', () => {
+  const sec=$('historySection'); sec.hidden=!sec.hidden; if(!sec.hidden) renderHistory();
+});
+$('historyList').addEventListener('click', e => {
+  const t=e.target.closest('.history-thumb'); if(!t) return;
+  const hist=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');
+  const entry=hist[+t.dataset.i]; if(!entry) return;
+  Object.assign(S,entry.state); S.shapes=entry.state.shapes||[];
+  syncInputs(); renderPlatformTabs(); renderTemplateGrid(); render();
+  toast('Design restored');
+});
+
+// --- Toast ---
+function toast(msg) {
+  const el=$('toast'); el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+// --- Init ---
+renderPlatformTabs(); renderTemplateGrid(); renderPresets(); syncInputs(); render();
 </script>
 <script src="/related.js"></script>
 </body>

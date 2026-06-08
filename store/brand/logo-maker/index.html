@@ -369,6 +369,7 @@ function buildControls(){
       <button class="btn btn-outline btn-sm" id="expPNG4">PNG 4x</button>
       <button class="btn btn-outline btn-sm" id="expFav">Favicon</button>
       <button class="btn btn-outline btn-sm" id="expCopy">Copy SVG</button>
+      <button class="btn btn-primary btn-sm" id="expBrandPack" style="width:100%;margin-top:6px;background:linear-gradient(135deg,#ec4899,#8b5cf6)">Download Brand Pack (all sizes)</button>
     </div>
   </div>
   `;
@@ -465,6 +466,7 @@ function bindControls(){
   $('expPNG4').onclick=()=>downloadPNG(4);
   $('expFav').onclick=downloadFavicon;
   $('expCopy').onclick=copySVG;
+  $('expBrandPack').onclick=downloadBrandPack;
 }
 
 // ============================================================
@@ -969,6 +971,104 @@ document.getElementById('hfGrid').addEventListener('click',e=>{
     }
   }
 });
+
+// ============================================================
+// BRAND PACK EXPORT (all sizes for all platforms)
+// ============================================================
+async function downloadBrandPack(){
+  const btn=$('expBrandPack');
+  btn.disabled=true;btn.textContent='Generating pack...';
+
+  const svg=generateSVG();
+  const name=(S.name||'logo').toLowerCase().replace(/[^a-z0-9]/g,'-');
+  const sizes=[
+    {name:'logo-primary',w:800,h:400},
+    {name:'favicon-32',w:32,h:32},
+    {name:'favicon-16',w:16,h:16},
+    {name:'apple-touch-icon-180',w:180,h:180},
+    {name:'android-192',w:192,h:192},
+    {name:'android-512',w:512,h:512},
+    {name:'og-image-1200x630',w:1200,h:630},
+    {name:'twitter-card-1200x675',w:1200,h:675},
+    {name:'icon-square-256',w:256,h:256},
+    {name:'icon-square-64',w:64,h:64},
+    {name:'watermark-200',w:200,h:100},
+  ];
+
+  // Generate each size as PNG
+  const files=[];
+  files.push({name:`${name}.svg`,content:svg,type:'image/svg+xml'});
+
+  for(const size of sizes){
+    try{
+      const canvas=document.createElement('canvas');
+      canvas.width=size.w;canvas.height=size.h;
+      const ctx=canvas.getContext('2d');
+      // White background for non-transparent sizes
+      if(!size.name.includes('watermark')){
+        ctx.fillStyle=size.name.includes('og-')||size.name.includes('twitter-')?S.primary||'#ec4899':'#ffffff';
+        ctx.fillRect(0,0,size.w,size.h);
+        if(size.name.includes('og-')||size.name.includes('twitter-')){
+          // Draw logo centered on colored bg
+          ctx.fillStyle='rgba(0,0,0,0.1)';ctx.fillRect(0,0,size.w,size.h);
+        }
+      }
+      const img=new Image();
+      const blob=new Blob([svg],{type:'image/svg+xml'});
+      const url=URL.createObjectURL(blob);
+      await new Promise((resolve,reject)=>{
+        img.onload=()=>{
+          // Center the logo in the canvas
+          const scale=Math.min(size.w*0.8/img.naturalWidth,size.h*0.8/img.naturalHeight,1);
+          const w=img.naturalWidth*scale;
+          const h=img.naturalHeight*scale;
+          ctx.drawImage(img,(size.w-w)/2,(size.h-h)/2,w,h);
+          URL.revokeObjectURL(url);
+          resolve();
+        };
+        img.onerror=reject;
+        img.src=url;
+      });
+      const dataUrl=canvas.toDataURL('image/png');
+      files.push({name:`${name}-${size.name}.png`,dataUrl});
+    }catch(e){console.warn('Failed to generate',size.name,e);}
+  }
+
+  // Download as individual files (ZIP requires a library, so we create a simple HTML manifest)
+  // First download SVG
+  const svgBlob=new Blob([svg],{type:'image/svg+xml'});
+  downloadBlob(svgBlob,`${name}.svg`);
+
+  // Then download a manifest HTML that shows all sizes and lets user save each
+  const manifest=`<!DOCTYPE html><html><head><title>${S.name} Brand Pack</title><style>
+body{font-family:Manrope,system-ui,sans-serif;background:#fafafa;padding:2rem;max-width:900px;margin:0 auto}
+h1{font-size:1.5rem}p{color:#6b7280;font-size:.85rem;margin-bottom:2rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem}
+.item{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:1rem;text-align:center}
+.item img{max-width:100%;height:auto;margin-bottom:.5rem;background:repeating-conic-gradient(#f3f4f6 0% 25%, transparent 0% 50%) 50% / 16px 16px}
+.item .name{font-size:.75rem;font-weight:600;margin-bottom:.3rem}
+.item .size{font-size:.65rem;color:#6b7280}
+.item a{display:inline-block;margin-top:.5rem;font-size:.72rem;color:#ec4899;font-weight:600}
+</style></head><body>
+<h1>${S.name} — Brand Pack</h1>
+<p>Right-click any image and "Save As" to download. SVG is the master file.</p>
+<div class="grid">
+${files.map(f=>{
+  if(f.dataUrl)return`<div class="item"><img src="${f.dataUrl}"><div class="name">${f.name}</div><a href="${f.dataUrl}" download="${f.name}">Download</a></div>`;
+  return'';
+}).join('')}
+</div></body></html>`;
+
+  const manifestBlob=new Blob([manifest],{type:'text/html'});
+  const mUrl=URL.createObjectURL(manifestBlob);
+  window.open(mUrl,'_blank');
+
+  btn.disabled=false;btn.innerHTML='Download Brand Pack (all sizes)';
+}
+
+function downloadBlob(blob,filename){
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();URL.revokeObjectURL(a.href);
+}
 
 // ============================================================
 // INIT
