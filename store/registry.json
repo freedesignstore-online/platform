@@ -206,6 +206,24 @@
       "iconBg": "#f59e0b",
       "category": "templates",
       "section": "templates"
+    },
+    {
+      "id": "stock-photos",
+      "name": "Stock Photo Library",
+      "description": "Free stock photos. Browse categories, upload your own (IndexedDB), connect Unsplash API. Favorites + history.",
+      "icon": "📷",
+      "iconBg": "#06b6d4",
+      "category": "images",
+      "section": "images"
+    },
+    {
+      "id": "free-logos",
+      "name": "Free Logo Templates",
+      "description": "24+ customizable SVG logo templates. Edit text, colors, icons. Download instantly. Favorites saved locally.",
+      "icon": "✨",
+      "iconBg": "#f59e0b",
+      "category": "images",
+      "section": "images"
     }
   ]
 }
