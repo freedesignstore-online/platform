@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Handoff Sheet - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Manrope',system-ui,sans-serif;background:#fafafa;color:#1a1a1a;min-height:100vh;overflow:hidden}
+a.back{display:inline-block;margin:24px 24px 0;color:#ec4899;text-decoration:none;font-weight:500}
+a.back:hover{text-decoration:underline}
+h1{font-size:28px;font-weight:700;margin:12px 24px 4px}
+p.sub{color:#6b7280;margin:0 24px 16px;font-size:14px}
+:root{--accent:#ec4899;--bg:#fafafa;--text:#1a1a1a;--panel:#ffffff;--line:#e5e7eb;--muted:#6b7280;--radius:8px}
+.toolbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:0 24px 12px}
+.tb-btn{padding:6px 12px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--text)}
+.tb-btn:hover{border-color:var(--accent);color:var(--accent)}
+.tb-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tb-sep{width:1px;height:24px;background:var(--line);margin:0 4px}
+.app{display:flex;height:calc(100vh - 110px);margin:0 24px 20px;gap:0}
+/* Canvas area */
+.canvas-wrap{flex:1;position:relative;overflow:hidden;border:1px solid var(--line);border-radius:12px 0 0 12px;background:#e5e7eb}
+.canvas-inner{position:absolute;transform-origin:0 0}
+.mockup-img{display:block;max-width:none;pointer-events:none;user-select:none}
+.grid-overlay{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .2s}
+.grid-overlay.on{opacity:1;background-image:linear-gradient(rgba(236,72,153,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(236,72,153,.1) 1px,transparent 1px);background-size:8px 8px}
+.redlines-overlay{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .2s}
+.redlines-overlay.on{opacity:1}
+/* Annotations */
+.anno{position:absolute;z-index:20}
+.anno-pin{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);position:relative}
+.anno-pin:hover{transform:scale(1.15)}
+.anno-tooltip{position:absolute;left:28px;top:-4px;background:#1a1a1a;color:#fff;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s}
+.anno:hover .anno-tooltip{opacity:1}
+/* Distance line */
+.dist-line{position:absolute;pointer-events:none;z-index:15}
+.dist-line .dist-val{position:absolute;background:rgba(239,68,68,.9);color:#fff;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;top:50%;left:50%;transform:translate(-50%,-50%)}
+/* Box measurement */
+.box-measure{position:absolute;border:2px solid rgba(239,68,68,.8);pointer-events:none;z-index:15}
+.box-measure .box-val{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);background:rgba(239,68,68,.9);color:#fff;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap}
+/* Upload state */
+.upload-area{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;cursor:pointer}
+.upload-area.hidden{display:none}
+.upload-icon{font-size:48px;color:var(--accent)}
+.upload-text{font-size:16px;font-weight:600;color:var(--text)}
+.upload-hint{font-size:13px;color:var(--muted)}
+/* Spec panel */
+.spec-panel{width:300px;flex-shrink:0;background:var(--panel);border:1px solid var(--line);border-left:none;border-radius:0 12px 12px 0;overflow-y:auto;display:flex;flex-direction:column}
+.spec-header{padding:14px 16px;border-bottom:1px solid var(--line);font-size:14px;font-weight:700}
+.spec-section{padding:12px 16px;border-bottom:1px solid var(--line)}
+.spec-section h4{font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);margin-bottom:8px;font-weight:700}
+.spec-item{display:flex;align-items:center;justify-content:space-between;padding:5px 0;font-size:12px;border-bottom:1px solid #f3f4f6}
+.spec-item:last-child{border-bottom:none}
+.spec-label{color:var(--muted);font-weight:500}
+.spec-value{font-weight:600;font-family:'Courier New',monospace;font-size:11px}
+.spec-color{display:inline-flex;align-items:center;gap:6px}
+.spec-color-dot{width:14px;height:14px;border-radius:4px;border:1px solid var(--line)}
+.token-item{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;border-bottom:1px solid #f3f4f6}
+.token-item:last-child{border-bottom:none}
+.token-name{font-weight:600;color:var(--accent);font-size:11px}
+.token-val{font-family:'Courier New',monospace;font-size:11px;color:var(--muted)}
+.spec-empty{color:var(--muted);font-size:12px;text-align:center;padding:16px}
+.add-token-row{display:flex;gap:4px;margin-top:8px}
+.add-token-row input{flex:1;padding:5px 8px;border:1px solid var(--line);border-radius:6px;font-family:inherit;font-size:11px}
+.add-token-row input:focus{outline:none;border-color:var(--accent)}
+.zoom-info{position:absolute;bottom:12px;left:12px;display:flex;gap:4px;z-index:50}
+.zoom-btn{width:28px;height:28px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.95);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.zoom-btn:hover{border-color:var(--accent);color:var(--accent)}
+.zoom-label{height:28px;line-height:28px;padding:0 6px;font-size:10px;font-weight:600;color:var(--muted);background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:#1a1a1a;color:#fff;padding:8px 20px;border-radius:8px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;z-index:9999;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.anno-delete{position:absolute;top:-8px;right:-8px;width:16px;height:16px;border-radius:50%;background:#ef4444;color:#fff;border:none;font-size:10px;cursor:pointer;display:none;align-items:center;justify-content:center;line-height:1;z-index:30}
+.anno:hover .anno-delete{display:flex}
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to FreeDesignStore</a>
+<h1>Design Handoff Sheet</h1>
+<p class="sub">Upload a mockup, annotate measurements, extract colors, and export developer-ready specs.</p>
+
+<div class="toolbar">
+  <button class="tb-btn" id="uploadBtn">Upload Mockup</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn active" id="toolNote" data-tool="note">Pin Note</button>
+  <button class="tb-btn" id="toolDist" data-tool="distance">Distance</button>
+  <button class="tb-btn" id="toolBox" data-tool="box">Box Size</button>
+  <button class="tb-btn" id="toolColor" data-tool="color">Pick Color</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" id="redlineToggle">Redlines</button>
+  <button class="tb-btn" id="gridToggle">8px Grid</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" id="exportHtml">Export HTML</button>
+  <button class="tb-btn" id="copyCss">Copy CSS</button>
+  <button class="tb-btn" id="copyJson">Copy JSON</button>
+  <button class="tb-btn" id="copyMd">Copy Markdown</button>
+</div>
+
+<div class="app">
+  <div class="canvas-wrap" id="canvasWrap">
+    <div class="upload-area" id="uploadArea">
+      <div class="upload-icon">&#8593;</div>
+      <div class="upload-text">Upload your design mockup</div>
+      <div class="upload-hint">PNG, JPG, or SVG. Drag & drop or click.</div>
+    </div>
+    <div class="canvas-inner" id="canvasInner">
+      <img class="mockup-img" id="mockupImg">
+      <div class="grid-overlay" id="gridOverlay"></div>
+      <div class="redlines-overlay" id="redlinesOverlay"></div>
+      <div id="annoLayer"></div>
+    </div>
+    <div class="zoom-info">
+      <button class="zoom-btn" id="zoomOut">-</button>
+      <span class="zoom-label" id="zoomLabel">100%</span>
+      <button class="zoom-btn" id="zoomIn">+</button>
+    </div>
+  </div>
+  <div class="spec-panel">
+    <div class="spec-header">Spec Panel</div>
+    <div class="spec-section">
+      <h4>Annotations</h4>
+      <div id="annoList"><div class="spec-empty">No annotations yet</div></div>
+    </div>
+    <div class="spec-section">
+      <h4>Extracted Colors</h4>
+      <div id="colorList"><div class="spec-empty">Use Pick Color tool</div></div>
+    </div>
+    <div class="spec-section">
+      <h4>Design Tokens</h4>
+      <div id="tokenList"><div class="spec-empty">No tokens yet</div></div>
+      <div class="add-token-row">
+        <input type="text" id="tokenName" placeholder="--spacing-lg">
+        <input type="text" id="tokenValue" placeholder="24px">
+        <button class="tb-btn" id="addTokenBtn" style="padding:4px 8px;font-size:11px">+</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept="image/*" hidden>
+<canvas id="pixelCanvas" style="display:none"></canvas>
+<div class="toast" id="toast"></div>
+
+<script>
+const LS_KEY = 'handoff-data';
+let mockupSrc = null, mockupW = 0, mockupH = 0;
+let annotations = [], colors = [], tokens = [];
+let activeTool = 'note';
+let zoom = 1, panX = 0, panY = 0;
+let isPanning = false, panStart = {}, panOrig = {};
+let drawState = null;
+let nextAnno = 1;
+
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1800); }
+function save() { localStorage.setItem(LS_KEY, JSON.stringify({ mockupSrc, mockupW, mockupH, annotations, colors, tokens, nextAnno })); }
+
+const canvasWrap = document.getElementById('canvasWrap');
+const canvasInner = document.getElementById('canvasInner');
+const mockupImg = document.getElementById('mockupImg');
+const annoLayer = document.getElementById('annoLayer');
+
+function updateTransform() {
+  canvasInner.style.transform = `translate(${panX}px,${panY}px) scale(${zoom})`;
+  document.getElementById('zoomLabel').textContent = Math.round(zoom * 100) + '%';
+}
+
+// Zoom
+canvasWrap.addEventListener('wheel', (e) => { if (!mockupSrc) return; e.preventDefault(); zoom = Math.max(0.1, Math.min(5, zoom + (e.deltaY > 0 ? -0.05 : 0.05))); updateTransform(); }, { passive: false });
+document.getElementById('zoomIn').onclick = () => { zoom = Math.min(5, zoom + 0.1); updateTransform(); };
+document.getElementById('zoomOut').onclick = () => { zoom = Math.max(0.1, zoom - 0.1); updateTransform(); };
+
+// Pan (middle click or alt+click)
+canvasWrap.addEventListener('mousedown', (e) => {
+  if (!mockupSrc) return;
+  if (e.button === 1 || (e.button === 0 && e.altKey)) {
+    isPanning = true; panStart = { x: e.clientX, y: e.clientY }; panOrig = { x: panX, y: panY };
+    canvasWrap.style.cursor = 'grabbing'; e.preventDefault();
+  }
+});
+window.addEventListener('mousemove', (e) => { if (isPanning) { panX = panOrig.x + (e.clientX - panStart.x); panY = panOrig.y + (e.clientY - panStart.y); updateTransform(); } });
+window.addEventListener('mouseup', () => { if (isPanning) { isPanning = false; canvasWrap.style.cursor = ''; } });
+
+// Upload
+const fileInput = document.getElementById('fileInput');
+document.getElementById('uploadBtn').onclick = () => fileInput.click();
+document.getElementById('uploadArea').onclick = () => fileInput.click();
+
+canvasWrap.addEventListener('dragover', (e) => e.preventDefault());
+canvasWrap.addEventListener('drop', (e) => {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) loadImage(file);
+});
+
+fileInput.onchange = function () { if (this.files[0]) loadImage(this.files[0]); this.value = ''; };
+
+function loadImage(file) {
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const img = new Image();
+    img.onload = () => {
+      mockupSrc = ev.target.result;
+      mockupW = img.width;
+      mockupH = img.height;
+      mockupImg.src = mockupSrc;
+      mockupImg.style.width = mockupW + 'px';
+      mockupImg.style.height = mockupH + 'px';
+      document.getElementById('uploadArea').classList.add('hidden');
+      // Prepare pixel canvas for color picking
+      const pc = document.getElementById('pixelCanvas');
+      pc.width = mockupW; pc.height = mockupH;
+      const ctx = pc.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      // Fit to view
+      const wrapW = canvasWrap.clientWidth, wrapH = canvasWrap.clientHeight;
+      zoom = Math.min(wrapW / mockupW, wrapH / mockupH, 1) * 0.9;
+      panX = (wrapW - mockupW * zoom) / 2;
+      panY = (wrapH - mockupH * zoom) / 2;
+      updateTransform();
+      annotations = []; colors = []; nextAnno = 1;
+      save(); renderAnnotations(); updateSpecPanel();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Tool selection
+document.querySelectorAll('[data-tool]').forEach(btn => {
+  btn.onclick = () => {
+    activeTool = btn.dataset.tool;
+    document.querySelectorAll('[data-tool]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    canvasWrap.style.cursor = activeTool === 'color' ? 'crosshair' : activeTool === 'distance' || activeTool === 'box' ? 'crosshair' : 'default';
+  };
+});
+
+// Canvas click handler
+canvasInner.addEventListener('mousedown', (e) => {
+  if (!mockupSrc || isPanning || e.altKey || e.button !== 0) return;
+  if (e.target.closest('.anno') || e.target.closest('.anno-delete')) return;
+
+  const rect = canvasInner.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / zoom;
+  const y = (e.clientY - rect.top) / zoom;
+
+  if (activeTool === 'note') {
+    const text = prompt('Annotation note:', 'Note');
+    if (text === null) return;
+    annotations.push({ id: nextAnno++, type: 'note', x, y, text });
+    save(); renderAnnotations(); updateSpecPanel();
+  } else if (activeTool === 'color') {
+    const pc = document.getElementById('pixelCanvas');
+    const ctx = pc.getContext('2d');
+    const px = Math.round(x), py = Math.round(y);
+    if (px >= 0 && px < mockupW && py >= 0 && py < mockupH) {
+      const data = ctx.getImageData(px, py, 1, 1).data;
+      const hex = '#' + [data[0], data[1], data[2]].map(v => v.toString(16).padStart(2, '0')).join('');
+      annotations.push({ id: nextAnno++, type: 'color', x, y, color: hex });
+      if (!colors.find(c => c === hex)) colors.push(hex);
+      save(); renderAnnotations(); updateSpecPanel();
+      toast('Picked: ' + hex);
+    }
+  } else if (activeTool === 'distance') {
+    drawState = { type: 'distance', x1: x, y1: y };
+    e.preventDefault();
+  } else if (activeTool === 'box') {
+    drawState = { type: 'box', x1: x, y1: y };
+    e.preventDefault();
+  }
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (!drawState) return;
+  // Preview handled on mouseup
+});
+
+window.addEventListener('mouseup', (e) => {
+  if (!drawState) return;
+  const rect = canvasInner.getBoundingClientRect();
+  const x2 = (e.clientX - rect.left) / zoom;
+  const y2 = (e.clientY - rect.top) / zoom;
+
+  if (drawState.type === 'distance') {
+    const dx = x2 - drawState.x1, dy = y2 - drawState.y1;
+    const dist = Math.round(Math.sqrt(dx * dx + dy * dy));
+    if (dist > 5) {
+      annotations.push({ id: nextAnno++, type: 'distance', x1: drawState.x1, y1: drawState.y1, x2, y2, value: dist + 'px' });
+      save(); renderAnnotations(); updateSpecPanel();
+    }
+  } else if (drawState.type === 'box') {
+    const w = Math.round(Math.abs(x2 - drawState.x1));
+    const h = Math.round(Math.abs(y2 - drawState.y1));
+    if (w > 5 && h > 5) {
+      annotations.push({ id: nextAnno++, type: 'box', x: Math.min(drawState.x1, x2), y: Math.min(drawState.y1, y2), w, h, value: w + ' x ' + h + 'px' });
+      save(); renderAnnotations(); updateSpecPanel();
+    }
+  }
+  drawState = null;
+});
+
+function renderAnnotations() {
+  annoLayer.innerHTML = '';
+  const redlines = document.getElementById('redlinesOverlay');
+  redlines.innerHTML = '';
+
+  annotations.forEach((anno, idx) => {
+    if (anno.type === 'note' || anno.type === 'color') {
+      const el = document.createElement('div');
+      el.className = 'anno';
+      el.style.left = anno.x + 'px';
+      el.style.top = anno.y + 'px';
+      const displayText = anno.type === 'color' ? anno.color : anno.text;
+      const pinColor = anno.type === 'color' ? anno.color : '';
+      el.innerHTML = `
+        <div class="anno-pin" ${pinColor ? 'style="background:' + pinColor + '"' : ''}>${idx + 1}</div>
+        <div class="anno-tooltip">${displayText}</div>
+        <button class="anno-delete">&times;</button>`;
+      el.querySelector('.anno-delete').onclick = (ev) => { ev.stopPropagation(); deleteAnno(anno.id); };
+      annoLayer.appendChild(el);
+    } else if (anno.type === 'distance') {
+      // Draw line on redlines layer
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible';
+      svg.innerHTML = `<line x1="${anno.x1}" y1="${anno.y1}" x2="${anno.x2}" y2="${anno.y2}" stroke="rgba(239,68,68,0.8)" stroke-width="2" stroke-dasharray="6,3"/>
+        <circle cx="${anno.x1}" cy="${anno.y1}" r="3" fill="#ef4444"/>
+        <circle cx="${anno.x2}" cy="${anno.y2}" r="3" fill="#ef4444"/>`;
+      redlines.appendChild(svg);
+
+      const label = document.createElement('div');
+      label.className = 'anno';
+      label.style.left = ((anno.x1 + anno.x2) / 2) + 'px';
+      label.style.top = ((anno.y1 + anno.y2) / 2) + 'px';
+      label.innerHTML = `<div class="anno-pin" style="background:#ef4444;font-size:9px;width:auto;min-width:22px;padding:0 4px;border-radius:10px">${anno.value}</div><button class="anno-delete">&times;</button>`;
+      label.querySelector('.anno-delete').onclick = (ev) => { ev.stopPropagation(); deleteAnno(anno.id); };
+      annoLayer.appendChild(label);
+    } else if (anno.type === 'box') {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible';
+      svg.innerHTML = `<rect x="${anno.x}" y="${anno.y}" width="${anno.w}" height="${anno.h}" fill="none" stroke="rgba(239,68,68,0.6)" stroke-width="2" stroke-dasharray="4,3"/>`;
+      redlines.appendChild(svg);
+
+      const label = document.createElement('div');
+      label.className = 'anno';
+      label.style.left = (anno.x + anno.w / 2) + 'px';
+      label.style.top = (anno.y + anno.h + 4) + 'px';
+      label.innerHTML = `<div class="anno-pin" style="background:#ef4444;font-size:9px;width:auto;min-width:22px;padding:0 6px;border-radius:10px">${anno.value}</div><button class="anno-delete">&times;</button>`;
+      label.querySelector('.anno-delete').onclick = (ev) => { ev.stopPropagation(); deleteAnno(anno.id); };
+      annoLayer.appendChild(label);
+    }
+  });
+}
+
+function deleteAnno(id) {
+  const anno = annotations.find(a => a.id === id);
+  annotations = annotations.filter(a => a.id !== id);
+  if (anno && anno.type === 'color') { colors = colors.filter(c => c !== anno.color); }
+  save(); renderAnnotations(); updateSpecPanel();
+}
+
+function updateSpecPanel() {
+  // Annotations
+  const annoList = document.getElementById('annoList');
+  if (!annotations.length) { annoList.innerHTML = '<div class="spec-empty">No annotations yet</div>'; }
+  else {
+    annoList.innerHTML = annotations.map((a, i) => {
+      if (a.type === 'note') return `<div class="spec-item"><span class="spec-label">#${i + 1} Note</span><span class="spec-value">${a.text}</span></div>`;
+      if (a.type === 'color') return `<div class="spec-item"><span class="spec-label">#${i + 1} Color</span><span class="spec-value spec-color"><span class="spec-color-dot" style="background:${a.color}"></span>${a.color}</span></div>`;
+      if (a.type === 'distance') return `<div class="spec-item"><span class="spec-label">#${i + 1} Distance</span><span class="spec-value">${a.value}</span></div>`;
+      if (a.type === 'box') return `<div class="spec-item"><span class="spec-label">#${i + 1} Box</span><span class="spec-value">${a.value}</span></div>`;
+      return '';
+    }).join('');
+  }
+
+  // Colors
+  const colorList = document.getElementById('colorList');
+  if (!colors.length) { colorList.innerHTML = '<div class="spec-empty">Use Pick Color tool</div>'; }
+  else {
+    colorList.innerHTML = colors.map(c => `<div class="spec-item"><span class="spec-color"><span class="spec-color-dot" style="background:${c}"></span>${c}</span><button class="tb-btn" style="padding:2px 8px;font-size:10px" onclick="navigator.clipboard.writeText('${c}');toast('Copied')">Copy</button></div>`).join('');
+  }
+
+  // Tokens
+  const tokenList = document.getElementById('tokenList');
+  if (!tokens.length) { tokenList.innerHTML = '<div class="spec-empty">No tokens yet</div>'; }
+  else {
+    tokenList.innerHTML = tokens.map((t, i) => `<div class="token-item"><span class="token-name">${t.name}</span><span class="token-val">${t.value}</span><button class="tb-btn" style="padding:1px 6px;font-size:10px;color:#ef4444;border-color:#ef4444" onclick="tokens.splice(${i},1);save();updateSpecPanel()">x</button></div>`).join('');
+  }
+}
+
+// Add token
+document.getElementById('addTokenBtn').onclick = () => {
+  const name = document.getElementById('tokenName').value.trim();
+  const value = document.getElementById('tokenValue').value.trim();
+  if (!name || !value) { toast('Enter token name and value'); return; }
+  tokens.push({ name, value });
+  document.getElementById('tokenName').value = '';
+  document.getElementById('tokenValue').value = '';
+  save(); updateSpecPanel();
+};
+
+// Toggles
+document.getElementById('redlineToggle').onclick = function () {
+  this.classList.toggle('active');
+  document.getElementById('redlinesOverlay').classList.toggle('on');
+};
+document.getElementById('gridToggle').onclick = function () {
+  this.classList.toggle('active');
+  document.getElementById('gridOverlay').classList.toggle('on');
+};
+
+// Export self-contained HTML
+document.getElementById('exportHtml').onclick = () => {
+  if (!mockupSrc) { toast('Upload a mockup first'); return; }
+  let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Design Handoff</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Manrope',sans-serif;background:#fafafa;color:#1a1a1a;display:flex;min-height:100vh}
+.canvas{flex:1;position:relative;overflow:auto;padding:20px;background:#e5e7eb}.canvas img{display:block;max-width:100%}
+.pin{position:absolute;width:22px;height:22px;border-radius:50%;background:#ec4899;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.dist{position:absolute;background:rgba(239,68,68,.9);color:#fff;padding:1px 6px;border-radius:10px;font-size:10px;font-weight:700}
+.panel{width:300px;background:#fff;border-left:1px solid #e5e7eb;overflow-y:auto;padding:16px}
+.panel h2{font-size:16px;font-weight:700;margin-bottom:12px}.panel h3{font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:#6b7280;margin:16px 0 8px;font-weight:700}
+.row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid #f3f4f6}
+.label{color:#6b7280}.val{font-weight:600;font-family:monospace;font-size:11px}
+.cdot{width:14px;height:14px;border-radius:4px;display:inline-block;vertical-align:middle;margin-right:6px;border:1px solid #e5e7eb}
+</style></head><body>
+<div class="canvas" style="position:relative"><img src="${mockupSrc}" style="width:${mockupW}px">`;
+
+  annotations.forEach((a, i) => {
+    if (a.type === 'note') html += `<div class="pin" style="left:${Math.round(a.x)}px;top:${Math.round(a.y)}px" title="${a.text}">${i + 1}</div>`;
+    else if (a.type === 'color') html += `<div class="pin" style="left:${Math.round(a.x)}px;top:${Math.round(a.y)}px;background:${a.color}" title="${a.color}">${i + 1}</div>`;
+    else if (a.type === 'distance') html += `<div class="dist" style="left:${Math.round((a.x1 + a.x2) / 2)}px;top:${Math.round((a.y1 + a.y2) / 2)}px">${a.value}</div>`;
+    else if (a.type === 'box') html += `<div class="dist" style="left:${Math.round(a.x + a.w / 2)}px;top:${Math.round(a.y + a.h)}px">${a.value}</div>`;
+  });
+
+  html += '</div><div class="panel"><h2>Spec Sheet</h2>';
+  html += '<h3>Annotations</h3>';
+  annotations.forEach((a, i) => {
+    if (a.type === 'note') html += `<div class="row"><span class="label">#${i + 1}</span><span class="val">${a.text}</span></div>`;
+    if (a.type === 'distance') html += `<div class="row"><span class="label">#${i + 1} Distance</span><span class="val">${a.value}</span></div>`;
+    if (a.type === 'box') html += `<div class="row"><span class="label">#${i + 1} Box</span><span class="val">${a.value}</span></div>`;
+  });
+  if (colors.length) {
+    html += '<h3>Colors</h3>';
+    colors.forEach(c => { html += `<div class="row"><span><span class="cdot" style="background:${c}"></span>${c}</span></div>`; });
+  }
+  if (tokens.length) {
+    html += '<h3>Design Tokens</h3>';
+    tokens.forEach(t => { html += `<div class="row"><span class="label">${t.name}</span><span class="val">${t.value}</span></div>`; });
+  }
+  html += '</div></body></html>';
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a'); a.download = 'design-handoff.html'; a.href = URL.createObjectURL(blob); a.click();
+  toast('Exported self-contained HTML');
+};
+
+// Copy CSS
+document.getElementById('copyCss').onclick = () => {
+  let css = '/* Design Handoff Specs */\n\n';
+  if (colors.length) {
+    css += ':root {\n';
+    colors.forEach((c, i) => { css += `  --color-${i + 1}: ${c};\n`; });
+    tokens.forEach(t => { css += `  ${t.name}: ${t.value};\n`; });
+    css += '}\n\n';
+  }
+  css += '/* Measurements */\n';
+  annotations.forEach((a, i) => {
+    if (a.type === 'distance') css += `/* #${i + 1} distance: ${a.value} */\n`;
+    if (a.type === 'box') css += `/* #${i + 1} box: ${a.value} */\n`;
+  });
+  navigator.clipboard.writeText(css).then(() => toast('Copied CSS specs'));
+};
+
+// Copy JSON
+document.getElementById('copyJson').onclick = () => {
+  const data = {
+    measurements: annotations.filter(a => a.type === 'distance' || a.type === 'box').map(a => ({ type: a.type, value: a.value })),
+    colors,
+    tokens: tokens.map(t => ({ name: t.name, value: t.value })),
+    notes: annotations.filter(a => a.type === 'note').map(a => a.text)
+  };
+  navigator.clipboard.writeText(JSON.stringify(data, null, 2)).then(() => toast('Copied JSON'));
+};
+
+// Copy Markdown
+document.getElementById('copyMd').onclick = () => {
+  let md = '# Design Handoff Specs\n\n';
+  const notes = annotations.filter(a => a.type === 'note');
+  if (notes.length) { md += '## Notes\n\n'; notes.forEach((a, i) => { md += `- ${a.text}\n`; }); md += '\n'; }
+  const measures = annotations.filter(a => a.type === 'distance' || a.type === 'box');
+  if (measures.length) {
+    md += '## Measurements\n\n| # | Type | Value |\n|---|---|---|\n';
+    measures.forEach((a, i) => { md += `| ${i + 1} | ${a.type} | ${a.value} |\n`; });
+    md += '\n';
+  }
+  if (colors.length) { md += '## Colors\n\n'; colors.forEach(c => { md += `- \`${c}\`\n`; }); md += '\n'; }
+  if (tokens.length) {
+    md += '## Design Tokens\n\n| Token | Value |\n|---|---|\n';
+    tokens.forEach(t => { md += `| \`${t.name}\` | \`${t.value}\` |\n`; });
+  }
+  navigator.clipboard.writeText(md).then(() => toast('Copied Markdown'));
+};
+
+// Init: restore
+const saved = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+if (saved && saved.mockupSrc) {
+  mockupSrc = saved.mockupSrc;
+  mockupW = saved.mockupW;
+  mockupH = saved.mockupH;
+  annotations = saved.annotations || [];
+  colors = saved.colors || [];
+  tokens = saved.tokens || [];
+  nextAnno = saved.nextAnno || 1;
+  mockupImg.src = mockupSrc;
+  mockupImg.style.width = mockupW + 'px';
+  mockupImg.style.height = mockupH + 'px';
+  document.getElementById('uploadArea').classList.add('hidden');
+  // Rebuild pixel canvas
+  const img = new Image();
+  img.onload = () => {
+    const pc = document.getElementById('pixelCanvas');
+    pc.width = mockupW; pc.height = mockupH;
+    pc.getContext('2d').drawImage(img, 0, 0);
+  };
+  img.src = mockupSrc;
+  // Fit view
+  setTimeout(() => {
+    const wrapW = canvasWrap.clientWidth, wrapH = canvasWrap.clientHeight;
+    zoom = Math.min(wrapW / mockupW, wrapH / mockupH, 1) * 0.9;
+    panX = (wrapW - mockupW * zoom) / 2;
+    panY = (wrapH - mockupH * zoom) / 2;
+    updateTransform();
+  }, 50);
+  renderAnnotations();
+  updateSpecPanel();
+} else {
+  updateTransform();
+  updateSpecPanel();
+}
+
+// Show redlines by default
+document.getElementById('redlinesOverlay').classList.add('on');
+document.getElementById('redlineToggle').classList.add('active');
+</script>
+<script src="/related.js"></script>
+</body>
+</html>
