@@ -264,18 +264,36 @@
     {
       "id": "css-effects",
       "name": "CSS Effects Generator",
-      "description": "Glassmorphism, neumorphism, multi-layer shadows, animated gradients. All-in-one with live preview.",
+      "description": "Glassmorphism, neumorphism, multi-layer shadows, and gradient builder. Presets, live preview, copy CSS.",
       "icon": "✨",
-      "iconBg": "#ec4899",
+      "iconBg": "#8b5cf6",
       "category": "brand",
       "section": "brand"
     },
     {
       "id": "noise-texture",
       "name": "Noise & Texture Generator",
-      "description": "Perlin noise, film grain, paper, marble, fabric textures. Tileable. Download PNG/SVG/CSS.",
-      "icon": "🌫️",
-      "iconBg": "#6b7280",
+      "description": "Perlin, simplex, film grain, paper, fabric, concrete, wood, marble. Tileable PNG, CSS, SVG filter export.",
+      "icon": "🔲",
+      "iconBg": "#6366f1",
+      "category": "images",
+      "section": "images"
+    },
+    {
+      "id": "micro-animations",
+      "name": "Micro-Interaction Library",
+      "description": "100+ CSS animations: hover effects, spinners, transitions, attention seekers, buttons, text effects. Copy-paste.",
+      "icon": "🎬",
+      "iconBg": "#ec4899",
+      "category": "brand",
+      "section": "brand"
+    },
+    {
+      "id": "svg-optimizer",
+      "name": "SVG Optimizer & Editor",
+      "description": "Clean, minify, and edit SVGs. Remove cruft, shorten IDs, change colors. Export as SVG, data URL, or React.",
+      "icon": "⚡",
+      "iconBg": "#10b981",
       "category": "images",
       "section": "images"
     },

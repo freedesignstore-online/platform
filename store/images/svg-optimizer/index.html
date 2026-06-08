@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SVG Optimizer & Editor - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; padding-bottom: 80px; }
+a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
+a.back:hover { text-decoration: underline; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+p.subtitle { color: #6b7280; margin-bottom: 24px; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
+h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 6px; }
+input[type="text"], input[type="number"], textarea { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+textarea { resize: vertical; min-height: 120px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; }
+input[type="color"] { width: 48px; height: 36px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 2px; cursor: pointer; }
+input[type="range"] { width: 100%; accent-color: #ec4899; }
+.btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 13px; transition: opacity .2s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+.drop-zone { border: 2px dashed #e5e7eb; border-radius: 12px; padding: 40px; text-align: center; cursor: pointer; transition: border-color .15s, background .15s; margin-bottom: 16px; }
+.drop-zone:hover, .drop-zone.dragover { border-color: #ec4899; background: #fdf2f8; }
+.drop-zone p { color: #6b7280; font-size: 14px; }
+.drop-zone p strong { color: #ec4899; }
+.tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; }
+.tab { padding: 10px 18px; cursor: pointer; font-weight: 600; font-size: 14px; border: none; background: none; color: #6b7280; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color .15s, border-color .15s; font-family: inherit; }
+.tab:hover { color: #1a1a1a; }
+.tab.active { color: #ec4899; border-bottom-color: #ec4899; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 800px) { .compare { grid-template-columns: 1fr; } }
+.svg-container { background: repeating-conic-gradient(#f0f0f0 0% 25%, #fff 0% 50%) 0 0 / 16px 16px; border: 1px solid #e5e7eb; border-radius: 12px; min-height: 200px; display: flex; align-items: center; justify-content: center; padding: 20px; overflow: hidden; position: relative; }
+.svg-container svg { max-width: 100%; max-height: 300px; }
+.stats { display: flex; gap: 24px; margin: 16px 0; flex-wrap: wrap; }
+.stat { text-align: center; }
+.stat .value { font-size: 24px; font-weight: 700; color: #ec4899; }
+.stat .label { font-size: 12px; color: #6b7280; }
+.savings { font-weight: 700; color: #16a34a; font-size: 15px; margin: 12px 0; }
+.chk-row { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 8px; }
+.chk-row input[type="checkbox"] { accent-color: #ec4899; }
+.opts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+@media (max-width: 600px) { .opts-grid { grid-template-columns: 1fr; } }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.edit-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px 16px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 16px; }
+.edit-bar label { margin: 0; display: flex; align-items: center; gap: 6px; }
+.edit-svg-container { background: repeating-conic-gradient(#f0f0f0 0% 25%, #fff 0% 50%) 0 0 / 16px 16px; border: 1px solid #e5e7eb; border-radius: 12px; min-height: 300px; padding: 20px; position: relative; cursor: crosshair; }
+.edit-svg-container svg { max-width: 100%; max-height: 400px; }
+.edit-svg-container .selected-outline { outline: 2px dashed #ec4899; outline-offset: 2px; }
+.code-output { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; padding: 12px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; max-height: 200px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+.batch-list { margin-top: 16px; }
+.batch-item { display: flex; align-items: center; gap: 12px; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 8px; }
+.batch-item .batch-name { font-weight: 600; font-size: 13px; flex: 1; }
+.batch-item .batch-sizes { font-size: 12px; color: #6b7280; }
+.batch-item .batch-saving { font-size: 12px; color: #16a34a; font-weight: 600; }
+.batch-item .batch-preview { width: 36px; height: 36px; background: repeating-conic-gradient(#f0f0f0 0% 25%, #fff 0% 50%) 0 0 / 8px 8px; border-radius: 6px; border: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.batch-item .batch-preview svg { max-width: 32px; max-height: 32px; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 100; }
+.toast.show { opacity: 1; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<h1>SVG Optimizer & Editor</h1>
+<p class="subtitle">Clean, optimize, and edit SVG files. Reduce file size without losing quality.</p>
+
+<div class="panel" id="uploadPanel">
+<div class="drop-zone" id="dropZone">
+<p>Drag & drop SVG files here, or <strong>click to browse</strong></p>
+<p style="margin-top:8px;font-size:12px;color:#9ca3af;">Single SVG or multiple for batch optimization</p>
+</div>
+<input type="file" id="fileInput" accept=".svg" multiple style="display:none;">
+<h3>Or paste SVG code</h3>
+<textarea id="pasteArea" placeholder="<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; ..."></textarea>
+<div class="actions">
+<button class="btn btn-primary" id="pasteBtn">Optimize Pasted SVG</button>
+</div>
+</div>
+
+<div id="workspace" class="hidden">
+<div class="tabs">
+<button class="tab active" data-tab="optimize">Optimize</button>
+<button class="tab" data-tab="edit">Edit</button>
+<button class="tab" data-tab="export">Export</button>
+<button class="tab" data-tab="batch">Batch</button>
+</div>
+
+<!-- OPTIMIZE TAB -->
+<div class="tab-content active" id="tab-optimize">
+<div class="panel">
+<h3>Optimization Options</h3>
+<div class="opts-grid">
+<div class="chk-row"><input type="checkbox" id="optComments" checked><label for="optComments">Remove comments</label></div>
+<div class="chk-row"><input type="checkbox" id="optMetadata" checked><label for="optMetadata">Remove metadata</label></div>
+<div class="chk-row"><input type="checkbox" id="optEditorCruft" checked><label for="optEditorCruft">Remove editor cruft</label></div>
+<div class="chk-row"><input type="checkbox" id="optMinify" checked><label for="optMinify">Minify whitespace</label></div>
+<div class="chk-row"><input type="checkbox" id="optShortenIds" checked><label for="optShortenIds">Shorten IDs</label></div>
+<div class="chk-row"><input type="checkbox" id="optEmptyGroups" checked><label for="optEmptyGroups">Remove empty groups</label></div>
+<div class="chk-row"><input type="checkbox" id="optHidden" checked><label for="optHidden">Remove hidden elements</label></div>
+<div class="chk-row"><input type="checkbox" id="optShapes"><label for="optShapes">Convert shapes to paths</label></div>
+</div>
+<div class="actions">
+<button class="btn btn-primary" id="reOptimize">Re-Optimize</button>
+<button class="btn btn-secondary" id="resetSvg">Reset to Original</button>
+</div>
+</div>
+
+<div class="stats" id="statsArea">
+<div class="stat"><div class="value" id="origSize">-</div><div class="label">Original</div></div>
+<div class="stat"><div class="value" id="optSize">-</div><div class="label">Optimized</div></div>
+<div class="stat"><div class="value" id="savedPct">-</div><div class="label">Saved</div></div>
+</div>
+
+<div class="compare">
+<div>
+<h3>Original</h3>
+<div class="svg-container" id="origPreview"></div>
+</div>
+<div>
+<h3>Optimized</h3>
+<div class="svg-container" id="optPreview"></div>
+</div>
+</div>
+</div>
+
+<!-- EDIT TAB -->
+<div class="tab-content" id="tab-edit">
+<div class="panel">
+<div class="edit-bar">
+<label>Fill <input type="color" id="editFill" value="#000000"></label>
+<label>Stroke <input type="color" id="editStroke" value="#000000"></label>
+<label>Stroke W <input type="number" id="editStrokeW" value="1" min="0" max="20" style="width:60px;font-size:12px;padding:4px 6px;"></label>
+<label>Scale <input type="range" id="editScale" min="25" max="200" value="100" style="width:120px;"> <span id="editScaleVal">100%</span></label>
+<button class="btn btn-sm btn-danger" id="editDelete">Delete Selected</button>
+</div>
+<p style="font-size:12px;color:#6b7280;margin-bottom:12px;">Click an element to select it, then change fill/stroke or delete.</p>
+<div class="edit-svg-container" id="editArea"></div>
+</div>
+</div>
+
+<!-- EXPORT TAB -->
+<div class="tab-content" id="tab-export">
+<div class="panel">
+<h3>Export Optimized SVG</h3>
+<div class="actions">
+<button class="btn btn-primary" id="dlSvg">Download SVG</button>
+<button class="btn btn-secondary" id="copySvgCode">Copy SVG Code</button>
+<button class="btn btn-secondary" id="copyDataUrl">Copy as Data URL</button>
+<button class="btn btn-secondary" id="copyReact">Copy as React Component</button>
+</div>
+<h3 style="margin-top:20px;">Optimized Code</h3>
+<div class="code-output" id="codeOutput"></div>
+</div>
+</div>
+
+<!-- BATCH TAB -->
+<div class="tab-content" id="tab-batch">
+<div class="panel">
+<h3>Batch Optimization</h3>
+<p style="font-size:13px;color:#6b7280;margin-bottom:12px;">Upload multiple SVGs above. They all get optimized at once.</p>
+<div class="batch-list" id="batchList"></div>
+<div class="actions" id="batchActions" style="display:none;">
+<button class="btn btn-primary" id="dlBatchAll">Download All Optimized</button>
+</div>
+</div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+function copyText(text) { navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard')); }
+function formatSize(bytes) { return bytes < 1024 ? bytes + 'B' : (bytes / 1024).toFixed(1) + 'KB'; }
+
+let originalSvg = '';
+let optimizedSvg = '';
+let selectedElement = null;
+let batchFiles = []; // { name, original, optimized }
+
+// Drop zone
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  handleFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+function handleFiles(files) {
+  const svgFiles = Array.from(files).filter(f => f.name.endsWith('.svg') || f.type === 'image/svg+xml');
+  if (svgFiles.length === 0) { showToast('No SVG files found'); return; }
+
+  if (svgFiles.length === 1) {
+    const reader = new FileReader();
+    reader.onload = e => { processSingle(e.target.result); };
+    reader.readAsText(svgFiles[0]);
+  } else {
+    batchFiles = [];
+    let loaded = 0;
+    svgFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        batchFiles.push({ name: file.name, original: e.target.result, optimized: optimize(e.target.result) });
+        loaded++;
+        if (loaded === svgFiles.length) {
+          // Also set the first as the active single
+          processSingle(batchFiles[0].original);
+          renderBatch();
+          document.querySelector('[data-tab="batch"]').click();
+        }
+      };
+      reader.readAsText(file);
+    });
+  }
+}
+
+document.getElementById('pasteBtn').addEventListener('click', () => {
+  const code = document.getElementById('pasteArea').value.trim();
+  if (!code || !code.includes('<svg')) { showToast('No valid SVG code'); return; }
+  processSingle(code);
+});
+
+function processSingle(svgCode) {
+  originalSvg = svgCode;
+  optimizedSvg = optimize(svgCode);
+  document.getElementById('workspace').classList.remove('hidden');
+  updatePreviews();
+  updateEdit();
+  updateExport();
+}
+
+// ---- OPTIMIZER ----
+function optimize(svg) {
+  let s = svg;
+
+  if (document.getElementById('optComments').checked) {
+    s = s.replace(/<!--[\s\S]*?-->/g, '');
+  }
+  if (document.getElementById('optMetadata').checked) {
+    s = s.replace(/<metadata[\s\S]*?<\/metadata>/gi, '');
+    s = s.replace(/<desc[\s\S]*?<\/desc>/gi, '');
+    s = s.replace(/<title[\s\S]*?<\/title>/gi, '');
+  }
+  if (document.getElementById('optEditorCruft').checked) {
+    // Remove Illustrator, Inkscape, Sketch namespace attrs
+    s = s.replace(/\s+xmlns:(i|inkscape|sodipodi|sketch|dc|cc|rdf)="[^"]*"/g, '');
+    s = s.replace(/\s+(inkscape|sodipodi|sketch):[a-z\-]+="[^"]*"/gi, '');
+    s = s.replace(/<(inkscape|sodipodi|sketch):[^>]*\/?>/gi, '');
+    s = s.replace(/\s+data-name="[^"]*"/g, '');
+    // Remove xml declaration
+    s = s.replace(/<\?xml[^?]*\?>\s*/g, '');
+    // Remove DOCTYPE
+    s = s.replace(/<!DOCTYPE[^>]*>\s*/g, '');
+  }
+  if (document.getElementById('optEmptyGroups').checked) {
+    // Repeatedly remove empty <g></g> tags
+    let prev;
+    do { prev = s; s = s.replace(/<g[^>]*>\s*<\/g>/gi, ''); } while (s !== prev);
+  }
+  if (document.getElementById('optHidden').checked) {
+    s = s.replace(/<[^>]+display\s*[:=]\s*["']?none[^>]*>[\s\S]*?<\/[^>]+>/gi, '');
+    s = s.replace(/<[^>]+visibility\s*[:=]\s*["']?hidden[^>]*>[\s\S]*?<\/[^>]+>/gi, '');
+    s = s.replace(/<[^>]+opacity\s*[:=]\s*["']?0["']?[^>]*>[\s\S]*?<\/[^>]+>/gi, '');
+  }
+  if (document.getElementById('optShortenIds').checked) {
+    let idCounter = 0;
+    const idMap = {};
+    s = s.replace(/\bid="([^"]+)"/g, (match, id) => {
+      const short = 'a' + (idCounter++).toString(36);
+      idMap[id] = short;
+      return `id="${short}"`;
+    });
+    // Update references
+    Object.entries(idMap).forEach(([old, short]) => {
+      s = s.replace(new RegExp('#' + old.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), '#' + short);
+      s = s.replace(new RegExp(`url\\(#${old.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)`, 'g'), `url(#${short})`);
+    });
+  }
+  if (document.getElementById('optShapes').checked) {
+    // Basic shape to path conversions
+    s = s.replace(/<rect\s+([^>]*)\/?\s*>/gi, (match, attrs) => {
+      const get = (name) => { const m = attrs.match(new RegExp(`${name}="([^"]*)"`, 'i')); return m ? parseFloat(m[1]) : 0; };
+      const x = get('x'), y = get('y'), w = get('width'), h = get('height'), rx = get('rx'), ry = get('ry');
+      const otherAttrs = attrs.replace(/\b(x|y|width|height|rx|ry)="[^"]*"/gi, '').trim();
+      if (rx || ry) {
+        const r = rx || ry;
+        return `<path d="M${x + r},${y} h${w - 2 * r} a${r},${r} 0 0 1 ${r},${r} v${h - 2 * r} a${r},${r} 0 0 1 -${r},${r} h-${w - 2 * r} a${r},${r} 0 0 1 -${r},-${r} v-${h - 2 * r} a${r},${r} 0 0 1 ${r},-${r}z" ${otherAttrs}/>`;
+      }
+      return `<path d="M${x},${y} h${w} v${h} h-${w}z" ${otherAttrs}/>`;
+    });
+    s = s.replace(/<circle\s+([^>]*)\/?\s*>/gi, (match, attrs) => {
+      const get = (name) => { const m = attrs.match(new RegExp(`${name}="([^"]*)"`, 'i')); return m ? parseFloat(m[1]) : 0; };
+      const cx = get('cx'), cy = get('cy'), r = get('r');
+      const otherAttrs = attrs.replace(/\b(cx|cy|r)="[^"]*"/gi, '').trim();
+      return `<path d="M${cx - r},${cy} a${r},${r} 0 1 0 ${2 * r},0 a${r},${r} 0 1 0 -${2 * r},0z" ${otherAttrs}/>`;
+    });
+    s = s.replace(/<ellipse\s+([^>]*)\/?\s*>/gi, (match, attrs) => {
+      const get = (name) => { const m = attrs.match(new RegExp(`${name}="([^"]*)"`, 'i')); return m ? parseFloat(m[1]) : 0; };
+      const cx = get('cx'), cy = get('cy'), rx = get('rx'), ry = get('ry');
+      const otherAttrs = attrs.replace(/\b(cx|cy|rx|ry)="[^"]*"/gi, '').trim();
+      return `<path d="M${cx - rx},${cy} a${rx},${ry} 0 1 0 ${2 * rx},0 a${rx},${ry} 0 1 0 -${2 * rx},0z" ${otherAttrs}/>`;
+    });
+    s = s.replace(/<line\s+([^>]*)\/?\s*>/gi, (match, attrs) => {
+      const get = (name) => { const m = attrs.match(new RegExp(`${name}="([^"]*)"`, 'i')); return m ? parseFloat(m[1]) : 0; };
+      const x1 = get('x1'), y1 = get('y1'), x2 = get('x2'), y2 = get('y2');
+      const otherAttrs = attrs.replace(/\b(x1|y1|x2|y2)="[^"]*"/gi, '').trim();
+      return `<path d="M${x1},${y1} L${x2},${y2}" ${otherAttrs}/>`;
+    });
+  }
+  if (document.getElementById('optMinify').checked) {
+    s = s.replace(/\n\s*/g, ' ').replace(/\s{2,}/g, ' ').replace(/>\s+</g, '><').trim();
+  }
+  return s;
+}
+
+function updatePreviews() {
+  const origBytes = new Blob([originalSvg]).size;
+  const optBytes = new Blob([optimizedSvg]).size;
+  const saved = origBytes > 0 ? ((1 - optBytes / origBytes) * 100).toFixed(0) : 0;
+
+  document.getElementById('origSize').textContent = formatSize(origBytes);
+  document.getElementById('optSize').textContent = formatSize(optBytes);
+  document.getElementById('savedPct').textContent = saved + '%';
+
+  document.getElementById('origPreview').innerHTML = originalSvg;
+  document.getElementById('optPreview').innerHTML = optimizedSvg;
+}
+
+document.getElementById('reOptimize').addEventListener('click', () => {
+  optimizedSvg = optimize(originalSvg);
+  updatePreviews();
+  updateEdit();
+  updateExport();
+  showToast('Re-optimized');
+});
+
+document.getElementById('resetSvg').addEventListener('click', () => {
+  optimizedSvg = originalSvg;
+  updatePreviews();
+  updateEdit();
+  updateExport();
+  showToast('Reset to original');
+});
+
+// ---- EDIT TAB ----
+function updateEdit() {
+  const area = document.getElementById('editArea');
+  area.innerHTML = optimizedSvg;
+  selectedElement = null;
+
+  // Make elements clickable
+  const svg = area.querySelector('svg');
+  if (!svg) return;
+  const scale = +document.getElementById('editScale').value / 100;
+  svg.style.transform = `scale(${scale})`;
+  svg.style.transformOrigin = 'top left';
+
+  const clickables = svg.querySelectorAll('path, rect, circle, ellipse, line, polygon, polyline, text, image');
+  clickables.forEach(el => {
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      if (selectedElement) selectedElement.classList.remove('selected-outline');
+      selectedElement = el;
+      el.classList.add('selected-outline');
+      // Populate color pickers from element
+      const fill = el.getAttribute('fill') || window.getComputedStyle(el).fill;
+      const stroke = el.getAttribute('stroke') || '';
+      if (fill && fill !== 'none') {
+        try { document.getElementById('editFill').value = rgbToHex(fill); } catch {}
+      }
+      if (stroke && stroke !== 'none') {
+        try { document.getElementById('editStroke').value = rgbToHex(stroke); } catch {}
+      }
+    });
+  });
+
+  area.addEventListener('click', e => {
+    if (e.target === area || e.target === svg) {
+      if (selectedElement) selectedElement.classList.remove('selected-outline');
+      selectedElement = null;
+    }
+  });
+}
+
+function rgbToHex(color) {
+  if (color.startsWith('#')) {
+    if (color.length === 4) return '#' + color[1] + color[1] + color[2] + color[2] + color[3] + color[3];
+    return color.slice(0, 7);
+  }
+  const match = color.match(/(\d+)/g);
+  if (match && match.length >= 3) {
+    return '#' + match.slice(0, 3).map(n => parseInt(n).toString(16).padStart(2, '0')).join('');
+  }
+  return '#000000';
+}
+
+document.getElementById('editFill').addEventListener('input', e => {
+  if (selectedElement) {
+    selectedElement.setAttribute('fill', e.target.value);
+    syncEditToOptimized();
+  }
+});
+
+document.getElementById('editStroke').addEventListener('input', e => {
+  if (selectedElement) {
+    selectedElement.setAttribute('stroke', e.target.value);
+    syncEditToOptimized();
+  }
+});
+
+document.getElementById('editStrokeW').addEventListener('input', e => {
+  if (selectedElement) {
+    selectedElement.setAttribute('stroke-width', e.target.value);
+    syncEditToOptimized();
+  }
+});
+
+document.getElementById('editScale').addEventListener('input', e => {
+  document.getElementById('editScaleVal').textContent = e.target.value + '%';
+  const svg = document.getElementById('editArea').querySelector('svg');
+  if (svg) {
+    const scale = +e.target.value / 100;
+    svg.style.transform = `scale(${scale})`;
+    svg.style.transformOrigin = 'top left';
+  }
+});
+
+document.getElementById('editDelete').addEventListener('click', () => {
+  if (selectedElement) {
+    selectedElement.remove();
+    selectedElement = null;
+    syncEditToOptimized();
+    showToast('Element deleted');
+  } else {
+    showToast('No element selected');
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if ((e.key === 'Delete' || e.key === 'Backspace') && selectedElement && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+    selectedElement.remove();
+    selectedElement = null;
+    syncEditToOptimized();
+    showToast('Element deleted');
+  }
+});
+
+function syncEditToOptimized() {
+  const svg = document.getElementById('editArea').querySelector('svg');
+  if (svg) {
+    const clone = svg.cloneNode(true);
+    clone.style.transform = '';
+    clone.style.transformOrigin = '';
+    clone.querySelectorAll('.selected-outline').forEach(el => el.classList.remove('selected-outline'));
+    clone.querySelectorAll('[style*="cursor"]').forEach(el => el.style.cursor = '');
+    optimizedSvg = clone.outerHTML;
+    updateExport();
+    // Update optimize tab preview too
+    document.getElementById('optPreview').innerHTML = optimizedSvg;
+    const optBytes = new Blob([optimizedSvg]).size;
+    const origBytes = new Blob([originalSvg]).size;
+    document.getElementById('optSize').textContent = formatSize(optBytes);
+    document.getElementById('savedPct').textContent = (origBytes > 0 ? ((1 - optBytes / origBytes) * 100).toFixed(0) : 0) + '%';
+  }
+}
+
+// ---- EXPORT TAB ----
+function updateExport() {
+  document.getElementById('codeOutput').textContent = optimizedSvg;
+}
+
+document.getElementById('dlSvg').addEventListener('click', () => {
+  const blob = new Blob([optimizedSvg], { type: 'image/svg+xml' });
+  const link = document.createElement('a');
+  link.download = 'optimized.svg';
+  link.href = URL.createObjectURL(blob);
+  link.click();
+  URL.revokeObjectURL(link.href);
+  showToast('SVG downloaded');
+});
+
+document.getElementById('copySvgCode').addEventListener('click', () => copyText(optimizedSvg));
+
+document.getElementById('copyDataUrl').addEventListener('click', () => {
+  const encoded = 'data:image/svg+xml,' + encodeURIComponent(optimizedSvg);
+  copyText(encoded);
+});
+
+document.getElementById('copyReact').addEventListener('click', () => {
+  let jsx = optimizedSvg
+    .replace(/class="/g, 'className="')
+    .replace(/clip-path/g, 'clipPath')
+    .replace(/clip-rule/g, 'clipRule')
+    .replace(/fill-rule/g, 'fillRule')
+    .replace(/fill-opacity/g, 'fillOpacity')
+    .replace(/stroke-width/g, 'strokeWidth')
+    .replace(/stroke-linecap/g, 'strokeLinecap')
+    .replace(/stroke-linejoin/g, 'strokeLinejoin')
+    .replace(/stroke-dasharray/g, 'strokeDasharray')
+    .replace(/stroke-dashoffset/g, 'strokeDashoffset')
+    .replace(/stroke-miterlimit/g, 'strokeMiterlimit')
+    .replace(/stroke-opacity/g, 'strokeOpacity')
+    .replace(/font-family/g, 'fontFamily')
+    .replace(/font-size/g, 'fontSize')
+    .replace(/font-weight/g, 'fontWeight')
+    .replace(/text-anchor/g, 'textAnchor')
+    .replace(/text-decoration/g, 'textDecoration')
+    .replace(/dominant-baseline/g, 'dominantBaseline')
+    .replace(/stop-color/g, 'stopColor')
+    .replace(/stop-opacity/g, 'stopOpacity')
+    .replace(/xmlns:xlink="[^"]*"/g, '')
+    .replace(/xlink:href/g, 'xlinkHref');
+  // Add props spread to svg tag
+  jsx = jsx.replace(/<svg/, '<svg {...props}');
+  const component = `const SvgIcon = (props) => (\n  ${jsx}\n);\n\nexport default SvgIcon;`;
+  copyText(component);
+});
+
+// ---- BATCH TAB ----
+function renderBatch() {
+  const list = document.getElementById('batchList');
+  if (batchFiles.length === 0) { list.innerHTML = '<p style="color:#6b7280;font-size:13px;">No batch files loaded.</p>'; return; }
+
+  document.getElementById('batchActions').style.display = 'flex';
+  list.innerHTML = batchFiles.map((f, i) => {
+    const origBytes = new Blob([f.original]).size;
+    const optBytes = new Blob([f.optimized]).size;
+    const saved = origBytes > 0 ? ((1 - optBytes / origBytes) * 100).toFixed(0) : 0;
+    return `<div class="batch-item">
+      <div class="batch-preview">${f.optimized}</div>
+      <div class="batch-name">${f.name}</div>
+      <div class="batch-sizes">${formatSize(origBytes)} &rarr; ${formatSize(optBytes)}</div>
+      <div class="batch-saving">${saved}% smaller</div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('dlBatchAll').addEventListener('click', () => {
+  batchFiles.forEach(f => {
+    const blob = new Blob([f.optimized], { type: 'image/svg+xml' });
+    const link = document.createElement('a');
+    link.download = f.name.replace('.svg', '-optimized.svg');
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    URL.revokeObjectURL(link.href);
+  });
+  showToast(`Downloaded ${batchFiles.length} optimized SVGs`);
+});
+
+// Tabs
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+</script>
+<script src="/related.js"></script>
+</body>
+</html>
