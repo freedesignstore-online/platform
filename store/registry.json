@@ -395,6 +395,15 @@
       "iconBg": "#1a1a1a",
       "category": "images",
       "section": "images"
+    },
+    {
+      "id": "vector-editor",
+      "name": "Vector Editor",
+      "description": "Mini-Illustrator. Pen tool, shapes, bezier paths, layers, align/distribute. SVG-native. Export clean SVG/PNG.",
+      "icon": "✒️",
+      "iconBg": "#6366f1",
+      "category": "images",
+      "section": "images"
     }
   ]
 }
