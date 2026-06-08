@@ -386,6 +386,15 @@
       "iconBg": "#f97316",
       "category": "uiux",
       "section": "components"
+    },
+    {
+      "id": "photo-editor",
+      "name": "Photo Editor",
+      "description": "Mini-Photoshop. 15 tools, layers, adjustments, clone stamp, blur, gradient. Undo/redo, keyboard shortcuts.",
+      "icon": "🖼️",
+      "iconBg": "#1a1a1a",
+      "category": "images",
+      "section": "images"
     }
   ]
 }
