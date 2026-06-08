@@ -151,17 +151,19 @@ document.getElementById('zoomFit').onclick = () => {
 
 // Pan
 canvasWrap.addEventListener('mousedown', (e) => {
-  if (e.target === canvasWrap || e.target === canvasInner || e.target === svgLayer) {
-    if (e.button === 1 || (e.button === 0 && e.altKey)) {
+  // Check if click is on the canvas area (not on a node or toolbar)
+  const isCanvas = e.target === canvasWrap || e.target === canvasInner || e.target === svgLayer || e.target.closest('.canvas-inner') === canvasInner && !e.target.closest('.flow-node');
+  if (isCanvas || (placingType && !e.target.closest('.flow-node'))) {
+    if (e.button === 1 || (e.button === 0 && e.altKey && !placingType)) {
       isPanning = true; panStart = { x: e.clientX, y: e.clientY }; panOrig = { x: panX, y: panY };
       canvasWrap.style.cursor = 'grabbing'; e.preventDefault();
     } else if (e.button === 0 && placingType) {
       const rect = canvasInner.getBoundingClientRect();
       const x = (e.clientX - rect.left) / zoom, y = (e.clientY - rect.top) / zoom;
-      addNode(placingType, x, y);
+      addNode(placingType, Math.max(20, x), Math.max(20, y));
       placingType = null;
       document.querySelectorAll('.toolbar .tb-btn').forEach(b => b.classList.remove('active'));
-    } else if (e.button === 0) {
+    } else if (e.button === 0 && isCanvas) {
       selectedNode = null; render();
     }
   }
@@ -657,12 +659,20 @@ function updateMinimap() {
   });
 }
 
-// Init: try loading saved state
+// Init: try loading saved state, or show starter nodes
 const saved = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
-if (saved) { nodes = saved.nodes || []; connections = saved.connections || []; nextId = saved.nextId || 1; }
+if (saved && saved.nodes && saved.nodes.length) {
+  nodes = saved.nodes; connections = saved.connections || []; nextId = saved.nextId || 1;
+} else {
+  // Add starter nodes so canvas isn't empty
+  addNode('start', 300, 60, 'Start');
+  addNode('screen', 260, 200, 'Home Page', 'User lands here');
+  addNode('action', 260, 350, 'Click Sign Up');
+}
 updateSaveList();
 render();
 updateTransform();
+toast('Click a button in the toolbar, then click the canvas to place nodes. Drag between ports to connect.');
 </script>
 <script src="/related.js"></script>
 </body>
