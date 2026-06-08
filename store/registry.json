@@ -233,6 +233,15 @@
       "iconBg": "#6366f1",
       "category": "images",
       "section": "images"
+    },
+    {
+      "id": "format-converter",
+      "name": "Format Converter",
+      "description": "Convert between PNG, JPEG, WebP, AVIF, BMP, ICO, Base64, SVG trace. Batch mode, EXIF strip, DPI control.",
+      "icon": "🔄",
+      "iconBg": "#3b82f6",
+      "category": "images",
+      "section": "images"
     }
   ]
 }

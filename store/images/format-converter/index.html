@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Format Converter - FreeDesignStore</title>
+<link rel="icon" href="/favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a { color: #ec4899; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; font-size: 14px; color: #6b7280; }
+.back:hover { color: #ec4899; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.subtitle { color: #6b7280; margin-bottom: 24px; font-size: 15px; }
+.container { max-width: 1200px; margin: 0 auto; }
+.panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
+.hidden { display: none !important; }
+
+/* Upload */
+.drop-zone { border: 2px dashed #e5e7eb; border-radius: 12px; padding: 60px 24px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; }
+.drop-zone:hover, .drop-zone.dragover { border-color: #ec4899; background: #fdf2f8; }
+.drop-zone p { color: #6b7280; margin-top: 8px; font-size: 14px; }
+.drop-zone .icon { font-size: 48px; color: #ec4899; }
+
+/* Layout */
+.editor { display: grid; grid-template-columns: 1fr 360px; gap: 20px; }
+@media (max-width: 860px) { .editor { grid-template-columns: 1fr; } }
+
+/* Preview area */
+.preview-area { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 600px) { .preview-area { grid-template-columns: 1fr; } }
+.preview-card { text-align: center; }
+.preview-card .label { font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+.preview-card .img-wrap { background: repeating-conic-gradient(#e5e7eb 0% 25%, transparent 0% 50%) 50%/16px 16px; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 200px; }
+.preview-card .img-wrap canvas, .preview-card .img-wrap img { max-width: 100%; max-height: 300px; display: block; }
+.preview-card .meta { font-size: 12px; color: #6b7280; margin-top: 6px; }
+
+/* Size comparison */
+.size-compare { margin-top: 16px; }
+.size-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.size-row .label { font-size: 13px; color: #6b7280; min-width: 60px; }
+.size-row .bar-outer { flex: 1; height: 24px; background: #f3f4f6; border-radius: 6px; overflow: hidden; position: relative; }
+.size-row .bar-inner { height: 100%; border-radius: 6px; transition: width .4s; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 600; color: #fff; min-width: 40px; }
+.size-row .bar-inner.orig { background: #6b7280; }
+.size-row .bar-inner.out { background: #10b981; }
+.size-row .bar-inner.out.bigger { background: #ef4444; }
+.compression-ratio { font-size: 14px; font-weight: 700; color: #ec4899; margin-top: 8px; }
+
+/* Format grid */
+.fmt-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
+@media (max-width: 500px) { .fmt-grid { grid-template-columns: repeat(3, 1fr); } }
+.fmt-btn { padding: 12px 8px; border: 2px solid #e5e7eb; border-radius: 10px; background: #fff; cursor: pointer; text-align: center; font-family: inherit; transition: all .15s; }
+.fmt-btn:hover { border-color: #ec4899; background: #fdf2f8; }
+.fmt-btn.active { border-color: #ec4899; background: #fdf2f8; }
+.fmt-btn .name { display: block; font-size: 14px; font-weight: 700; color: #1a1a1a; }
+.fmt-btn .desc { display: block; font-size: 10px; color: #6b7280; margin-top: 2px; }
+
+/* Options */
+label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 4px; margin-top: 14px; }
+label:first-child { margin-top: 0; }
+input[type="range"] { width: 100%; accent-color: #ec4899; }
+input[type="number"] { width: 100%; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; }
+select { padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; width: 100%; }
+.slider-row { display: flex; align-items: center; gap: 8px; }
+.slider-row input[type="range"] { flex: 1; }
+.slider-row .val { font-size: 13px; color: #ec4899; font-weight: 600; min-width: 36px; text-align: right; }
+.toggle-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.toggle-row input[type="checkbox"] { accent-color: #ec4899; }
+.toggle-row label { margin: 0; cursor: pointer; }
+.quality-val { font-size: 13px; color: #ec4899; font-weight: 600; }
+
+/* Quick actions */
+.quick-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.quick-btn { padding: 8px 14px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600; transition: all .15s; }
+.quick-btn:hover { border-color: #ec4899; background: #fdf2f8; }
+
+/* EXIF panel */
+.exif-panel { margin-top: 14px; padding: 12px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 12px; max-height: 160px; overflow-y: auto; }
+.exif-panel .row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #f0f0f0; }
+.exif-panel .row:last-child { border: none; }
+.exif-panel .key { color: #6b7280; }
+.exif-panel .value { font-weight: 600; color: #1a1a1a; }
+
+/* Base64 output */
+.b64-output { margin-top: 12px; padding: 12px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; font-family: monospace; font-size: 11px; word-break: break-all; max-height: 120px; overflow-y: auto; cursor: pointer; position: relative; }
+.b64-output:hover::after { content: 'Click to copy'; position: absolute; top: -20px; right: 0; font-size: 11px; color: #ec4899; font-family: 'Manrope', system-ui; }
+.b64-count { font-size: 12px; color: #6b7280; margin-top: 4px; }
+
+/* Actions */
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.btn { padding: 10px 18px; border-radius: 8px; border: none; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-primary:hover { background: #db2777; }
+.btn-secondary { background: #fff; border: 1px solid #e5e7eb; color: #1a1a1a; }
+.btn-secondary:hover { border-color: #ec4899; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+/* Batch list */
+.batch-list { margin-top: 12px; }
+.batch-item { display: flex; align-items: center; gap: 10px; padding: 8px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 6px; }
+.batch-item img { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; }
+.batch-item .info { flex: 1; font-size: 12px; color: #6b7280; }
+.batch-item .info .name { font-weight: 600; color: #1a1a1a; font-size: 13px; }
+.batch-item .status { font-size: 11px; color: #10b981; font-weight: 600; }
+.batch-item .remove-batch { background: none; border: none; color: #dc2626; cursor: pointer; font-size: 16px; }
+
+/* DPI */
+.dpi-btns { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+.dpi-btn { padding: 4px 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 12px; background: #fff; cursor: pointer; font-family: inherit; }
+.dpi-btn:hover, .dpi-btn.active { border-color: #ec4899; background: #fdf2f8; }
+
+/* ICO sizes */
+.ico-sizes { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.ico-sizes label { display: flex; align-items: center; gap: 4px; font-size: 12px; margin: 0; }
+.ico-sizes input { accent-color: #ec4899; }
+
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 100; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="back">&larr; Back to FreeDesignStore</a>
+  <h1>Image Format Converter</h1>
+  <p class="subtitle">Convert between PNG, JPEG, WebP, AVIF, BMP, ICO, Base64, and SVG. Batch supported.</p>
+
+  <!-- Upload -->
+  <div class="panel" id="uploadPanel">
+    <div class="drop-zone" id="dropZone">
+      <div class="icon">&#128260;</div>
+      <p>Drop images here, click to upload, or paste from clipboard (Ctrl+V)</p>
+      <p style="font-size:12px;margin-top:4px;color:#9ca3af">PNG, JPEG, WebP, SVG, GIF, BMP, AVIF, ICO, TIFF</p>
+      <input type="file" id="fileInput" accept="image/*,.ico,.tiff,.tif,.avif" multiple class="hidden">
+    </div>
+  </div>
+
+  <!-- Editor -->
+  <div class="hidden" id="editorSection">
+    <div class="editor">
+      <!-- Left: Preview -->
+      <div>
+        <div class="panel">
+          <div class="preview-area" id="previewArea">
+            <div class="preview-card">
+              <div class="label">Original</div>
+              <div class="img-wrap"><canvas id="origCanvas"></canvas></div>
+              <div class="meta" id="origMeta"></div>
+            </div>
+            <div class="preview-card">
+              <div class="label">Converted</div>
+              <div class="img-wrap"><canvas id="outCanvas"></canvas></div>
+              <div class="meta" id="outMeta"></div>
+            </div>
+          </div>
+          <div class="size-compare" id="sizeCompare">
+            <div class="size-row">
+              <span class="label">Original</span>
+              <div class="bar-outer"><div class="bar-inner orig" id="barOrig"></div></div>
+            </div>
+            <div class="size-row">
+              <span class="label">Output</span>
+              <div class="bar-outer"><div class="bar-inner out" id="barOut"></div></div>
+            </div>
+            <div class="compression-ratio" id="compressionRatio"></div>
+          </div>
+        </div>
+
+        <!-- Base64 output -->
+        <div class="panel hidden" id="b64Panel">
+          <label style="margin-top:0">Base64 Data URL</label>
+          <div class="b64-output" id="b64Output"></div>
+          <div class="b64-count" id="b64Count"></div>
+          <div class="actions">
+            <button class="btn btn-secondary btn-sm" id="b64CopyBtn">Copy Data URL</button>
+          </div>
+        </div>
+
+        <!-- EXIF -->
+        <div class="panel hidden" id="exifPanel">
+          <label style="margin-top:0">Image Metadata</label>
+          <div class="exif-panel" id="exifContent"></div>
+          <div class="actions">
+            <button class="btn btn-secondary btn-sm" id="stripExifBtn">Strip Metadata on Export</button>
+          </div>
+        </div>
+
+        <!-- Batch list -->
+        <div class="panel hidden" id="batchPanel">
+          <label style="margin-top:0">Batch Files</label>
+          <div class="batch-list" id="batchList"></div>
+          <div class="actions">
+            <button class="btn btn-secondary btn-sm" id="addBatchBtn">+ Add More</button>
+            <button class="btn btn-primary btn-sm" id="processBatchBtn">Convert &amp; Download All</button>
+            <input type="file" id="batchInput" accept="image/*,.ico,.tiff,.tif,.avif" multiple class="hidden">
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Controls -->
+      <div class="panel">
+        <!-- Quick actions -->
+        <label>Quick Optimize</label>
+        <div class="quick-actions">
+          <button class="quick-btn" id="optWeb">Optimize for Web</button>
+          <button class="quick-btn" id="optEmail">Optimize for Email</button>
+        </div>
+
+        <!-- Format selector -->
+        <label>Convert To</label>
+        <div class="fmt-grid">
+          <button class="fmt-btn" data-fmt="image/png"><span class="name">PNG</span><span class="desc">Lossless</span></button>
+          <button class="fmt-btn active" data-fmt="image/jpeg"><span class="name">JPEG</span><span class="desc">Lossy, small</span></button>
+          <button class="fmt-btn" data-fmt="image/webp"><span class="name">WebP</span><span class="desc">Modern</span></button>
+          <button class="fmt-btn" data-fmt="image/avif"><span class="name">AVIF</span><span class="desc">Smallest</span></button>
+          <button class="fmt-btn" data-fmt="image/bmp"><span class="name">BMP</span><span class="desc">Uncompressed</span></button>
+          <button class="fmt-btn" data-fmt="ico"><span class="name">ICO</span><span class="desc">Multi-size</span></button>
+          <button class="fmt-btn" data-fmt="base64"><span class="name">Base64</span><span class="desc">Data URL</span></button>
+          <button class="fmt-btn" data-fmt="svg-trace"><span class="name">SVG</span><span class="desc">Trace</span></button>
+        </div>
+
+        <!-- Format-specific options -->
+        <div id="optJPEG">
+          <label>Quality <span class="quality-val" id="jpegQualVal">85%</span></label>
+          <input type="range" id="jpegQual" min="1" max="100" value="85">
+        </div>
+        <div id="optWebP" class="hidden">
+          <label>Quality <span class="quality-val" id="webpQualVal">80%</span></label>
+          <input type="range" id="webpQual" min="1" max="100" value="80">
+          <div class="toggle-row"><input type="checkbox" id="webpLossless"><label for="webpLossless">Lossless</label></div>
+        </div>
+        <div id="optAVIF" class="hidden">
+          <label>Quality <span class="quality-val" id="avifQualVal">60%</span></label>
+          <input type="range" id="avifQual" min="1" max="100" value="60">
+        </div>
+        <div id="optICO" class="hidden">
+          <label>ICO Sizes (multi-resolution)</label>
+          <div class="ico-sizes" id="icoSizes">
+            <label><input type="checkbox" value="16" checked> 16</label>
+            <label><input type="checkbox" value="32" checked> 32</label>
+            <label><input type="checkbox" value="48" checked> 48</label>
+            <label><input type="checkbox" value="64"> 64</label>
+            <label><input type="checkbox" value="128"> 128</label>
+            <label><input type="checkbox" value="256"> 256</label>
+          </div>
+        </div>
+        <div id="optSVG" class="hidden">
+          <label>SVG Trace Threshold</label>
+          <div class="slider-row">
+            <input type="range" id="svgThreshold" min="0" max="255" value="128">
+            <span class="val" id="svgThreshVal">128</span>
+          </div>
+          <p style="font-size:11px;color:#9ca3af;margin-top:4px">Converts bitmap to simple black/white SVG paths. Best for logos and simple shapes.</p>
+        </div>
+
+        <!-- DPI -->
+        <label>DPI</label>
+        <div class="dpi-btns">
+          <button class="dpi-btn active" data-dpi="72">72</button>
+          <button class="dpi-btn" data-dpi="96">96</button>
+          <button class="dpi-btn" data-dpi="150">150</button>
+          <button class="dpi-btn" data-dpi="300">300</button>
+        </div>
+
+        <!-- Max width -->
+        <label>Max Width (px, 0 = no limit)</label>
+        <input type="number" id="maxWidth" min="0" max="10000" value="0" placeholder="No limit">
+
+        <!-- Color profile -->
+        <div class="toggle-row">
+          <input type="checkbox" id="stripMeta" checked>
+          <label for="stripMeta">Strip metadata / color profile</label>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions" style="border-top:1px solid #e5e7eb;padding-top:16px;margin-top:16px">
+          <button class="btn btn-primary" id="downloadBtn">Download</button>
+          <button class="btn btn-secondary" id="copyBtn">Copy to Clipboard</button>
+          <button class="btn btn-secondary" id="resetBtn">New Image</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+'use strict';
+
+function $(id) { return document.getElementById(id); }
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+function fmtBytes(b) { if (b < 1024) return b + ' B'; if (b < 1048576) return (b/1024).toFixed(1) + ' KB'; return (b/1048576).toFixed(2) + ' MB'; }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+/* ── State ── */
+let origImg = null;
+let origFile = null;
+let origW = 0, origH = 0;
+let selectedFmt = 'image/jpeg';
+let selectedDPI = 72;
+let batchFiles = [];
+let avifSupported = false;
+
+// Check AVIF support
+(function checkAVIF() {
+  const c = document.createElement('canvas');
+  c.width = 1; c.height = 1;
+  avifSupported = c.toDataURL('image/avif').startsWith('data:image/avif');
+})();
+
+/* ── Upload ── */
+const dropZone = $('dropZone'), fileInput = $('fileInput');
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  const files = [...e.dataTransfer.files].filter(f => f.type.startsWith('image/'));
+  if (files.length > 1) { batchFiles = files; loadImage(files[0]); showBatchPanel(); }
+  else if (files.length === 1) loadImage(files[0]);
+});
+fileInput.addEventListener('change', e => {
+  const files = [...e.target.files];
+  if (files.length > 1) { batchFiles = files; loadImage(files[0]); showBatchPanel(); }
+  else if (files.length === 1) loadImage(files[0]);
+});
+document.addEventListener('paste', e => {
+  const items = [...(e.clipboardData || {}).items || []];
+  const img = items.find(i => i.type.startsWith('image/'));
+  if (img) { const file = img.getAsFile(); if (file) loadImage(file); }
+});
+
+function loadImage(file) {
+  origFile = file;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      origImg = img;
+      origW = img.naturalWidth;
+      origH = img.naturalHeight;
+      $('uploadPanel').classList.add('hidden');
+      $('editorSection').classList.remove('hidden');
+      renderOrigPreview();
+      extractMetadata(file);
+      convert();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderOrigPreview() {
+  const c = $('origCanvas');
+  const maxW = 400, maxH = 300;
+  const scale = Math.min(1, maxW / origW, maxH / origH);
+  c.width = Math.round(origW * scale);
+  c.height = Math.round(origH * scale);
+  const ctx = c.getContext('2d');
+  ctx.drawImage(origImg, 0, 0, c.width, c.height);
+  const ext = origFile.name.split('.').pop().toUpperCase();
+  $('origMeta').textContent = `${origW} x ${origH} | ${ext} | ${fmtBytes(origFile.size)}`;
+}
+
+/* ── Metadata extraction (basic EXIF from JPEG) ── */
+function extractMetadata(file) {
+  const panel = $('exifPanel');
+  const content = $('exifContent');
+  content.innerHTML = '';
+
+  // Basic info always shown
+  const info = [
+    ['Filename', file.name],
+    ['Type', file.type || 'unknown'],
+    ['Size', fmtBytes(file.size)],
+    ['Dimensions', origW + ' x ' + origH],
+    ['Last Modified', file.lastModified ? new Date(file.lastModified).toLocaleDateString() : 'unknown'],
+  ];
+
+  // Attempt basic EXIF read for JPEG
+  if (file.type === 'image/jpeg' || file.name.match(/\.jpe?g$/i)) {
+    readBasicEXIF(file).then(exif => {
+      if (exif.length) info.push(...exif);
+      renderExifInfo(info);
+      panel.classList.remove('hidden');
+    });
+  } else {
+    renderExifInfo(info);
+    panel.classList.remove('hidden');
+  }
+}
+
+function renderExifInfo(info) {
+  $('exifContent').innerHTML = info.map(([k, v]) =>
+    `<div class="row"><span class="key">${k}</span><span class="value">${v}</span></div>`
+  ).join('');
+}
+
+function readBasicEXIF(file) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const buf = new Uint8Array(e.target.result);
+      const exif = [];
+      // Look for EXIF markers — simplified extraction
+      if (buf[0] === 0xFF && buf[1] === 0xD8) {
+        // Check for Orientation, Camera Make, etc. in APP1
+        let offset = 2;
+        while (offset < buf.length - 4) {
+          if (buf[offset] === 0xFF && buf[offset + 1] === 0xE1) {
+            const len = (buf[offset + 2] << 8) | buf[offset + 3];
+            // Check for "Exif\0\0"
+            if (buf[offset + 4] === 0x45 && buf[offset + 5] === 0x78) {
+              exif.push(['EXIF', 'Present (APP1 marker found)']);
+              exif.push(['EXIF Size', len + ' bytes']);
+            }
+            break;
+          }
+          if (buf[offset] === 0xFF) {
+            const segLen = (buf[offset + 2] << 8) | buf[offset + 3];
+            offset += 2 + segLen;
+          } else break;
+        }
+      }
+      resolve(exif);
+    };
+    reader.readAsArrayBuffer(file.slice(0, 65536));
+  });
+}
+
+/* ── Format selection ── */
+document.querySelectorAll('.fmt-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.fmt-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedFmt = btn.dataset.fmt;
+    updateOptionsVisibility();
+    convert();
+  });
+});
+
+function updateOptionsVisibility() {
+  $('optJPEG').classList.toggle('hidden', selectedFmt !== 'image/jpeg');
+  $('optWebP').classList.toggle('hidden', selectedFmt !== 'image/webp');
+  $('optAVIF').classList.toggle('hidden', selectedFmt !== 'image/avif');
+  $('optICO').classList.toggle('hidden', selectedFmt !== 'ico');
+  $('optSVG').classList.toggle('hidden', selectedFmt !== 'svg-trace');
+  $('b64Panel').classList.toggle('hidden', selectedFmt !== 'base64');
+}
+
+/* ── Quality sliders ── */
+$('jpegQual').addEventListener('input', e => { $('jpegQualVal').textContent = e.target.value + '%'; convert(); });
+$('webpQual').addEventListener('input', e => { $('webpQualVal').textContent = e.target.value + '%'; convert(); });
+$('webpLossless').addEventListener('change', convert);
+$('avifQual').addEventListener('input', e => { $('avifQualVal').textContent = e.target.value + '%'; convert(); });
+$('svgThreshold').addEventListener('input', e => { $('svgThreshVal').textContent = e.target.value; convert(); });
+$('maxWidth').addEventListener('input', convert);
+
+/* ── DPI buttons ── */
+document.querySelectorAll('.dpi-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.dpi-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedDPI = +btn.dataset.dpi;
+  });
+});
+
+/* ── Quick optimizers ── */
+$('optWeb').addEventListener('click', () => {
+  selectFormat('image/webp');
+  $('webpQual').value = 80; $('webpQualVal').textContent = '80%';
+  $('webpLossless').checked = false;
+  $('maxWidth').value = 2000;
+  convert();
+  toast('Optimized for web: WebP, quality 80, max 2000px');
+});
+
+$('optEmail').addEventListener('click', () => {
+  selectFormat('image/jpeg');
+  $('jpegQual').value = 70; $('jpegQualVal').textContent = '70%';
+  $('maxWidth').value = 800;
+  convert();
+  toast('Optimized for email: JPEG, quality 70, max 800px');
+});
+
+function selectFormat(fmt) {
+  selectedFmt = fmt;
+  document.querySelectorAll('.fmt-btn').forEach(b => b.classList.toggle('active', b.dataset.fmt === fmt));
+  updateOptionsVisibility();
+}
+
+/* ── Conversion ── */
+let lastOutputBlob = null;
+let lastOutputDataURL = null;
+
+function getTargetDimensions() {
+  let w = origW, h = origH;
+  const maxW = +$('maxWidth').value;
+  if (maxW > 0 && w > maxW) {
+    const scale = maxW / w;
+    w = maxW;
+    h = Math.round(origH * scale);
+  }
+  return { w, h };
+}
+
+function convert() {
+  if (!origImg) return;
+
+  if (selectedFmt === 'ico') { convertICO(); return; }
+  if (selectedFmt === 'base64') { convertBase64(); return; }
+  if (selectedFmt === 'svg-trace') { convertSVGTrace(); return; }
+
+  const { w, h } = getTargetDimensions();
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(origImg, 0, 0, w, h);
+
+  let fmt = selectedFmt;
+  let quality;
+  if (fmt === 'image/jpeg') quality = +$('jpegQual').value / 100;
+  else if (fmt === 'image/webp') {
+    quality = $('webpLossless').checked ? undefined : +$('webpQual').value / 100;
+    if ($('webpLossless').checked) quality = 1;
+  }
+  else if (fmt === 'image/avif') quality = +$('avifQual').value / 100;
+
+  // Handle AVIF fallback
+  if (fmt === 'image/avif' && !avifSupported) {
+    toast('AVIF not supported in this browser. Try Chrome 85+.');
+    fmt = 'image/webp';
+  }
+
+  canvas.toBlob(blob => {
+    if (!blob) { toast('Conversion failed for this format'); return; }
+    lastOutputBlob = blob;
+    lastOutputDataURL = null;
+    renderOutputPreview(canvas, w, h, blob);
+    updateSizeComparison(blob.size);
+  }, fmt, quality);
+}
+
+function convertBase64() {
+  const { w, h } = getTargetDimensions();
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(origImg, 0, 0, w, h);
+  const dataURL = canvas.toDataURL('image/png');
+  lastOutputDataURL = dataURL;
+  lastOutputBlob = null;
+
+  renderOutputPreview(canvas, w, h, null);
+  $('b64Panel').classList.remove('hidden');
+  $('b64Output').textContent = dataURL;
+  $('b64Count').textContent = dataURL.length.toLocaleString() + ' characters';
+
+  // Estimate size
+  const byteSize = Math.ceil(dataURL.length * 3 / 4);
+  updateSizeComparison(byteSize);
+}
+
+function convertICO() {
+  const sizes = [...document.querySelectorAll('#icoSizes input:checked')].map(i => +i.value);
+  if (sizes.length === 0) { toast('Select at least one ICO size'); return; }
+
+  // Build ICO file (PNG-based ICO format)
+  const pngBuffers = [];
+  const promises = sizes.map(sz => {
+    return new Promise(resolve => {
+      const c = document.createElement('canvas');
+      c.width = sz; c.height = sz;
+      const ctx = c.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(origImg, 0, 0, sz, sz);
+      c.toBlob(blob => {
+        blob.arrayBuffer().then(buf => {
+          pngBuffers.push({ size: sz, data: new Uint8Array(buf) });
+          resolve();
+        });
+      }, 'image/png');
+    });
+  });
+
+  Promise.all(promises).then(() => {
+    pngBuffers.sort((a, b) => a.size - b.size);
+    const icoBlob = buildICO(pngBuffers);
+    lastOutputBlob = icoBlob;
+    lastOutputDataURL = null;
+
+    // Preview: just show the largest
+    const largest = pngBuffers[pngBuffers.length - 1];
+    const c = $('outCanvas');
+    c.width = largest.size; c.height = largest.size;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(origImg, 0, 0, largest.size, largest.size);
+    $('outMeta').textContent = `ICO (${sizes.join(', ')}px) | ${fmtBytes(icoBlob.size)}`;
+    updateSizeComparison(icoBlob.size);
+  });
+}
+
+function buildICO(pngBuffers) {
+  const count = pngBuffers.length;
+  const headerSize = 6;
+  const dirSize = 16 * count;
+  let dataOffset = headerSize + dirSize;
+  const totalSize = dataOffset + pngBuffers.reduce((s, p) => s + p.data.length, 0);
+  const buf = new ArrayBuffer(totalSize);
+  const view = new DataView(buf);
+  const arr = new Uint8Array(buf);
+
+  // ICO header: reserved(2) + type(2) + count(2)
+  view.setUint16(0, 0, true);
+  view.setUint16(2, 1, true); // ICO type
+  view.setUint16(4, count, true);
+
+  // Directory entries
+  let offset = headerSize;
+  pngBuffers.forEach((p, i) => {
+    const sz = p.size >= 256 ? 0 : p.size;
+    arr[offset] = sz;       // width
+    arr[offset + 1] = sz;   // height
+    arr[offset + 2] = 0;    // color palette
+    arr[offset + 3] = 0;    // reserved
+    view.setUint16(offset + 4, 1, true);  // color planes
+    view.setUint16(offset + 6, 32, true); // bits per pixel
+    view.setUint32(offset + 8, p.data.length, true); // size
+    view.setUint32(offset + 12, dataOffset, true);     // offset
+    dataOffset += p.data.length;
+    offset += 16;
+  });
+
+  // Image data
+  let imgOffset = headerSize + dirSize;
+  pngBuffers.forEach(p => {
+    arr.set(p.data, imgOffset);
+    imgOffset += p.data.length;
+  });
+
+  return new Blob([buf], { type: 'image/x-icon' });
+}
+
+function convertSVGTrace() {
+  const { w, h } = getTargetDimensions();
+  const threshold = +$('svgThreshold').value;
+
+  // Render to small canvas for tracing
+  const traceW = Math.min(w, 400);
+  const traceH = Math.round(traceW * (h / w));
+  const c = document.createElement('canvas');
+  c.width = traceW; c.height = traceH;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(origImg, 0, 0, traceW, traceH);
+
+  const imageData = ctx.getImageData(0, 0, traceW, traceH);
+  const data = imageData.data;
+
+  // Build binary bitmap
+  const bitmap = new Uint8Array(traceW * traceH);
+  for (let i = 0; i < bitmap.length; i++) {
+    const idx = i * 4;
+    const gray = data[idx] * 0.299 + data[idx + 1] * 0.587 + data[idx + 2] * 0.114;
+    bitmap[i] = gray < threshold ? 1 : 0;
+  }
+
+  // Simple run-length SVG path generation
+  let paths = '';
+  for (let y = 0; y < traceH; y++) {
+    let x = 0;
+    while (x < traceW) {
+      if (bitmap[y * traceW + x]) {
+        const startX = x;
+        while (x < traceW && bitmap[y * traceW + x]) x++;
+        // Scale back to original dimensions
+        const sx = (startX / traceW * w).toFixed(1);
+        const sy = (y / traceH * h).toFixed(1);
+        const sw = ((x - startX) / traceW * w).toFixed(1);
+        const sh = (1 / traceH * h).toFixed(1);
+        paths += `M${sx},${sy}h${sw}v${sh}h-${sw}Z`;
+      }
+      x++;
+    }
+  }
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"><path d="${paths}" fill="#000"/></svg>`;
+  lastOutputBlob = new Blob([svg], { type: 'image/svg+xml' });
+  lastOutputDataURL = null;
+
+  // Show preview
+  const outC = $('outCanvas');
+  outC.width = Math.min(w, 400);
+  outC.height = Math.round(outC.width * (h / w));
+  const outCtx = outC.getContext('2d');
+  outCtx.fillStyle = '#fff';
+  outCtx.fillRect(0, 0, outC.width, outC.height);
+  // Render the traced bitmap for preview
+  const previewData = outCtx.createImageData(outC.width, outC.height);
+  const pw = outC.width, ph = outC.height;
+  for (let py = 0; py < ph; py++) {
+    for (let px = 0; px < pw; px++) {
+      const srcX = Math.floor(px / pw * traceW);
+      const srcY = Math.floor(py / ph * traceH);
+      const isBlack = bitmap[srcY * traceW + srcX];
+      const idx = (py * pw + px) * 4;
+      previewData.data[idx] = isBlack ? 0 : 255;
+      previewData.data[idx + 1] = isBlack ? 0 : 255;
+      previewData.data[idx + 2] = isBlack ? 0 : 255;
+      previewData.data[idx + 3] = 255;
+    }
+  }
+  outCtx.putImageData(previewData, 0, 0);
+  $('outMeta').textContent = `SVG trace | ${w} x ${h} | ${fmtBytes(lastOutputBlob.size)}`;
+  updateSizeComparison(lastOutputBlob.size);
+}
+
+function renderOutputPreview(canvas, w, h, blob) {
+  const outC = $('outCanvas');
+  const maxDisp = 400;
+  const scale = Math.min(1, maxDisp / w, 300 / h);
+  outC.width = Math.round(w * scale);
+  outC.height = Math.round(h * scale);
+  const ctx = outC.getContext('2d');
+  ctx.drawImage(canvas, 0, 0, outC.width, outC.height);
+
+  const extMap = { 'image/png': 'PNG', 'image/jpeg': 'JPEG', 'image/webp': 'WebP', 'image/avif': 'AVIF', 'image/bmp': 'BMP' };
+  const ext = extMap[selectedFmt] || selectedFmt.toUpperCase();
+  const size = blob ? fmtBytes(blob.size) : 'N/A';
+  $('outMeta').textContent = `${w} x ${h} | ${ext} | ${size}`;
+}
+
+function updateSizeComparison(outSize) {
+  if (!origFile) return;
+  const origSize = origFile.size;
+  const maxSize = Math.max(origSize, outSize);
+  const origPct = (origSize / maxSize) * 100;
+  const outPct = (outSize / maxSize) * 100;
+
+  $('barOrig').style.width = origPct + '%';
+  $('barOrig').textContent = fmtBytes(origSize);
+  $('barOut').style.width = outPct + '%';
+  $('barOut').textContent = fmtBytes(outSize);
+  $('barOut').classList.toggle('bigger', outSize > origSize);
+
+  const ratio = origSize > 0 ? ((1 - outSize / origSize) * 100).toFixed(1) : 0;
+  if (outSize < origSize) {
+    $('compressionRatio').textContent = `${ratio}% smaller`;
+    $('compressionRatio').style.color = '#10b981';
+  } else if (outSize > origSize) {
+    $('compressionRatio').textContent = `${Math.abs(ratio)}% larger`;
+    $('compressionRatio').style.color = '#ef4444';
+  } else {
+    $('compressionRatio').textContent = 'Same size';
+    $('compressionRatio').style.color = '#6b7280';
+  }
+}
+
+/* ── Download ── */
+$('downloadBtn').addEventListener('click', () => {
+  if (selectedFmt === 'base64') {
+    if (lastOutputDataURL) { navigator.clipboard.writeText(lastOutputDataURL).then(() => toast('Base64 copied to clipboard')); }
+    return;
+  }
+  if (!lastOutputBlob) { toast('Nothing to download'); return; }
+  downloadBlob(lastOutputBlob, getOutputFilename());
+  toast('Downloaded');
+});
+
+function getOutputFilename() {
+  const baseName = origFile ? origFile.name.replace(/\.[^.]+$/, '') : 'image';
+  const extMap = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'image/avif': '.avif', 'image/bmp': '.bmp', 'ico': '.ico', 'svg-trace': '.svg', 'base64': '.txt' };
+  return baseName + '-converted' + (extMap[selectedFmt] || '.png');
+}
+
+function downloadBlob(blob, filename) {
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = URL.createObjectURL(blob);
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+/* ── Copy ── */
+$('copyBtn').addEventListener('click', () => {
+  if (selectedFmt === 'base64' && lastOutputDataURL) {
+    navigator.clipboard.writeText(lastOutputDataURL).then(() => toast('Copied'));
+    return;
+  }
+  if (!origImg) return;
+  const { w, h } = getTargetDimensions();
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  c.getContext('2d').drawImage(origImg, 0, 0, w, h);
+  c.toBlob(blob => {
+    if (!blob) return;
+    navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(() => toast('Copied')).catch(() => toast('Copy failed'));
+  }, 'image/png');
+});
+
+/* ── Base64 copy ── */
+$('b64CopyBtn').addEventListener('click', () => {
+  const text = $('b64Output').textContent;
+  if (text) navigator.clipboard.writeText(text).then(() => toast('Copied'));
+});
+$('b64Output').addEventListener('click', () => {
+  const text = $('b64Output').textContent;
+  if (text) navigator.clipboard.writeText(text).then(() => toast('Copied'));
+});
+
+/* ── Strip EXIF ── */
+$('stripExifBtn').addEventListener('click', () => {
+  const el = $('stripMeta');
+  el.checked = true;
+  toast('Metadata will be stripped on export');
+});
+
+/* ── Reset ── */
+$('resetBtn').addEventListener('click', () => {
+  origImg = null; origFile = null; batchFiles = [];
+  lastOutputBlob = null; lastOutputDataURL = null;
+  fileInput.value = '';
+  $('uploadPanel').classList.remove('hidden');
+  $('editorSection').classList.add('hidden');
+  $('b64Panel').classList.add('hidden');
+  $('exifPanel').classList.add('hidden');
+  $('batchPanel').classList.add('hidden');
+});
+
+/* ── Batch ── */
+function showBatchPanel() {
+  $('batchPanel').classList.remove('hidden');
+  renderBatchList();
+}
+
+$('addBatchBtn').addEventListener('click', () => $('batchInput').click());
+$('batchInput').addEventListener('change', e => {
+  batchFiles = batchFiles.concat([...e.target.files].filter(f => f.type.startsWith('image/')));
+  renderBatchList();
+});
+
+function renderBatchList() {
+  const list = $('batchList');
+  list.innerHTML = '';
+  batchFiles.forEach((file, i) => {
+    const item = document.createElement('div');
+    item.className = 'batch-item';
+    const thumb = document.createElement('img');
+    thumb.src = URL.createObjectURL(file);
+    const info = document.createElement('div');
+    info.className = 'info';
+    info.innerHTML = `<div class="name">${file.name}</div>${fmtBytes(file.size)}`;
+    const rm = document.createElement('button');
+    rm.className = 'remove-batch';
+    rm.innerHTML = '&times;';
+    rm.addEventListener('click', () => { batchFiles.splice(i, 1); renderBatchList(); });
+    item.append(thumb, info, rm);
+    list.appendChild(item);
+  });
+}
+
+$('processBatchBtn').addEventListener('click', async () => {
+  if (batchFiles.length === 0) { toast('No files in batch'); return; }
+  toast('Converting ' + batchFiles.length + ' files...');
+  const { w: maxW } = getTargetDimensions();
+
+  for (let i = 0; i < batchFiles.length; i++) {
+    const file = batchFiles[i];
+    const img = await loadImageAsync(file);
+    let w = img.naturalWidth, h = img.naturalHeight;
+    const mw = +$('maxWidth').value;
+    if (mw > 0 && w > mw) { const s = mw / w; w = mw; h = Math.round(h * s); }
+
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    const ctx = c.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, 0, 0, w, h);
+
+    let fmt = selectedFmt;
+    if (fmt === 'ico' || fmt === 'base64' || fmt === 'svg-trace') fmt = 'image/png'; // fallback for batch
+    let quality;
+    if (fmt === 'image/jpeg') quality = +$('jpegQual').value / 100;
+    else if (fmt === 'image/webp') quality = $('webpLossless').checked ? 1 : +$('webpQual').value / 100;
+    else if (fmt === 'image/avif') quality = +$('avifQual').value / 100;
+    if (fmt === 'image/avif' && !avifSupported) fmt = 'image/webp';
+
+    const blob = await new Promise(res => c.toBlob(res, fmt, quality));
+    if (!blob) continue;
+    const baseName = file.name.replace(/\.[^.]+$/, '');
+    const extMap = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'image/avif': '.avif', 'image/bmp': '.bmp' };
+    downloadBlob(blob, baseName + '-converted' + (extMap[fmt] || '.png'));
+    await new Promise(r => setTimeout(r, 300));
+
+    // Update status in list
+    const items = $('batchList').querySelectorAll('.batch-item');
+    if (items[i]) {
+      const status = document.createElement('span');
+      status.className = 'status';
+      status.textContent = 'Done';
+      items[i].appendChild(status);
+    }
+  }
+  toast('All files converted');
+});
+
+function loadImageAsync(file) {
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => res(img);
+      img.onerror = rej;
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ── Init ── */
+updateOptionsVisibility();
+
+})();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>
