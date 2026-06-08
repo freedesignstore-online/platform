@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Layout Builder - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Manrope',system-ui,sans-serif;background:#fafafa;color:#1a1a1a;min-height:100vh}
+a.back{display:inline-block;margin:24px 24px 0;color:#ec4899;text-decoration:none;font-weight:500}
+a.back:hover{text-decoration:underline}
+h1{font-size:28px;font-weight:700;margin:12px 24px 4px}
+p.sub{color:#6b7280;margin:0 24px 16px;font-size:14px}
+.panel{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:20px;margin:0 24px 16px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{padding:7px 14px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-family:inherit;font-size:13px;transition:all .15s}
+.btn:hover{opacity:.85}
+.btn-p{background:#ec4899;color:#fff}
+.btn-s{background:#f3f4f6;color:#1a1a1a;border:1px solid #e5e7eb}
+.btn-s.active{background:#ec4899;color:#fff;border-color:#ec4899}
+select,input[type="text"],input[type="number"]{font-family:inherit;font-size:13px;padding:7px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fff}
+input[type="number"]{width:70px}
+label{font-size:12px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px}
+.tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid #e5e7eb}
+.tab{padding:8px 18px;font-size:14px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;color:#6b7280;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.tab:hover{color:#1a1a1a}
+.tab.on{color:#ec4899;border-bottom-color:#ec4899}
+.app-layout{display:flex;gap:16px;margin:0 24px 24px;min-height:500px}
+.controls{width:300px;flex-shrink:0;display:flex;flex-direction:column;gap:12px}
+.ctrl-panel{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px}
+.ctrl-panel h3{font-size:14px;font-weight:700;margin-bottom:10px}
+.ctrl-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.ctrl-row label{margin-bottom:0;min-width:80px}
+.canvas-wrap{flex:1;display:flex;flex-direction:column;min-width:0}
+.canvas{flex:1;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;overflow:auto;position:relative}
+/* Grid canvas */
+.grid-canvas{display:grid;gap:8px;min-height:300px}
+.grid-cell{background:rgba(236,72,153,.08);border:2px dashed rgba(236,72,153,.25);border-radius:8px;padding:12px;font-size:12px;color:#ec4899;font-weight:600;text-align:center;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;min-height:60px;position:relative}
+.grid-cell:hover{background:rgba(236,72,153,.15);border-color:rgba(236,72,153,.5)}
+.grid-cell.selected{border-color:#ec4899;background:rgba(236,72,153,.15)}
+.grid-cell.named{background:rgba(236,72,153,.12);border-style:solid;border-color:#ec4899}
+/* Flex canvas */
+.flex-canvas{display:flex;gap:8px;min-height:300px;padding:8px}
+.flex-child{background:rgba(139,92,246,.1);border:2px solid rgba(139,92,246,.3);border-radius:8px;padding:16px;font-size:12px;font-weight:600;color:#8b5cf6;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;min-width:60px;min-height:60px;transition:all .15s}
+.flex-child:hover{border-color:#8b5cf6}
+.flex-child.selected{border-color:#8b5cf6;background:rgba(139,92,246,.2)}
+.output-panel{background:#fff;border:1px solid #e5e7eb;border-radius:12px;margin:0 24px 24px;overflow:hidden}
+.output-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #e5e7eb}
+.output-header h3{font-size:14px;font-weight:700}
+.output-tabs{display:flex;gap:4px}
+.output-tab{padding:4px 12px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;color:#6b7280;transition:all .15s}
+.output-tab:hover{border-color:#ec4899;color:#ec4899}
+.output-tab.active{background:#ec4899;color:#fff;border-color:#ec4899}
+.output-code{padding:16px;font-family:'Courier New',monospace;font-size:12px;line-height:1.6;white-space:pre-wrap;max-height:300px;overflow:auto;background:#fafafa}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.preset-btn{padding:5px 10px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;color:#6b7280;transition:all .15s}
+.preset-btn:hover{border-color:#ec4899;color:#ec4899}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:#1a1a1a;color:#fff;padding:8px 20px;border-radius:8px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;z-index:999;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to FreeDesignStore</a>
+<h1>Visual CSS Layout Builder</h1>
+<p class="sub">Build CSS Grid and Flexbox layouts visually. Live CSS output, presets, copy to clipboard.</p>
+
+<div class="panel">
+<div class="tabs" id="modeTabs">
+<button class="tab on" data-mode="grid">CSS Grid</button>
+<button class="tab" data-mode="flex">Flexbox</button>
+</div>
+<div class="presets" id="presets"></div>
+</div>
+
+<div class="app-layout">
+<div class="controls" id="controls"></div>
+<div class="canvas-wrap">
+<div class="canvas" id="canvas"></div>
+</div>
+</div>
+
+<div class="output-panel">
+<div class="output-header">
+<h3>Generated Code</h3>
+<div class="output-tabs" id="outputTabs">
+<button class="output-tab active" data-fmt="css">CSS</button>
+<button class="output-tab" data-fmt="tw">Tailwind</button>
+<button class="output-tab" data-fmt="html">HTML + CSS</button>
+</div>
+<button class="btn btn-p" id="copyBtn">Copy</button>
+</div>
+<div class="output-code" id="outputCode"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let mode = 'grid';
+let outputFmt = 'css';
+
+// Grid state
+let gridState = { cols: 3, rows: 3, colSizes: [], rowSizes: [], gap: 8, rowGap: 8, colGap: 8, areas: {}, alignItems: 'stretch', justifyItems: 'stretch' };
+let selectedCell = null;
+
+// Flex state
+let flexState = { direction: 'row', wrap: 'nowrap', justify: 'flex-start', align: 'stretch', gap: 8, children: [] };
+let selectedFlex = -1;
+
+const PRESETS = {
+  grid: [
+    { name: 'Holy Grail', cols: 3, rows: 3, colSizes: ['200px','1fr','200px'], rowSizes: ['60px','1fr','50px'], areas: {'0-0':'header','0-1':'header','0-2':'header','1-0':'sidebar','1-1':'main','1-2':'aside','2-0':'footer','2-1':'footer','2-2':'footer'} },
+    { name: 'Dashboard', cols: 4, rows: 3, colSizes: ['220px','1fr','1fr','1fr'], rowSizes: ['60px','1fr','1fr'], areas: {'0-0':'nav','0-1':'header','0-2':'header','0-3':'header','1-0':'nav','1-1':'card1','1-2':'card2','1-3':'card3','2-0':'nav','2-1':'chart','2-2':'chart','2-3':'table'} },
+    { name: 'Blog', cols: 3, rows: 2, colSizes: ['1fr','1fr','300px'], rowSizes: ['auto','1fr'], areas: {'0-0':'hero','0-1':'hero','0-2':'hero','1-0':'post','1-1':'post','1-2':'sidebar'} },
+    { name: 'Gallery', cols: 4, rows: 3, colSizes: ['1fr','1fr','1fr','1fr'], rowSizes: ['1fr','1fr','1fr'], areas: {} },
+    { name: 'Card Grid', cols: 3, rows: 2, colSizes: ['1fr','1fr','1fr'], rowSizes: ['1fr','1fr'], areas: {} },
+    { name: 'Sidebar', cols: 2, rows: 1, colSizes: ['260px','1fr'], rowSizes: ['1fr'], areas: {'0-0':'sidebar','0-1':'main'} },
+    { name: 'Full-width Sections', cols: 1, rows: 4, colSizes: ['1fr'], rowSizes: ['auto','auto','auto','auto'], areas: {'0-0':'hero','1-0':'features','2-0':'pricing','3-0':'footer'} },
+    { name: 'Masonry-like', cols: 3, rows: 4, colSizes: ['1fr','1fr','1fr'], rowSizes: ['120px','120px','120px','120px'], areas: {} }
+  ],
+  flex: [
+    { name: 'Nav Bar', direction: 'row', wrap: 'nowrap', justify: 'space-between', align: 'center', gap: 16, children: [{basis:'auto',grow:0,shrink:0,label:'Logo'},{basis:'auto',grow:1,shrink:1,label:'Links'},{basis:'auto',grow:0,shrink:0,label:'CTA'}] },
+    { name: 'Card Row', direction: 'row', wrap: 'wrap', justify: 'flex-start', align: 'stretch', gap: 16, children: [{basis:'300px',grow:1,shrink:1,label:'Card 1'},{basis:'300px',grow:1,shrink:1,label:'Card 2'},{basis:'300px',grow:1,shrink:1,label:'Card 3'}] },
+    { name: 'Sidebar + Main', direction: 'row', wrap: 'nowrap', justify: 'flex-start', align: 'stretch', gap: 16, children: [{basis:'240px',grow:0,shrink:0,label:'Sidebar'},{basis:'0',grow:1,shrink:1,label:'Main'}] },
+    { name: 'Centered Column', direction: 'column', wrap: 'nowrap', justify: 'center', align: 'center', gap: 16, children: [{basis:'auto',grow:0,shrink:0,label:'Title'},{basis:'auto',grow:0,shrink:0,label:'Subtitle'},{basis:'auto',grow:0,shrink:0,label:'Button'}] },
+    { name: 'Footer Cols', direction: 'row', wrap: 'wrap', justify: 'space-between', align: 'flex-start', gap: 24, children: [{basis:'200px',grow:1,shrink:1,label:'About'},{basis:'150px',grow:1,shrink:1,label:'Links'},{basis:'150px',grow:1,shrink:1,label:'Legal'},{basis:'200px',grow:1,shrink:1,label:'Newsletter'}] },
+    { name: 'Holy Grail Flex', direction: 'column', wrap: 'nowrap', justify: 'flex-start', align: 'stretch', gap: 0, children: [{basis:'60px',grow:0,shrink:0,label:'Header'},{basis:'0',grow:1,shrink:1,label:'Body'},{basis:'50px',grow:0,shrink:0,label:'Footer'}] },
+    { name: 'Pricing Row', direction: 'row', wrap: 'wrap', justify: 'center', align: 'stretch', gap: 16, children: [{basis:'260px',grow:0,shrink:0,label:'Basic'},{basis:'260px',grow:0,shrink:0,label:'Pro'},{basis:'260px',grow:0,shrink:0,label:'Enterprise'}] },
+    { name: 'Stack', direction: 'column', wrap: 'nowrap', justify: 'flex-start', align: 'stretch', gap: 12, children: [{basis:'auto',grow:0,shrink:0,label:'Item 1'},{basis:'auto',grow:0,shrink:0,label:'Item 2'},{basis:'auto',grow:0,shrink:0,label:'Item 3'},{basis:'auto',grow:0,shrink:0,label:'Item 4'}] }
+  ]
+};
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function initGridSizes() {
+  if (gridState.colSizes.length !== gridState.cols) gridState.colSizes = Array(gridState.cols).fill('1fr');
+  if (gridState.rowSizes.length !== gridState.rows) gridState.rowSizes = Array(gridState.rows).fill('1fr');
+}
+
+function renderPresets() {
+  const wrap = document.getElementById('presets');
+  const list = PRESETS[mode] || [];
+  wrap.innerHTML = list.map(p => `<button class="preset-btn">${p.name}</button>`).join('');
+  wrap.querySelectorAll('.preset-btn').forEach((btn, i) => {
+    btn.onclick = () => applyPreset(list[i]);
+  });
+}
+
+function applyPreset(p) {
+  if (mode === 'grid') {
+    gridState.cols = p.cols; gridState.rows = p.rows;
+    gridState.colSizes = [...(p.colSizes || Array(p.cols).fill('1fr'))];
+    gridState.rowSizes = [...(p.rowSizes || Array(p.rows).fill('1fr'))];
+    gridState.areas = { ...p.areas };
+    selectedCell = null;
+    renderControls(); renderCanvas(); updateOutput();
+  } else {
+    flexState = { direction: p.direction, wrap: p.wrap, justify: p.justify, align: p.align, gap: p.gap, children: p.children.map(c => ({...c})) };
+    selectedFlex = -1;
+    renderControls(); renderCanvas(); updateOutput();
+  }
+}
+
+function renderControls() {
+  const wrap = document.getElementById('controls');
+  if (mode === 'grid') {
+    initGridSizes();
+    let h = `<div class="ctrl-panel"><h3>Grid Setup</h3>`;
+    h += `<div class="ctrl-row"><label>Columns</label><input type="number" id="gridCols" value="${gridState.cols}" min="1" max="12"></div>`;
+    h += `<div class="ctrl-row"><label>Rows</label><input type="number" id="gridRows" value="${gridState.rows}" min="1" max="12"></div>`;
+    h += `<div class="ctrl-row"><label>Column Gap</label><input type="number" id="gridColGap" value="${gridState.colGap}" min="0">px</div>`;
+    h += `<div class="ctrl-row"><label>Row Gap</label><input type="number" id="gridRowGap" value="${gridState.rowGap}" min="0">px</div>`;
+    h += `</div>`;
+    h += `<div class="ctrl-panel"><h3>Column Sizes</h3>`;
+    for (let c = 0; c < gridState.cols; c++) {
+      h += `<div class="ctrl-row"><label>Col ${c+1}</label><input type="text" class="col-size" data-idx="${c}" value="${gridState.colSizes[c]}" style="width:80px"></div>`;
+    }
+    h += `</div>`;
+    h += `<div class="ctrl-panel"><h3>Row Sizes</h3>`;
+    for (let r = 0; r < gridState.rows; r++) {
+      h += `<div class="ctrl-row"><label>Row ${r+1}</label><input type="text" class="row-size" data-idx="${r}" value="${gridState.rowSizes[r]}" style="width:80px"></div>`;
+    }
+    h += `</div>`;
+    h += `<div class="ctrl-panel"><h3>Alignment</h3>`;
+    h += `<div class="ctrl-row"><label>align-items</label><select id="gridAlignItems"><option ${gridState.alignItems==='stretch'?'selected':''}>stretch</option><option ${gridState.alignItems==='start'?'selected':''}>start</option><option ${gridState.alignItems==='center'?'selected':''}>center</option><option ${gridState.alignItems==='end'?'selected':''}>end</option></select></div>`;
+    h += `<div class="ctrl-row"><label>justify-items</label><select id="gridJustifyItems"><option ${gridState.justifyItems==='stretch'?'selected':''}>stretch</option><option ${gridState.justifyItems==='start'?'selected':''}>start</option><option ${gridState.justifyItems==='center'?'selected':''}>center</option><option ${gridState.justifyItems==='end'?'selected':''}>end</option></select></div>`;
+    h += `</div>`;
+    if (selectedCell !== null) {
+      const key = selectedCell;
+      const area = gridState.areas[key] || '';
+      h += `<div class="ctrl-panel"><h3>Cell: ${key}</h3>`;
+      h += `<div class="ctrl-row"><label>Area Name</label><input type="text" id="cellAreaName" value="${area}" placeholder="e.g. header" style="width:120px"></div>`;
+      h += `<button class="btn btn-s" id="clearArea" style="margin-top:4px">Clear Name</button>`;
+      h += `</div>`;
+    }
+    wrap.innerHTML = h;
+
+    document.getElementById('gridCols').onchange = e => { gridState.cols = Math.max(1, Math.min(12, +e.target.value)); gridState.colSizes = Array(gridState.cols).fill('1fr'); gridState.areas = {}; selectedCell = null; renderControls(); renderCanvas(); updateOutput(); };
+    document.getElementById('gridRows').onchange = e => { gridState.rows = Math.max(1, Math.min(12, +e.target.value)); gridState.rowSizes = Array(gridState.rows).fill('1fr'); gridState.areas = {}; selectedCell = null; renderControls(); renderCanvas(); updateOutput(); };
+    document.getElementById('gridColGap').onchange = e => { gridState.colGap = +e.target.value; renderCanvas(); updateOutput(); };
+    document.getElementById('gridRowGap').onchange = e => { gridState.rowGap = +e.target.value; renderCanvas(); updateOutput(); };
+    document.getElementById('gridAlignItems').onchange = e => { gridState.alignItems = e.target.value; renderCanvas(); updateOutput(); };
+    document.getElementById('gridJustifyItems').onchange = e => { gridState.justifyItems = e.target.value; renderCanvas(); updateOutput(); };
+    wrap.querySelectorAll('.col-size').forEach(inp => { inp.onchange = () => { gridState.colSizes[+inp.dataset.idx] = inp.value; renderCanvas(); updateOutput(); }; });
+    wrap.querySelectorAll('.row-size').forEach(inp => { inp.onchange = () => { gridState.rowSizes[+inp.dataset.idx] = inp.value; renderCanvas(); updateOutput(); }; });
+    if (selectedCell !== null) {
+      document.getElementById('cellAreaName').onchange = e => { if (e.target.value) gridState.areas[selectedCell] = e.target.value; else delete gridState.areas[selectedCell]; renderCanvas(); updateOutput(); };
+      document.getElementById('clearArea').onclick = () => { delete gridState.areas[selectedCell]; renderControls(); renderCanvas(); updateOutput(); };
+    }
+  } else {
+    let h = `<div class="ctrl-panel"><h3>Flex Container</h3>`;
+    h += `<div class="ctrl-row"><label>direction</label><select id="flexDir">${['row','row-reverse','column','column-reverse'].map(v=>`<option ${flexState.direction===v?'selected':''}>${v}</option>`).join('')}</select></div>`;
+    h += `<div class="ctrl-row"><label>flex-wrap</label><select id="flexWrap">${['nowrap','wrap','wrap-reverse'].map(v=>`<option ${flexState.wrap===v?'selected':''}>${v}</option>`).join('')}</select></div>`;
+    h += `<div class="ctrl-row"><label>justify-content</label><select id="flexJustify">${['flex-start','flex-end','center','space-between','space-around','space-evenly'].map(v=>`<option ${flexState.justify===v?'selected':''}>${v}</option>`).join('')}</select></div>`;
+    h += `<div class="ctrl-row"><label>align-items</label><select id="flexAlign">${['stretch','flex-start','flex-end','center','baseline'].map(v=>`<option ${flexState.align===v?'selected':''}>${v}</option>`).join('')}</select></div>`;
+    h += `<div class="ctrl-row"><label>gap</label><input type="number" id="flexGap" value="${flexState.gap}" min="0">px</div>`;
+    h += `<div style="margin-top:8px"><button class="btn btn-p" id="addChild">+ Add Child</button></div>`;
+    h += `</div>`;
+    if (selectedFlex >= 0 && flexState.children[selectedFlex]) {
+      const ch = flexState.children[selectedFlex];
+      h += `<div class="ctrl-panel"><h3>Child ${selectedFlex + 1}: ${ch.label}</h3>`;
+      h += `<div class="ctrl-row"><label>Label</label><input type="text" id="childLabel" value="${ch.label}" style="width:100px"></div>`;
+      h += `<div class="ctrl-row"><label>flex-grow</label><input type="number" id="childGrow" value="${ch.grow}" min="0" step="1"></div>`;
+      h += `<div class="ctrl-row"><label>flex-shrink</label><input type="number" id="childShrink" value="${ch.shrink}" min="0" step="1"></div>`;
+      h += `<div class="ctrl-row"><label>flex-basis</label><input type="text" id="childBasis" value="${ch.basis}" style="width:80px"></div>`;
+      h += `<div class="ctrl-row"><label>order</label><input type="number" id="childOrder" value="${ch.order||0}" min="-10" max="10"></div>`;
+      h += `<div class="ctrl-row"><label>align-self</label><select id="childAlignSelf"><option value="">auto</option>${['flex-start','flex-end','center','stretch','baseline'].map(v=>`<option ${(ch.alignSelf||'')===v?'selected':''}>${v}</option>`).join('')}</select></div>`;
+      h += `<button class="btn btn-s" id="removeChild" style="margin-top:4px;color:#ef4444;border-color:#ef4444">Remove</button>`;
+      h += `</div>`;
+    }
+    wrap.innerHTML = h;
+
+    document.getElementById('flexDir').onchange = e => { flexState.direction = e.target.value; renderCanvas(); updateOutput(); };
+    document.getElementById('flexWrap').onchange = e => { flexState.wrap = e.target.value; renderCanvas(); updateOutput(); };
+    document.getElementById('flexJustify').onchange = e => { flexState.justify = e.target.value; renderCanvas(); updateOutput(); };
+    document.getElementById('flexAlign').onchange = e => { flexState.align = e.target.value; renderCanvas(); updateOutput(); };
+    document.getElementById('flexGap').onchange = e => { flexState.gap = +e.target.value; renderCanvas(); updateOutput(); };
+    document.getElementById('addChild').onclick = () => { flexState.children.push({basis:'auto',grow:0,shrink:1,label:`Box ${flexState.children.length+1}`}); renderControls(); renderCanvas(); updateOutput(); };
+    if (selectedFlex >= 0 && flexState.children[selectedFlex]) {
+      document.getElementById('childLabel').onchange = e => { flexState.children[selectedFlex].label = e.target.value; renderCanvas(); updateOutput(); };
+      document.getElementById('childGrow').onchange = e => { flexState.children[selectedFlex].grow = +e.target.value; renderCanvas(); updateOutput(); };
+      document.getElementById('childShrink').onchange = e => { flexState.children[selectedFlex].shrink = +e.target.value; renderCanvas(); updateOutput(); };
+      document.getElementById('childBasis').onchange = e => { flexState.children[selectedFlex].basis = e.target.value; renderCanvas(); updateOutput(); };
+      document.getElementById('childOrder').onchange = e => { flexState.children[selectedFlex].order = +e.target.value; renderCanvas(); updateOutput(); };
+      document.getElementById('childAlignSelf').onchange = e => { flexState.children[selectedFlex].alignSelf = e.target.value; renderCanvas(); updateOutput(); };
+      document.getElementById('removeChild').onclick = () => { flexState.children.splice(selectedFlex, 1); selectedFlex = -1; renderControls(); renderCanvas(); updateOutput(); };
+    }
+  }
+}
+
+function renderCanvas() {
+  const wrap = document.getElementById('canvas');
+  if (mode === 'grid') {
+    initGridSizes();
+    const gapStyle = gridState.colGap === gridState.rowGap ? `gap:${gridState.colGap}px` : `column-gap:${gridState.colGap}px;row-gap:${gridState.rowGap}px`;
+    wrap.innerHTML = `<div class="grid-canvas" style="grid-template-columns:${gridState.colSizes.join(' ')};grid-template-rows:${gridState.rowSizes.join(' ')};${gapStyle};align-items:${gridState.alignItems};justify-items:${gridState.justifyItems}" id="gridEl"></div>`;
+    const grid = document.getElementById('gridEl');
+    for (let r = 0; r < gridState.rows; r++) {
+      for (let c = 0; c < gridState.cols; c++) {
+        const key = `${r}-${c}`;
+        const area = gridState.areas[key] || '';
+        const cell = document.createElement('div');
+        cell.className = `grid-cell${area ? ' named' : ''}${selectedCell === key ? ' selected' : ''}`;
+        cell.textContent = area || `${r+1},${c+1}`;
+        cell.style.gridRow = `${r+1}`;
+        cell.style.gridColumn = `${c+1}`;
+        cell.onclick = () => { selectedCell = key; renderControls(); renderCanvas(); };
+        grid.appendChild(cell);
+      }
+    }
+  } else {
+    let style = `display:flex;flex-direction:${flexState.direction};flex-wrap:${flexState.wrap};justify-content:${flexState.justify};align-items:${flexState.align};gap:${flexState.gap}px`;
+    wrap.innerHTML = `<div class="flex-canvas" style="${style}" id="flexEl"></div>`;
+    const el = document.getElementById('flexEl');
+    const colors = ['#ec4899','#8b5cf6','#3b82f6','#10b981','#f59e0b','#ef4444','#06b6d4','#6366f1'];
+    flexState.children.forEach((ch, i) => {
+      const color = colors[i % colors.length];
+      const div = document.createElement('div');
+      div.className = `flex-child${selectedFlex === i ? ' selected' : ''}`;
+      div.style.cssText = `flex-grow:${ch.grow};flex-shrink:${ch.shrink};flex-basis:${ch.basis};order:${ch.order||0};${ch.alignSelf?'align-self:'+ch.alignSelf+';':''}background:${color}15;border-color:${color}50;color:${color}`;
+      div.textContent = ch.label;
+      div.draggable = true;
+      div.dataset.idx = i;
+      div.onclick = () => { selectedFlex = i; renderControls(); renderCanvas(); };
+      div.ondragstart = e => { e.dataTransfer.setData('text/plain', i); div.style.opacity = '0.5'; };
+      div.ondragend = () => { div.style.opacity = '1'; };
+      div.ondragover = e => e.preventDefault();
+      div.ondrop = e => {
+        e.preventDefault();
+        const from = +e.dataTransfer.getData('text/plain');
+        const to = i;
+        if (from !== to) {
+          const item = flexState.children.splice(from, 1)[0];
+          flexState.children.splice(to, 0, item);
+          selectedFlex = to;
+          renderControls(); renderCanvas(); updateOutput();
+        }
+      };
+      el.appendChild(div);
+    });
+  }
+}
+
+function getGridAreas() {
+  const areaMap = {};
+  for (const [key, name] of Object.entries(gridState.areas)) {
+    if (!areaMap[name]) areaMap[name] = [];
+    areaMap[name].push(key);
+  }
+  if (Object.keys(areaMap).length === 0) return null;
+  const template = [];
+  for (let r = 0; r < gridState.rows; r++) {
+    const row = [];
+    for (let c = 0; c < gridState.cols; c++) {
+      row.push(gridState.areas[`${r}-${c}`] || '.');
+    }
+    template.push(`"${row.join(' ')}"`);
+  }
+  return template.join('\n    ');
+}
+
+function updateOutput() {
+  const code = document.getElementById('outputCode');
+  if (mode === 'grid') {
+    const areas = getGridAreas();
+    const gapCSS = gridState.colGap === gridState.rowGap ? `gap: ${gridState.colGap}px;` : `column-gap: ${gridState.colGap}px;\n  row-gap: ${gridState.rowGap}px;`;
+    if (outputFmt === 'css') {
+      let css = `.container {\n  display: grid;\n  grid-template-columns: ${gridState.colSizes.join(' ')};\n  grid-template-rows: ${gridState.rowSizes.join(' ')};\n  ${gapCSS}`;
+      if (gridState.alignItems !== 'stretch') css += `\n  align-items: ${gridState.alignItems};`;
+      if (gridState.justifyItems !== 'stretch') css += `\n  justify-items: ${gridState.justifyItems};`;
+      if (areas) css += `\n  grid-template-areas:\n    ${areas};`;
+      css += '\n}';
+      code.textContent = css;
+    } else if (outputFmt === 'tw') {
+      let tw = `grid grid-cols-[${gridState.colSizes.join('_')}] grid-rows-[${gridState.rowSizes.join('_')}] gap-[${gridState.colGap}px]`;
+      if (gridState.alignItems !== 'stretch') tw += ` items-${gridState.alignItems}`;
+      if (gridState.justifyItems !== 'stretch') tw += ` justify-items-${gridState.justifyItems}`;
+      code.textContent = tw;
+    } else {
+      let css = `.container {\n  display: grid;\n  grid-template-columns: ${gridState.colSizes.join(' ')};\n  grid-template-rows: ${gridState.rowSizes.join(' ')};\n  ${gapCSS}`;
+      if (areas) css += `\n  grid-template-areas:\n    ${areas};`;
+      css += '\n}';
+      let html = `<style>\n${css}\n</style>\n\n<div class="container">`;
+      const usedAreas = new Set();
+      for (let r = 0; r < gridState.rows; r++) {
+        for (let c = 0; c < gridState.cols; c++) {
+          const a = gridState.areas[`${r}-${c}`];
+          if (a && usedAreas.has(a)) continue;
+          if (a) usedAreas.add(a);
+          html += a ? `\n  <div style="grid-area: ${a}">${a}</div>` : `\n  <div>Cell ${r+1},${c+1}</div>`;
+        }
+      }
+      html += '\n</div>';
+      code.textContent = html;
+    }
+  } else {
+    if (outputFmt === 'css') {
+      let css = `.container {\n  display: flex;\n  flex-direction: ${flexState.direction};\n  flex-wrap: ${flexState.wrap};\n  justify-content: ${flexState.justify};\n  align-items: ${flexState.align};\n  gap: ${flexState.gap}px;\n}`;
+      flexState.children.forEach((ch, i) => {
+        css += `\n\n.child-${i + 1} {\n  flex: ${ch.grow} ${ch.shrink} ${ch.basis};`;
+        if (ch.order) css += `\n  order: ${ch.order};`;
+        if (ch.alignSelf) css += `\n  align-self: ${ch.alignSelf};`;
+        css += '\n}';
+      });
+      code.textContent = css;
+    } else if (outputFmt === 'tw') {
+      const dirMap = { row: 'flex-row', 'row-reverse': 'flex-row-reverse', column: 'flex-col', 'column-reverse': 'flex-col-reverse' };
+      const wrapMap = { nowrap: 'flex-nowrap', wrap: 'flex-wrap', 'wrap-reverse': 'flex-wrap-reverse' };
+      const justifyMap = { 'flex-start': 'justify-start', 'flex-end': 'justify-end', center: 'justify-center', 'space-between': 'justify-between', 'space-around': 'justify-around', 'space-evenly': 'justify-evenly' };
+      const alignMap = { stretch: 'items-stretch', 'flex-start': 'items-start', 'flex-end': 'items-end', center: 'items-center', baseline: 'items-baseline' };
+      let tw = `flex ${dirMap[flexState.direction]} ${wrapMap[flexState.wrap]} ${justifyMap[flexState.justify]} ${alignMap[flexState.align]} gap-[${flexState.gap}px]`;
+      code.textContent = tw;
+    } else {
+      let css = `.container {\n  display: flex;\n  flex-direction: ${flexState.direction};\n  flex-wrap: ${flexState.wrap};\n  justify-content: ${flexState.justify};\n  align-items: ${flexState.align};\n  gap: ${flexState.gap}px;\n}`;
+      flexState.children.forEach((ch, i) => {
+        css += `\n.child-${i+1} { flex: ${ch.grow} ${ch.shrink} ${ch.basis};${ch.order?` order: ${ch.order};`:''}${ch.alignSelf?` align-self: ${ch.alignSelf};`:''} }`;
+      });
+      let html = `<style>\n${css}\n</style>\n\n<div class="container">`;
+      flexState.children.forEach((ch, i) => {
+        html += `\n  <div class="child-${i+1}">${ch.label}</div>`;
+      });
+      html += '\n</div>';
+      code.textContent = html;
+    }
+  }
+}
+
+// Mode tabs
+document.querySelectorAll('#modeTabs .tab').forEach(tab => {
+  tab.onclick = () => {
+    mode = tab.dataset.mode;
+    document.querySelectorAll('#modeTabs .tab').forEach(t => t.classList.toggle('on', t === tab));
+    selectedCell = null; selectedFlex = -1;
+    renderPresets(); renderControls(); renderCanvas(); updateOutput();
+  };
+});
+
+// Output tabs
+document.getElementById('outputTabs').addEventListener('click', e => {
+  if (!e.target.classList.contains('output-tab')) return;
+  outputFmt = e.target.dataset.fmt;
+  document.querySelectorAll('.output-tab').forEach(t => t.classList.toggle('active', t === e.target));
+  updateOutput();
+});
+
+document.getElementById('copyBtn').onclick = () => {
+  navigator.clipboard.writeText(document.getElementById('outputCode').textContent).then(() => showToast('Copied!'));
+};
+
+// Init
+renderPresets();
+applyPreset(PRESETS.grid[0]);
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

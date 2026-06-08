@@ -4,328 +4,554 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Seamless Pattern Generator - FreeDesignStore</title>
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" href="/favicon.ico">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
-a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
-a.back:hover { text-decoration: underline; }
+a { color: #ec4899; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; font-size: 14px; color: #6b7280; }
+.back:hover { color: #ec4899; text-decoration: none; }
 h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
-p.subtitle { color: #6b7280; margin-bottom: 24px; }
-.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
+.subtitle { color: #6b7280; margin-bottom: 24px; font-size: 15px; }
+.container { max-width: 1300px; margin: 0 auto; }
+.panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
 h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
-label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 6px; }
-select, input[type="number"] { width: 100%; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 4px; }
+select, input[type="number"] { width: 100%; padding: 7px 10px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 13px; background: #fff; }
+select:focus, input:focus { outline: none; border-color: #ec4899; }
 input[type="range"] { width: 100%; accent-color: #ec4899; }
-input[type="color"] { width: 48px; height: 36px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 2px; cursor: pointer; }
+input[type="color"] { width: 40px; height: 32px; border: 1px solid #e5e7eb; border-radius: 6px; padding: 2px; cursor: pointer; }
 .btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 13px; transition: opacity .2s; }
 .btn:hover { opacity: .85; }
 .btn-primary { background: #ec4899; color: #fff; }
-.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
-.layout { display: grid; grid-template-columns: 300px 1fr; gap: 24px; }
+.btn-secondary { background: #fff; border: 1px solid #e5e7eb; color: #1a1a1a; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+.layout { display: grid; grid-template-columns: 320px 1fr; gap: 24px; }
 @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
-.field { margin-bottom: 16px; }
-.field-row { display: flex; gap: 12px; align-items: flex-end; }
+.field { margin-bottom: 12px; }
+.field-row { display: flex; gap: 10px; align-items: flex-end; }
 .field-row > div { flex: 1; }
-.layers { margin-top: 16px; border-top: 1px solid #e5e7eb; padding-top: 16px; }
-.layer-item { padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 8px; position: relative; }
-.layer-item .remove { position: absolute; top: 8px; right: 8px; background: none; border: none; color: #dc2626; cursor: pointer; font-size: 16px; }
+.range-row { display: flex; align-items: center; gap: 6px; }
+.range-row input[type="range"] { flex: 1; }
+.range-val { font-size: 11px; color: #6b7280; min-width: 32px; text-align: right; }
+.layer-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; margin-bottom: 10px; position: relative; background: #f9fafb; }
+.layer-card .lremove { position: absolute; top: 6px; right: 8px; background: none; border: none; color: #dc2626; cursor: pointer; font-size: 16px; }
+.layer-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.layer-header span { font-size: 12px; font-weight: 600; color: #6b7280; }
+.blend-select { width: 100px; padding: 4px 8px; font-size: 12px; }
+.bg-section { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #e5e7eb; }
+.bg-section .field-row { align-items: center; }
 .preview-tile { width: 100%; aspect-ratio: 1; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
-.preview-tile canvas { width: 100%; height: 100%; }
-.presets-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
-@media (max-width: 600px) { .presets-grid { grid-template-columns: repeat(4, 1fr); } }
-.preset-btn { aspect-ratio: 1; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; overflow: hidden; transition: border-color .15s; background: #fff; padding: 0; }
-.preset-btn:hover, .preset-btn.active { border-color: #ec4899; }
-.preset-btn canvas { width: 100%; height: 100%; pointer-events: none; }
+.preview-tile canvas { width: 100%; height: 100%; display: block; }
+.context-previews { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.ctx-card { border-radius: 10px; padding: 20px; height: 120px; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #1a1a1a; font-size: 14px; border: 1px solid #e5e7eb; }
+.ctx-header { border-radius: 10px; height: 60px; border: 1px solid #e5e7eb; }
 .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
-.css-output { margin-top: 12px; font-family: monospace; font-size: 12px; padding: 12px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; word-break: break-all; max-height: 100px; overflow-y: auto; cursor: pointer; }
-.range-val { font-size: 12px; color: #6b7280; text-align: right; }
-.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.css-output { margin-top: 12px; font-family: monospace; font-size: 12px; padding: 12px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; word-break: break-all; max-height: 100px; overflow-y: auto; cursor: pointer; white-space: pre-wrap; }
+.presets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px; }
+.preset-btn { aspect-ratio: 1; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; overflow: hidden; transition: all .15s; background: #fff; padding: 0; }
+.preset-btn:hover, .preset-btn.active { border-color: #ec4899; transform: scale(1.05); }
+.preset-btn canvas { width: 100%; height: 100%; pointer-events: none; display: block; }
+.color-themes { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.theme-btn { padding: 4px 10px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; cursor: pointer; font-size: 11px; font-family: inherit; }
+.theme-btn:hover, .theme-btn.active { border-color: #ec4899; color: #ec4899; }
+.favs-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.fav-item { width: 48px; height: 48px; border-radius: 6px; border: 2px solid #e5e7eb; cursor: pointer; overflow: hidden; position: relative; }
+.fav-item:hover { border-color: #ec4899; }
+.fav-item canvas { width: 100%; height: 100%; display: block; }
+.fav-item .fav-rm { position: absolute; top: -2px; right: -2px; width: 14px; height: 14px; border-radius: 50%; background: #dc2626; color: #fff; font-size: 8px; display: none; align-items: center; justify-content: center; cursor: pointer; border: none; }
+.fav-item:hover .fav-rm { display: flex; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 99; }
 .toast.show { opacity: 1; }
 </style>
 </head>
 <body>
-<a class="back" href="/">Back to Store</a>
-<h1>Seamless Pattern Generator</h1>
-<p class="subtitle">Create tileable patterns with multiple layers. Export as SVG, PNG, or CSS background.</p>
+<div class="container">
+  <a href="/" class="back">&larr; Back to FreeDesignStore</a>
+  <h1>Seamless Pattern Generator</h1>
+  <p class="subtitle">15 base patterns, 4 layers, blend modes, 30 presets. Export SVG, PNG, or CSS background.</p>
 
-<div class="panel">
-<h3>Presets</h3>
-<div class="presets-grid" id="presetsGrid"></div>
-</div>
+  <div class="panel">
+    <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+      <h3 style="margin:0;">Presets</h3>
+      <div class="color-themes" id="colorThemes" style="margin:0;"></div>
+    </div>
+    <div class="presets-grid" id="presetsGrid"></div>
+  </div>
 
-<div class="layout">
-<div>
-<div class="panel">
-<h3>Pattern Settings</h3>
-<div id="layersContainer"></div>
-<button class="btn btn-secondary" id="addLayerBtn" style="width:100%;margin-top:12px;">+ Add Layer</button>
-</div>
-</div>
-<div>
-<div class="panel">
-<h3>Preview (4x4 tile)</h3>
-<div class="preview-tile"><canvas id="previewCanvas" width="512" height="512"></canvas></div>
-<div class="actions">
-<button class="btn btn-primary" id="dlSvg">Download SVG</button>
-<button class="btn btn-primary" id="dlPng">Download PNG</button>
-<button class="btn btn-secondary" id="copyCSS">Copy CSS</button>
-</div>
-<div class="css-output" id="cssOutput" style="display:none;"></div>
-</div>
-</div>
+  <div class="layout">
+    <div>
+      <div class="panel" style="max-height:80vh;overflow-y:auto;">
+        <div class="bg-section">
+          <h3>Background</h3>
+          <div class="field-row">
+            <div class="field">
+              <label>Color</label>
+              <input type="color" id="bgColor" value="#ffffff">
+            </div>
+            <div class="field" style="flex:2;">
+              <label>Or Gradient</label>
+              <select id="bgGrad">
+                <option value="none">Solid Color</option>
+                <option value="linear">Linear Gradient</option>
+                <option value="radial">Radial Gradient</option>
+              </select>
+            </div>
+            <div class="field" id="bgColor2Field" style="display:none;">
+              <label>Color 2</label>
+              <input type="color" id="bgColor2" value="#f3f4f6">
+            </div>
+          </div>
+        </div>
+
+        <h3>Pattern Layers</h3>
+        <div id="layersContainer"></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary btn-sm" id="addLayerBtn" style="flex:1;">+ Add Layer</button>
+          <button class="btn btn-secondary btn-sm" id="randomBtn">Randomize</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h3>Preview (4x4 tile)</h3>
+        <div class="preview-tile"><canvas id="previewCanvas" width="512" height="512"></canvas></div>
+        <div class="actions">
+          <button class="btn btn-primary" id="dlSvg">SVG</button>
+          <button class="btn btn-primary" id="dlPng">PNG</button>
+          <button class="btn btn-secondary" id="copySvgCSS">CSS (SVG)</button>
+          <button class="btn btn-secondary" id="copyPngCSS">CSS (base64)</button>
+          <button class="btn btn-secondary" id="copyTailwind">Tailwind</button>
+          <button class="btn btn-secondary" id="saveFav">Favorite</button>
+        </div>
+        <div class="css-output" id="cssOutput" style="display:none;" onclick="navigator.clipboard.writeText(this.textContent);showToast('Copied')"></div>
+      </div>
+
+      <div class="panel">
+        <h3>Preview in Context</h3>
+        <div class="context-previews">
+          <div class="ctx-card" id="ctxCard">Card Preview</div>
+          <div class="ctx-card" id="ctxCard2">Full Page</div>
+          <div class="ctx-header" id="ctxHeader"></div>
+          <div class="ctx-header" id="ctxHeader2"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Favorites</h3>
+        <div class="favs-row" id="favsRow"></div>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
-}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
 
-const SHAPES = ['dots','lines','chevrons','waves','circles','triangles','hexagons'];
+const SHAPES=['dots','lines','diagonal-lines','chevrons','waves','circles','triangles','hexagons','diamonds','crosses','stars','scales','herringbone','zigzag','grid'];
+const BLENDS=['normal','multiply','screen','overlay'];
 
-let layers = [{ shape: 'dots', size: 20, spacing: 40, rotation: 0, color: '#ec4899', opacity: 1 }];
+let bgColor='#ffffff',bgGrad='none',bgColor2='#f3f4f6';
+let layers=[{shape:'dots',size:10,spacing:28,rotation:0,color:'#ec4899',opacity:0.6,strokeWidth:2,blend:'normal'}];
+let favorites=JSON.parse(localStorage.getItem('fds-pat-favs')||'[]');
 
-const PRESETS = [
-  [{ shape:'dots', size:8, spacing:24, rotation:0, color:'#1a1a1a', opacity:0.6 }],
-  [{ shape:'lines', size:2, spacing:16, rotation:45, color:'#3b82f6', opacity:0.4 }],
-  [{ shape:'chevrons', size:12, spacing:32, rotation:0, color:'#10b981', opacity:0.7 }],
-  [{ shape:'waves', size:6, spacing:20, rotation:0, color:'#8b5cf6', opacity:0.5 }],
-  [{ shape:'circles', size:16, spacing:40, rotation:0, color:'#f59e0b', opacity:0.3 }],
-  [{ shape:'triangles', size:10, spacing:28, rotation:0, color:'#ec4899', opacity:0.6 }],
-  [{ shape:'hexagons', size:18, spacing:44, rotation:0, color:'#06b6d4', opacity:0.5 }],
-  [{ shape:'dots', size:4, spacing:12, rotation:0, color:'#dc2626', opacity:0.4 },{ shape:'dots', size:8, spacing:24, rotation:0, color:'#dc2626', opacity:0.2 }],
-  [{ shape:'lines', size:1, spacing:8, rotation:0, color:'#64748b', opacity:0.3 },{ shape:'lines', size:1, spacing:8, rotation:90, color:'#64748b', opacity:0.3 }],
-  [{ shape:'dots', size:6, spacing:20, rotation:0, color:'#1a1a1a', opacity:0.5 },{ shape:'lines', size:1, spacing:40, rotation:45, color:'#1a1a1a', opacity:0.2 }],
-  [{ shape:'chevrons', size:8, spacing:24, rotation:0, color:'#6366f1', opacity:0.5 },{ shape:'dots', size:3, spacing:24, rotation:0, color:'#6366f1', opacity:0.3 }],
-  [{ shape:'waves', size:4, spacing:16, rotation:0, color:'#059669', opacity:0.4 },{ shape:'waves', size:4, spacing:16, rotation:180, color:'#059669', opacity:0.4 }],
-  [{ shape:'hexagons', size:12, spacing:32, rotation:0, color:'#7c3aed', opacity:0.4 }],
-  [{ shape:'triangles', size:6, spacing:18, rotation:0, color:'#ea580c', opacity:0.5 },{ shape:'triangles', size:6, spacing:18, rotation:180, color:'#ea580c', opacity:0.3 }],
-  [{ shape:'circles', size:20, spacing:48, rotation:0, color:'#0ea5e9', opacity:0.2 },{ shape:'dots', size:4, spacing:48, rotation:0, color:'#0ea5e9', opacity:0.6 }],
-  [{ shape:'lines', size:2, spacing:12, rotation:30, color:'#be185d', opacity:0.3 }],
-  [{ shape:'dots', size:3, spacing:10, rotation:0, color:'#374151', opacity:0.8 }],
-  [{ shape:'waves', size:8, spacing:24, rotation:45, color:'#0369a1', opacity:0.4 }],
-  [{ shape:'hexagons', size:24, spacing:56, rotation:30, color:'#4f46e5', opacity:0.3 },{ shape:'dots', size:4, spacing:56, rotation:0, color:'#4f46e5', opacity:0.5 }],
-  [{ shape:'chevrons', size:16, spacing:40, rotation:90, color:'#b91c1c', opacity:0.4 }]
+const PRESETS=[
+  // Simple elegant (10)
+  [{shape:'dots',size:4,spacing:16,rotation:0,color:'#1a1a1a',opacity:0.15,strokeWidth:1,blend:'normal'}],
+  [{shape:'lines',size:2,spacing:12,rotation:45,color:'#3b82f6',opacity:0.2,strokeWidth:1,blend:'normal'}],
+  [{shape:'diagonal-lines',size:2,spacing:10,rotation:0,color:'#6b7280',opacity:0.15,strokeWidth:1,blend:'normal'}],
+  [{shape:'chevrons',size:8,spacing:24,rotation:0,color:'#10b981',opacity:0.3,strokeWidth:2,blend:'normal'}],
+  [{shape:'waves',size:6,spacing:20,rotation:0,color:'#8b5cf6',opacity:0.25,strokeWidth:2,blend:'normal'}],
+  [{shape:'hexagons',size:14,spacing:36,rotation:0,color:'#06b6d4',opacity:0.2,strokeWidth:1.5,blend:'normal'}],
+  [{shape:'diamonds',size:8,spacing:24,rotation:0,color:'#ec4899',opacity:0.25,strokeWidth:1.5,blend:'normal'}],
+  [{shape:'crosses',size:6,spacing:20,rotation:0,color:'#f59e0b',opacity:0.3,strokeWidth:1.5,blend:'normal'}],
+  [{shape:'stars',size:8,spacing:28,rotation:0,color:'#dc2626',opacity:0.2,strokeWidth:1,blend:'normal'}],
+  [{shape:'scales',size:12,spacing:28,rotation:0,color:'#0369a1',opacity:0.2,strokeWidth:1.5,blend:'normal'}],
+  // Layered combos (10)
+  [{shape:'grid',size:1,spacing:16,rotation:0,color:'#1a1a1a',opacity:0.1,strokeWidth:1,blend:'normal'},{shape:'dots',size:3,spacing:16,rotation:0,color:'#1a1a1a',opacity:0.3,strokeWidth:1,blend:'normal'}],
+  [{shape:'lines',size:1,spacing:10,rotation:0,color:'#6366f1',opacity:0.15,strokeWidth:1,blend:'normal'},{shape:'lines',size:1,spacing:10,rotation:90,color:'#6366f1',opacity:0.15,strokeWidth:1,blend:'normal'}],
+  [{shape:'dots',size:3,spacing:12,rotation:0,color:'#dc2626',opacity:0.2,strokeWidth:1,blend:'normal'},{shape:'dots',size:6,spacing:24,rotation:0,color:'#dc2626',opacity:0.1,strokeWidth:1,blend:'normal'}],
+  [{shape:'chevrons',size:8,spacing:24,rotation:0,color:'#6366f1',opacity:0.3,strokeWidth:2,blend:'normal'},{shape:'dots',size:2,spacing:24,rotation:0,color:'#6366f1',opacity:0.2,strokeWidth:1,blend:'normal'}],
+  [{shape:'waves',size:4,spacing:16,rotation:0,color:'#059669',opacity:0.25,strokeWidth:1.5,blend:'normal'},{shape:'waves',size:4,spacing:16,rotation:180,color:'#059669',opacity:0.25,strokeWidth:1.5,blend:'normal'}],
+  [{shape:'triangles',size:6,spacing:18,rotation:0,color:'#ea580c',opacity:0.3,strokeWidth:1,blend:'normal'},{shape:'triangles',size:6,spacing:18,rotation:180,color:'#ea580c',opacity:0.15,strokeWidth:1,blend:'normal'}],
+  [{shape:'herringbone',size:10,spacing:20,rotation:0,color:'#78350f',opacity:0.2,strokeWidth:1.5,blend:'normal'}],
+  [{shape:'zigzag',size:6,spacing:16,rotation:0,color:'#7c3aed',opacity:0.25,strokeWidth:2,blend:'normal'}],
+  [{shape:'hexagons',size:16,spacing:40,rotation:0,color:'#4f46e5',opacity:0.15,strokeWidth:1,blend:'normal'},{shape:'dots',size:3,spacing:40,rotation:0,color:'#4f46e5',opacity:0.3,strokeWidth:1,blend:'normal'}],
+  [{shape:'circles',size:16,spacing:40,rotation:0,color:'#0ea5e9',opacity:0.1,strokeWidth:1,blend:'normal'},{shape:'dots',size:3,spacing:40,rotation:0,color:'#0ea5e9',opacity:0.4,strokeWidth:1,blend:'normal'}],
+  // Bold/decorative (10)
+  [{shape:'stars',size:12,spacing:32,rotation:15,color:'#f97316',opacity:0.4,strokeWidth:1.5,blend:'normal'},{shape:'circles',size:20,spacing:32,rotation:0,color:'#f97316',opacity:0.1,strokeWidth:1,blend:'normal'}],
+  [{shape:'diamonds',size:12,spacing:28,rotation:45,color:'#be185d',opacity:0.3,strokeWidth:2,blend:'normal'}],
+  [{shape:'scales',size:16,spacing:32,rotation:0,color:'#0d9488',opacity:0.25,strokeWidth:2,blend:'normal'},{shape:'dots',size:2,spacing:16,rotation:0,color:'#0d9488',opacity:0.15,strokeWidth:1,blend:'normal'}],
+  [{shape:'grid',size:1,spacing:24,rotation:45,color:'#94a3b8',opacity:0.2,strokeWidth:1,blend:'normal'},{shape:'crosses',size:4,spacing:24,rotation:45,color:'#94a3b8',opacity:0.15,strokeWidth:1,blend:'normal'}],
+  [{shape:'herringbone',size:6,spacing:14,rotation:0,color:'#1e293b',opacity:0.15,strokeWidth:1,blend:'normal'},{shape:'dots',size:2,spacing:28,rotation:0,color:'#1e293b',opacity:0.2,strokeWidth:1,blend:'normal'}],
+  [{shape:'zigzag',size:4,spacing:12,rotation:0,color:'#e11d48',opacity:0.2,strokeWidth:1.5,blend:'normal'},{shape:'zigzag',size:4,spacing:12,rotation:90,color:'#e11d48',opacity:0.2,strokeWidth:1.5,blend:'normal'}],
+  [{shape:'waves',size:8,spacing:20,rotation:30,color:'#2563eb',opacity:0.2,strokeWidth:2,blend:'normal'}],
+  [{shape:'diagonal-lines',size:1,spacing:6,rotation:0,color:'#a855f7',opacity:0.12,strokeWidth:1,blend:'normal'},{shape:'diagonal-lines',size:1,spacing:6,rotation:90,color:'#a855f7',opacity:0.12,strokeWidth:1,blend:'normal'}],
+  [{shape:'triangles',size:10,spacing:24,rotation:0,color:'#0891b2',opacity:0.2,strokeWidth:1.5,blend:'normal'},{shape:'circles',size:4,spacing:24,rotation:0,color:'#0891b2',opacity:0.15,strokeWidth:1,blend:'normal'}],
+  [{shape:'crosses',size:10,spacing:28,rotation:45,color:'#059669',opacity:0.2,strokeWidth:2,blend:'normal'},{shape:'dots',size:3,spacing:28,rotation:0,color:'#059669',opacity:0.3,strokeWidth:1,blend:'normal'}],
 ];
 
-function drawShape(ctx, shape, x, y, size, rotation, color, opacity) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(rotation * Math.PI / 180);
-  ctx.globalAlpha = opacity;
-  ctx.fillStyle = color;
-  ctx.strokeStyle = color;
-  ctx.lineWidth = Math.max(1, size * 0.15);
+const COLOR_THEMES=[
+  {name:'Monochrome',colors:['#1a1a1a']},
+  {name:'Complementary',colors:['#ec4899','#10b981']},
+  {name:'Analogous',colors:['#3b82f6','#8b5cf6','#6366f1']},
+  {name:'Warm',colors:['#dc2626','#f97316','#f59e0b']},
+  {name:'Cool',colors:['#06b6d4','#3b82f6','#8b5cf6']},
+];
 
-  switch (shape) {
-    case 'dots':
-      ctx.beginPath(); ctx.arc(0, 0, size/2, 0, Math.PI*2); ctx.fill(); break;
-    case 'lines':
-      ctx.beginPath(); ctx.moveTo(-size, 0); ctx.lineTo(size, 0); ctx.stroke(); break;
-    case 'chevrons':
-      ctx.beginPath(); ctx.moveTo(-size/2, size/3); ctx.lineTo(0, -size/3); ctx.lineTo(size/2, size/3); ctx.stroke(); break;
-    case 'waves':
-      ctx.beginPath();
-      ctx.moveTo(-size, 0);
-      ctx.quadraticCurveTo(-size/2, -size/2, 0, 0);
-      ctx.quadraticCurveTo(size/2, size/2, size, 0);
-      ctx.stroke(); break;
-    case 'circles':
-      ctx.beginPath(); ctx.arc(0, 0, size/2, 0, Math.PI*2); ctx.stroke(); break;
-    case 'triangles':
-      ctx.beginPath();
-      ctx.moveTo(0, -size/2); ctx.lineTo(size/2, size/2); ctx.lineTo(-size/2, size/2); ctx.closePath(); ctx.fill(); break;
-    case 'hexagons':
-      ctx.beginPath();
-      for (let i = 0; i < 6; i++) {
-        const a = Math.PI/3 * i - Math.PI/6;
-        const px = Math.cos(a) * size/2, py = Math.sin(a) * size/2;
-        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-      }
-      ctx.closePath(); ctx.stroke(); break;
+function drawShape(ctx,shape,x,y,size,rotation,color,opacity,sw){
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.rotate(rotation*Math.PI/180);
+  ctx.globalAlpha=opacity;
+  ctx.fillStyle=color;
+  ctx.strokeStyle=color;
+  ctx.lineWidth=sw;
+  ctx.lineCap='round';ctx.lineJoin='round';
+  const r=size/2;
+  switch(shape){
+    case 'dots':ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();break;
+    case 'lines':ctx.beginPath();ctx.moveTo(-size,0);ctx.lineTo(size,0);ctx.stroke();break;
+    case 'diagonal-lines':ctx.beginPath();ctx.moveTo(-size,-size);ctx.lineTo(size,size);ctx.stroke();break;
+    case 'chevrons':ctx.beginPath();ctx.moveTo(-r,r/2);ctx.lineTo(0,-r/2);ctx.lineTo(r,r/2);ctx.stroke();break;
+    case 'waves':ctx.beginPath();ctx.moveTo(-size,0);ctx.quadraticCurveTo(-r,-r,0,0);ctx.quadraticCurveTo(r,r,size,0);ctx.stroke();break;
+    case 'circles':ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.stroke();break;
+    case 'triangles':ctx.beginPath();ctx.moveTo(0,-r);ctx.lineTo(r,r);ctx.lineTo(-r,r);ctx.closePath();ctx.fill();break;
+    case 'hexagons':ctx.beginPath();for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;if(i===0)ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r);else ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);}ctx.closePath();ctx.stroke();break;
+    case 'diamonds':ctx.beginPath();ctx.moveTo(0,-r);ctx.lineTo(r,0);ctx.lineTo(0,r);ctx.lineTo(-r,0);ctx.closePath();ctx.stroke();break;
+    case 'crosses':ctx.beginPath();ctx.moveTo(-r,0);ctx.lineTo(r,0);ctx.moveTo(0,-r);ctx.lineTo(0,r);ctx.stroke();break;
+    case 'stars':{ctx.beginPath();for(let i=0;i<5;i++){const a=Math.PI*2/5*i-Math.PI/2;const ai=a+Math.PI/5;ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);ctx.lineTo(Math.cos(ai)*r*0.4,Math.sin(ai)*r*0.4);}ctx.closePath();ctx.fill();break;}
+    case 'scales':{ctx.beginPath();ctx.arc(0,r/2,r,Math.PI,0);ctx.stroke();break;}
+    case 'herringbone':{ctx.beginPath();ctx.moveTo(-r,-r/3);ctx.lineTo(0,r/3);ctx.lineTo(r,-r/3);ctx.moveTo(-r,r/3);ctx.lineTo(0,r);ctx.lineTo(r,r/3);ctx.stroke();break;}
+    case 'zigzag':{ctx.beginPath();ctx.moveTo(-size,-r/2);ctx.lineTo(-r,r/2);ctx.lineTo(0,-r/2);ctx.lineTo(r,r/2);ctx.lineTo(size,-r/2);ctx.stroke();break;}
+    case 'grid':{ctx.beginPath();ctx.moveTo(-size,0);ctx.lineTo(size,0);ctx.moveTo(0,-size);ctx.lineTo(0,size);ctx.stroke();break;}
   }
   ctx.restore();
 }
 
-function renderTile(ctx, tileSize, layers) {
-  ctx.clearRect(0, 0, tileSize, tileSize);
-  for (const layer of layers) {
-    const sp = layer.spacing || 40;
-    for (let y = -sp; y < tileSize + sp; y += sp) {
-      for (let x = -sp; x < tileSize + sp; x += sp) {
-        drawShape(ctx, layer.shape, x, y, layer.size, layer.rotation, layer.color, layer.opacity);
+function renderTile(ctx,tileSize,layersList,bg,bgG,bg2){
+  ctx.clearRect(0,0,tileSize,tileSize);
+  // Background
+  if(bgG==='linear'){
+    const g=ctx.createLinearGradient(0,0,tileSize,tileSize);
+    g.addColorStop(0,bg);g.addColorStop(1,bg2);ctx.fillStyle=g;
+  }else if(bgG==='radial'){
+    const g=ctx.createRadialGradient(tileSize/2,tileSize/2,0,tileSize/2,tileSize/2,tileSize/2);
+    g.addColorStop(0,bg);g.addColorStop(1,bg2);ctx.fillStyle=g;
+  }else{ctx.fillStyle=bg;}
+  ctx.fillRect(0,0,tileSize,tileSize);
+  // Layers
+  for(const layer of layersList){
+    ctx.save();
+    if(layer.blend&&layer.blend!=='normal')ctx.globalCompositeOperation=layer.blend;
+    const sp=layer.spacing||28;
+    for(let y=-sp;y<tileSize+sp;y+=sp){
+      for(let x=-sp;x<tileSize+sp;x+=sp){
+        drawShape(ctx,layer.shape,x,y,layer.size,layer.rotation,layer.color,layer.opacity,layer.strokeWidth);
       }
     }
+    ctx.restore();
   }
 }
 
-function renderPreview() {
-  const canvas = document.getElementById('previewCanvas');
-  const ctx = canvas.getContext('2d');
-  const tileSize = 128;
-  // Render one tile to offscreen
-  const offscreen = document.createElement('canvas');
-  offscreen.width = tileSize; offscreen.height = tileSize;
-  const octx = offscreen.getContext('2d');
-  octx.fillStyle = '#ffffff';
-  octx.fillRect(0, 0, tileSize, tileSize);
-  renderTile(octx, tileSize, layers);
-  // Tile 4x4
-  ctx.clearRect(0, 0, 512, 512);
-  for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
-    ctx.drawImage(offscreen, c * tileSize, r * tileSize);
-  }
+function renderPreview(){
+  const canvas=document.getElementById('previewCanvas');
+  const ctx=canvas.getContext('2d');
+  const tileSize=128;
+  const off=document.createElement('canvas');off.width=tileSize;off.height=tileSize;
+  const octx=off.getContext('2d');
+  renderTile(octx,tileSize,layers,bgColor,bgGrad,bgColor2);
+  ctx.clearRect(0,0,512,512);
+  for(let r=0;r<4;r++)for(let c=0;c<4;c++)ctx.drawImage(off,c*tileSize,r*tileSize);
+  // Context previews
+  const dataURL=off.toDataURL('image/png');
+  const bgCSS=`url("${dataURL}")`;
+  ['ctxCard','ctxCard2','ctxHeader','ctxHeader2'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.style.backgroundImage=bgCSS;
+    el.style.backgroundRepeat='repeat';
+    el.style.backgroundSize=`${tileSize}px ${tileSize}px`;
+  });
 }
 
-function renderLayerUI() {
-  const container = document.getElementById('layersContainer');
-  container.innerHTML = '';
-  layers.forEach((layer, idx) => {
-    const div = document.createElement('div');
-    div.className = 'layer-item';
-    div.innerHTML = `
-      <button class="remove" data-idx="${idx}">&times;</button>
-      <div class="field"><label>Shape</label>
-        <select data-idx="${idx}" data-prop="shape">${SHAPES.map(s=>`<option value="${s}" ${s===layer.shape?'selected':''}>${s}</option>`).join('')}</select>
+function renderLayerUI(){
+  const container=document.getElementById('layersContainer');
+  container.innerHTML='';
+  layers.forEach((layer,idx)=>{
+    const div=document.createElement('div');
+    div.className='layer-card';
+    div.innerHTML=`
+      ${layers.length>1?`<button class="lremove" data-idx="${idx}">&times;</button>`:''}
+      <div class="layer-header"><span>Layer ${idx+1}</span>
+        <select class="blend-select" data-idx="${idx}" data-prop="blend">${BLENDS.map(b=>`<option value="${b}"${b===layer.blend?' selected':''}>${b}</option>`).join('')}</select>
+      </div>
+      <div class="field"><label>Pattern</label>
+        <select data-idx="${idx}" data-prop="shape">${SHAPES.map(s=>`<option value="${s}"${s===layer.shape?' selected':''}>${s}</option>`).join('')}</select>
       </div>
       <div class="field-row">
-        <div><label>Size: <span class="range-val">${layer.size}</span></label><input type="range" min="2" max="40" value="${layer.size}" data-idx="${idx}" data-prop="size"></div>
-        <div><label>Spacing: <span class="range-val">${layer.spacing}</span></label><input type="range" min="8" max="80" value="${layer.spacing}" data-idx="${idx}" data-prop="spacing"></div>
+        <div class="field"><label>Size: <span class="range-val">${layer.size}</span></label>
+          <div class="range-row"><input type="range" min="2" max="40" value="${layer.size}" data-idx="${idx}" data-prop="size"><span class="range-val">${layer.size}</span></div></div>
+        <div class="field"><label>Spacing: <span class="range-val">${layer.spacing}</span></label>
+          <div class="range-row"><input type="range" min="6" max="80" value="${layer.spacing}" data-idx="${idx}" data-prop="spacing"><span class="range-val">${layer.spacing}</span></div></div>
       </div>
       <div class="field-row">
-        <div><label>Rotation: <span class="range-val">${layer.rotation}&deg;</span></label><input type="range" min="0" max="360" value="${layer.rotation}" data-idx="${idx}" data-prop="rotation"></div>
-        <div><label>Opacity: <span class="range-val">${layer.opacity.toFixed(1)}</span></label><input type="range" min="0" max="10" value="${Math.round(layer.opacity*10)}" data-idx="${idx}" data-prop="opacity"></div>
+        <div class="field"><label>Rotation</label>
+          <div class="range-row"><input type="range" min="0" max="360" value="${layer.rotation}" data-idx="${idx}" data-prop="rotation"><span class="range-val">${layer.rotation}&deg;</span></div></div>
+        <div class="field"><label>Opacity</label>
+          <div class="range-row"><input type="range" min="0" max="100" value="${Math.round(layer.opacity*100)}" data-idx="${idx}" data-prop="opacity"><span class="range-val">${Math.round(layer.opacity*100)}%</span></div></div>
       </div>
       <div class="field-row">
-        <div><label>Color</label><input type="color" value="${layer.color}" data-idx="${idx}" data-prop="color"></div>
+        <div class="field"><label>Stroke Width</label>
+          <div class="range-row"><input type="range" min="5" max="40" value="${Math.round(layer.strokeWidth*10)}" data-idx="${idx}" data-prop="strokeWidth"><span class="range-val">${layer.strokeWidth}</span></div></div>
+        <div class="field"><label>Color</label><input type="color" value="${layer.color}" data-idx="${idx}" data-prop="color"></div>
       </div>
     `;
     container.appendChild(div);
   });
 
-  container.querySelectorAll('select, input[type="range"], input[type="color"]').forEach(el => {
-    el.addEventListener('input', e => {
-      const idx = +e.target.dataset.idx;
-      const prop = e.target.dataset.prop;
-      let val = e.target.value;
-      if (prop === 'size' || prop === 'spacing' || prop === 'rotation') val = +val;
-      if (prop === 'opacity') val = +val / 10;
-      layers[idx][prop] = val;
+  container.querySelectorAll('select,input[type="range"],input[type="color"]').forEach(el=>{
+    el.addEventListener('input',e=>{
+      const idx=+e.target.dataset.idx;
+      const prop=e.target.dataset.prop;
+      let val=e.target.value;
+      if(prop==='size'||prop==='spacing'||prop==='rotation')val=+val;
+      else if(prop==='opacity')val=+val/100;
+      else if(prop==='strokeWidth')val=+val/10;
+      layers[idx][prop]=val;
       renderLayerUI();
       renderPreview();
     });
   });
 
-  container.querySelectorAll('.remove').forEach(btn => {
-    btn.addEventListener('click', e => {
-      const idx = +e.target.dataset.idx;
-      if (layers.length <= 1) return;
-      layers.splice(idx, 1);
-      renderLayerUI();
-      renderPreview();
+  container.querySelectorAll('.lremove').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      if(layers.length<=1)return;
+      layers.splice(+e.target.dataset.idx,1);
+      renderLayerUI();renderPreview();
     });
   });
 }
 
-document.getElementById('addLayerBtn').addEventListener('click', () => {
-  if (layers.length >= 3) { showToast('Max 3 layers'); return; }
-  layers.push({ shape: 'lines', size: 12, spacing: 32, rotation: 0, color: '#3b82f6', opacity: 0.5 });
-  renderLayerUI();
+// Background controls
+document.getElementById('bgColor').addEventListener('input',e=>{bgColor=e.target.value;renderPreview();});
+document.getElementById('bgColor2').addEventListener('input',e=>{bgColor2=e.target.value;renderPreview();});
+document.getElementById('bgGrad').addEventListener('change',e=>{
+  bgGrad=e.target.value;
+  document.getElementById('bgColor2Field').style.display=bgGrad==='none'?'none':'block';
   renderPreview();
 });
 
+// Add layer
+document.getElementById('addLayerBtn').addEventListener('click',()=>{
+  if(layers.length>=4){showToast('Max 4 layers');return;}
+  const colors=['#3b82f6','#10b981','#f59e0b','#8b5cf6'];
+  layers.push({shape:'lines',size:8,spacing:24,rotation:45,color:colors[layers.length%4],opacity:0.3,strokeWidth:1.5,blend:'normal'});
+  renderLayerUI();renderPreview();
+});
+
+// Randomize
+document.getElementById('randomBtn').addEventListener('click',()=>{
+  const count=1+Math.floor(Math.random()*3);
+  layers=[];
+  for(let i=0;i<count;i++){
+    layers.push({
+      shape:SHAPES[Math.floor(Math.random()*SHAPES.length)],
+      size:4+Math.floor(Math.random()*20),
+      spacing:12+Math.floor(Math.random()*40),
+      rotation:Math.floor(Math.random()*360),
+      color:'#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0'),
+      opacity:0.1+Math.random()*0.5,
+      strokeWidth:0.5+Math.random()*2.5,
+      blend:BLENDS[Math.floor(Math.random()*BLENDS.length)]
+    });
+  }
+  renderLayerUI();renderPreview();
+});
+
+// Color themes
+function renderColorThemes(){
+  const cont=document.getElementById('colorThemes');
+  COLOR_THEMES.forEach(theme=>{
+    const btn=document.createElement('button');
+    btn.className='theme-btn';
+    btn.textContent=theme.name;
+    btn.addEventListener('click',()=>{
+      layers.forEach((l,i)=>{l.color=theme.colors[i%theme.colors.length];});
+      renderLayerUI();renderPreview();
+    });
+    cont.appendChild(btn);
+  });
+}
+
 // Presets
-function renderPresets() {
-  const grid = document.getElementById('presetsGrid');
-  PRESETS.forEach((preset, idx) => {
-    const btn = document.createElement('button');
-    btn.className = 'preset-btn';
-    const c = document.createElement('canvas');
-    c.width = 64; c.height = 64;
-    const ctx = c.getContext('2d');
-    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 64, 64);
-    renderTile(ctx, 64, preset);
+function renderPresets(){
+  const grid=document.getElementById('presetsGrid');
+  PRESETS.forEach((preset,idx)=>{
+    const btn=document.createElement('button');
+    btn.className='preset-btn';
+    const c=document.createElement('canvas');c.width=64;c.height=64;
+    const ctx=c.getContext('2d');
+    renderTile(ctx,64,preset,'#ffffff','none','#f3f4f6');
     btn.appendChild(c);
-    btn.addEventListener('click', () => {
-      layers = JSON.parse(JSON.stringify(preset));
-      renderLayerUI();
-      renderPreview();
-      grid.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    btn.addEventListener('click',()=>{
+      layers=JSON.parse(JSON.stringify(preset));
+      renderLayerUI();renderPreview();
+      grid.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
     });
     grid.appendChild(btn);
   });
 }
 
-// Export SVG
-document.getElementById('dlSvg').addEventListener('click', () => {
-  const tileSize = 128;
-  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${tileSize}" height="${tileSize}" viewBox="0 0 ${tileSize} ${tileSize}">`;
-  svg += `<rect width="${tileSize}" height="${tileSize}" fill="#ffffff"/>`;
-  for (const layer of layers) {
-    const sp = layer.spacing;
-    for (let y = -sp; y < tileSize + sp; y += sp) {
-      for (let x = -sp; x < tileSize + sp; x += sp) {
-        svg += shapeToSVG(layer.shape, x, y, layer.size, layer.rotation, layer.color, layer.opacity);
-      }
-    }
-  }
-  svg += '</svg>';
-  const blob = new Blob([svg], { type: 'image/svg+xml' });
-  const link = document.createElement('a'); link.download = 'pattern.svg'; link.href = URL.createObjectURL(blob); link.click();
-  showToast('SVG downloaded');
-});
-
-function shapeToSVG(shape, x, y, size, rotation, color, opacity) {
-  const t = `transform="translate(${x},${y}) rotate(${rotation})" opacity="${opacity}"`;
-  switch (shape) {
-    case 'dots': return `<circle cx="0" cy="0" r="${size/2}" fill="${color}" ${t}/>`;
-    case 'lines': return `<line x1="${-size}" y1="0" x2="${size}" y2="0" stroke="${color}" stroke-width="${Math.max(1,size*0.15)}" ${t}/>`;
-    case 'chevrons': return `<polyline points="${-size/2},${size/3} 0,${-size/3} ${size/2},${size/3}" fill="none" stroke="${color}" stroke-width="${Math.max(1,size*0.15)}" ${t}/>`;
-    case 'waves': return `<path d="M${-size},0 Q${-size/2},${-size/2} 0,0 Q${size/2},${size/2} ${size},0" fill="none" stroke="${color}" stroke-width="${Math.max(1,size*0.15)}" ${t}/>`;
-    case 'circles': return `<circle cx="0" cy="0" r="${size/2}" fill="none" stroke="${color}" stroke-width="${Math.max(1,size*0.15)}" ${t}/>`;
-    case 'triangles': return `<polygon points="0,${-size/2} ${size/2},${size/2} ${-size/2},${size/2}" fill="${color}" ${t}/>`;
-    case 'hexagons': {
-      const pts = Array.from({length:6},(_,i)=>{const a=Math.PI/3*i-Math.PI/6;return `${Math.cos(a)*size/2},${Math.sin(a)*size/2}`;}).join(' ');
-      return `<polygon points="${pts}" fill="none" stroke="${color}" stroke-width="${Math.max(1,size*0.15)}" ${t}/>`;
-    }
-    default: return '';
+// SVG export helpers
+function shapeToSVG(shape,x,y,size,rotation,color,opacity,sw){
+  const t=`transform="translate(${x},${y}) rotate(${rotation})" opacity="${opacity}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"`;
+  const r=size/2;
+  switch(shape){
+    case 'dots':return `<circle cx="0" cy="0" r="${r}" fill="${color}" ${t}/>`;
+    case 'lines':return `<line x1="${-size}" y1="0" x2="${size}" y2="0" stroke="${color}" fill="none" ${t}/>`;
+    case 'diagonal-lines':return `<line x1="${-size}" y1="${-size}" x2="${size}" y2="${size}" stroke="${color}" fill="none" ${t}/>`;
+    case 'chevrons':return `<polyline points="${-r},${r/2} 0,${-r/2} ${r},${r/2}" fill="none" stroke="${color}" ${t}/>`;
+    case 'waves':return `<path d="M${-size},0 Q${-r},${-r} 0,0 Q${r},${r} ${size},0" fill="none" stroke="${color}" ${t}/>`;
+    case 'circles':return `<circle cx="0" cy="0" r="${r}" fill="none" stroke="${color}" ${t}/>`;
+    case 'triangles':return `<polygon points="0,${-r} ${r},${r} ${-r},${r}" fill="${color}" ${t}/>`;
+    case 'hexagons':{const pts=Array.from({length:6},(_,i)=>{const a=Math.PI/3*i-Math.PI/6;return `${(Math.cos(a)*r).toFixed(2)},${(Math.sin(a)*r).toFixed(2)}`;}).join(' ');return `<polygon points="${pts}" fill="none" stroke="${color}" ${t}/>`;}
+    case 'diamonds':return `<polygon points="0,${-r} ${r},0 0,${r} ${-r},0" fill="none" stroke="${color}" ${t}/>`;
+    case 'crosses':return `<g ${t}><line x1="${-r}" y1="0" x2="${r}" y2="0" stroke="${color}" fill="none"/><line x1="0" y1="${-r}" x2="0" y2="${r}" stroke="${color}" fill="none"/></g>`;
+    case 'stars':{let pts='';for(let i=0;i<5;i++){const a=Math.PI*2/5*i-Math.PI/2;const ai=a+Math.PI/5;pts+=`${(Math.cos(a)*r).toFixed(2)},${(Math.sin(a)*r).toFixed(2)} ${(Math.cos(ai)*r*0.4).toFixed(2)},${(Math.sin(ai)*r*0.4).toFixed(2)} `;}return `<polygon points="${pts.trim()}" fill="${color}" ${t}/>`;}
+    case 'scales':return `<path d="M${-r},${r/2} A${r},${r} 0 0,1 ${r},${r/2}" fill="none" stroke="${color}" ${t}/>`;
+    case 'herringbone':return `<g ${t}><polyline points="${-r},${-r/3} 0,${r/3} ${r},${-r/3}" fill="none" stroke="${color}"/><polyline points="${-r},${r/3} 0,${r} ${r},${r/3}" fill="none" stroke="${color}"/></g>`;
+    case 'zigzag':return `<polyline points="${-size},${-r/2} ${-r},${r/2} 0,${-r/2} ${r},${r/2} ${size},${-r/2}" fill="none" stroke="${color}" ${t}/>`;
+    case 'grid':return `<g ${t}><line x1="${-size}" y1="0" x2="${size}" y2="0" stroke="${color}" fill="none"/><line x1="0" y1="${-size}" x2="0" y2="${size}" stroke="${color}" fill="none"/></g>`;
+    default:return '';
   }
 }
 
-// Export PNG
-document.getElementById('dlPng').addEventListener('click', () => {
-  const tileSize = 256;
-  const c = document.createElement('canvas'); c.width = tileSize; c.height = tileSize;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, tileSize, tileSize);
-  renderTile(ctx, tileSize, layers);
-  const link = document.createElement('a'); link.download = 'pattern.png'; link.href = c.toDataURL('image/png'); link.click();
+function buildSVG(tileSize){
+  let svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${tileSize}" height="${tileSize}" viewBox="0 0 ${tileSize} ${tileSize}">`;
+  if(bgGrad==='linear'){
+    svg+=`<defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="${bgColor}"/><stop offset="100%" stop-color="${bgColor2}"/></linearGradient></defs>`;
+    svg+=`<rect width="${tileSize}" height="${tileSize}" fill="url(#bg)"/>`;
+  }else if(bgGrad==='radial'){
+    svg+=`<defs><radialGradient id="bg"><stop offset="0%" stop-color="${bgColor}"/><stop offset="100%" stop-color="${bgColor2}"/></radialGradient></defs>`;
+    svg+=`<rect width="${tileSize}" height="${tileSize}" fill="url(#bg)"/>`;
+  }else{
+    svg+=`<rect width="${tileSize}" height="${tileSize}" fill="${bgColor}"/>`;
+  }
+  for(const layer of layers){
+    const sp=layer.spacing;
+    if(layer.blend&&layer.blend!=='normal')svg+=`<g style="mix-blend-mode:${layer.blend}">`;
+    for(let y=-sp;y<tileSize+sp;y+=sp){
+      for(let x=-sp;x<tileSize+sp;x+=sp){
+        svg+=shapeToSVG(layer.shape,x,y,layer.size,layer.rotation,layer.color,layer.opacity,layer.strokeWidth);
+      }
+    }
+    if(layer.blend&&layer.blend!=='normal')svg+='</g>';
+  }
+  svg+='</svg>';
+  return svg;
+}
+
+// Download SVG
+document.getElementById('dlSvg').addEventListener('click',()=>{
+  const svg=buildSVG(128);
+  const blob=new Blob([svg],{type:'image/svg+xml'});
+  const a=document.createElement('a');a.download='pattern.svg';a.href=URL.createObjectURL(blob);a.click();
+  showToast('SVG downloaded');
+});
+
+// Download PNG
+document.getElementById('dlPng').addEventListener('click',()=>{
+  const tileSize=512;
+  const c=document.createElement('canvas');c.width=tileSize;c.height=tileSize;
+  const ctx=c.getContext('2d');
+  renderTile(ctx,tileSize,layers,bgColor,bgGrad,bgColor2);
+  const a=document.createElement('a');a.download='pattern.png';a.href=c.toDataURL('image/png');a.click();
   showToast('PNG downloaded');
 });
 
-// Copy CSS
-document.getElementById('copyCSS').addEventListener('click', () => {
-  const tileSize = 128;
-  const c = document.createElement('canvas'); c.width = tileSize; c.height = tileSize;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, tileSize, tileSize);
-  renderTile(ctx, tileSize, layers);
-  const dataURL = c.toDataURL('image/png');
-  const css = `background-image: url("${dataURL}");\nbackground-repeat: repeat;\nbackground-size: ${tileSize}px ${tileSize}px;`;
-  navigator.clipboard.writeText(css).then(() => showToast('CSS copied to clipboard'));
-  const output = document.getElementById('cssOutput');
-  output.style.display = 'block';
-  output.textContent = css;
+// Copy CSS (SVG data URL)
+document.getElementById('copySvgCSS').addEventListener('click',()=>{
+  const svg=buildSVG(128);
+  const encoded=encodeURIComponent(svg).replace(/'/g,"%27").replace(/"/g,"%22");
+  const css=`background-image: url("data:image/svg+xml,${encoded}");\nbackground-repeat: repeat;\nbackground-size: 128px 128px;`;
+  navigator.clipboard.writeText(css).then(()=>showToast('SVG CSS copied'));
+  const out=document.getElementById('cssOutput');out.style.display='block';out.textContent=css;
 });
 
+// Copy CSS (base64 PNG)
+document.getElementById('copyPngCSS').addEventListener('click',()=>{
+  const tileSize=128;
+  const c=document.createElement('canvas');c.width=tileSize;c.height=tileSize;
+  const ctx=c.getContext('2d');
+  renderTile(ctx,tileSize,layers,bgColor,bgGrad,bgColor2);
+  const dataURL=c.toDataURL('image/png');
+  const css=`background-image: url("${dataURL}");\nbackground-repeat: repeat;\nbackground-size: ${tileSize}px ${tileSize}px;`;
+  navigator.clipboard.writeText(css).then(()=>showToast('PNG CSS copied'));
+  const out=document.getElementById('cssOutput');out.style.display='block';out.textContent=css;
+});
+
+// Copy Tailwind
+document.getElementById('copyTailwind').addEventListener('click',()=>{
+  const tileSize=128;
+  const c=document.createElement('canvas');c.width=tileSize;c.height=tileSize;
+  const ctx=c.getContext('2d');
+  renderTile(ctx,tileSize,layers,bgColor,bgGrad,bgColor2);
+  const dataURL=c.toDataURL('image/png');
+  const tw=`backgroundImage: 'url("${dataURL}")'`;
+  navigator.clipboard.writeText(tw).then(()=>showToast('Tailwind value copied'));
+  const out=document.getElementById('cssOutput');out.style.display='block';out.textContent=`// tailwind.config.js extend:\n${tw}`;
+});
+
+// Favorites
+document.getElementById('saveFav').addEventListener('click',()=>{
+  favorites.push({layers:JSON.parse(JSON.stringify(layers)),bgColor,bgGrad,bgColor2});
+  if(favorites.length>20)favorites.shift();
+  localStorage.setItem('fds-pat-favs',JSON.stringify(favorites));
+  renderFavs();
+  showToast('Saved to favorites');
+});
+
+function renderFavs(){
+  const row=document.getElementById('favsRow');
+  if(!favorites.length){row.innerHTML='<span style="font-size:12px;color:#9ca3af;">No favorites yet</span>';return;}
+  row.innerHTML='';
+  favorites.forEach((fav,i)=>{
+    const item=document.createElement('div');item.className='fav-item';
+    const c=document.createElement('canvas');c.width=48;c.height=48;
+    const ctx=c.getContext('2d');
+    renderTile(ctx,48,fav.layers,fav.bgColor,fav.bgGrad,fav.bgColor2);
+    item.appendChild(c);
+    item.innerHTML+=`<button class="fav-rm" data-i="${i}">&times;</button>`;
+    item.addEventListener('click',e=>{
+      if(e.target.classList.contains('fav-rm')){
+        favorites.splice(+e.target.dataset.i,1);
+        localStorage.setItem('fds-pat-favs',JSON.stringify(favorites));
+        renderFavs();return;
+      }
+      layers=JSON.parse(JSON.stringify(fav.layers));
+      bgColor=fav.bgColor;bgGrad=fav.bgGrad;bgColor2=fav.bgColor2;
+      document.getElementById('bgColor').value=bgColor;
+      document.getElementById('bgColor2').value=bgColor2;
+      document.getElementById('bgGrad').value=bgGrad;
+      document.getElementById('bgColor2Field').style.display=bgGrad==='none'?'none':'block';
+      renderLayerUI();renderPreview();
+    });
+    row.appendChild(item);
+  });
+}
+
+// Init
+renderColorThemes();
 renderPresets();
 renderLayerUI();
 renderPreview();
+renderFavs();
 </script>
 <script src="/related.js"></script>
 </body>
