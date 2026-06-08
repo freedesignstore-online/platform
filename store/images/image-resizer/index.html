@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Image Resizer & Cropper - FreeDesignStore</title>
+<title>Image Processing Studio - FreeDesignStore</title>
 <link rel="icon" href="/favicon.ico">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -15,220 +15,935 @@ a:hover { text-decoration: underline; }
 .back:hover { color: #ec4899; }
 h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
 .subtitle { color: #6b7280; margin-bottom: 24px; font-size: 15px; }
-.container { max-width: 1100px; margin: 0 auto; }
-.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
+.container { max-width: 1200px; margin: 0 auto; }
+.panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
+.hidden { display: none !important; }
+
+/* Upload */
 .drop-zone { border: 2px dashed #e5e7eb; border-radius: 12px; padding: 60px 24px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; }
 .drop-zone:hover, .drop-zone.dragover { border-color: #ec4899; background: #fdf2f8; }
 .drop-zone p { color: #6b7280; margin-top: 8px; font-size: 14px; }
 .drop-zone .icon { font-size: 48px; color: #ec4899; }
-.hidden { display: none; }
-.editor { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
-@media (max-width: 800px) { .editor { grid-template-columns: 1fr; } }
+.file-info { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
+.file-info span { font-size: 13px; color: #6b7280; background: #f9fafb; padding: 4px 10px; border-radius: 6px; }
+.file-info span b { color: #1a1a1a; }
+
+/* Tabs */
+.tab-bar { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
+.tab { padding: 8px 16px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 500; transition: all .15s; }
+.tab.active { background: #ec4899; color: #fff; border-color: #ec4899; }
+
+/* Layout */
+.editor { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+@media (max-width: 860px) { .editor { grid-template-columns: 1fr; } }
+
+/* Canvas preview */
 .canvas-wrap { position: relative; overflow: hidden; border-radius: 8px; background: repeating-conic-gradient(#e5e7eb 0% 25%, transparent 0% 50%) 50%/20px 20px; display: flex; align-items: center; justify-content: center; min-height: 400px; }
-.canvas-wrap img { max-width: 100%; max-height: 500px; display: block; }
-.crop-overlay { position: absolute; border: 2px solid #ec4899; background: rgba(236,72,153,.08); cursor: move; }
-.controls label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 4px; margin-top: 14px; }
-.controls label:first-child { margin-top: 0; }
-.presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
-.preset-btn { padding: 8px 10px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; cursor: pointer; font-size: 12px; font-family: inherit; transition: all .15s; text-align: left; }
-.preset-btn:hover { border-color: #ec4899; background: #fdf2f8; }
-.preset-btn.active { border-color: #ec4899; background: #fdf2f8; color: #ec4899; }
-.preset-btn span { display: block; font-weight: 600; }
-.preset-btn small { color: #6b7280; }
+.canvas-wrap canvas { max-width: 100%; max-height: 500px; display: block; }
+
+/* Before/After slider */
+.ba-container { position: relative; overflow: hidden; border-radius: 8px; min-height: 300px; cursor: col-resize; user-select: none; }
+.ba-container canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.ba-divider { position: absolute; top: 0; bottom: 0; width: 3px; background: #ec4899; z-index: 5; cursor: col-resize; }
+.ba-divider::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 28px; height: 28px; background: #ec4899; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+.ba-label { position: absolute; top: 8px; padding: 2px 8px; background: rgba(0,0,0,.5); color: #fff; font-size: 11px; border-radius: 4px; z-index: 6; pointer-events: none; }
+.ba-label.l { left: 8px; }
+.ba-label.r { right: 8px; }
+
+/* Crop overlay */
+.crop-box { position: absolute; border: 2px solid #ec4899; background: rgba(236,72,153,.06); cursor: move; z-index: 10; }
+.crop-handle { position: absolute; width: 10px; height: 10px; background: #fff; border: 2px solid #ec4899; border-radius: 2px; z-index: 11; }
+.crop-handle.nw { top: -5px; left: -5px; cursor: nw-resize; }
+.crop-handle.ne { top: -5px; right: -5px; cursor: ne-resize; }
+.crop-handle.sw { bottom: -5px; left: -5px; cursor: sw-resize; }
+.crop-handle.se { bottom: -5px; right: -5px; cursor: se-resize; }
+.crop-handle.n { top: -5px; left: 50%; transform: translateX(-50%); cursor: n-resize; }
+.crop-handle.s { bottom: -5px; left: 50%; transform: translateX(-50%); cursor: s-resize; }
+.crop-handle.w { top: 50%; left: -5px; transform: translateY(-50%); cursor: w-resize; }
+.crop-handle.e { top: 50%; right: -5px; transform: translateY(-50%); cursor: e-resize; }
+.crop-thirds { position: absolute; inset: 0; pointer-events: none; }
+.crop-thirds.show .th { position: absolute; background: rgba(255,255,255,.4); }
+.crop-thirds.show .th.h1 { left: 0; right: 0; top: 33.33%; height: 1px; }
+.crop-thirds.show .th.h2 { left: 0; right: 0; top: 66.66%; height: 1px; }
+.crop-thirds.show .th.v1 { top: 0; bottom: 0; left: 33.33%; width: 1px; }
+.crop-thirds.show .th.v2 { top: 0; bottom: 0; left: 66.66%; width: 1px; }
+.crop-dim { position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); font-size: 11px; color: #ec4899; background: rgba(255,255,255,.9); padding: 1px 6px; border-radius: 3px; white-space: nowrap; z-index: 11; }
+
+/* Controls */
+.controls { overflow-y: auto; max-height: 80vh; }
+.ctrl-section { display: none; }
+.ctrl-section.active { display: block; }
+label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 4px; margin-top: 14px; }
+label:first-child { margin-top: 0; }
 .row { display: flex; gap: 8px; align-items: center; }
 input[type="number"] { width: 100%; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; }
 input[type="range"] { width: 100%; accent-color: #ec4899; }
-.lock-btn { width: 36px; height: 36px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+select { padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; width: 100%; }
+.presets-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 12px; }
+.preset-btn { padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; cursor: pointer; font-size: 12px; font-family: inherit; transition: all .15s; text-align: left; }
+.preset-btn:hover { border-color: #ec4899; background: #fdf2f8; }
+.preset-btn.active { border-color: #ec4899; background: #fdf2f8; color: #ec4899; }
+.preset-btn span { display: block; font-weight: 600; font-size: 11px; }
+.preset-btn small { color: #6b7280; font-size: 10px; }
+.lock-btn { width: 36px; height: 36px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .lock-btn.locked { background: #fdf2f8; border-color: #ec4899; }
-.actions { display: flex; gap: 8px; margin-top: 20px; }
+.pct-btns { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+.pct-btn { padding: 4px 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 12px; background: #fff; cursor: pointer; font-family: inherit; }
+.pct-btn:hover { border-color: #ec4899; }
+.ratio-btns { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+.ratio-btn { padding: 4px 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 12px; background: #fff; cursor: pointer; font-family: inherit; }
+.ratio-btn:hover, .ratio-btn.active { border-color: #ec4899; background: #fdf2f8; }
+.quality-val { font-size: 13px; color: #ec4899; font-weight: 600; }
+.slider-row { display: flex; align-items: center; gap: 8px; }
+.slider-row input[type="range"] { flex: 1; }
+.slider-row .val { font-size: 12px; color: #6b7280; min-width: 36px; text-align: right; }
+.toggle-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.toggle-row input[type="checkbox"] { accent-color: #ec4899; }
+.toggle-row label { margin: 0; cursor: pointer; }
+
+/* Actions */
+.actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
 .btn { padding: 10px 18px; border-radius: 8px; border: none; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s; }
 .btn-primary { background: #ec4899; color: #fff; }
 .btn-primary:hover { background: #db2777; }
 .btn-secondary { background: #fff; border: 1px solid #e5e7eb; color: #1a1a1a; }
 .btn-secondary:hover { border-color: #ec4899; }
-select { padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; width: 100%; }
-.quality-val { font-size: 13px; color: #ec4899; font-weight: 600; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+/* Size comparison */
+.size-bar { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: 13px; }
+.size-bar .bar { flex: 1; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
+.size-bar .bar-fill { height: 100%; border-radius: 4px; transition: width .3s; }
+.size-bar .bar-fill.smaller { background: #10b981; }
+.size-bar .bar-fill.bigger { background: #ef4444; }
+
+/* Batch list */
+.batch-list { margin-top: 12px; }
+.batch-item { display: flex; align-items: center; gap: 10px; padding: 8px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 6px; }
+.batch-item img { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; }
+.batch-item .info { flex: 1; font-size: 12px; color: #6b7280; }
+.batch-item .info .name { font-weight: 600; color: #1a1a1a; }
+.batch-item .remove-batch { background: none; border: none; color: #dc2626; cursor: pointer; font-size: 16px; }
+
+/* History */
+.history { margin-top: 12px; }
+.history-item { display: flex; align-items: center; gap: 8px; padding: 6px; border-radius: 6px; cursor: pointer; transition: background .15s; }
+.history-item:hover { background: #f9fafb; }
+.history-item img { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; }
+.history-item .meta { font-size: 11px; color: #6b7280; }
+
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 100; }
+.toast.show { opacity: 1; }
 </style>
 </head>
 <body>
 <div class="container">
   <a href="/" class="back">&larr; Back to FreeDesignStore</a>
-  <h1>Image Resizer & Cropper</h1>
-  <p class="subtitle">Resize, crop, and export images for any platform. Drag & drop to start.</p>
+  <h1>Image Processing Studio</h1>
+  <p class="subtitle">Resize, crop, convert, adjust, and batch-process images. Professional quality, entirely in-browser.</p>
 
+  <!-- Upload Panel -->
   <div class="panel" id="uploadPanel">
     <div class="drop-zone" id="dropZone">
       <div class="icon">&#128444;</div>
-      <p>Drop an image here or click to upload</p>
-      <input type="file" id="fileInput" accept="image/*" class="hidden">
+      <p>Drop images here, click to upload, or paste from clipboard (Ctrl+V)</p>
+      <p style="font-size:12px;margin-top:4px;color:#9ca3af">PNG, JPEG, WebP, SVG, GIF, BMP, AVIF</p>
+      <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
     </div>
+    <div class="file-info hidden" id="fileInfo"></div>
   </div>
 
-  <div class="editor hidden" id="editorSection">
-    <div class="panel">
-      <div class="canvas-wrap" id="canvasWrap">
-        <img id="preview" alt="Preview">
-        <div class="crop-overlay hidden" id="cropOverlay"></div>
-      </div>
+  <!-- Editor -->
+  <div class="hidden" id="editorSection">
+    <div class="tab-bar">
+      <button class="tab active" data-tab="resize">Resize</button>
+      <button class="tab" data-tab="crop">Crop</button>
+      <button class="tab" data-tab="format">Format</button>
+      <button class="tab" data-tab="adjust">Adjust</button>
+      <button class="tab" data-tab="batch">Batch</button>
     </div>
-    <div class="panel controls">
-      <label>Presets</label>
-      <div class="presets">
-        <button class="preset-btn" data-w="1080" data-h="1080"><span>Instagram Post</span><small>1080x1080</small></button>
-        <button class="preset-btn" data-w="1080" data-h="1920"><span>Instagram Story</span><small>1080x1920</small></button>
-        <button class="preset-btn" data-w="1200" data-h="675"><span>X / Twitter</span><small>1200x675</small></button>
-        <button class="preset-btn" data-w="1200" data-h="627"><span>LinkedIn</span><small>1200x627</small></button>
-        <button class="preset-btn" data-w="1200" data-h="630"><span>Facebook</span><small>1200x630</small></button>
-        <button class="preset-btn" data-w="1280" data-h="720"><span>YouTube</span><small>1280x720</small></button>
-        <button class="preset-btn" data-w="1200" data-h="630"><span>OG Image</span><small>1200x630</small></button>
-        <button class="preset-btn" data-w="0" data-h="0"><span>Custom</span><small>Free size</small></button>
+
+    <div class="editor">
+      <!-- Preview area -->
+      <div class="panel" style="padding:16px">
+        <div class="canvas-wrap" id="canvasWrap">
+          <canvas id="previewCanvas"></canvas>
+          <!-- Crop box injected here -->
+        </div>
+        <!-- Before/After -->
+        <div class="ba-container hidden" id="baContainer">
+          <canvas id="baOriginal"></canvas>
+          <canvas id="baProcessed"></canvas>
+          <div class="ba-divider" id="baDivider" style="left:50%"></div>
+          <span class="ba-label l">Original</span>
+          <span class="ba-label r">Output</span>
+        </div>
+        <div class="size-bar" id="sizeBar" style="display:none">
+          <span id="origSize">--</span>
+          <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+          <span id="outSize">--</span>
+        </div>
       </div>
 
-      <label>Width (px)</label>
-      <div class="row">
-        <input type="number" id="widthInput" min="1" max="10000" value="1080">
-        <button class="lock-btn locked" id="lockBtn" title="Lock aspect ratio">&#128279;</button>
-      </div>
+      <!-- Controls sidebar -->
+      <div class="panel controls">
+        <!-- RESIZE -->
+        <div class="ctrl-section active" data-ctrl="resize">
+          <label>Platform Presets</label>
+          <div class="presets-grid" id="presetsGrid">
+            <button class="preset-btn" data-w="1080" data-h="1080"><span>Instagram Post</span><small>1080x1080</small></button>
+            <button class="preset-btn" data-w="1080" data-h="1920"><span>IG Story</span><small>1080x1920</small></button>
+            <button class="preset-btn" data-w="320" data-h="320"><span>IG Profile</span><small>320x320</small></button>
+            <button class="preset-btn" data-w="1500" data-h="500"><span>X Header</span><small>1500x500</small></button>
+            <button class="preset-btn" data-w="1200" data-h="675"><span>X Post</span><small>1200x675</small></button>
+            <button class="preset-btn" data-w="400" data-h="400"><span>X Profile</span><small>400x400</small></button>
+            <button class="preset-btn" data-w="1584" data-h="396"><span>LinkedIn Banner</span><small>1584x396</small></button>
+            <button class="preset-btn" data-w="1200" data-h="627"><span>LinkedIn Post</span><small>1200x627</small></button>
+            <button class="preset-btn" data-w="1280" data-h="720"><span>YT Thumbnail</span><small>1280x720</small></button>
+            <button class="preset-btn" data-w="2560" data-h="1440"><span>YT Channel Art</span><small>2560x1440</small></button>
+            <button class="preset-btn" data-w="820" data-h="312"><span>FB Cover</span><small>820x312</small></button>
+            <button class="preset-btn" data-w="1200" data-h="630"><span>FB / OG Image</span><small>1200x630</small></button>
+            <button class="preset-btn" data-w="32" data-h="32"><span>Favicon</span><small>32x32</small></button>
+            <button class="preset-btn" data-w="180" data-h="180"><span>Apple Touch</span><small>180x180</small></button>
+          </div>
 
-      <label>Height (px)</label>
-      <input type="number" id="heightInput" min="1" max="10000" value="1080">
+          <label>Dimensions</label>
+          <div class="row">
+            <input type="number" id="wInput" min="1" max="10000">
+            <button class="lock-btn locked" id="lockBtn" title="Lock aspect ratio">&#128279;</button>
+            <input type="number" id="hInput" min="1" max="10000">
+          </div>
+          <div class="pct-btns">
+            <button class="pct-btn" data-pct="25">25%</button>
+            <button class="pct-btn" data-pct="50">50%</button>
+            <button class="pct-btn" data-pct="75">75%</button>
+            <button class="pct-btn" data-pct="100">100%</button>
+            <button class="pct-btn" data-pct="150">150%</button>
+            <button class="pct-btn" data-pct="200">200%</button>
+          </div>
+        </div>
 
-      <label>Quality <span class="quality-val" id="qualityVal">90%</span></label>
-      <input type="range" id="qualitySlider" min="10" max="100" value="90">
+        <!-- CROP -->
+        <div class="ctrl-section" data-ctrl="crop">
+          <label>Aspect Ratio</label>
+          <div class="ratio-btns">
+            <button class="ratio-btn active" data-ratio="free">Free</button>
+            <button class="ratio-btn" data-ratio="1:1">1:1</button>
+            <button class="ratio-btn" data-ratio="4:3">4:3</button>
+            <button class="ratio-btn" data-ratio="3:2">3:2</button>
+            <button class="ratio-btn" data-ratio="16:9">16:9</button>
+            <button class="ratio-btn" data-ratio="9:16">9:16</button>
+            <button class="ratio-btn" data-ratio="2:3">2:3</button>
+            <button class="ratio-btn" data-ratio="3:4">3:4</button>
+          </div>
+          <div class="toggle-row">
+            <input type="checkbox" id="thirdsToggle">
+            <label for="thirdsToggle">Rule of thirds overlay</label>
+          </div>
+          <div class="actions" style="margin-top:12px">
+            <button class="btn btn-primary btn-sm" id="applyCrop">Crop to Selection</button>
+            <button class="btn btn-secondary btn-sm" id="resetCrop">Reset Crop</button>
+          </div>
+        </div>
 
-      <label>Format</label>
-      <select id="formatSelect">
-        <option value="image/png">PNG</option>
-        <option value="image/jpeg">JPEG</option>
-      </select>
+        <!-- FORMAT -->
+        <div class="ctrl-section" data-ctrl="format">
+          <label>Output Format</label>
+          <select id="fmtSelect">
+            <option value="image/png">PNG (lossless)</option>
+            <option value="image/jpeg">JPEG</option>
+            <option value="image/webp" selected>WebP</option>
+            <option value="image/avif">AVIF (if supported)</option>
+            <option value="image/bmp">BMP</option>
+          </select>
+          <label>Quality <span class="quality-val" id="qualityVal">85%</span></label>
+          <input type="range" id="qualitySlider" min="1" max="100" value="85">
+          <div class="toggle-row">
+            <input type="checkbox" id="showBA" checked>
+            <label for="showBA">Show before/after comparison</label>
+          </div>
+        </div>
 
-      <div class="actions">
-        <button class="btn btn-primary" id="downloadBtn">Download</button>
-        <button class="btn btn-secondary" id="resetBtn">New Image</button>
+        <!-- ADJUST -->
+        <div class="ctrl-section" data-ctrl="adjust">
+          <label>Brightness</label>
+          <div class="slider-row"><input type="range" id="adjBrightness" min="-100" max="100" value="0"><span class="val" id="valBrightness">0</span></div>
+          <label>Contrast</label>
+          <div class="slider-row"><input type="range" id="adjContrast" min="-100" max="100" value="0"><span class="val" id="valContrast">0</span></div>
+          <label>Saturation</label>
+          <div class="slider-row"><input type="range" id="adjSaturation" min="-100" max="100" value="0"><span class="val" id="valSaturation">0</span></div>
+          <label>Blur</label>
+          <div class="slider-row"><input type="range" id="adjBlur" min="0" max="20" value="0"><span class="val" id="valBlur">0px</span></div>
+          <label>Sharpen</label>
+          <div class="slider-row"><input type="range" id="adjSharpen" min="0" max="100" value="0"><span class="val" id="valSharpen">0</span></div>
+          <div class="toggle-row"><input type="checkbox" id="togGrayscale"><label for="togGrayscale">Grayscale</label></div>
+          <div class="toggle-row"><input type="checkbox" id="togInvert"><label for="togInvert">Invert</label></div>
+          <div class="toggle-row"><input type="checkbox" id="togSepia"><label for="togSepia">Sepia</label></div>
+          <div class="actions" style="margin-top:8px">
+            <button class="btn btn-secondary btn-sm" id="resetAdj">Reset Adjustments</button>
+          </div>
+        </div>
+
+        <!-- BATCH -->
+        <div class="ctrl-section" data-ctrl="batch">
+          <label>Batch Mode</label>
+          <p style="font-size:13px;color:#6b7280;margin-bottom:10px">Upload multiple images and apply the same resize, format, and quality settings to all.</p>
+          <button class="btn btn-secondary btn-sm" id="addBatchBtn">+ Add More Images</button>
+          <input type="file" id="batchInput" accept="image/*" multiple class="hidden">
+          <div class="batch-list" id="batchList"></div>
+          <div class="actions" style="margin-top:10px">
+            <button class="btn btn-primary btn-sm" id="processBatch">Process &amp; Download All</button>
+          </div>
+        </div>
+
+        <!-- Shared actions -->
+        <div style="border-top:1px solid #e5e7eb;margin-top:16px;padding-top:16px">
+          <div class="actions">
+            <button class="btn btn-primary" id="downloadBtn">Download</button>
+            <button class="btn btn-secondary" id="copyBtn">Copy</button>
+            <button class="btn btn-secondary" id="resetBtn">New Image</button>
+          </div>
+        </div>
+
+        <!-- History -->
+        <div style="border-top:1px solid #e5e7eb;margin-top:16px;padding-top:12px">
+          <label style="margin-top:0">Recent (last 5)</label>
+          <div class="history" id="historyList"></div>
+        </div>
       </div>
     </div>
   </div>
 </div>
+<div class="toast" id="toast"></div>
 
 <script>
-const dropZone = document.getElementById('dropZone');
-const fileInput = document.getElementById('fileInput');
-const uploadPanel = document.getElementById('uploadPanel');
-const editorSection = document.getElementById('editorSection');
-const preview = document.getElementById('preview');
-const widthInput = document.getElementById('widthInput');
-const heightInput = document.getElementById('heightInput');
-const lockBtn = document.getElementById('lockBtn');
-const qualitySlider = document.getElementById('qualitySlider');
-const qualityVal = document.getElementById('qualityVal');
-const formatSelect = document.getElementById('formatSelect');
-const downloadBtn = document.getElementById('downloadBtn');
-const resetBtn = document.getElementById('resetBtn');
-const presetBtns = document.querySelectorAll('.preset-btn');
+(function() {
+'use strict';
 
-let originalImage = null;
+/* ── Helpers ── */
+function $(id) { return document.getElementById(id); }
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function fmtBytes(b) { if (b < 1024) return b + ' B'; if (b < 1048576) return (b/1024).toFixed(1) + ' KB'; return (b/1048576).toFixed(2) + ' MB'; }
+
+/* ── State ── */
+let origImg = null;       // HTMLImageElement of the source
+let origFile = null;      // File object
+let origW = 0, origH = 0;
 let aspectLocked = true;
 let aspectRatio = 1;
+let activeTab = 'resize';
 
+// Crop state
+let cropBox = { x: 0, y: 0, w: 0, h: 0 }; // in image coords
+let cropRatio = null;     // null = free
+let showThirds = false;
+let cropActive = false;
+
+// Adjustment state
+let adj = { brightness: 0, contrast: 0, saturation: 0, blur: 0, sharpen: 0, grayscale: false, invert: false, sepia: false };
+
+// Batch
+let batchFiles = [];
+
+// History
+let history = [];
+
+/* ── DOM refs ── */
+const dropZone = $('dropZone'), fileInput = $('fileInput');
+const uploadPanel = $('uploadPanel'), editorSection = $('editorSection');
+const previewCanvas = $('previewCanvas'), canvasWrap = $('canvasWrap');
+const wInput = $('wInput'), hInput = $('hInput'), lockBtn = $('lockBtn');
+const fmtSelect = $('fmtSelect'), qualitySlider = $('qualitySlider'), qualityVal = $('qualityVal');
+const baContainer = $('baContainer'), baDivider = $('baDivider');
+
+/* ── Upload ── */
 dropZone.addEventListener('click', () => fileInput.click());
 dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
-fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  const files = [...e.dataTransfer.files].filter(f => f.type.startsWith('image/'));
+  if (files.length > 1) { batchFiles = files; loadImage(files[0]); switchTab('batch'); renderBatchList(); }
+  else if (files.length === 1) loadImage(files[0]);
+});
+fileInput.addEventListener('change', e => {
+  const files = [...e.target.files];
+  if (files.length > 1) { batchFiles = files; loadImage(files[0]); switchTab('batch'); renderBatchList(); }
+  else if (files.length === 1) loadImage(files[0]);
+});
 
-function handleFile(file) {
-  if (!file || !file.type.startsWith('image/')) return;
+// Paste from clipboard
+document.addEventListener('paste', e => {
+  const items = [...(e.clipboardData || {}).items || []];
+  const img = items.find(i => i.type.startsWith('image/'));
+  if (img) { const file = img.getAsFile(); if (file) loadImage(file); }
+});
+
+function loadImage(file) {
+  origFile = file;
   const reader = new FileReader();
-  reader.onload = e => {
+  reader.onload = ev => {
     const img = new Image();
     img.onload = () => {
-      originalImage = img;
-      preview.src = img.src;
-      widthInput.value = img.naturalWidth;
-      heightInput.value = img.naturalHeight;
-      aspectRatio = img.naturalWidth / img.naturalHeight;
+      origImg = img;
+      origW = img.naturalWidth;
+      origH = img.naturalHeight;
+      aspectRatio = origW / origH;
+      wInput.value = origW;
+      hInput.value = origH;
+      cropBox = { x: 0, y: 0, w: origW, h: origH };
+      resetAdjustments();
       uploadPanel.classList.add('hidden');
       editorSection.classList.remove('hidden');
+      showFileInfo(file);
+      renderPreview();
+      updateSizeBar();
     };
-    img.src = e.target.result;
+    img.src = ev.target.result;
   };
   reader.readAsDataURL(file);
 }
 
-presetBtns.forEach(btn => {
+function showFileInfo(file) {
+  const info = $('fileInfo');
+  info.classList.remove('hidden');
+  const ext = file.name.split('.').pop().toUpperCase();
+  info.innerHTML = `<span><b>File:</b> ${file.name}</span><span><b>Size:</b> ${fmtBytes(file.size)}</span><span><b>Format:</b> ${ext}</span><span><b>Dimensions:</b> ${origW} x ${origH}</span>`;
+}
+
+/* ── Tabs ── */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+});
+
+function switchTab(name) {
+  activeTab = name;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.ctrl-section').forEach(s => s.classList.toggle('active', s.dataset.ctrl === name));
+  cropActive = (name === 'crop');
+  renderPreview();
+}
+
+/* ── Presets ── */
+document.querySelectorAll('.preset-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    presetBtns.forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    const w = parseInt(btn.dataset.w);
-    const h = parseInt(btn.dataset.h);
-    if (w && h) {
-      widthInput.value = w;
-      heightInput.value = h;
-      aspectRatio = w / h;
-    }
+    const w = +btn.dataset.w, h = +btn.dataset.h;
+    if (w && h) { wInput.value = w; hInput.value = h; aspectRatio = w / h; renderPreview(); }
   });
 });
 
-widthInput.addEventListener('input', () => {
-  if (aspectLocked) {
-    heightInput.value = Math.round(parseInt(widthInput.value) / aspectRatio);
-  }
+/* ── Percentage scaling ── */
+document.querySelectorAll('.pct-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (!origImg) return;
+    const pct = +btn.dataset.pct / 100;
+    wInput.value = Math.round(origW * pct);
+    hInput.value = Math.round(origH * pct);
+    aspectRatio = origW / origH;
+    renderPreview();
+  });
 });
 
-heightInput.addEventListener('input', () => {
-  if (aspectLocked) {
-    widthInput.value = Math.round(parseInt(heightInput.value) * aspectRatio);
-  }
+/* ── Width / Height inputs ── */
+wInput.addEventListener('input', () => {
+  if (aspectLocked) hInput.value = Math.round(+wInput.value / aspectRatio);
+  renderPreview();
 });
-
+hInput.addEventListener('input', () => {
+  if (aspectLocked) wInput.value = Math.round(+hInput.value * aspectRatio);
+  renderPreview();
+});
 lockBtn.addEventListener('click', () => {
   aspectLocked = !aspectLocked;
   lockBtn.classList.toggle('locked', aspectLocked);
-  if (aspectLocked) {
-    aspectRatio = parseInt(widthInput.value) / parseInt(heightInput.value);
-  }
+  if (aspectLocked) aspectRatio = +wInput.value / +hInput.value;
 });
 
+/* ── Quality ── */
 qualitySlider.addEventListener('input', () => {
   qualityVal.textContent = qualitySlider.value + '%';
+  updateSizeBar();
 });
 
-downloadBtn.addEventListener('click', () => {
-  if (!originalImage) return;
-  const w = parseInt(widthInput.value);
-  const h = parseInt(heightInput.value);
+/* ── Adjustments ── */
+const adjSliders = ['Brightness','Contrast','Saturation','Blur','Sharpen'];
+adjSliders.forEach(name => {
+  const el = $('adj' + name);
+  el.addEventListener('input', () => {
+    adj[name.toLowerCase()] = +el.value;
+    $('val' + name).textContent = name === 'Blur' ? el.value + 'px' : el.value;
+    renderPreview();
+  });
+});
+['Grayscale','Invert','Sepia'].forEach(name => {
+  const el = $('tog' + name);
+  el.addEventListener('change', () => { adj[name.toLowerCase()] = el.checked; renderPreview(); });
+});
+$('resetAdj').addEventListener('click', () => { resetAdjustments(); renderPreview(); });
+
+function resetAdjustments() {
+  adj = { brightness: 0, contrast: 0, saturation: 0, blur: 0, sharpen: 0, grayscale: false, invert: false, sepia: false };
+  adjSliders.forEach(name => { $('adj' + name).value = 0; $('val' + name).textContent = name === 'Blur' ? '0px' : '0'; });
+  ['Grayscale','Invert','Sepia'].forEach(name => { $('tog' + name).checked = false; });
+}
+
+/* ── Render preview ── */
+function buildFilterString() {
+  let f = '';
+  if (adj.brightness !== 0) f += `brightness(${100 + adj.brightness}%) `;
+  if (adj.contrast !== 0) f += `contrast(${100 + adj.contrast}%) `;
+  if (adj.saturation !== 0) f += `saturate(${100 + adj.saturation}%) `;
+  if (adj.blur > 0) f += `blur(${adj.blur}px) `;
+  if (adj.grayscale) f += 'grayscale(100%) ';
+  if (adj.invert) f += 'invert(100%) ';
+  if (adj.sepia) f += 'sepia(100%) ';
+  return f.trim() || 'none';
+}
+
+function processToCanvas(targetW, targetH, sourceImg) {
+  const img = sourceImg || origImg;
+  if (!img) return null;
   const canvas = document.createElement('canvas');
-  canvas.width = w;
-  canvas.height = h;
+  canvas.width = targetW; canvas.height = targetH;
   const ctx = canvas.getContext('2d');
-  const srcRatio = originalImage.naturalWidth / originalImage.naturalHeight;
-  const dstRatio = w / h;
-  let sx = 0, sy = 0, sw = originalImage.naturalWidth, sh = originalImage.naturalHeight;
-  if (srcRatio > dstRatio) {
-    sw = originalImage.naturalHeight * dstRatio;
-    sx = (originalImage.naturalWidth - sw) / 2;
-  } else {
-    sh = originalImage.naturalWidth / dstRatio;
-    sy = (originalImage.naturalHeight - sh) / 2;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.filter = buildFilterString();
+
+  // Draw from crop region
+  const cx = cropBox.x, cy = cropBox.y, cw = cropBox.w, ch = cropBox.h;
+  ctx.drawImage(img, cx, cy, cw, ch, 0, 0, targetW, targetH);
+
+  // Sharpen via convolution
+  if (adj.sharpen > 0) applySharpen(ctx, targetW, targetH, adj.sharpen / 100);
+  return canvas;
+}
+
+function applySharpen(ctx, w, h, amount) {
+  const imageData = ctx.getImageData(0, 0, w, h);
+  const data = imageData.data;
+  const copy = new Uint8ClampedArray(data);
+  const a = amount;
+  const kernel = [0, -a, 0, -a, 1 + 4 * a, -a, 0, -a, 0];
+  for (let y = 1; y < h - 1; y++) {
+    for (let x = 1; x < w - 1; x++) {
+      for (let c = 0; c < 3; c++) {
+        let val = 0;
+        for (let ky = -1; ky <= 1; ky++) {
+          for (let kx = -1; kx <= 1; kx++) {
+            val += copy[((y + ky) * w + (x + kx)) * 4 + c] * kernel[(ky + 1) * 3 + (kx + 1)];
+          }
+        }
+        data[(y * w + x) * 4 + c] = clamp(Math.round(val), 0, 255);
+      }
+    }
   }
-  ctx.drawImage(originalImage, sx, sy, sw, sh, 0, 0, w, h);
-  const format = formatSelect.value;
-  const quality = parseInt(qualitySlider.value) / 100;
-  const dataUrl = canvas.toDataURL(format, quality);
-  const link = document.createElement('a');
-  link.download = `resized-${w}x${h}.${format === 'image/png' ? 'png' : 'jpg'}`;
-  link.href = dataUrl;
-  link.click();
+  ctx.putImageData(imageData, 0, 0);
+}
+
+function renderPreview() {
+  if (!origImg) return;
+  const tW = +wInput.value || origW;
+  const tH = +hInput.value || origH;
+
+  // Main canvas preview (fit to wrap)
+  const maxW = canvasWrap.clientWidth - 4;
+  const maxH = 500;
+  const scale = Math.min(1, maxW / tW, maxH / tH);
+  const dispW = Math.round(tW * scale);
+  const dispH = Math.round(tH * scale);
+
+  previewCanvas.width = dispW;
+  previewCanvas.height = dispH;
+  const pCtx = previewCanvas.getContext('2d');
+  pCtx.imageSmoothingEnabled = true;
+  pCtx.imageSmoothingQuality = 'high';
+  pCtx.filter = buildFilterString();
+  pCtx.drawImage(origImg, cropBox.x, cropBox.y, cropBox.w, cropBox.h, 0, 0, dispW, dispH);
+  if (adj.sharpen > 0) applySharpen(pCtx, dispW, dispH, adj.sharpen / 100);
+
+  // Update crop overlay visibility
+  updateCropOverlay(dispW, dispH, scale);
+
+  // Before/after
+  const showBA = $('showBA').checked && activeTab === 'format';
+  canvasWrap.classList.toggle('hidden', showBA);
+  baContainer.classList.toggle('hidden', !showBA);
+  if (showBA) renderBeforeAfter(tW, tH);
+
+  updateSizeBar();
+}
+
+/* ── Before/After ── */
+function renderBeforeAfter(tW, tH) {
+  const cont = baContainer;
+  const maxW = cont.parentElement.clientWidth - 50;
+  const maxH = 400;
+  const scale = Math.min(1, maxW / tW, maxH / tH);
+  const dW = Math.round(tW * scale), dH = Math.round(tH * scale);
+  cont.style.width = dW + 'px';
+  cont.style.height = dH + 'px';
+
+  const origC = $('baOriginal');
+  origC.width = dW; origC.height = dH;
+  const origCtx = origC.getContext('2d');
+  origCtx.imageSmoothingEnabled = true;
+  origCtx.imageSmoothingQuality = 'high';
+  origCtx.drawImage(origImg, 0, 0, origW, origH, 0, 0, dW, dH);
+
+  const procC = $('baProcessed');
+  procC.width = dW; procC.height = dH;
+  const procCtx = procC.getContext('2d');
+  procCtx.imageSmoothingEnabled = true;
+  procCtx.imageSmoothingQuality = 'high';
+  procCtx.filter = buildFilterString();
+  procCtx.drawImage(origImg, cropBox.x, cropBox.y, cropBox.w, cropBox.h, 0, 0, dW, dH);
+  if (adj.sharpen > 0) applySharpen(procCtx, dW, dH, adj.sharpen / 100);
+
+  // Clip: original shows left of divider, processed shows right
+  updateBAClip();
+}
+
+function updateBAClip() {
+  const cont = baContainer;
+  const w = cont.clientWidth;
+  const pos = parseFloat(baDivider.style.left) || 50;
+  const px = w * pos / 100;
+  $('baOriginal').style.clipPath = `inset(0 ${w - px}px 0 0)`;
+  $('baProcessed').style.clipPath = `inset(0 0 0 ${px}px)`;
+}
+
+// BA drag
+let baDragging = false;
+baDivider.addEventListener('mousedown', () => baDragging = true);
+baContainer.addEventListener('mousedown', e => { if (e.target !== baDivider) baDragging = true; moveBA(e); });
+document.addEventListener('mousemove', e => { if (baDragging) moveBA(e); });
+document.addEventListener('mouseup', () => baDragging = false);
+baContainer.addEventListener('touchstart', e => { baDragging = true; moveBA(e.touches[0]); }, { passive: true });
+document.addEventListener('touchmove', e => { if (baDragging) moveBA(e.touches[0]); }, { passive: true });
+document.addEventListener('touchend', () => baDragging = false);
+
+function moveBA(e) {
+  const rect = baContainer.getBoundingClientRect();
+  const x = clamp(e.clientX - rect.left, 0, rect.width);
+  const pct = (x / rect.width) * 100;
+  baDivider.style.left = pct + '%';
+  updateBAClip();
+}
+
+$('showBA').addEventListener('change', renderPreview);
+
+/* ── Crop ── */
+function updateCropOverlay(dispW, dispH, scale) {
+  // Remove existing
+  canvasWrap.querySelectorAll('.crop-box, .crop-handle, .crop-thirds, .crop-dim').forEach(el => el.remove());
+  if (!cropActive || !origImg) return;
+
+  const box = document.createElement('div');
+  box.className = 'crop-box';
+  const scaleX = dispW / origW;
+  const scaleY = dispH / origH;
+  // Offset from canvas position inside wrap
+  const cRect = previewCanvas.getBoundingClientRect();
+  const wRect = canvasWrap.getBoundingClientRect();
+  const offX = cRect.left - wRect.left;
+  const offY = cRect.top - wRect.top;
+
+  function setCropCSS() {
+    box.style.left = (offX + cropBox.x * scaleX) + 'px';
+    box.style.top = (offY + cropBox.y * scaleY) + 'px';
+    box.style.width = (cropBox.w * scaleX) + 'px';
+    box.style.height = (cropBox.h * scaleY) + 'px';
+  }
+  setCropCSS();
+
+  // Handles
+  const dirs = ['nw','n','ne','w','e','sw','s','se'];
+  dirs.forEach(d => { const h = document.createElement('div'); h.className = 'crop-handle ' + d; h.dataset.dir = d; box.appendChild(h); });
+
+  // Thirds
+  const thirds = document.createElement('div');
+  thirds.className = 'crop-thirds' + (showThirds ? ' show' : '');
+  thirds.innerHTML = '<div class="th h1"></div><div class="th h2"></div><div class="th v1"></div><div class="th v2"></div>';
+  box.appendChild(thirds);
+
+  // Dimensions label
+  const dim = document.createElement('div');
+  dim.className = 'crop-dim';
+  dim.textContent = Math.round(cropBox.w) + ' x ' + Math.round(cropBox.h);
+  box.appendChild(dim);
+
+  canvasWrap.appendChild(box);
+
+  // Drag logic
+  let dragging = null, startX, startY, startCrop;
+  box.addEventListener('mousedown', e => {
+    e.preventDefault();
+    const dir = e.target.dataset.dir || 'move';
+    dragging = dir;
+    startX = e.clientX; startY = e.clientY;
+    startCrop = { ...cropBox };
+  });
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const dx = (e.clientX - startX) / scaleX;
+    const dy = (e.clientY - startY) / scaleY;
+    const sc = startCrop;
+
+    if (dragging === 'move') {
+      cropBox.x = clamp(sc.x + dx, 0, origW - cropBox.w);
+      cropBox.y = clamp(sc.y + dy, 0, origH - cropBox.h);
+    } else {
+      let nx = sc.x, ny = sc.y, nw = sc.w, nh = sc.h;
+      if (dragging.includes('w')) { nx = sc.x + dx; nw = sc.w - dx; }
+      if (dragging.includes('e')) { nw = sc.w + dx; }
+      if (dragging.includes('n')) { ny = sc.y + dy; nh = sc.h - dy; }
+      if (dragging.includes('s')) { nh = sc.h + dy; }
+      // Enforce ratio
+      if (cropRatio && nw > 10 && nh > 10) {
+        if (dragging.includes('e') || dragging.includes('w')) nh = nw / cropRatio;
+        else nw = nh * cropRatio;
+      }
+      if (nw > 10 && nh > 10) {
+        cropBox.x = clamp(nx, 0, origW - 20);
+        cropBox.y = clamp(ny, 0, origH - 20);
+        cropBox.w = clamp(nw, 20, origW - cropBox.x);
+        cropBox.h = clamp(nh, 20, origH - cropBox.y);
+      }
+    }
+    setCropCSS();
+    dim.textContent = Math.round(cropBox.w) + ' x ' + Math.round(cropBox.h);
+  });
+  document.addEventListener('mouseup', () => { dragging = null; });
+}
+
+// Crop ratio buttons
+document.querySelectorAll('.ratio-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const r = btn.dataset.ratio;
+    if (r === 'free') { cropRatio = null; }
+    else {
+      const [a, b2] = r.split(':').map(Number);
+      cropRatio = a / b2;
+      // Adjust crop box to match ratio
+      const newH = cropBox.w / cropRatio;
+      if (newH <= origH) cropBox.h = newH;
+      else { cropBox.h = origH; cropBox.w = origH * cropRatio; }
+    }
+    renderPreview();
+  });
 });
 
-resetBtn.addEventListener('click', () => {
-  originalImage = null;
-  preview.src = '';
+$('thirdsToggle').addEventListener('change', e => { showThirds = e.target.checked; renderPreview(); });
+
+$('applyCrop').addEventListener('click', () => {
+  if (!origImg) return;
+  // Bake the crop into a new image
+  const canvas = document.createElement('canvas');
+  canvas.width = cropBox.w; canvas.height = cropBox.h;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(origImg, cropBox.x, cropBox.y, cropBox.w, cropBox.h, 0, 0, cropBox.w, cropBox.h);
+  const newImg = new Image();
+  newImg.onload = () => {
+    origImg = newImg;
+    origW = newImg.naturalWidth; origH = newImg.naturalHeight;
+    aspectRatio = origW / origH;
+    wInput.value = origW; hInput.value = origH;
+    cropBox = { x: 0, y: 0, w: origW, h: origH };
+    renderPreview();
+    toast('Crop applied');
+  };
+  newImg.src = canvas.toDataURL('image/png');
+});
+
+$('resetCrop').addEventListener('click', () => {
+  if (!origImg) return;
+  cropBox = { x: 0, y: 0, w: origW, h: origH };
+  cropRatio = null;
+  document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.ratio-btn[data-ratio="free"]').classList.add('active');
+  renderPreview();
+});
+
+/* ── Size estimation ── */
+function getOutputBlob(callback) {
+  const tW = +wInput.value || origW, tH = +hInput.value || origH;
+  const canvas = processToCanvas(tW, tH);
+  if (!canvas) return;
+  const fmt = fmtSelect.value;
+  const q = +qualitySlider.value / 100;
+  canvas.toBlob(blob => { if (blob) callback(blob); }, fmt, q);
+}
+
+function updateSizeBar() {
+  if (!origFile) return;
+  getOutputBlob(blob => {
+    const origSz = origFile.size;
+    const outSz = blob.size;
+    $('origSize').textContent = fmtBytes(origSz);
+    $('outSize').textContent = fmtBytes(outSz);
+    const pct = Math.min((outSz / origSz) * 100, 100);
+    const fill = $('barFill');
+    fill.style.width = pct + '%';
+    fill.className = 'bar-fill ' + (outSz <= origSz ? 'smaller' : 'bigger');
+    $('sizeBar').style.display = 'flex';
+  });
+}
+
+fmtSelect.addEventListener('change', () => { updateSizeBar(); renderPreview(); });
+
+/* ── Download ── */
+$('downloadBtn').addEventListener('click', () => {
+  if (!origImg) return;
+  const tW = +wInput.value || origW, tH = +hInput.value || origH;
+  const canvas = processToCanvas(tW, tH);
+  if (!canvas) return;
+  const fmt = fmtSelect.value;
+  const q = +qualitySlider.value / 100;
+  canvas.toBlob(blob => {
+    if (!blob) return;
+    const ext = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/avif': 'avif', 'image/bmp': 'bmp' }[fmt] || 'png';
+    const link = document.createElement('a');
+    link.download = `processed-${tW}x${tH}.${ext}`;
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    URL.revokeObjectURL(link.href);
+    addHistory(canvas, tW, tH, ext, blob.size);
+    toast('Downloaded');
+  }, fmt, q);
+});
+
+/* ── Copy to clipboard ── */
+$('copyBtn').addEventListener('click', () => {
+  if (!origImg) return;
+  const tW = +wInput.value || origW, tH = +hInput.value || origH;
+  const canvas = processToCanvas(tW, tH);
+  if (!canvas) return;
+  canvas.toBlob(blob => {
+    if (!blob) return;
+    navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(() => toast('Copied to clipboard')).catch(() => toast('Copy failed'));
+  }, 'image/png');
+});
+
+/* ── Reset ── */
+$('resetBtn').addEventListener('click', () => {
+  origImg = null; origFile = null; batchFiles = [];
   fileInput.value = '';
   uploadPanel.classList.remove('hidden');
   editorSection.classList.add('hidden');
-  presetBtns.forEach(b => b.classList.remove('active'));
+  $('fileInfo').classList.add('hidden');
+  $('sizeBar').style.display = 'none';
+  resetAdjustments();
+  switchTab('resize');
 });
+
+/* ── Batch ── */
+$('addBatchBtn').addEventListener('click', () => $('batchInput').click());
+$('batchInput').addEventListener('change', e => {
+  batchFiles = batchFiles.concat([...e.target.files].filter(f => f.type.startsWith('image/')));
+  renderBatchList();
+});
+
+function renderBatchList() {
+  const list = $('batchList');
+  list.innerHTML = '';
+  batchFiles.forEach((file, i) => {
+    const item = document.createElement('div');
+    item.className = 'batch-item';
+    const thumb = document.createElement('img');
+    thumb.src = URL.createObjectURL(file);
+    const info = document.createElement('div');
+    info.className = 'info';
+    info.innerHTML = `<div class="name">${file.name}</div>${fmtBytes(file.size)}`;
+    const rm = document.createElement('button');
+    rm.className = 'remove-batch';
+    rm.innerHTML = '&times;';
+    rm.addEventListener('click', () => { batchFiles.splice(i, 1); renderBatchList(); });
+    item.append(thumb, info, rm);
+    list.appendChild(item);
+  });
+}
+
+$('processBatch').addEventListener('click', async () => {
+  if (batchFiles.length === 0) { toast('No images in batch'); return; }
+  const tW = +wInput.value || origW, tH = +hInput.value || origH;
+  const fmt = fmtSelect.value;
+  const q = +qualitySlider.value / 100;
+  const ext = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/avif': 'avif', 'image/bmp': 'bmp' }[fmt] || 'png';
+
+  toast('Processing ' + batchFiles.length + ' images...');
+  for (let i = 0; i < batchFiles.length; i++) {
+    const file = batchFiles[i];
+    const img = await loadImageAsync(file);
+    const canvas = document.createElement('canvas');
+    canvas.width = tW; canvas.height = tH;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.filter = buildFilterString();
+    // Fit: center-crop to target aspect
+    const srcR = img.naturalWidth / img.naturalHeight;
+    const dstR = tW / tH;
+    let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
+    if (srcR > dstR) { sw = img.naturalHeight * dstR; sx = (img.naturalWidth - sw) / 2; }
+    else { sh = img.naturalWidth / dstR; sy = (img.naturalHeight - sh) / 2; }
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, tW, tH);
+    if (adj.sharpen > 0) applySharpen(ctx, tW, tH, adj.sharpen / 100);
+
+    const blob = await new Promise(res => canvas.toBlob(res, fmt, q));
+    const link = document.createElement('a');
+    const name = file.name.replace(/\.[^.]+$/, '');
+    link.download = `${name}-${tW}x${tH}.${ext}`;
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    URL.revokeObjectURL(link.href);
+    // Small delay between downloads
+    await new Promise(r => setTimeout(r, 300));
+  }
+  toast('All downloads complete');
+});
+
+function loadImageAsync(file) {
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => res(img);
+      img.onerror = rej;
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ── History ── */
+function addHistory(canvas, w, h, ext, size) {
+  const thumb = canvas.toDataURL('image/jpeg', 0.5);
+  history.unshift({ thumb, w, h, ext, size, time: Date.now() });
+  if (history.length > 5) history.pop();
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = $('historyList');
+  list.innerHTML = '';
+  history.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'history-item';
+    div.innerHTML = `<img src="${item.thumb}" alt=""><div class="meta">${item.w}x${item.h} .${item.ext} (${fmtBytes(item.size)})</div>`;
+    list.appendChild(div);
+  });
+}
+
+/* ── Init ── */
+renderPreview();
+
+})();
 </script>
 <script src="/related.js"></script>
 </body>

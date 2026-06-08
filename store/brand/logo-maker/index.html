@@ -21,8 +21,8 @@ a.back:hover{text-decoration:underline}
 .sidebar-head{padding:16px 16px 0;flex-shrink:0}
 .sidebar-head h1{font-size:1.25rem;font-weight:800;margin-bottom:2px}
 .sidebar-head p{font-size:.75rem;color:var(--muted);margin-bottom:12px}
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;position:relative;background:var(--bg);overflow:hidden}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.canvas-wrap{flex:1;min-height:0;max-height:calc(100vh - 160px);display:flex;align-items:center;justify-content:center;position:relative;background:var(--bg);overflow:hidden}
 .canvas-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:background .3s}
 .canvas-bg.dark{background:#1a1a1a}
 .canvas-bg.photo{background:linear-gradient(135deg,#667eea,#764ba2)}
@@ -37,7 +37,7 @@ a.back:hover{text-decoration:underline}
 .bg-btn:hover,.bg-btn.active{border-color:var(--accent);color:var(--accent)}
 
 /* VARIATIONS STRIP */
-.variations-strip{border-top:1px solid var(--line);background:var(--panel);padding:12px 16px;flex-shrink:0}
+.variations-strip{border-top:1px solid var(--line);background:var(--panel);padding:10px 16px;flex-shrink:0;min-height:110px}
 .variations-strip h3{font-size:.75rem;font-weight:700;margin-bottom:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .var-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
 .var-card{min-width:140px;height:80px;background:#fff;border:1px solid var(--line);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;padding:8px;overflow:hidden}
@@ -355,7 +355,8 @@ function buildControls(){
   </div>
 
   <div class="panel">
-    <div class="panel-title">AI Suggest</div>
+    <div class="panel-title">AI Design Assistant</div>
+    <div id="aiStatus" style="font-size:.68rem;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:5px"><span id="aiDot" style="width:6px;height:6px;border-radius:50%;background:#d1d5db"></span><span id="aiStatusText">Checking AI...</span></div>
     <button class="btn btn-ai btn-sm" id="btnAI">Suggest Style</button>
     <div id="aiResult" style="margin-top:6px;font-size:.72rem;color:var(--muted)"></div>
   </div>
@@ -823,6 +824,29 @@ function dl(url,name){
 }
 
 // ============================================================
+// AI STATUS CHECK
+// ============================================================
+(async()=>{
+  const dot=document.getElementById('aiDot');
+  const txt=document.getElementById('aiStatusText');
+  try{
+    if(self.ai&&self.ai.languageModel){
+      const caps=await self.ai.languageModel.capabilities();
+      if(caps.available==='readily'){
+        dot.style.background='#22c55e';
+        txt.textContent='Chrome AI (Nano) ready — click to get smart suggestions';
+      }else if(caps.available==='after-download'){
+        dot.style.background='#f59e0b';
+        txt.innerHTML='Chrome AI available after download. <button onclick="self.ai.languageModel.create()" style="font-size:.65rem;color:var(--accent);border:none;background:none;cursor:pointer;text-decoration:underline">Download model</button>';
+      }else{
+        txt.textContent='Chrome AI not available — using keyword-based suggestions';
+      }
+    }else{
+      txt.textContent='Enable chrome://flags/#optimization-guide-on-device-model for AI features';
+    }
+  }catch(e){txt.textContent='AI unavailable — keyword-based suggestions active';}
+})();
+
 // AI SUGGEST (Chrome AI or fallback)
 // ============================================================
 async function aiSuggest(){
@@ -830,18 +854,24 @@ async function aiSuggest(){
   const name=S.name||'Acme';
   res.textContent='Thinking...';
 
-  // Try Chrome built-in AI
+  // Try Chrome built-in AI (Nano model)
   if(self.ai&&self.ai.languageModel){
     try{
-      const session=await self.ai.languageModel.create({systemPrompt:'You are a brand designer. Respond ONLY with valid JSON.'});
-      const prompt=`Suggest a logo style for brand "${name}". Return JSON: {"fontIndex": 0-19, "weight": 400-900, "layout": "horizontal"|"vertical"|"text-only"|"monogram"|"badge"|"stacked"|"minimal"|"underline", "paletteIndex": 0-14, "iconIndex": 0-41, "reason": "one sentence"}`;
-      const text=await session.prompt(prompt);
-      const json=JSON.parse(text.match(/\{[\s\S]*\}/)[0]);
-      applyAISuggestion(json);
-      res.textContent=json.reason||'Applied!';
-      session.destroy();
-      return;
-    }catch(e){/* fallback */}
+      const caps=await self.ai.languageModel.capabilities();
+      if(caps.available==='readily'||caps.available==='after-download'){
+        res.textContent='AI thinking (this may take 10-30 seconds)...';
+        const session=await self.ai.languageModel.create({systemPrompt:'You are a professional brand designer. Respond ONLY with valid JSON. Be creative and specific.'});
+        const prompt=`I'm designing a logo for "${name}"${S.tagline?' (tagline: '+S.tagline+')':''}. Suggest the best logo style. Return JSON: {"fontIndex": 0-19, "weight": 400-900, "layout": "horizontal"|"vertical"|"text-only"|"monogram"|"badge"|"stacked"|"minimal"|"underline", "paletteIndex": 0-14, "iconIndex": 0-41, "transform": "none"|"uppercase"|"lowercase", "spacing": -0.02 to 0.15, "reason": "2 sentences explaining WHY this style fits the brand"}`;
+        const text=await session.prompt(prompt);
+        const json=JSON.parse(text.match(/\{[\s\S]*\}/)[0]);
+        applyAISuggestion(json);
+        res.innerHTML=`<strong>AI recommends:</strong> ${json.reason||'Applied!'}`;
+        session.destroy();
+        return;
+      }
+    }catch(e){
+      res.textContent='AI model error — using keyword matching instead.';
+    }
   }
 
   // Keyword-based fallback
@@ -872,6 +902,8 @@ function applyAISuggestion(s){
   if(s.fontIndex!=null)S.font=Math.min(FONTS.length-1,Math.max(0,s.fontIndex));
   if(s.weight)S.weight=s.weight;
   if(s.layout)S.layout=s.layout;
+  if(s.transform)S.transform=s.transform;
+  if(s.spacing!=null)S.spacing=Math.max(-0.05,Math.min(0.2,s.spacing));
   if(s.paletteIndex!=null){
     const p=PALETTES[Math.min(PALETTES.length-1,Math.max(0,s.paletteIndex))];
     S.primary=p.colors[0];S.secondary=p.colors[1];S.iconColor=p.colors[0];
