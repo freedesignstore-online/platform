@@ -404,6 +404,15 @@
       "iconBg": "#6366f1",
       "category": "images",
       "section": "images"
+    },
+    {
+      "id": "pixel-editor",
+      "name": "Pixel Art Editor",
+      "description": "Sprite editor with animation frames, onion skin, layers, mirror mode. Export PNG/spritesheet/GIF. 8-128px grids.",
+      "icon": "👾",
+      "iconBg": "#ef4444",
+      "category": "images",
+      "section": "images"
     }
   ]
 }
