@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avatar & Profile Picture Generator - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
+a.back:hover { text-decoration: underline; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+p.subtitle { color: #6b7280; margin-bottom: 24px; }
+.panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
+h2 { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 6px; }
+input[type="text"], textarea, select { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+input[type="color"] { width: 48px; height: 40px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 2px; cursor: pointer; }
+input[type="number"] { padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 13px; background: #fff; }
+textarea { resize: vertical; min-height: 80px; }
+.btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 13px; transition: opacity .2s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+.style-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+.style-tab { padding: 8px 14px; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; background: #fff; font-family: inherit; transition: all .15s; }
+.style-tab:hover { border-color: #ec4899; }
+.style-tab.active { background: #ec4899; color: #fff; border-color: #ec4899; }
+
+.controls { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.controls input[type="text"] { width: 100%; }
+.controls select { width: 100%; }
+
+.preview-area { display: flex; align-items: center; justify-content: center; min-height: 200px; background: #f9fafb; border-radius: 12px; border: 1px solid #e5e7eb; padding: 32px; margin-bottom: 16px; gap: 24px; flex-wrap: wrap; }
+.preview-main canvas { display: block; cursor: pointer; }
+.preview-info { font-size: 12px; color: #6b7280; text-align: center; margin-top: 8px; }
+
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+
+.batch-area { margin-top: 16px; }
+.batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 12px; margin-top: 12px; }
+.batch-item { text-align: center; cursor: pointer; }
+.batch-item canvas { display: block; margin: 0 auto 4px; border-radius: 4px; }
+.batch-item .batch-name { font-size: 11px; color: #6b7280; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.api-preview { background: #1a1a1a; color: #a5f3fc; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 12px; margin-top: 12px; overflow-x: auto; }
+
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<h1>Avatar & Profile Picture Generator</h1>
+<p class="subtitle">Generate unique, deterministic avatars from any name or email. 7 styles, batch mode, PNG & SVG export.</p>
+
+<div class="panel">
+<h2>Style</h2>
+<div class="style-tabs" id="styleTabs">
+<button class="style-tab active" data-style="initials">Initials</button>
+<button class="style-tab" data-style="geometric">Geometric</button>
+<button class="style-tab" data-style="gradient">Gradient</button>
+<button class="style-tab" data-style="pixel">Pixel Art</button>
+<button class="style-tab" data-style="pattern">Pattern</button>
+<button class="style-tab" data-style="rings">Rings</button>
+<button class="style-tab" data-style="blob">Blob</button>
+</div>
+
+<div class="controls">
+<div>
+<label>Name / Email</label>
+<input type="text" id="inputName" value="John Doe" oninput="generate()">
+</div>
+<div>
+<label>Size (px)</label>
+<input type="number" id="inputSize" value="128" min="32" max="512" step="16" onchange="generate()">
+</div>
+<div>
+<label>Shape</label>
+<select id="inputShape" onchange="generate()">
+<option value="circle">Circle</option>
+<option value="square">Square</option>
+<option value="rounded">Rounded Square</option>
+</select>
+</div>
+<div>
+<label>Background</label>
+<div class="row">
+<input type="color" id="inputBg" value="#ec4899" onchange="generate()">
+<label style="margin:0;"><input type="checkbox" id="autoBg" checked onchange="generate()" style="width:auto;"> Auto</label>
+</div>
+</div>
+</div>
+
+<div class="preview-area" id="previewArea"></div>
+<div class="preview-info" id="previewInfo">Click avatar to copy as data URL</div>
+
+<div class="actions">
+<button class="btn btn-primary" onclick="downloadPNG()">Download PNG</button>
+<button class="btn btn-secondary" onclick="downloadSVG()">Download SVG</button>
+<button class="btn btn-secondary" onclick="copyDataURL()">Copy Data URL</button>
+</div>
+</div>
+
+<!-- Batch -->
+<div class="panel">
+<h2>Batch Generate</h2>
+<p style="font-size:13px;color:#6b7280;margin-bottom:12px;">Enter one name per line. All avatars use the current style and size.</p>
+<textarea id="batchInput" placeholder="Alice&#10;Bob&#10;charlie@example.com&#10;Design Team">Alice
+Bob
+Charlie
+Diana
+Eve</textarea>
+<button class="btn btn-primary" style="margin-top:12px;" onclick="batchGenerate()">Generate All</button>
+<div class="batch-grid" id="batchGrid"></div>
+</div>
+
+<!-- API Preview -->
+<div class="panel">
+<h2>Usage Preview</h2>
+<p style="font-size:13px;color:#6b7280;margin-bottom:12px;">Same input always produces the same avatar (deterministic hashing).</p>
+<div class="api-preview" id="apiPreview"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== Deterministic hash ===== */
+function hashStr(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+function hashColor(str, offset) {
+  const h = hashStr(str + (offset || ''));
+  const hue = h % 360;
+  return `hsl(${hue}, 65%, 55%)`;
+}
+
+function hashHex(str, offset) {
+  const h = hashStr(str + (offset || ''));
+  const hue = h % 360;
+  const s = 0.65, l = 0.55;
+  const a = s * Math.min(l, 1-l);
+  const f = n => { const k = (n+hue/30)%12; return l - a * Math.max(Math.min(k-3, 9-k, 1), -1); };
+  const toHex = x => Math.round(x*255).toString(16).padStart(2,'0');
+  return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
+}
+
+function getInitials(name) {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
+
+/* ===== State ===== */
+let currentStyle = 'initials';
+let lastCanvas = null;
+let lastSVG = '';
+
+/* ===== Style tabs ===== */
+document.querySelectorAll('.style-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.style-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentStyle = tab.dataset.style;
+    generate();
+  });
+});
+
+/* ===== Get background color ===== */
+function getBg(name) {
+  if (document.getElementById('autoBg').checked) return hashHex(name, 'bg');
+  return document.getElementById('inputBg').value;
+}
+
+/* ===== Draw functions ===== */
+
+function drawInitials(ctx, size, name) {
+  const bg = getBg(name);
+  const initials = getInitials(name);
+  ctx.fillStyle = bg;
+  fillShape(ctx, size);
+  ctx.fillStyle = '#fff';
+  ctx.font = `bold ${size * 0.38}px Manrope, system-ui, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(initials, size/2, size/2 + size*0.02);
+}
+
+function drawGeometric(ctx, size, name) {
+  const bg = getBg(name);
+  ctx.fillStyle = bg;
+  fillShape(ctx, size);
+  const h = hashStr(name);
+  const gridN = 4;
+  const cellSize = size / gridN;
+  for (let r = 0; r < gridN; r++) {
+    for (let c = 0; c < gridN; c++) {
+      const idx = r * gridN + c;
+      const val = (h >> (idx % 30)) & 3;
+      const cx = c * cellSize + cellSize/2;
+      const cy = r * cellSize + cellSize/2;
+      ctx.fillStyle = `hsla(${(h + idx * 47) % 360}, 70%, 85%, 0.7)`;
+      if (val === 0) {
+        ctx.beginPath(); ctx.arc(cx, cy, cellSize * 0.3, 0, Math.PI*2); ctx.fill();
+      } else if (val === 1) {
+        ctx.fillRect(cx - cellSize*0.25, cy - cellSize*0.25, cellSize*0.5, cellSize*0.5);
+      } else if (val === 2) {
+        ctx.beginPath(); ctx.moveTo(cx, cy - cellSize*0.3); ctx.lineTo(cx + cellSize*0.3, cy + cellSize*0.3); ctx.lineTo(cx - cellSize*0.3, cy + cellSize*0.3); ctx.closePath(); ctx.fill();
+      } else {
+        ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(c*cellSize, r*cellSize); ctx.lineTo((c+1)*cellSize, (r+1)*cellSize); ctx.stroke();
+      }
+    }
+  }
+}
+
+function drawGradient(ctx, size, name) {
+  const h = hashStr(name);
+  const c1 = `hsl(${h % 360}, 70%, 60%)`;
+  const c2 = `hsl(${(h * 7 + 120) % 360}, 70%, 50%)`;
+  const c3 = `hsl(${(h * 13 + 240) % 360}, 60%, 55%)`;
+  const angle = (h % 360) * Math.PI / 180;
+  const cx = size/2, cy = size/2, r = size * 0.7;
+  const grad = ctx.createLinearGradient(cx + Math.cos(angle)*r, cy + Math.sin(angle)*r, cx - Math.cos(angle)*r, cy - Math.sin(angle)*r);
+  grad.addColorStop(0, c1);
+  grad.addColorStop(0.5, c2);
+  grad.addColorStop(1, c3);
+  ctx.fillStyle = grad;
+  fillShape(ctx, size);
+}
+
+function drawPixel(ctx, size, name) {
+  const bg = getBg(name);
+  ctx.fillStyle = bg;
+  fillShape(ctx, size);
+  const h = hashStr(name);
+  const gridN = 8;
+  const cellSize = size / gridN;
+  const half = Math.ceil(gridN / 2);
+  for (let r = 0; r < gridN; r++) {
+    for (let c = 0; c < half; c++) {
+      const bit = (hashStr(name + r + ',' + c) >> 3) & 1;
+      if (bit) {
+        const lum = 80 + ((hashStr(name + r + c) % 20));
+        ctx.fillStyle = `hsla(0, 0%, ${lum}%, 0.9)`;
+        ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+        // Mirror
+        ctx.fillRect((gridN - 1 - c) * cellSize, r * cellSize, cellSize, cellSize);
+      }
+    }
+  }
+}
+
+function drawPattern(ctx, size, name) {
+  const bg = getBg(name);
+  const h = hashStr(name);
+  ctx.fillStyle = bg;
+  fillShape(ctx, size);
+  const patternType = h % 4;
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+  ctx.lineWidth = 2;
+  const step = size / 6;
+  if (patternType === 0) {
+    // Diagonal lines
+    for (let i = -size; i < size * 2; i += step) {
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + size, size); ctx.stroke();
+    }
+  } else if (patternType === 1) {
+    // Dots
+    for (let x = step/2; x < size; x += step) {
+      for (let y = step/2; y < size; y += step) {
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.beginPath(); ctx.arc(x, y, step * 0.2, 0, Math.PI*2); ctx.fill();
+      }
+    }
+  } else if (patternType === 2) {
+    // Hexagons
+    for (let row = 0; row < 5; row++) {
+      for (let col = 0; col < 5; col++) {
+        const cx = col * step + (row % 2 ? step/2 : 0);
+        const cy = row * step;
+        drawHex(ctx, cx, cy, step * 0.4);
+      }
+    }
+  } else {
+    // Crosses
+    for (let x = step/2; x < size; x += step) {
+      for (let y = step/2; y < size; y += step) {
+        const s = step * 0.25;
+        ctx.beginPath(); ctx.moveTo(x-s, y); ctx.lineTo(x+s, y); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x, y-s); ctx.lineTo(x, y+s); ctx.stroke();
+      }
+    }
+  }
+}
+
+function drawHex(ctx, cx, cy, r) {
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) {
+    const a = Math.PI/3 * i - Math.PI/6;
+    const x = cx + r * Math.cos(a), y = cy + r * Math.sin(a);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.closePath(); ctx.stroke();
+}
+
+function drawRings(ctx, size, name) {
+  const h = hashStr(name);
+  const shape = document.getElementById('inputShape').value;
+  ctx.fillStyle = '#fff';
+  fillShape(ctx, size);
+  const ringCount = 4 + (h % 3);
+  for (let i = ringCount; i >= 0; i--) {
+    const hue = (h + i * 60) % 360;
+    ctx.fillStyle = `hsl(${hue}, 65%, ${50 + i * 5}%)`;
+    ctx.beginPath();
+    ctx.arc(size/2, size/2, (size/2) * (i+1) / (ringCount+1), 0, Math.PI*2);
+    ctx.fill();
+  }
+  if (shape === 'square' || shape === 'rounded') {
+    // Clip to shape
+    clipShape(ctx, size);
+  }
+}
+
+function drawBlob(ctx, size, name) {
+  const h = hashStr(name);
+  const c1 = `hsl(${h % 360}, 70%, 60%)`;
+  const c2 = `hsl(${(h + 90) % 360}, 65%, 50%)`;
+  const grad = ctx.createRadialGradient(size*0.4, size*0.4, 0, size/2, size/2, size*0.6);
+  grad.addColorStop(0, c1);
+  grad.addColorStop(1, c2);
+  ctx.fillStyle = '#f0f0f0';
+  fillShape(ctx, size);
+
+  // Blob
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  const points = 8;
+  const cx = size/2, cy = size/2;
+  for (let i = 0; i <= points; i++) {
+    const angle = (i / points) * Math.PI * 2;
+    const r = size * 0.3 + (hashStr(name + i) % 30) * (size / 300);
+    const x = cx + r * Math.cos(angle), y = cy + r * Math.sin(angle);
+    if (i === 0) ctx.moveTo(x, y);
+    else {
+      const cp1a = ((i - 0.5) / points) * Math.PI * 2;
+      const cp1r = size * 0.35 + (hashStr(name + 'c' + i) % 20) * (size / 300);
+      ctx.quadraticCurveTo(cx + cp1r * Math.cos(cp1a), cy + cp1r * Math.sin(cp1a), x, y);
+    }
+  }
+  ctx.closePath();
+  ctx.fill();
+}
+
+/* ===== Shape helpers ===== */
+function fillShape(ctx, size) {
+  const shape = document.getElementById('inputShape').value;
+  if (shape === 'circle') {
+    ctx.beginPath(); ctx.arc(size/2, size/2, size/2, 0, Math.PI*2); ctx.fill();
+  } else if (shape === 'rounded') {
+    roundRect(ctx, 0, 0, size, size, size * 0.15);
+    ctx.fill();
+  } else {
+    ctx.fillRect(0, 0, size, size);
+  }
+}
+
+function clipShape(ctx, size) {
+  const shape = document.getElementById('inputShape').value;
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-in';
+  ctx.fillStyle = '#000';
+  fillShape(ctx, size);
+  ctx.restore();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+
+/* ===== Generate ===== */
+function generate() {
+  const name = document.getElementById('inputName').value || 'User';
+  const size = parseInt(document.getElementById('inputSize').value) || 128;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  ctx.clearRect(0, 0, size, size);
+
+  const drawFn = {
+    initials: drawInitials,
+    geometric: drawGeometric,
+    gradient: drawGradient,
+    pixel: drawPixel,
+    pattern: drawPattern,
+    rings: drawRings,
+    blob: drawBlob
+  }[currentStyle];
+
+  drawFn(ctx, size, name);
+
+  // Apply shape clip for complex styles
+  if (['geometric','pixel','pattern'].includes(currentStyle)) clipShape(ctx, size);
+
+  lastCanvas = canvas;
+  lastSVG = generateSVG(name, size);
+
+  const area = document.getElementById('previewArea');
+  area.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.className = 'preview-main';
+  canvas.style.width = Math.min(size, 256) + 'px';
+  canvas.style.height = Math.min(size, 256) + 'px';
+  canvas.style.borderRadius = document.getElementById('inputShape').value === 'circle' ? '50%' : document.getElementById('inputShape').value === 'rounded' ? '15%' : '0';
+  canvas.addEventListener('click', copyDataURL);
+  wrap.appendChild(canvas);
+  area.appendChild(wrap);
+
+  // Show multiple sizes
+  [32, 48, 64].forEach(s => {
+    const mini = document.createElement('canvas');
+    mini.width = s; mini.height = s;
+    const mctx = mini.getContext('2d');
+    mctx.drawImage(canvas, 0, 0, s, s);
+    mini.style.width = s + 'px';
+    mini.style.height = s + 'px';
+    mini.style.borderRadius = document.getElementById('inputShape').value === 'circle' ? '50%' : document.getElementById('inputShape').value === 'rounded' ? '15%' : '0';
+    area.appendChild(mini);
+  });
+
+  updateAPIPreview(name, size);
+}
+
+/* ===== SVG generation (for initials, gradient, rings) ===== */
+function generateSVG(name, size) {
+  const shape = document.getElementById('inputShape').value;
+  const bg = getBg(name);
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">`;
+
+  if (shape === 'circle') {
+    svg += `<circle cx="${size/2}" cy="${size/2}" r="${size/2}" fill="${bg}"/>`;
+  } else if (shape === 'rounded') {
+    svg += `<rect width="${size}" height="${size}" rx="${size*0.15}" fill="${bg}"/>`;
+  } else {
+    svg += `<rect width="${size}" height="${size}" fill="${bg}"/>`;
+  }
+
+  if (currentStyle === 'initials') {
+    const initials = getInitials(name);
+    svg += `<text x="${size/2}" y="${size/2}" text-anchor="middle" dominant-baseline="central" font-family="Manrope,system-ui,sans-serif" font-weight="bold" font-size="${size*0.38}" fill="#fff">${initials}</text>`;
+  }
+
+  svg += '</svg>';
+  return svg;
+}
+
+/* ===== Downloads ===== */
+function downloadPNG() {
+  if (!lastCanvas) return;
+  const link = document.createElement('a');
+  const name = document.getElementById('inputName').value || 'avatar';
+  link.download = `avatar-${name.replace(/\s+/g, '-').toLowerCase()}.png`;
+  link.href = lastCanvas.toDataURL('image/png');
+  link.click();
+  toast('PNG downloaded');
+}
+
+function downloadSVG() {
+  if (!lastSVG) return;
+  const blob = new Blob([lastSVG], { type: 'image/svg+xml' });
+  const link = document.createElement('a');
+  const name = document.getElementById('inputName').value || 'avatar';
+  link.download = `avatar-${name.replace(/\s+/g, '-').toLowerCase()}.svg`;
+  link.href = URL.createObjectURL(blob);
+  link.click();
+  toast('SVG downloaded');
+}
+
+function copyDataURL() {
+  if (!lastCanvas) return;
+  navigator.clipboard.writeText(lastCanvas.toDataURL('image/png'));
+  toast('Data URL copied to clipboard');
+}
+
+/* ===== Batch ===== */
+function batchGenerate() {
+  const input = document.getElementById('batchInput').value;
+  const names = input.split('\n').map(s => s.trim()).filter(Boolean);
+  if (names.length === 0) { toast('Enter some names'); return; }
+
+  const size = parseInt(document.getElementById('inputSize').value) || 128;
+  const grid = document.getElementById('batchGrid');
+  grid.innerHTML = '';
+
+  const drawFn = {
+    initials: drawInitials,
+    geometric: drawGeometric,
+    gradient: drawGradient,
+    pixel: drawPixel,
+    pattern: drawPattern,
+    rings: drawRings,
+    blob: drawBlob
+  }[currentStyle];
+
+  names.forEach(name => {
+    const canvas = document.createElement('canvas');
+    canvas.width = size; canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    drawFn(ctx, size, name);
+    if (['geometric','pixel','pattern'].includes(currentStyle)) clipShape(ctx, size);
+
+    const displaySize = Math.min(size, 64);
+    canvas.style.width = displaySize + 'px';
+    canvas.style.height = displaySize + 'px';
+    canvas.style.borderRadius = document.getElementById('inputShape').value === 'circle' ? '50%' : document.getElementById('inputShape').value === 'rounded' ? '15%' : '0';
+    canvas.addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = `avatar-${name.replace(/\s+/g,'-').toLowerCase()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      toast(`Downloaded: ${name}`);
+    });
+
+    const item = document.createElement('div');
+    item.className = 'batch-item';
+    item.appendChild(canvas);
+    const label = document.createElement('div');
+    label.className = 'batch-name';
+    label.textContent = name;
+    item.appendChild(label);
+    grid.appendChild(item);
+  });
+
+  toast(`Generated ${names.length} avatars`);
+}
+
+/* ===== API Preview ===== */
+function updateAPIPreview(name, size) {
+  const hash = hashStr(name);
+  document.getElementById('apiPreview').innerHTML =
+    `<span style="color:#6b7280;">// Same input always produces the same avatar</span>\n` +
+    `&lt;img src="avatar.png?name=${encodeURIComponent(name)}&size=${size}" /&gt;\n\n` +
+    `<span style="color:#6b7280;">// Or use as inline data URL:</span>\n` +
+    `&lt;img src="${lastCanvas ? lastCanvas.toDataURL('image/png').slice(0, 60) + '...' : 'data:image/png;base64,...'}" /&gt;\n\n` +
+    `<span style="color:#6b7280;">// Hash for "${name}": ${hash}</span>`;
+}
+
+/* ===== Toast ===== */
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+/* ===== Init ===== */
+generate();
+</script>
+<script src="/ai-queue.js"></script>
+<script src="/related.js"></script>
+</body>
+</html>

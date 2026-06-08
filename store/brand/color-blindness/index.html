@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color Blindness Simulator - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
+a.back:hover { text-decoration: underline; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+p.subtitle { color: #6b7280; margin-bottom: 24px; }
+.panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
+h2 { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 6px; }
+input[type="text"], textarea { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+input[type="color"] { width: 48px; height: 40px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 2px; cursor: pointer; }
+.btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 13px; transition: opacity .2s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+.tabs { display: flex; gap: 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 20px; flex-wrap: wrap; }
+.tab { padding: 10px 16px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -2px; color: #6b7280; font-family: inherit; transition: all .15s; }
+.tab:hover { color: #1a1a1a; }
+.tab.active { color: #ec4899; border-bottom-color: #ec4899; }
+.sec { display: none; }
+.sec.active { display: block; }
+
+/* Drop zone */
+.drop-zone { border: 2px dashed #d1d5db; border-radius: 12px; padding: 48px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; }
+.drop-zone:hover, .drop-zone.over { border-color: #ec4899; background: #fdf2f8; }
+.drop-zone p { color: #6b7280; font-size: 14px; }
+.drop-zone .big { font-size: 36px; margin-bottom: 8px; }
+
+/* Grid */
+.sim-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.sim-card { border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+.sim-card canvas { width: 100%; display: block; }
+.sim-card .sim-label { padding: 10px 14px; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+.sim-card .sim-type { font-size: 11px; color: #6b7280; font-weight: 400; }
+
+/* Side by side */
+.side-by-side { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 640px) { .side-by-side { grid-template-columns: 1fr; } }
+.side-canvas-wrap { border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+.side-canvas-wrap canvas { width: 100%; display: block; }
+.side-canvas-wrap .side-label { padding: 10px 14px; font-size: 13px; font-weight: 600; }
+
+/* Color picker */
+.pick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-top: 16px; }
+.pick-item { padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb; text-align: center; }
+.pick-swatch { width: 48px; height: 48px; border-radius: 8px; margin: 0 auto 8px; border: 1px solid #e5e7eb; }
+.pick-label { font-size: 12px; font-weight: 600; }
+.pick-hex { font-size: 11px; color: #6b7280; }
+
+/* Palette checker */
+.pal-input { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.pal-swatch { width: 48px; height: 48px; border-radius: 8px; border: 1px solid #e5e7eb; }
+.pal-results { margin-top: 16px; }
+.pal-type-row { margin-bottom: 16px; }
+.pal-type-label { font-weight: 600; font-size: 14px; margin-bottom: 8px; }
+.pal-combo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 6px; }
+.pal-combo { padding: 8px; border-radius: 6px; border: 1px solid #e5e7eb; text-align: center; font-size: 11px; }
+.pal-combo.fail { border-color: #fca5a5; background: #fef2f2; }
+.pal-combo.pass { border-color: #86efac; background: #f0fdf4; }
+
+/* Recommendations */
+.rec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 12px; }
+.rec-item { padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb; }
+.rec-item .rec-pair { display: flex; gap: 4px; margin-bottom: 6px; }
+.rec-item .rec-sw { width: 28px; height: 28px; border-radius: 4px; border: 1px solid #e5e7eb; }
+.rec-item .rec-text { font-size: 12px; color: #6b7280; }
+
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<h1>Color Blindness Simulator</h1>
+<p class="subtitle">See your designs through the eyes of color-blind users. Upload images, test palettes, get accessible alternatives.</p>
+
+<div class="tabs">
+<button class="tab active" data-tab="image">Image Simulator</button>
+<button class="tab" data-tab="picker">Color Picker</button>
+<button class="tab" data-tab="palette">Palette Checker</button>
+<button class="tab" data-tab="sidebyside">Side by Side</button>
+</div>
+
+<!-- Image Simulator -->
+<div class="sec active" id="sec-image">
+<div class="panel">
+<div class="drop-zone" id="dropZone">
+<div class="big">&#128444;</div>
+<p>Drag & drop an image here, or click to upload</p>
+<p style="font-size:12px;margin-top:8px;color:#9ca3af;">PNG, JPG, WebP supported</p>
+</div>
+<input type="file" id="fileInput" accept="image/*" style="display:none;">
+</div>
+<div class="sim-grid" id="simGrid"></div>
+</div>
+
+<!-- Color Picker -->
+<div class="sec" id="sec-picker">
+<div class="panel">
+<h2>Pick a Color</h2>
+<div class="row" style="margin-bottom:16px;">
+<input type="color" id="singleColor" value="#e74c3c">
+<input type="text" id="singleHex" value="#e74c3c" style="width:100px;" onchange="document.getElementById('singleColor').value=this.value;renderPicker();">
+<button class="btn btn-primary btn-sm" onclick="renderPicker()">Simulate</button>
+</div>
+<p style="font-size:13px;color:#6b7280;margin-bottom:12px;">See how this color appears to people with each type of color vision deficiency.</p>
+<div class="pick-grid" id="pickGrid"></div>
+</div>
+</div>
+
+<!-- Palette Checker -->
+<div class="sec" id="sec-palette">
+<div class="panel">
+<h2>Palette Checker</h2>
+<p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Enter up to 8 colors separated by commas. Check if they remain distinguishable for each color vision type.</p>
+<div class="row" style="margin-bottom:16px;">
+<input type="text" id="palInput" value="#e74c3c, #3498db, #2ecc71, #f39c12, #9b59b6" style="flex:1;" placeholder="#hex1, #hex2, #hex3...">
+<button class="btn btn-primary" onclick="checkPalette()">Check</button>
+</div>
+<div class="pal-input" id="palSwatches"></div>
+<div class="pal-results" id="palResults"></div>
+</div>
+</div>
+
+<!-- Side by Side -->
+<div class="sec" id="sec-sidebyside">
+<div class="panel">
+<h2>Side by Side</h2>
+<div class="row" style="margin-bottom:16px;">
+<label style="margin:0;">Compare with:</label>
+<select id="sideType" onchange="renderSideBySide()">
+<option value="protanopia">Protanopia</option>
+<option value="deuteranopia">Deuteranopia</option>
+<option value="tritanopia">Tritanopia</option>
+<option value="protanomaly">Protanomaly</option>
+<option value="deuteranomaly">Deuteranomaly</option>
+<option value="tritanomaly">Tritanomaly</option>
+<option value="achromatopsia">Achromatopsia</option>
+<option value="achromatomaly">Achromatomaly</option>
+</select>
+</div>
+<div class="side-by-side" id="sideBySide">
+<p style="color:#9ca3af;font-size:13px;">Upload an image above first.</p>
+</div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== Color Vision Deficiency Matrices ===== */
+const CVD_TYPES = {
+  protanopia:    { name:'Protanopia',    type:'No red cones',        matrix:[0.567,0.433,0,0,0, 0.558,0.442,0,0,0, 0,0.242,0.758,0,0, 0,0,0,1,0] },
+  deuteranopia:  { name:'Deuteranopia',  type:'No green cones',      matrix:[0.625,0.375,0,0,0, 0.7,0.3,0,0,0, 0,0.3,0.7,0,0, 0,0,0,1,0] },
+  tritanopia:    { name:'Tritanopia',    type:'No blue cones',       matrix:[0.95,0.05,0,0,0, 0,0.433,0.567,0,0, 0,0.475,0.525,0,0, 0,0,0,1,0] },
+  protanomaly:   { name:'Protanomaly',   type:'Weak red cones',      matrix:[0.817,0.183,0,0,0, 0.333,0.667,0,0,0, 0,0.125,0.875,0,0, 0,0,0,1,0] },
+  deuteranomaly: { name:'Deuteranomaly', type:'Weak green cones',    matrix:[0.8,0.2,0,0,0, 0.258,0.742,0,0,0, 0,0.142,0.858,0,0, 0,0,0,1,0] },
+  tritanomaly:   { name:'Tritanomaly',   type:'Weak blue cones',     matrix:[0.967,0.033,0,0,0, 0,0.733,0.267,0,0, 0,0.183,0.817,0,0, 0,0,0,1,0] },
+  achromatopsia: { name:'Achromatopsia', type:'Total color blindness',matrix:[0.299,0.587,0.114,0,0, 0.299,0.587,0.114,0,0, 0.299,0.587,0.114,0,0, 0,0,0,1,0] },
+  achromatomaly: { name:'Achromatomaly', type:'Weak overall color',  matrix:[0.618,0.32,0.062,0,0, 0.163,0.775,0.062,0,0, 0.163,0.32,0.516,0,0, 0,0,0,1,0] }
+};
+
+let uploadedImg = null;
+
+/* ===== Apply CVD matrix to pixel data ===== */
+function applyMatrix(imageData, matrix) {
+  const d = imageData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const r = d[i], g = d[i+1], b = d[i+2];
+    d[i]   = Math.min(255, Math.max(0, r*matrix[0] + g*matrix[1] + b*matrix[2] + matrix[3]*255 + matrix[4]*255));
+    d[i+1] = Math.min(255, Math.max(0, r*matrix[5] + g*matrix[6] + b*matrix[7] + matrix[8]*255 + matrix[9]*255));
+    d[i+2] = Math.min(255, Math.max(0, r*matrix[10]+ g*matrix[11]+ b*matrix[12]+ matrix[13]*255+ matrix[14]*255));
+  }
+  return imageData;
+}
+
+function applyMatrixToColor(r, g, b, matrix) {
+  return [
+    Math.min(255, Math.max(0, Math.round(r*matrix[0] + g*matrix[1] + b*matrix[2]))),
+    Math.min(255, Math.max(0, Math.round(r*matrix[5] + g*matrix[6] + b*matrix[7]))),
+    Math.min(255, Math.max(0, Math.round(r*matrix[10]+ g*matrix[11]+ b*matrix[12])))
+  ];
+}
+
+function hexToRgb(hex) {
+  hex = hex.replace('#','');
+  if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+  return [parseInt(hex.slice(0,2),16), parseInt(hex.slice(2,4),16), parseInt(hex.slice(4,6),16)];
+}
+
+function rgbToHex(r,g,b) {
+  return '#' + [r,g,b].map(v => Math.round(v).toString(16).padStart(2,'0')).join('');
+}
+
+/* ===== Tabs ===== */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('sec-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+/* ===== Drop zone ===== */
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) loadImage(file);
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) loadImage(e.target.files[0]);
+});
+
+function loadImage(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      uploadedImg = img;
+      dropZone.innerHTML = `<p style="color:#16a34a;font-weight:600;">Image loaded: ${img.width}x${img.height}</p><p style="font-size:12px;color:#6b7280;margin-top:4px;">Drop another to replace</p>`;
+      renderAllSimulations();
+      renderSideBySide();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ===== Render all 8 simulations + original ===== */
+function renderAllSimulations() {
+  if (!uploadedImg) return;
+  const grid = document.getElementById('simGrid');
+  const maxW = 400;
+  const scale = Math.min(1, maxW / uploadedImg.width);
+  const w = Math.round(uploadedImg.width * scale);
+  const h = Math.round(uploadedImg.height * scale);
+
+  // Original
+  let html = `<div class="sim-card"><canvas id="sim-original" width="${w}" height="${h}"></canvas><div class="sim-label">Original<span class="sim-type">Normal vision</span></div></div>`;
+
+  for (const [key, cvd] of Object.entries(CVD_TYPES)) {
+    html += `<div class="sim-card"><canvas id="sim-${key}" width="${w}" height="${h}"></canvas><div class="sim-label">${cvd.name}<span class="sim-type">${cvd.type}</span></div></div>`;
+  }
+  grid.innerHTML = html;
+
+  // Draw original
+  const origCtx = document.getElementById('sim-original').getContext('2d');
+  origCtx.drawImage(uploadedImg, 0, 0, w, h);
+  const origData = origCtx.getImageData(0, 0, w, h);
+
+  // Draw each simulation
+  for (const [key, cvd] of Object.entries(CVD_TYPES)) {
+    const canvas = document.getElementById('sim-' + key);
+    const ctx = canvas.getContext('2d');
+    const data = new ImageData(new Uint8ClampedArray(origData.data), w, h);
+    applyMatrix(data, cvd.matrix);
+    ctx.putImageData(data, 0, 0);
+  }
+}
+
+/* ===== Side by Side ===== */
+function renderSideBySide() {
+  if (!uploadedImg) return;
+  const type = document.getElementById('sideType').value;
+  const cvd = CVD_TYPES[type];
+  const maxW = 500;
+  const scale = Math.min(1, maxW / uploadedImg.width);
+  const w = Math.round(uploadedImg.width * scale);
+  const h = Math.round(uploadedImg.height * scale);
+
+  document.getElementById('sideBySide').innerHTML = `
+    <div class="side-canvas-wrap"><canvas id="sideOrig" width="${w}" height="${h}"></canvas><div class="side-label">Original</div></div>
+    <div class="side-canvas-wrap"><canvas id="sideSim" width="${w}" height="${h}"></canvas><div class="side-label">${cvd.name}</div></div>
+  `;
+
+  const origCtx = document.getElementById('sideOrig').getContext('2d');
+  origCtx.drawImage(uploadedImg, 0, 0, w, h);
+  const origData = origCtx.getImageData(0, 0, w, h);
+
+  const simCtx = document.getElementById('sideSim').getContext('2d');
+  const simData = new ImageData(new Uint8ClampedArray(origData.data), w, h);
+  applyMatrix(simData, cvd.matrix);
+  simCtx.putImageData(simData, 0, 0);
+}
+
+/* ===== Color Picker ===== */
+document.getElementById('singleColor').addEventListener('input', e => {
+  document.getElementById('singleHex').value = e.target.value;
+  renderPicker();
+});
+
+function renderPicker() {
+  const hex = document.getElementById('singleColor').value;
+  const [r, g, b] = hexToRgb(hex);
+  const grid = document.getElementById('pickGrid');
+
+  let html = `<div class="pick-item"><div class="pick-swatch" style="background:${hex}"></div><div class="pick-label">Original</div><div class="pick-hex">${hex}</div></div>`;
+
+  for (const [key, cvd] of Object.entries(CVD_TYPES)) {
+    const [sr, sg, sb] = applyMatrixToColor(r, g, b, cvd.matrix);
+    const simHex = rgbToHex(sr, sg, sb);
+    html += `<div class="pick-item"><div class="pick-swatch" style="background:${simHex}"></div><div class="pick-label">${cvd.name}</div><div class="pick-hex">${simHex}</div></div>`;
+  }
+  grid.innerHTML = html;
+}
+
+/* ===== Palette Checker ===== */
+function checkPalette() {
+  const input = document.getElementById('palInput').value;
+  const colors = input.split(/[,\n]+/).map(s => s.trim()).filter(s => /^#?[0-9a-fA-F]{3,6}$/.test(s)).map(s => s.startsWith('#') ? s : '#' + s);
+  if (colors.length < 2) { toast('Enter at least 2 hex colors'); return; }
+
+  // Show swatches
+  document.getElementById('palSwatches').innerHTML = colors.map(c => `<div class="pal-swatch" style="background:${c};" title="${c}"></div>`).join('');
+
+  const results = document.getElementById('palResults');
+  let html = '';
+
+  for (const [key, cvd] of Object.entries(CVD_TYPES)) {
+    const simulated = colors.map(c => {
+      const [r,g,b] = hexToRgb(c);
+      const [sr,sg,sb] = applyMatrixToColor(r,g,b, cvd.matrix);
+      return { orig: c, sim: rgbToHex(sr,sg,sb), rgb: [sr,sg,sb] };
+    });
+
+    // Check distinguishability: color distance between each pair
+    let allPass = true;
+    let combos = '';
+    for (let i = 0; i < simulated.length; i++) {
+      for (let j = i+1; j < simulated.length; j++) {
+        const dist = colorDistance(simulated[i].rgb, simulated[j].rgb);
+        const pass = dist > 35;
+        if (!pass) allPass = false;
+        combos += `<div class="pal-combo ${pass ? 'pass' : 'fail'}">
+          <div style="display:flex;gap:3px;justify-content:center;margin-bottom:4px;">
+            <div style="width:16px;height:16px;border-radius:3px;background:${simulated[i].sim};border:1px solid #ddd;"></div>
+            <div style="width:16px;height:16px;border-radius:3px;background:${simulated[j].sim};border:1px solid #ddd;"></div>
+          </div>
+          ${pass ? 'OK' : 'Too similar'}<br><span style="font-size:10px;color:#6b7280;">d=${dist.toFixed(0)}</span>
+        </div>`;
+      }
+    }
+
+    const statusIcon = allPass ? '<span style="color:#16a34a;">All pairs distinguishable</span>' : '<span style="color:#dc2626;">Some pairs too similar</span>';
+    html += `<div class="pal-type-row">
+      <div class="pal-type-label">${cvd.name} <span style="font-weight:400;font-size:12px;color:#6b7280;">(${cvd.type})</span> ${statusIcon}</div>
+      <div class="pal-combo-grid">${combos}</div>
+    </div>`;
+  }
+
+  // Recommendations for failing pairs
+  html += renderRecommendations(colors);
+  results.innerHTML = html;
+}
+
+function colorDistance(a, b) {
+  return Math.sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2 + (a[2]-b[2])**2);
+}
+
+function renderRecommendations(colors) {
+  // Find pairs that fail in most CVD types and suggest alternatives
+  const failPairs = [];
+  for (let i = 0; i < colors.length; i++) {
+    for (let j = i+1; j < colors.length; j++) {
+      let failCount = 0;
+      for (const cvd of Object.values(CVD_TYPES)) {
+        const [r1,g1,b1] = hexToRgb(colors[i]);
+        const [r2,g2,b2] = hexToRgb(colors[j]);
+        const s1 = applyMatrixToColor(r1,g1,b1, cvd.matrix);
+        const s2 = applyMatrixToColor(r2,g2,b2, cvd.matrix);
+        if (colorDistance(s1, s2) <= 35) failCount++;
+      }
+      if (failCount > 0) failPairs.push({ i, j, fails: failCount, c1: colors[i], c2: colors[j] });
+    }
+  }
+
+  if (failPairs.length === 0) return '';
+
+  let html = '<div style="margin-top:24px;"><h3>Recommendations</h3><p style="font-size:13px;color:#6b7280;margin-bottom:12px;">These pairs have poor distinguishability. Try adjusting lightness contrast between them.</p><div class="rec-grid">';
+
+  for (const pair of failPairs.slice(0, 6)) {
+    // Suggest: increase lightness distance
+    const [h1,s1,l1] = rgbToHsl(...hexToRgb(pair.c1));
+    const [h2,s2,l2] = rgbToHsl(...hexToRgb(pair.c2));
+    const newL1 = l1 > l2 ? Math.min(85, l1 + 15) : Math.max(15, l1 - 15);
+    const alt = hslToHex(h1, s1, newL1);
+
+    html += `<div class="rec-item">
+      <div class="rec-pair">
+        <div class="rec-sw" style="background:${pair.c1}"></div>
+        <div class="rec-sw" style="background:${pair.c2}"></div>
+        <span style="font-size:12px;color:#dc2626;margin-left:4px;">Fails in ${pair.fails} type${pair.fails>1?'s':''}</span>
+      </div>
+      <div class="rec-text">Try replacing ${pair.c1} with <b>${alt}</b> for more lightness contrast.</div>
+      <div class="rec-pair" style="margin-top:6px;">
+        <div class="rec-sw" style="background:${alt}"></div>
+        <div class="rec-sw" style="background:${pair.c2}"></div>
+        <span style="font-size:12px;color:#16a34a;margin-left:4px;">Suggested</span>
+      </div>
+    </div>`;
+  }
+
+  html += '</div></div>';
+  return html;
+}
+
+function rgbToHsl(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r,g,b), min = Math.min(r,g,b), d = max-min;
+  let h = 0, s = 0, l = (max+min)/2;
+  if (d > 0) {
+    s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+    if (max === r) h = ((g-b)/d+(g<b?6:0))/6;
+    else if (max === g) h = ((b-r)/d+2)/6;
+    else h = ((r-g)/d+4)/6;
+  }
+  return [h*360, s*100, l*100];
+}
+
+function hslToHex(h, s, l) {
+  h = ((h%360)+360)%360; s = Math.max(0,Math.min(100,s))/100; l = Math.max(0,Math.min(100,l))/100;
+  const a = s * Math.min(l, 1-l);
+  const f = n => { const k = (n+h/30)%12; return l - a * Math.max(Math.min(k-3, 9-k, 1), -1); };
+  const toHex = x => Math.round(x*255).toString(16).padStart(2,'0');
+  return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
+}
+
+/* ===== Toast ===== */
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+/* ===== Init ===== */
+renderPicker();
+</script>
+<script src="/ai-queue.js"></script>
+<script src="/related.js"></script>
+</body>
+</html>

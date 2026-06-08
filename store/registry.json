@@ -278,6 +278,24 @@
       "iconBg": "#6b7280",
       "category": "images",
       "section": "images"
+    },
+    {
+      "id": "color-blindness",
+      "name": "Color Blindness Simulator",
+      "description": "Upload image → see through 8 types of color blindness. Palette checker, accessible alternatives.",
+      "icon": "👁️",
+      "iconBg": "#10b981",
+      "category": "brand",
+      "section": "brand"
+    },
+    {
+      "id": "avatar-generator",
+      "name": "Avatar Generator",
+      "description": "7 styles: initials, geometric, gradient, pixel art, pattern, rings, blob. Deterministic from name. Batch mode.",
+      "icon": "👤",
+      "iconBg": "#f59e0b",
+      "category": "images",
+      "section": "images"
     }
   ]
 }

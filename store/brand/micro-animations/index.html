@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Micro-Interaction Library - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; padding-bottom: 80px; }
+a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
+a.back:hover { text-decoration: underline; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+p.subtitle { color: #6b7280; margin-bottom: 24px; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
+h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 6px; }
+input[type="text"] { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+input[type="range"] { width: 100%; accent-color: #ec4899; }
+input[type="color"] { width: 36px; height: 28px; border: 1px solid #e5e7eb; border-radius: 6px; padding: 1px; cursor: pointer; }
+select { padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 13px; background: #fff; }
+.btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 13px; transition: opacity .2s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+.toolbar input[type="text"] { max-width: 280px; }
+.categories { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 20px; }
+.cat-btn { padding: 6px 14px; border: 1px solid #e5e7eb; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 600; background: #fff; font-family: inherit; transition: all .15s; white-space: nowrap; }
+.cat-btn:hover, .cat-btn.active { background: #ec4899; color: #fff; border-color: #ec4899; }
+.customize { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; padding: 12px 16px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; }
+.customize label { margin: 0; display: flex; align-items: center; gap: 6px; }
+.effects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.effect-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; transition: border-color .15s; }
+.effect-card:hover { border-color: #ec4899; }
+.effect-preview { height: 120px; display: flex; align-items: center; justify-content: center; background: #f9fafb; position: relative; overflow: hidden; }
+.effect-info { padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.effect-name { font-weight: 600; font-size: 13px; }
+.effect-cat { font-size: 11px; color: #6b7280; }
+.effect-actions { display: flex; gap: 4px; }
+.fav-btn { background: none; border: none; cursor: pointer; font-size: 16px; opacity: .4; transition: opacity .15s; }
+.fav-btn:hover, .fav-btn.active { opacity: 1; }
+.demo-box { width: 60px; height: 60px; background: #ec4899; border-radius: 10px; }
+.demo-btn { padding: 10px 24px; background: #ec4899; color: #fff; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; font-family: inherit; cursor: pointer; }
+.demo-text { font-size: 20px; font-weight: 700; color: #1a1a1a; }
+.demo-spinner { width: 40px; height: 40px; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 100; }
+.toast.show { opacity: 1; }
+.counter { font-size: 13px; color: #6b7280; margin-left: auto; white-space: nowrap; }
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to Store</a>
+<h1>Micro-Interaction Library</h1>
+<p class="subtitle">100+ copy-paste CSS animations and hover effects. Customize, preview, copy.</p>
+
+<div class="toolbar">
+<input type="text" id="search" placeholder="Search effects...">
+<span class="counter" id="counter"></span>
+</div>
+
+<div class="categories" id="categories"></div>
+
+<div class="customize">
+<label>Duration <select id="custDuration"><option value="">Default</option><option value="0.15s">0.15s</option><option value="0.3s">0.3s</option><option value="0.5s">0.5s</option><option value="0.8s">0.8s</option><option value="1s">1s</option><option value="1.5s">1.5s</option><option value="2s">2s</option></select></label>
+<label>Color <input type="color" id="custColor" value="#ec4899"></label>
+<label>Easing <select id="custEasing"><option value="">Default</option><option value="ease">ease</option><option value="ease-in">ease-in</option><option value="ease-out">ease-out</option><option value="ease-in-out">ease-in-out</option><option value="linear">linear</option><option value="cubic-bezier(0.68,-0.55,0.265,1.55)">bounce</option></select></label>
+</div>
+
+<div class="effects-grid" id="grid"></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+function copyText(text) { navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard')); }
+
+const C = '#ec4899';
+
+// Effect definitions: { name, cat, css, html, demoType }
+// demoType: 'box-hover' | 'btn-hover' | 'text' | 'spinner' | 'animate' | 'scroll'
+const effects = [
+  // ---- HOVER EFFECTS (20) ----
+  { name: 'Scale Up', cat: 'Hover', css: `.fx:hover { transform: scale(1.1); }\n.fx { transition: transform 0.3s ease; }`, html: '<div class="fx">Hover me</div>', dt: 'box-hover' },
+  { name: 'Lift', cat: 'Hover', css: `.fx:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }\n.fx { transition: all 0.3s ease; }`, html: '<div class="fx">Hover me</div>', dt: 'box-hover' },
+  { name: 'Glow', cat: 'Hover', css: `.fx:hover { box-shadow: 0 0 20px ${C}66; }\n.fx { transition: box-shadow 0.3s ease; }`, html: '<div class="fx">Hover me</div>', dt: 'box-hover' },
+  { name: 'Underline Slide', cat: 'Hover', css: `.fx { position: relative; display: inline-block; }\n.fx::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background: ${C}; transition: width 0.3s ease; }\n.fx:hover::after { width: 100%; }`, html: '<span class="fx">Hover me</span>', dt: 'text' },
+  { name: 'Fill Background', cat: 'Hover', css: `.fx { background: linear-gradient(to right, ${C} 50%, transparent 50%); background-size: 200% 100%; background-position: right; transition: background-position 0.3s ease; color: #1a1a1a; }\n.fx:hover { background-position: left; color: #fff; }`, html: '<div class="fx">Hover me</div>', dt: 'btn-hover' },
+  { name: 'Slide Right', cat: 'Hover', css: `.fx:hover { transform: translateX(8px); }\n.fx { transition: transform 0.3s ease; }`, html: '<div class="fx">Hover me</div>', dt: 'box-hover' },
+  { name: 'Rotate', cat: 'Hover', css: `.fx:hover { transform: rotate(5deg); }\n.fx { transition: transform 0.3s ease; }`, html: '<div class="fx">Hover me</div>', dt: 'box-hover' },
+  { name: 'Shake', cat: 'Hover', css: `@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }\n.fx:hover { animation: shake 0.4s ease; }`, html: '<div class="fx">Hover me</div>', dt: 'box-hover' },
+  { name: 'Bounce', cat: 'Hover', css: `@keyframes bounceHover { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }\n.fx:hover { animation: bounceHover 0.5s ease; }`, html: '<div class="fx">Hover me</div>', dt: 'box-hover' },
+  { name: 'Pulse', cat: 'Hover', css: `@keyframes pulseHover { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }\n.fx:hover { animation: pulseHover 0.6s ease; }`, html: '<div class="fx">Hover me</div>', dt: 'box-hover' },
+  { name: 'Border Glow', cat: 'Hover', css: `.fx { border: 2px solid transparent; transition: border-color 0.3s ease; }\n.fx:hover { border-color: ${C}; }`, html: '<div class="fx">Hover me</div>', dt: 'box-hover' },
+  { name: 'Shadow Grow', cat: 'Hover', css: `.fx:hover { box-shadow: 0 12px 32px rgba(0,0,0,0.2); }\n.fx { box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: box-shadow 0.3s ease; }`, html: '<div class="fx">Hover me</div>', dt: 'box-hover' },
+  { name: 'Color Shift', cat: 'Hover', css: `.fx:hover { background: ${C}; color: #fff; }\n.fx { transition: all 0.3s ease; }`, html: '<div class="fx">Hover me</div>', dt: 'box-hover' },
+  { name: 'Skew', cat: 'Hover', css: `.fx:hover { transform: skewX(-3deg); }\n.fx { transition: transform 0.3s ease; }`, html: '<div class="fx">Hover me</div>', dt: 'box-hover' },
+  { name: 'Flip X', cat: 'Hover', css: `.fx:hover { transform: rotateY(180deg); }\n.fx { transition: transform 0.6s ease; }`, html: '<div class="fx">Hover me</div>', dt: 'box-hover' },
+  { name: 'Blur In', cat: 'Hover', css: `.fx { filter: blur(2px); transition: filter 0.3s ease; }\n.fx:hover { filter: blur(0); }`, html: '<div class="fx">Hover me</div>', dt: 'box-hover' },
+  { name: 'Tilt', cat: 'Hover', css: `.fx:hover { transform: perspective(500px) rotateX(5deg) rotateY(-5deg); }\n.fx { transition: transform 0.3s ease; }`, html: '<div class="fx">Hover me</div>', dt: 'box-hover' },
+  { name: 'Magnetic', cat: 'Hover', css: `.fx:hover { transform: scale(1.02) translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }\n.fx { transition: all 0.2s ease; }`, html: '<div class="fx">Hover me</div>', dt: 'box-hover' },
+  { name: 'Ripple', cat: 'Hover', css: `.fx { position: relative; overflow: hidden; }\n.fx::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at center, ${C}33 0%, transparent 70%); transform: scale(0); transition: transform 0.5s ease; }\n.fx:hover::after { transform: scale(2.5); }`, html: '<div class="fx">Hover me</div>', dt: 'box-hover' },
+  { name: 'Morph', cat: 'Hover', css: `.fx:hover { border-radius: 50%; }\n.fx { transition: border-radius 0.4s ease; }`, html: '<div class="fx">Hover me</div>', dt: 'box-hover' },
+
+  // ---- LOADING SPINNERS (15) ----
+  { name: 'Dots', cat: 'Spinners', css: `@keyframes dotPulse { 0%,80%,100% { transform: scale(0); } 40% { transform: scale(1); } }\n.dots { display: flex; gap: 6px; }\n.dots span { width: 10px; height: 10px; background: ${C}; border-radius: 50%; animation: dotPulse 1.4s ease infinite; }\n.dots span:nth-child(2) { animation-delay: 0.16s; }\n.dots span:nth-child(3) { animation-delay: 0.32s; }`, html: '<div class="dots"><span></span><span></span><span></span></div>', dt: 'spinner' },
+  { name: 'Ring', cat: 'Spinners', css: `@keyframes spin { to { transform: rotate(360deg); } }\n.ring { width: 40px; height: 40px; border: 3px solid #e5e7eb; border-top-color: ${C}; border-radius: 50%; animation: spin 0.8s linear infinite; }`, html: '<div class="ring"></div>', dt: 'spinner' },
+  { name: 'Bars', cat: 'Spinners', css: `@keyframes barGrow { 0%,40%,100% { transform: scaleY(0.4); } 20% { transform: scaleY(1); } }\n.bars { display: flex; gap: 3px; height: 30px; align-items: center; }\n.bars span { width: 4px; height: 100%; background: ${C}; animation: barGrow 1.2s ease infinite; }\n.bars span:nth-child(2) { animation-delay: 0.1s; }\n.bars span:nth-child(3) { animation-delay: 0.2s; }\n.bars span:nth-child(4) { animation-delay: 0.3s; }\n.bars span:nth-child(5) { animation-delay: 0.4s; }`, html: '<div class="bars"><span></span><span></span><span></span><span></span><span></span></div>', dt: 'spinner' },
+  { name: 'Pulse Ring', cat: 'Spinners', css: `@keyframes pulseRing { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }\n.pulse-ring { width: 40px; height: 40px; border: 3px solid ${C}; border-radius: 50%; animation: pulseRing 1.2s ease infinite; }`, html: '<div class="pulse-ring"></div>', dt: 'spinner' },
+  { name: 'Bounce Dots', cat: 'Spinners', css: `@keyframes bounceDot { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }\n.bounce-dots { display: flex; gap: 6px; }\n.bounce-dots span { width: 10px; height: 10px; background: ${C}; border-radius: 50%; animation: bounceDot 0.6s ease infinite alternate; }\n.bounce-dots span:nth-child(2) { animation-delay: 0.2s; }\n.bounce-dots span:nth-child(3) { animation-delay: 0.4s; }`, html: '<div class="bounce-dots"><span></span><span></span><span></span></div>', dt: 'spinner' },
+  { name: 'Wave', cat: 'Spinners', css: `@keyframes wave { 0%,100% { transform: scaleY(0.5); } 50% { transform: scaleY(1.5); } }\n.wave { display: flex; gap: 2px; height: 30px; align-items: center; }\n.wave span { width: 4px; height: 20px; background: ${C}; border-radius: 2px; animation: wave 1s ease infinite; }\n.wave span:nth-child(2) { animation-delay: 0.1s; }\n.wave span:nth-child(3) { animation-delay: 0.2s; }\n.wave span:nth-child(4) { animation-delay: 0.3s; }\n.wave span:nth-child(5) { animation-delay: 0.4s; }\n.wave span:nth-child(6) { animation-delay: 0.5s; }`, html: '<div class="wave"><span></span><span></span><span></span><span></span><span></span><span></span></div>', dt: 'spinner' },
+  { name: 'Orbit', cat: 'Spinners', css: `@keyframes orbit { to { transform: rotate(360deg); } }\n.orbit { width: 40px; height: 40px; position: relative; animation: orbit 1.2s linear infinite; }\n.orbit::before { content: ''; position: absolute; top: 0; left: 50%; width: 8px; height: 8px; margin-left: -4px; background: ${C}; border-radius: 50%; }`, html: '<div class="orbit"></div>', dt: 'spinner' },
+  { name: 'Grid', cat: 'Spinners', css: `@keyframes gridPulse { 0%,70%,100% { transform: scale(1); opacity: 1; } 35% { transform: scale(0); opacity: 0.5; } }\n.grid-spin { display: grid; grid-template-columns: repeat(3,10px); gap: 3px; }\n.grid-spin span { width: 10px; height: 10px; background: ${C}; border-radius: 2px; animation: gridPulse 1.3s ease infinite; }\n.grid-spin span:nth-child(1) { animation-delay: 0s; }\n.grid-spin span:nth-child(2) { animation-delay: 0.1s; }\n.grid-spin span:nth-child(3) { animation-delay: 0.2s; }\n.grid-spin span:nth-child(4) { animation-delay: 0.3s; }\n.grid-spin span:nth-child(5) { animation-delay: 0.4s; }\n.grid-spin span:nth-child(6) { animation-delay: 0.5s; }\n.grid-spin span:nth-child(7) { animation-delay: 0.6s; }\n.grid-spin span:nth-child(8) { animation-delay: 0.7s; }\n.grid-spin span:nth-child(9) { animation-delay: 0.8s; }`, html: '<div class="grid-spin"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>', dt: 'spinner' },
+  { name: 'Chase', cat: 'Spinners', css: `@keyframes chase { to { transform: rotate(360deg); } }\n@keyframes chaseDot { 80%,100% { transform: rotate(360deg); } }\n.chase { width: 40px; height: 40px; position: relative; animation: chase 2.5s linear infinite; }\n.chase span { position: absolute; width: 50%; height: 50%; top: 0; left: 0; animation: chaseDot 2s ease infinite; }\n.chase span::before { content: ''; width: 8px; height: 8px; background: ${C}; border-radius: 50%; display: block; }`, html: '<div class="chase"><span></span><span style="animation-delay:0.3s;"></span><span style="animation-delay:0.6s;"></span></div>', dt: 'spinner' },
+  { name: 'Fold', cat: 'Spinners', css: `@keyframes fold { 0%,10% { transform: perspective(140px) rotateX(-180deg); opacity: 0; } 25%,75% { transform: perspective(140px) rotateX(0deg); opacity: 1; } 90%,100% { transform: perspective(140px) rotateY(180deg); opacity: 0; } }\n.fold { width: 40px; height: 40px; background: ${C}; animation: fold 2.4s infinite linear both; }`, html: '<div class="fold"></div>', dt: 'spinner' },
+  { name: 'Square', cat: 'Spinners', css: `@keyframes squareSpin { 25% { transform: perspective(100px) rotateX(180deg) rotateY(0); } 50% { transform: perspective(100px) rotateX(180deg) rotateY(180deg); } 75% { transform: perspective(100px) rotateX(0) rotateY(180deg); } 100% { transform: perspective(100px) rotateX(0) rotateY(0); } }\n.square-spin { width: 30px; height: 30px; background: ${C}; animation: squareSpin 3s infinite cubic-bezier(0.09,0.57,0.49,0.9); }`, html: '<div class="square-spin"></div>', dt: 'spinner' },
+  { name: 'Heart', cat: 'Spinners', css: `@keyframes heartbeat { 0%,100% { transform: scale(1); } 14% { transform: scale(1.3); } 28% { transform: scale(1); } 42% { transform: scale(1.3); } 70% { transform: scale(1); } }\n.heart-beat { font-size: 28px; animation: heartbeat 1.2s infinite; display: inline-block; }`, html: '<span class="heart-beat" style="color:${C};">&#9829;</span>', dt: 'spinner' },
+  { name: 'Clock', cat: 'Spinners', css: `@keyframes clockSpin { to { transform: rotate(360deg); } }\n.clock { width: 36px; height: 36px; border: 3px solid ${C}; border-radius: 50%; position: relative; }\n.clock::after { content: ''; position: absolute; top: 50%; left: 50%; width: 2px; height: 14px; background: ${C}; transform-origin: bottom center; animation: clockSpin 2s linear infinite; margin-top: -14px; margin-left: -1px; }`, html: '<div class="clock"></div>', dt: 'spinner' },
+  { name: 'DNA', cat: 'Spinners', css: `@keyframes dnaA { 0%,100% { transform: translateY(-8px); } 50% { transform: translateY(8px); } }\n@keyframes dnaB { 0%,100% { transform: translateY(8px); } 50% { transform: translateY(-8px); } }\n.dna { display: flex; gap: 4px; }\n.dna span:nth-child(odd) { width: 6px; height: 6px; background: ${C}; border-radius: 50%; animation: dnaA 1s ease infinite; }\n.dna span:nth-child(even) { width: 6px; height: 6px; background: #8b5cf6; border-radius: 50%; animation: dnaB 1s ease infinite; }\n.dna span:nth-child(2) { animation-delay: 0.1s; }\n.dna span:nth-child(3) { animation-delay: 0.2s; }\n.dna span:nth-child(4) { animation-delay: 0.3s; }\n.dna span:nth-child(5) { animation-delay: 0.4s; }\n.dna span:nth-child(6) { animation-delay: 0.5s; }\n.dna span:nth-child(7) { animation-delay: 0.6s; }\n.dna span:nth-child(8) { animation-delay: 0.7s; }`, html: '<div class="dna"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>', dt: 'spinner' },
+  { name: 'Infinity', cat: 'Spinners', css: `@keyframes infinity { 0% { transform: translateX(-20px) scale(0.8); } 25% { transform: translateX(0) scale(1); } 50% { transform: translateX(20px) scale(0.8); } 75% { transform: translateX(0) scale(1); } 100% { transform: translateX(-20px) scale(0.8); } }\n.infinity-dot { width: 12px; height: 12px; background: ${C}; border-radius: 50%; animation: infinity 1.5s ease infinite; }`, html: '<div class="infinity-dot"></div>', dt: 'spinner' },
+
+  // ---- TRANSITIONS (15) ----
+  { name: 'Fade In', cat: 'Transitions', css: `@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }\n.fx { animation: fadeIn 0.5s ease forwards; }`, html: '<div class="fx">Content</div>', dt: 'animate' },
+  { name: 'Slide Up', cat: 'Transitions', css: `@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }\n.fx { animation: slideUp 0.5s ease forwards; }`, html: '<div class="fx">Content</div>', dt: 'animate' },
+  { name: 'Slide Down', cat: 'Transitions', css: `@keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }\n.fx { animation: slideDown 0.5s ease forwards; }`, html: '<div class="fx">Content</div>', dt: 'animate' },
+  { name: 'Slide Left', cat: 'Transitions', css: `@keyframes slideLeft { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }\n.fx { animation: slideLeft 0.5s ease forwards; }`, html: '<div class="fx">Content</div>', dt: 'animate' },
+  { name: 'Slide Right', cat: 'Transitions', css: `@keyframes slideRight { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }\n.fx { animation: slideRight 0.5s ease forwards; }`, html: '<div class="fx">Content</div>', dt: 'animate' },
+  { name: 'Zoom In', cat: 'Transitions', css: `@keyframes zoomIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }\n.fx { animation: zoomIn 0.4s ease forwards; }`, html: '<div class="fx">Content</div>', dt: 'animate' },
+  { name: 'Flip In', cat: 'Transitions', css: `@keyframes flipIn { from { opacity: 0; transform: perspective(400px) rotateX(90deg); } to { opacity: 1; transform: perspective(400px) rotateX(0); } }\n.fx { animation: flipIn 0.6s ease forwards; }`, html: '<div class="fx">Content</div>', dt: 'animate' },
+  { name: 'Rotate In', cat: 'Transitions', css: `@keyframes rotateIn { from { opacity: 0; transform: rotate(-200deg); } to { opacity: 1; transform: rotate(0); } }\n.fx { animation: rotateIn 0.6s ease forwards; }`, html: '<div class="fx">Content</div>', dt: 'animate' },
+  { name: 'Blur In', cat: 'Transitions', css: `@keyframes blurIn { from { opacity: 0; filter: blur(10px); } to { opacity: 1; filter: blur(0); } }\n.fx { animation: blurIn 0.5s ease forwards; }`, html: '<div class="fx">Content</div>', dt: 'animate' },
+  { name: 'Clip Reveal', cat: 'Transitions', css: `@keyframes clipReveal { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }\n.fx { animation: clipReveal 0.6s ease forwards; }`, html: '<div class="fx">Content</div>', dt: 'animate' },
+  { name: 'Wipe', cat: 'Transitions', css: `@keyframes wipe { from { clip-path: polygon(0 0, 0 0, 0 100%, 0 100%); } to { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); } }\n.fx { animation: wipe 0.6s ease forwards; }`, html: '<div class="fx">Content</div>', dt: 'animate' },
+  { name: 'Curtain', cat: 'Transitions', css: `@keyframes curtain { from { clip-path: inset(0 50% 0 50%); } to { clip-path: inset(0 0 0 0); } }\n.fx { animation: curtain 0.5s ease forwards; }`, html: '<div class="fx">Content</div>', dt: 'animate' },
+  { name: 'Fold In', cat: 'Transitions', css: `@keyframes foldIn { from { opacity: 0; transform: perspective(500px) rotateY(-80deg); } to { opacity: 1; transform: perspective(500px) rotateY(0); } }\n.fx { animation: foldIn 0.6s ease forwards; }`, html: '<div class="fx">Content</div>', dt: 'animate' },
+  { name: 'Swing In', cat: 'Transitions', css: `@keyframes swingIn { 0% { opacity: 0; transform: rotate(15deg); } 100% { opacity: 1; transform: rotate(0deg); } }\n.fx { transform-origin: top center; animation: swingIn 0.5s ease forwards; }`, html: '<div class="fx">Content</div>', dt: 'animate' },
+  { name: 'Drop In', cat: 'Transitions', css: `@keyframes dropIn { 0% { opacity: 0; transform: translateY(-40px); } 70% { transform: translateY(4px); } 100% { opacity: 1; transform: translateY(0); } }\n.fx { animation: dropIn 0.5s ease forwards; }`, html: '<div class="fx">Content</div>', dt: 'animate' },
+
+  // ---- ATTENTION SEEKERS (10) ----
+  { name: 'Bounce', cat: 'Attention', css: `@keyframes bounce { 0%,20%,53%,100% { transform: translateY(0); } 40% { transform: translateY(-20px); } 43% { transform: translateY(-20px); } 70% { transform: translateY(-10px); } 90% { transform: translateY(-4px); } }\n.fx { animation: bounce 1s ease; }`, html: '<div class="fx">Notice me</div>', dt: 'animate' },
+  { name: 'Flash', cat: 'Attention', css: `@keyframes flash { 0%,50%,100% { opacity: 1; } 25%,75% { opacity: 0; } }\n.fx { animation: flash 1s ease; }`, html: '<div class="fx">Notice me</div>', dt: 'animate' },
+  { name: 'Pulse', cat: 'Attention', css: `@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }\n.fx { animation: pulse 1s ease; }`, html: '<div class="fx">Notice me</div>', dt: 'animate' },
+  { name: 'Rubber Band', cat: 'Attention', css: `@keyframes rubberBand { 0% { transform: scale(1); } 30% { transform: scaleX(1.25) scaleY(0.75); } 40% { transform: scaleX(0.75) scaleY(1.25); } 50% { transform: scaleX(1.15) scaleY(0.85); } 65% { transform: scaleX(0.95) scaleY(1.05); } 75% { transform: scaleX(1.05) scaleY(0.95); } 100% { transform: scale(1); } }\n.fx { animation: rubberBand 1s ease; }`, html: '<div class="fx">Notice me</div>', dt: 'animate' },
+  { name: 'Shake X', cat: 'Attention', css: `@keyframes shakeX { 0%,100% { transform: translateX(0); } 10%,30%,50%,70%,90% { transform: translateX(-6px); } 20%,40%,60%,80% { transform: translateX(6px); } }\n.fx { animation: shakeX 0.8s ease; }`, html: '<div class="fx">Notice me</div>', dt: 'animate' },
+  { name: 'Head Shake', cat: 'Attention', css: `@keyframes headShake { 0% { transform: translateX(0); } 6.5% { transform: translateX(-6px) rotateY(-9deg); } 18.5% { transform: translateX(5px) rotateY(7deg); } 31.5% { transform: translateX(-3px) rotateY(-5deg); } 43.5% { transform: translateX(2px) rotateY(3deg); } 50% { transform: translateX(0); } }\n.fx { animation: headShake 1s ease; }`, html: '<div class="fx">Notice me</div>', dt: 'animate' },
+  { name: 'Swing', cat: 'Attention', css: `@keyframes swing { 20% { transform: rotate(15deg); } 40% { transform: rotate(-10deg); } 60% { transform: rotate(5deg); } 80% { transform: rotate(-5deg); } 100% { transform: rotate(0); } }\n.fx { transform-origin: top center; animation: swing 1s ease; }`, html: '<div class="fx">Notice me</div>', dt: 'animate' },
+  { name: 'Tada', cat: 'Attention', css: `@keyframes tada { 0% { transform: scale(1) rotate(0); } 10%,20% { transform: scale(0.9) rotate(-3deg); } 30%,50%,70%,90% { transform: scale(1.1) rotate(3deg); } 40%,60%,80% { transform: scale(1.1) rotate(-3deg); } 100% { transform: scale(1) rotate(0); } }\n.fx { animation: tada 1s ease; }`, html: '<div class="fx">Notice me</div>', dt: 'animate' },
+  { name: 'Wobble', cat: 'Attention', css: `@keyframes wobble { 0% { transform: translateX(0%); } 15% { transform: translateX(-15%) rotate(-5deg); } 30% { transform: translateX(10%) rotate(3deg); } 45% { transform: translateX(-10%) rotate(-3deg); } 60% { transform: translateX(5%) rotate(2deg); } 75% { transform: translateX(-2%) rotate(-1deg); } 100% { transform: translateX(0%); } }\n.fx { animation: wobble 1s ease; }`, html: '<div class="fx">Notice me</div>', dt: 'animate' },
+  { name: 'Jello', cat: 'Attention', css: `@keyframes jello { 0%,100% { transform: skewX(0) skewY(0); } 11% { transform: skewX(-12.5deg) skewY(-12.5deg); } 22% { transform: skewX(6.25deg) skewY(6.25deg); } 33% { transform: skewX(-3.125deg) skewY(-3.125deg); } 44% { transform: skewX(1.5625deg) skewY(1.5625deg); } }\n.fx { animation: jello 1s ease; }`, html: '<div class="fx">Notice me</div>', dt: 'animate' },
+
+  // ---- SCROLL REVEALS (10) ----
+  { name: 'Fade In Up', cat: 'Scroll', css: `@keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }\n.fx { animation: fadeInUp 0.6s ease forwards; }`, html: '<div class="fx">Revealed</div>', dt: 'animate' },
+  { name: 'Fade In Down', cat: 'Scroll', css: `@keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }\n.fx { animation: fadeInDown 0.6s ease forwards; }`, html: '<div class="fx">Revealed</div>', dt: 'animate' },
+  { name: 'Fade In Left', cat: 'Scroll', css: `@keyframes fadeInLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }\n.fx { animation: fadeInLeft 0.6s ease forwards; }`, html: '<div class="fx">Revealed</div>', dt: 'animate' },
+  { name: 'Fade In Right', cat: 'Scroll', css: `@keyframes fadeInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }\n.fx { animation: fadeInRight 0.6s ease forwards; }`, html: '<div class="fx">Revealed</div>', dt: 'animate' },
+  { name: 'Zoom In', cat: 'Scroll', css: `@keyframes zoomInScroll { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }\n.fx { animation: zoomInScroll 0.5s ease forwards; }`, html: '<div class="fx">Revealed</div>', dt: 'animate' },
+  { name: 'Slide Up', cat: 'Scroll', css: `@keyframes slideUpScroll { from { opacity: 0; transform: translateY(60px); } to { opacity: 1; transform: translateY(0); } }\n.fx { animation: slideUpScroll 0.6s ease forwards; }`, html: '<div class="fx">Revealed</div>', dt: 'animate' },
+  { name: 'Flip In', cat: 'Scroll', css: `@keyframes flipInScroll { from { opacity: 0; transform: perspective(400px) rotateX(80deg); } to { opacity: 1; transform: perspective(400px) rotateX(0); } }\n.fx { animation: flipInScroll 0.6s ease forwards; }`, html: '<div class="fx">Revealed</div>', dt: 'animate' },
+  { name: 'Rotate In', cat: 'Scroll', css: `@keyframes rotateInScroll { from { opacity: 0; transform: rotate(-90deg); } to { opacity: 1; transform: rotate(0); } }\n.fx { animation: rotateInScroll 0.6s ease forwards; }`, html: '<div class="fx">Revealed</div>', dt: 'animate' },
+  { name: 'Bounce In', cat: 'Scroll', css: `@keyframes bounceInScroll { 0% { opacity: 0; transform: scale(0.3); } 50% { transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }\n.fx { animation: bounceInScroll 0.6s ease forwards; }`, html: '<div class="fx">Revealed</div>', dt: 'animate' },
+  { name: 'Light Speed In', cat: 'Scroll', css: `@keyframes lightSpeedIn { from { opacity: 0; transform: translateX(40px) skewX(-15deg); } 60% { opacity: 1; transform: skewX(10deg); } 80% { transform: skewX(-2deg); } 100% { opacity: 1; transform: none; } }\n.fx { animation: lightSpeedIn 0.6s ease-out forwards; }`, html: '<div class="fx">Revealed</div>', dt: 'animate' },
+
+  // ---- BUTTON EFFECTS (10) ----
+  { name: 'Ripple Click', cat: 'Buttons', css: `.fx { position: relative; overflow: hidden; }\n.fx::after { content: ''; position: absolute; width: 100%; padding-bottom: 100%; background: rgba(255,255,255,0.3); border-radius: 50%; left: 50%; top: 50%; transform: translate(-50%,-50%) scale(0); }\n.fx:active::after { animation: rippleClick 0.5s ease; }\n@keyframes rippleClick { to { transform: translate(-50%,-50%) scale(2.5); opacity: 0; } }`, html: '<button class="fx">Click me</button>', dt: 'btn-hover' },
+  { name: 'Push', cat: 'Buttons', css: `.fx:active { transform: scale(0.95); }\n.fx { transition: transform 0.15s ease; }`, html: '<button class="fx">Click me</button>', dt: 'btn-hover' },
+  { name: 'Slide BG', cat: 'Buttons', css: `.fx { background: linear-gradient(to right, ${C} 50%, #f3f4f6 50%); background-size: 200% 100%; background-position: right; transition: all 0.3s ease; border: 1px solid #e5e7eb; }\n.fx:hover { background-position: left; color: #fff; border-color: ${C}; }`, html: '<button class="fx">Hover me</button>', dt: 'btn-hover' },
+  { name: 'Gradient Shift', cat: 'Buttons', css: `.fx { background: linear-gradient(135deg, ${C}, #8b5cf6); background-size: 200% 200%; transition: background-position 0.5s ease; }\n.fx:hover { background-position: 100% 100%; }`, html: '<button class="fx">Hover me</button>', dt: 'btn-hover' },
+  { name: 'Border Draw', cat: 'Buttons', css: `.fx { border: 2px solid transparent; background-clip: padding-box; position: relative; }\n.fx::before { content: ''; position: absolute; inset: -2px; border: 2px solid ${C}; border-radius: inherit; clip-path: inset(0 100% 0 0); transition: clip-path 0.4s ease; }\n.fx:hover::before { clip-path: inset(0 0 0 0); }`, html: '<button class="fx">Hover me</button>', dt: 'btn-hover' },
+  { name: 'Glow Button', cat: 'Buttons', css: `.fx:hover { box-shadow: 0 0 16px ${C}80, 0 0 32px ${C}40; }\n.fx { transition: box-shadow 0.3s ease; background: ${C}; color: #fff; }`, html: '<button class="fx">Hover me</button>', dt: 'btn-hover' },
+  { name: 'Split', cat: 'Buttons', css: `.fx { position: relative; overflow: hidden; z-index: 1; }\n.fx::before, .fx::after { content: ''; position: absolute; width: 50%; height: 100%; background: ${C}; z-index: -1; transition: transform 0.3s ease; }\n.fx::before { left: 0; top: 0; transform: translateY(-100%); }\n.fx::after { right: 0; top: 0; transform: translateY(100%); }\n.fx:hover::before { transform: translateY(0); }\n.fx:hover::after { transform: translateY(0); }\n.fx:hover { color: #fff; }`, html: '<button class="fx">Hover me</button>', dt: 'btn-hover' },
+  { name: 'Fill Up', cat: 'Buttons', css: `.fx { position: relative; overflow: hidden; z-index: 1; }\n.fx::before { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 0; background: ${C}; z-index: -1; transition: height 0.3s ease; }\n.fx:hover::before { height: 100%; }\n.fx:hover { color: #fff; }`, html: '<button class="fx">Hover me</button>', dt: 'btn-hover' },
+  { name: 'Outline', cat: 'Buttons', css: `.fx { border: 2px solid ${C}; color: ${C}; background: transparent; transition: all 0.3s ease; }\n.fx:hover { background: ${C}; color: #fff; }`, html: '<button class="fx">Hover me</button>', dt: 'btn-hover' },
+  { name: 'Neon', cat: 'Buttons', css: `.fx { border: 1px solid ${C}; color: ${C}; background: transparent; text-shadow: 0 0 8px ${C}80; transition: all 0.3s ease; }\n.fx:hover { background: ${C}20; box-shadow: 0 0 12px ${C}60, inset 0 0 12px ${C}20; }`, html: '<button class="fx">Hover me</button>', dt: 'btn-hover' },
+
+  // ---- TEXT EFFECTS (10) ----
+  { name: 'Typewriter', cat: 'Text', css: `@keyframes typing { from { width: 0; } to { width: 12ch; } }\n@keyframes blink { 50% { border-color: transparent; } }\n.fx { overflow: hidden; white-space: nowrap; border-right: 2px solid ${C}; width: 0; animation: typing 2s steps(12) forwards, blink 0.7s step-end infinite; font-family: monospace; }`, html: '<span class="fx">Hello World!</span>', dt: 'text' },
+  { name: 'Glitch', cat: 'Text', css: `@keyframes glitch1 { 0%,100% { clip-path: inset(20% 0 60% 0); transform: translateX(-2px); } 50% { clip-path: inset(50% 0 20% 0); transform: translateX(2px); } }\n@keyframes glitch2 { 0%,100% { clip-path: inset(60% 0 10% 0); transform: translateX(2px); } 50% { clip-path: inset(10% 0 50% 0); transform: translateX(-2px); } }\n.glitch { position: relative; }\n.glitch::before, .glitch::after { content: attr(data-text); position: absolute; left: 0; top: 0; }\n.glitch::before { color: #0ff; animation: glitch1 0.3s infinite; }\n.glitch::after { color: #f0f; animation: glitch2 0.3s infinite; }`, html: '<span class="glitch" data-text="Glitch">Glitch</span>', dt: 'text' },
+  { name: 'Wave Text', cat: 'Text', css: `@keyframes waveText { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }\n.wave-text span { display: inline-block; animation: waveText 1s ease infinite; }\n.wave-text span:nth-child(2) { animation-delay: 0.1s; }\n.wave-text span:nth-child(3) { animation-delay: 0.2s; }\n.wave-text span:nth-child(4) { animation-delay: 0.3s; }\n.wave-text span:nth-child(5) { animation-delay: 0.4s; }`, html: '<div class="wave-text"><span>H</span><span>e</span><span>l</span><span>l</span><span>o</span></div>', dt: 'text' },
+  { name: 'Fade Letters', cat: 'Text', css: `@keyframes fadeLetter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }\n.fade-letters span { display: inline-block; opacity: 0; animation: fadeLetter 0.4s ease forwards; }\n.fade-letters span:nth-child(2) { animation-delay: 0.1s; }\n.fade-letters span:nth-child(3) { animation-delay: 0.2s; }\n.fade-letters span:nth-child(4) { animation-delay: 0.3s; }\n.fade-letters span:nth-child(5) { animation-delay: 0.4s; }`, html: '<div class="fade-letters"><span>H</span><span>e</span><span>l</span><span>l</span><span>o</span></div>', dt: 'text' },
+  { name: 'Bounce Letters', cat: 'Text', css: `@keyframes bounceLetter { 0%,100% { transform: translateY(0); } 40% { transform: translateY(-14px); } }\n.bounce-letters span { display: inline-block; animation: bounceLetter 0.8s ease infinite; }\n.bounce-letters span:nth-child(2) { animation-delay: 0.1s; }\n.bounce-letters span:nth-child(3) { animation-delay: 0.2s; }\n.bounce-letters span:nth-child(4) { animation-delay: 0.3s; }\n.bounce-letters span:nth-child(5) { animation-delay: 0.4s; }`, html: '<div class="bounce-letters"><span>H</span><span>e</span><span>l</span><span>l</span><span>o</span></div>', dt: 'text' },
+  { name: 'Gradient Text', cat: 'Text', css: `.fx { background: linear-gradient(135deg, ${C}, #8b5cf6, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; background-size: 200% 200%; animation: gradText 3s ease infinite; }\n@keyframes gradText { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }`, html: '<span class="fx" style="font-size:24px;font-weight:700;">Gradient Text</span>', dt: 'text' },
+  { name: 'Blur Reveal', cat: 'Text', css: `@keyframes blurReveal { from { filter: blur(12px); opacity: 0; } to { filter: blur(0); opacity: 1; } }\n.fx { animation: blurReveal 0.8s ease forwards; }`, html: '<span class="fx" style="font-size:20px;font-weight:700;">Revealed</span>', dt: 'text' },
+  { name: 'Split Reveal', cat: 'Text', css: `@keyframes splitTop { from { clip-path: inset(50% 0 50% 0); } to { clip-path: inset(0 0 50% 0); } }\n@keyframes splitBot { from { clip-path: inset(50% 0 50% 0); } to { clip-path: inset(50% 0 0 0); } }\n.split-reveal { position: relative; }\n.split-reveal span { position: absolute; left: 0; }\n.split-reveal span:first-child { animation: splitTop 0.5s ease forwards; }\n.split-reveal span:last-child { animation: splitBot 0.5s ease forwards; }`, html: '<div class="split-reveal" style="position:relative;height:1.5em;"><span>Split</span><span>Split</span></div>', dt: 'text' },
+  { name: 'Neon Flicker', cat: 'Text', css: `@keyframes neonFlicker { 0%,19%,21%,23%,25%,54%,56%,100% { text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff, 0 0 40px ${C}, 0 0 80px ${C}; } 20%,24%,55% { text-shadow: none; } }\n.fx { color: #fff; animation: neonFlicker 1.5s infinite alternate; }`, html: '<span class="fx" style="font-size:20px;font-weight:700;">Neon</span>', dt: 'text' },
+  { name: 'Scramble', cat: 'Text', css: `@keyframes scramble { 0% { opacity: 0; filter: blur(4px); transform: translateX(4px); } 50% { opacity: 0.7; filter: blur(2px); } 100% { opacity: 1; filter: blur(0); transform: translateX(0); } }\n.scramble span { display: inline-block; animation: scramble 0.5s ease forwards; opacity: 0; }\n.scramble span:nth-child(2) { animation-delay: 0.05s; }\n.scramble span:nth-child(3) { animation-delay: 0.1s; }\n.scramble span:nth-child(4) { animation-delay: 0.15s; }\n.scramble span:nth-child(5) { animation-delay: 0.2s; }\n.scramble span:nth-child(6) { animation-delay: 0.25s; }\n.scramble span:nth-child(7) { animation-delay: 0.3s; }`, html: '<div class="scramble"><span>S</span><span>c</span><span>r</span><span>a</span><span>m</span><span>b</span><span>l</span><span>e</span></div>', dt: 'text' }
+];
+
+// Favorites in localStorage
+const FAVS_KEY = 'fds-micro-anims-favs';
+function loadFavs() { try { return JSON.parse(localStorage.getItem(FAVS_KEY)) || []; } catch { return []; } }
+function saveFavs(f) { localStorage.setItem(FAVS_KEY, JSON.stringify(f)); }
+let favs = loadFavs();
+
+function applyCustom(css) {
+  const dur = document.getElementById('custDuration').value;
+  const col = document.getElementById('custColor').value;
+  const eas = document.getElementById('custEasing').value;
+  let out = css;
+  if (dur) out = out.replace(/(\d+\.?\d*)(s\b)/g, dur.replace('s', '') + '$2');
+  if (col !== '#ec4899') out = out.replace(/#ec4899/g, col);
+  if (eas) out = out.replace(/ease(?:-in-out|-in|-out)?|linear|cubic-bezier\([^)]+\)/g, eas);
+  return out;
+}
+
+const cats = ['All', ...new Set(effects.map(e => e.cat))];
+
+function renderCategories() {
+  const container = document.getElementById('categories');
+  container.innerHTML = cats.map((c, i) => `<button class="cat-btn${i === 0 ? ' active' : ''}" data-cat="${c}">${c}${c !== 'All' ? ` (${effects.filter(e => e.cat === c).length})` : ''}</button>`).join('');
+  container.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderGrid();
+    });
+  });
+}
+
+function renderGrid() {
+  const cat = document.querySelector('.cat-btn.active')?.dataset.cat || 'All';
+  const search = document.getElementById('search').value.toLowerCase();
+  const filtered = effects.filter(e => {
+    if (cat !== 'All' && e.cat !== cat) return false;
+    if (search && !e.name.toLowerCase().includes(search) && !e.cat.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  document.getElementById('counter').textContent = filtered.length + ' effects';
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+
+  filtered.forEach((effect, i) => {
+    const card = document.createElement('div');
+    card.className = 'effect-card';
+    const isFav = favs.includes(effect.name);
+
+    // Build preview
+    const previewDiv = document.createElement('div');
+    previewDiv.className = 'effect-preview';
+
+    // Inject scoped styles
+    const scopeId = 'fx-' + i + '-' + Date.now();
+    const style = document.createElement('style');
+    const scopedCSS = applyCustom(effect.css).replace(/\.fx/g, '.' + scopeId).replace(/\.dots/g, '.' + scopeId).replace(/\.bounce-dots/g, '.' + scopeId).replace(/\.wave\b/g, '.' + scopeId).replace(/\.orbit/g, '.' + scopeId).replace(/\.grid-spin/g, '.' + scopeId).replace(/\.chase/g, '.' + scopeId).replace(/\.fold\b/g, '.' + scopeId).replace(/\.square-spin/g, '.' + scopeId).replace(/\.heart-beat/g, '.' + scopeId).replace(/\.clock/g, '.' + scopeId).replace(/\.dna/g, '.' + scopeId).replace(/\.infinity-dot/g, '.' + scopeId).replace(/\.ring/g, '.' + scopeId).replace(/\.bars/g, '.' + scopeId).replace(/\.pulse-ring/g, '.' + scopeId).replace(/\.glitch/g, '.' + scopeId).replace(/\.wave-text/g, '.' + scopeId).replace(/\.fade-letters/g, '.' + scopeId).replace(/\.bounce-letters/g, '.' + scopeId).replace(/\.split-reveal/g, '.' + scopeId).replace(/\.scramble/g, '.' + scopeId);
+    style.textContent = scopedCSS;
+    previewDiv.appendChild(style);
+
+    const scopedHTML = effect.html.replace(/class="[^"]*"/g, m => m.replace(/"([^"]*)"/g, '"' + scopeId + '"'));
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = scopedHTML;
+    previewDiv.appendChild(wrapper.firstElementChild || wrapper);
+
+    // For animate types, replay on click
+    if (effect.dt === 'animate') {
+      previewDiv.style.cursor = 'pointer';
+      previewDiv.title = 'Click to replay';
+      previewDiv.addEventListener('click', () => {
+        const el = previewDiv.querySelector('.' + scopeId);
+        if (el) { el.style.animation = 'none'; el.offsetHeight; el.style.animation = ''; }
+      });
+    }
+
+    // Neon flicker needs dark bg
+    if (effect.name === 'Neon Flicker') previewDiv.style.background = '#1a1a1a';
+
+    card.appendChild(previewDiv);
+
+    // Info bar
+    const info = document.createElement('div');
+    info.className = 'effect-info';
+    info.innerHTML = `
+      <div><div class="effect-name">${effect.name}</div><div class="effect-cat">${effect.cat}</div></div>
+      <div class="effect-actions">
+        <button class="fav-btn${isFav ? ' active' : ''}" data-name="${effect.name}" title="Favorite">&#9829;</button>
+        <button class="btn btn-sm btn-secondary copy-css" title="Copy CSS">CSS</button>
+        <button class="btn btn-sm btn-secondary copy-html" title="Copy HTML">HTML</button>
+      </div>
+    `;
+    card.appendChild(info);
+
+    info.querySelector('.fav-btn').addEventListener('click', e => {
+      const name = e.currentTarget.dataset.name;
+      if (favs.includes(name)) { favs = favs.filter(n => n !== name); } else { favs.push(name); }
+      saveFavs(favs);
+      e.currentTarget.classList.toggle('active');
+    });
+    info.querySelector('.copy-css').addEventListener('click', () => copyText(applyCustom(effect.css)));
+    info.querySelector('.copy-html').addEventListener('click', () => copyText(effect.html));
+
+    grid.appendChild(card);
+  });
+}
+
+document.getElementById('search').addEventListener('input', renderGrid);
+['custDuration', 'custColor', 'custEasing'].forEach(id => document.getElementById(id).addEventListener('input', renderGrid));
+
+renderCategories();
+renderGrid();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>
