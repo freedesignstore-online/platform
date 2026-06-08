@@ -4,292 +4,753 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Favicon Generator - FreeDesignStore</title>
+<meta name="description" content="Create favicons from letters, emoji, or images. Preview in browser tabs, bookmarks, and mobile. Download all sizes as PNG, ICO, SVG, and manifest.json.">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
-a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
-a.back:hover { text-decoration: underline; }
-h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
-p.subtitle { color: #6b7280; margin-bottom: 24px; }
-.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
-.btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 14px; transition: opacity .2s; }
-.btn:hover { opacity: .85; }
-.btn-primary { background: #ec4899; color: #fff; }
-.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
-.layout { display: grid; grid-template-columns: 300px 1fr; gap: 24px; }
-@media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }
-.form-group { margin-bottom: 16px; }
-.form-group label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 4px; }
-.form-group input[type="text"] { font-family: inherit; font-size: 18px; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; width: 100%; text-align: center; }
-.form-group input[type="color"] { width: 48px; height: 40px; padding: 2px; border: 1px solid #e5e7eb; border-radius: 8px; cursor: pointer; }
-.form-group select { font-family: inherit; font-size: 14px; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; width: 100%; background: #fff; }
-.shape-options { display: flex; gap: 8px; }
-.shape-btn { width: 44px; height: 44px; border: 2px solid #e5e7eb; background: #f9fafb; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: border-color .2s; }
-.shape-btn:hover { border-color: #ec4899; }
-.shape-btn.active { border-color: #ec4899; background: #fdf2f8; }
-.shape-btn[data-shape="square"] { border-radius: 4px; }
-.shape-btn[data-shape="rounded"] { border-radius: 10px; }
-.shape-btn[data-shape="circle"] { border-radius: 50%; }
-.bg-options { display: flex; gap: 8px; margin-bottom: 8px; }
-.bg-btn { padding: 6px 12px; border: 2px solid #e5e7eb; border-radius: 6px; background: #fff; cursor: pointer; font-size: 13px; }
-.bg-btn:hover { border-color: #ec4899; }
-.bg-btn.active { border-color: #ec4899; background: #fdf2f8; }
-.previews { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; }
-.preview-item { text-align: center; }
-.preview-item .size-label { font-size: 11px; color: #6b7280; margin-top: 4px; }
-.preview-canvas { border: 1px solid #e5e7eb; border-radius: 4px; image-rendering: pixelated; }
-.gradient-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
-.gradient-row input[type="color"] { width: 40px; height: 34px; }
-.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
-.code-block { margin-top: 16px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 13px; cursor: pointer; position: relative; }
-.code-block:hover::after { content: 'Click to copy'; position: absolute; top: 8px; right: 8px; font-size: 11px; color: #ec4899; font-family: 'Manrope', sans-serif; }
-.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; }
-.toast.show { opacity: 1; }
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#fafafa;--text:#1a1a1a;--accent:#ec4899;--panel:#ffffff;--line:#e5e7eb;--muted:#6b7280}
+body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:24px;padding-bottom:80px}
+a.back{display:inline-block;margin-bottom:24px;color:var(--accent);text-decoration:none;font-weight:500;font-size:.85rem}
+a.back:hover{text-decoration:underline}
+h1{font-size:28px;font-weight:700;margin-bottom:8px}
+p.subtitle{color:var(--muted);margin-bottom:24px;font-size:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:24px;margin-bottom:24px}
+.panel h2{font-size:16px;font-weight:700;margin-bottom:12px}
+.panel h3{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px}
+.btn{padding:8px 16px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-family:inherit;font-size:14px;transition:opacity .2s}
+.btn:hover{opacity:.85}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-secondary{background:#f3f4f6;color:var(--text);border:1px solid var(--line)}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+/* Layout */
+.layout{display:grid;grid-template-columns:320px 1fr;gap:24px}
+@media(max-width:800px){.layout{grid-template-columns:1fr}}
+
+/* Forms */
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.form-group input[type="text"]{font-family:inherit;font-size:20px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;width:100%;text-align:center}
+.form-group input[type="color"]{width:48px;height:40px;padding:2px;border:1px solid var(--line);border-radius:8px;cursor:pointer}
+.form-group select,.form-group input[type="range"]{font-family:inherit;font-size:14px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;width:100%;background:#fff}
+input[type="range"]{accent-color:var(--accent)}
+
+/* Input mode tabs */
+.input-tabs{display:flex;gap:0;border-bottom:2px solid var(--line);margin-bottom:16px}
+.input-tab{flex:1;padding:8px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;color:var(--muted);text-align:center;transition:all .15s}
+.input-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.input-pane{display:none}
+.input-pane.active{display:block}
+
+/* Options buttons */
+.opt-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.opt-btn{padding:5px 10px;border:2px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;transition:border-color .15s}
+.opt-btn:hover{border-color:var(--accent)}
+.opt-btn.active{border-color:var(--accent);background:#fdf2f8}
+
+/* Shape buttons */
+.shape-options{display:flex;gap:8px}
+.shape-btn{width:44px;height:44px;border:2px solid var(--line);background:#f9fafb;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:border-color .15s}
+.shape-btn:hover{border-color:var(--accent)}
+.shape-btn.active{border-color:var(--accent);background:#fdf2f8}
+.shape-btn[data-shape="square"]{border-radius:4px}
+.shape-btn[data-shape="rounded"]{border-radius:10px}
+.shape-btn[data-shape="circle"]{border-radius:50%}
+.shape-btn[data-shape="squircle"]{border-radius:28%}
+
+/* Gradient row */
+.gradient-row{display:flex;gap:8px;align-items:center;margin-top:8px}
+.gradient-row input[type="color"]{width:40px;height:34px}
+
+/* Previews */
+.previews-grid{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;margin-bottom:20px}
+.preview-item{text-align:center}
+.preview-item .size-label{font-size:10px;color:var(--muted);margin-top:4px;font-weight:500}
+.preview-canvas{border:1px solid var(--line);border-radius:3px;image-rendering:pixelated}
+
+/* Context previews */
+.context-previews{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:900px){.context-previews{grid-template-columns:1fr}}
+.context-card{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.context-card h4{font-size:11px;font-weight:600;color:var(--muted);padding:8px 12px;border-bottom:1px solid #f3f4f6;text-transform:uppercase;letter-spacing:.5px}
+.context-body{padding:12px}
+
+/* Browser tab mockup */
+.tab-mockup{background:#f3f4f6;border-radius:8px 8px 0 0;padding:8px 0 0 8px;display:flex;gap:0}
+.tab-active{background:#fff;border-radius:8px 8px 0 0;padding:6px 16px;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;max-width:200px}
+.tab-inactive{background:#e5e7eb;border-radius:8px 8px 0 0;padding:6px 16px;font-size:12px;color:#9ca3af;max-width:120px}
+.tab-bar-dots{margin-left:auto;padding:6px 12px;display:flex;gap:4px}
+.tab-bar-dots span{width:8px;height:8px;border-radius:50%;background:#d1d5db}
+.browser-url{background:#fff;padding:8px 12px;border-bottom:1px solid var(--line);font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}
+
+/* Bookmark bar mockup */
+.bookmark-bar{background:#f9fafb;padding:6px 12px;display:flex;gap:12px;border:1px solid var(--line);border-radius:8px}
+.bookmark-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)}
+
+/* Mobile home mockup */
+.mobile-frame{width:160px;margin:0 auto;background:#f3f4f6;border-radius:16px;padding:12px;border:1px solid var(--line)}
+.mobile-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.mobile-icon{text-align:center}
+.mobile-icon .icon-frame{border-radius:14px;overflow:hidden;margin:0 auto;width:40px;height:40px}
+.mobile-icon .icon-label{font-size:7px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Actions */
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+
+/* Code block */
+.code-block{background:#f9fafb;border:1px solid var(--line);border-radius:8px;padding:12px;font-family:monospace;font-size:12px;cursor:pointer;position:relative;white-space:pre;overflow-x:auto;line-height:1.6}
+.code-block:hover::after{content:'Click to copy';position:absolute;top:8px;right:8px;font-size:10px;color:var(--accent);font-family:'Manrope',sans-serif;font-weight:600}
+
+/* History */
+.history-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+.history-item{width:48px;height:48px;border:2px solid var(--line);border-radius:8px;cursor:pointer;overflow:hidden;transition:border-color .15s}
+.history-item:hover{border-color:var(--accent)}
+.history-item canvas{width:100%;height:100%}
+
+.toast{position:fixed;bottom:80px;right:24px;background:var(--text);color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:100}
+.toast.show{opacity:1}
 </style>
 </head>
 <body>
 <a class="back" href="/">Back to Store</a>
 <h1>Favicon Generator</h1>
-<p class="subtitle">Create favicons from letters or emoji. Download as SVG, PNG, or ICO.</p>
+<p class="subtitle">Create favicons from letters, emoji, or images. Preview in browser tabs, bookmarks, and mobile home screens. Download all sizes.</p>
 
 <div class="panel">
   <div class="layout">
+    <!-- Left: Controls -->
     <div>
-      <div class="form-group">
-        <label>Text (1-2 letters or emoji)</label>
-        <input type="text" id="faviText" value="Fd" maxlength="3" oninput="render()">
-      </div>
-      <div class="form-group">
-        <label>Font Weight</label>
-        <select id="fontWeight" onchange="render()">
-          <option value="400">Regular</option>
-          <option value="600">Semibold</option>
-          <option value="700" selected>Bold</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Text Color</label>
-        <input type="color" id="textColor" value="#ffffff" onchange="render()">
+      <!-- Input mode tabs -->
+      <div class="input-tabs" id="inputTabs">
+        <button class="input-tab active" data-mode="text">Letters</button>
+        <button class="input-tab" data-mode="emoji">Emoji</button>
+        <button class="input-tab" data-mode="image">Image</button>
+        <button class="input-tab" data-mode="logo">Logo Maker</button>
       </div>
 
+      <!-- Text input -->
+      <div class="input-pane active" id="paneText">
+        <div class="form-group">
+          <label>Text (1-3 characters)</label>
+          <input type="text" id="faviText" value="Fd" maxlength="3">
+        </div>
+        <div class="form-group">
+          <label>Font Weight</label>
+          <select id="fontWeight">
+            <option value="400">Regular</option>
+            <option value="500">Medium</option>
+            <option value="600">Semibold</option>
+            <option value="700" selected>Bold</option>
+            <option value="800">Extra Bold</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Text Color</label>
+          <input type="color" id="textColor" value="#ffffff">
+        </div>
+      </div>
+
+      <!-- Emoji input -->
+      <div class="input-pane" id="paneEmoji">
+        <div class="form-group">
+          <label>Pick an Emoji</label>
+          <input type="text" id="emojiInput" value="" placeholder="Paste or type emoji" style="font-size:28px">
+        </div>
+        <div class="opt-row" id="emojiQuick">
+          <button class="opt-btn" onclick="pickEmoji(this)">&#9889;</button>
+          <button class="opt-btn" onclick="pickEmoji(this)">&#128293;</button>
+          <button class="opt-btn" onclick="pickEmoji(this)">&#127775;</button>
+          <button class="opt-btn" onclick="pickEmoji(this)">&#128640;</button>
+          <button class="opt-btn" onclick="pickEmoji(this)">&#127912;</button>
+          <button class="opt-btn" onclick="pickEmoji(this)">&#128161;</button>
+          <button class="opt-btn" onclick="pickEmoji(this)">&#9749;</button>
+          <button class="opt-btn" onclick="pickEmoji(this)">&#128142;</button>
+          <button class="opt-btn" onclick="pickEmoji(this)">&#128187;</button>
+          <button class="opt-btn" onclick="pickEmoji(this)">&#127793;</button>
+          <button class="opt-btn" onclick="pickEmoji(this)">&#128736;</button>
+          <button class="opt-btn" onclick="pickEmoji(this)">&#128170;</button>
+        </div>
+      </div>
+
+      <!-- Image input -->
+      <div class="input-pane" id="paneImage">
+        <div class="form-group">
+          <label>Upload Image (PNG, SVG, JPG)</label>
+          <input type="file" id="imageUpload" accept="image/*" style="font-size:12px">
+        </div>
+        <p style="font-size:11px;color:var(--muted)">Image will be cropped to center square and resized to all favicon sizes.</p>
+      </div>
+
+      <!-- Logo Maker bridge -->
+      <div class="input-pane" id="paneLogo">
+        <button class="btn btn-primary" onclick="importFromLogoMaker()" style="margin-bottom:12px">Import from Logo Maker</button>
+        <p style="font-size:11px;color:var(--muted)">Loads the last exported logo from Logo Maker (stored in localStorage).</p>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--line);margin:16px 0">
+
+      <!-- Background -->
       <div class="form-group">
         <label>Background</label>
-        <div class="bg-options">
-          <button class="bg-btn active" data-bg="solid" onclick="setBg('solid',this)">Solid</button>
-          <button class="bg-btn" data-bg="gradient" onclick="setBg('gradient',this)">Gradient</button>
-          <button class="bg-btn" data-bg="transparent" onclick="setBg('transparent',this)">None</button>
+        <div class="opt-row" id="bgOptions">
+          <button class="opt-btn active" data-bg="solid">Solid</button>
+          <button class="opt-btn" data-bg="gradient-linear">Linear Gradient</button>
+          <button class="opt-btn" data-bg="gradient-radial">Radial Gradient</button>
+          <button class="opt-btn" data-bg="transparent">Transparent</button>
         </div>
-        <div id="solidRow"><input type="color" id="bgColor" value="#ec4899" onchange="render()"></div>
-        <div id="gradientRow" class="gradient-row" style="display:none;">
-          <input type="color" id="grad1" value="#ec4899" onchange="render()">
-          <span style="color:#6b7280;font-size:12px;">to</span>
-          <input type="color" id="grad2" value="#8b5cf6" onchange="render()">
+        <div id="solidRow"><input type="color" id="bgColor" value="#ec4899"></div>
+        <div id="gradientRow" class="gradient-row" style="display:none">
+          <input type="color" id="grad1" value="#ec4899">
+          <span style="color:var(--muted);font-size:12px">to</span>
+          <input type="color" id="grad2" value="#8b5cf6">
         </div>
       </div>
 
+      <!-- Shape -->
       <div class="form-group">
         <label>Shape</label>
-        <div class="shape-options">
-          <button class="shape-btn active" data-shape="square" onclick="setShape('square',this)">&#9632;</button>
-          <button class="shape-btn" data-shape="rounded" onclick="setShape('rounded',this)">&#9632;</button>
-          <button class="shape-btn" data-shape="circle" onclick="setShape('circle',this)">&#9679;</button>
+        <div class="shape-options" id="shapeOptions">
+          <button class="shape-btn active" data-shape="square" title="Square">&#9632;</button>
+          <button class="shape-btn" data-shape="rounded" title="Rounded">&#9632;</button>
+          <button class="shape-btn" data-shape="circle" title="Circle">&#9679;</button>
+          <button class="shape-btn" data-shape="squircle" title="Squircle">&#9632;</button>
+        </div>
+      </div>
+
+      <!-- Corner radius (for rounded/squircle) -->
+      <div class="form-group" id="radiusGroup" style="display:none">
+        <label>Corner Radius: <span id="radiusVal">20%</span></label>
+        <input type="range" id="radiusSlider" min="5" max="50" value="20">
+      </div>
+
+      <!-- Effects -->
+      <div class="form-group">
+        <label>Effects</label>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label style="font-size:12px;display:flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0;margin:0"><input type="checkbox" id="fxShadow"> Drop Shadow</label>
+          <label style="font-size:12px;display:flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0;margin:0"><input type="checkbox" id="fxBorder"> Border <input type="color" id="fxBorderColor" value="#ffffff" style="width:28px;height:22px;padding:1px;border-radius:4px;margin-left:4px"></label>
+          <label style="font-size:12px;display:flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0;margin:0"><input type="checkbox" id="fxGlow"> Glow</label>
         </div>
       </div>
     </div>
 
+    <!-- Right: Previews -->
     <div>
-      <h3 style="margin-bottom:16px;">Preview</h3>
-      <div class="previews" id="previews"></div>
+      <h2>All Sizes</h2>
+      <div class="previews-grid" id="previews"></div>
 
+      <h2 style="margin-top:16px">In Context</h2>
+      <div class="context-previews">
+        <!-- Browser tab -->
+        <div class="context-card">
+          <h4>Browser Tab</h4>
+          <div class="context-body" style="padding:0">
+            <div class="tab-mockup">
+              <div class="tab-active"><canvas id="ctxTab" width="16" height="16" style="width:16px;height:16px;flex-shrink:0"></canvas><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="ctxTabTitle">My Website</span></div>
+              <div class="tab-inactive">New Tab</div>
+              <div class="tab-bar-dots"><span></span><span></span><span></span></div>
+            </div>
+            <div class="browser-url"><canvas id="ctxUrl" width="16" height="16" style="width:16px;height:16px;flex-shrink:0"></canvas>mywebsite.com</div>
+          </div>
+        </div>
+        <!-- Bookmark bar -->
+        <div class="context-card">
+          <h4>Bookmark Bar</h4>
+          <div class="context-body">
+            <div class="bookmark-bar">
+              <div class="bookmark-item"><canvas id="ctxBm1" width="16" height="16" style="width:16px;height:16px"></canvas>GitHub</div>
+              <div class="bookmark-item"><canvas id="ctxBm2" width="16" height="16" style="width:16px;height:16px"></canvas><strong>My Site</strong></div>
+              <div class="bookmark-item"><canvas id="ctxBm3" width="16" height="16" style="width:16px;height:16px"></canvas>Docs</div>
+            </div>
+          </div>
+        </div>
+        <!-- Mobile home screen -->
+        <div class="context-card">
+          <h4>Mobile Home Screen</h4>
+          <div class="context-body">
+            <div class="mobile-frame">
+              <div class="mobile-grid">
+                <div class="mobile-icon"><div class="icon-frame" style="background:#e5e7eb"></div><div class="icon-label">Phone</div></div>
+                <div class="mobile-icon"><div class="icon-frame" style="background:#e5e7eb"></div><div class="icon-label">Mail</div></div>
+                <div class="mobile-icon"><div class="icon-frame"><canvas id="ctxMobile" width="192" height="192" style="width:100%;height:100%;border-radius:14px"></canvas></div><div class="icon-label" id="ctxMobileLabel">My Site</div></div>
+                <div class="mobile-icon"><div class="icon-frame" style="background:#e5e7eb"></div><div class="icon-label">Safari</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Download actions -->
       <div class="actions">
-        <button class="btn btn-primary" onclick="downloadSVG()">Download SVG</button>
-        <button class="btn btn-secondary" onclick="downloadPNG(16)">PNG 16</button>
-        <button class="btn btn-secondary" onclick="downloadPNG(32)">PNG 32</button>
-        <button class="btn btn-secondary" onclick="downloadPNG(48)">PNG 48</button>
-        <button class="btn btn-secondary" onclick="downloadPNG(180)">PNG 180</button>
-        <button class="btn btn-secondary" onclick="downloadPNG(512)">PNG 512</button>
-        <button class="btn btn-secondary" onclick="downloadICO()">Download ICO</button>
+        <button class="btn btn-primary" onclick="downloadPack()">Download All (ZIP-like pack)</button>
+        <button class="btn btn-secondary" onclick="downloadSVG()">SVG</button>
+        <button class="btn btn-secondary" onclick="downloadICO()">ICO</button>
+        <button class="btn btn-secondary" onclick="downloadPNG(16)">16px</button>
+        <button class="btn btn-secondary" onclick="downloadPNG(32)">32px</button>
+        <button class="btn btn-secondary" onclick="downloadPNG(48)">48px</button>
+        <button class="btn btn-secondary" onclick="downloadPNG(64)">64px</button>
+        <button class="btn btn-secondary" onclick="downloadPNG(128)">128px</button>
+        <button class="btn btn-secondary" onclick="downloadPNG(180)">180px</button>
+        <button class="btn btn-secondary" onclick="downloadPNG(192)">192px</button>
+        <button class="btn btn-secondary" onclick="downloadPNG(512)">512px</button>
       </div>
 
-      <div class="code-block" id="htmlTags" onclick="copyTags()">
-&lt;link rel="icon" type="image/svg+xml" href="/favicon.svg"&gt;
+      <!-- HTML tags -->
+      <h3 style="margin-top:20px">HTML Tags</h3>
+      <div class="code-block" id="htmlTags" onclick="copyTags()">&lt;link rel="icon" type="image/svg+xml" href="/favicon.svg"&gt;
 &lt;link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png"&gt;
+&lt;link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png"&gt;
 &lt;link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"&gt;
-      </div>
+&lt;link rel="icon" sizes="192x192" href="/icon-192.png"&gt;
+&lt;link rel="icon" sizes="512x512" href="/icon-512.png"&gt;
+&lt;link rel="manifest" href="/manifest.json"&gt;</div>
+
+      <!-- Manifest snippet -->
+      <h3 style="margin-top:16px">manifest.json snippet</h3>
+      <div class="code-block" id="manifestSnippet" onclick="copyManifest()">{
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}</div>
     </div>
+  </div>
+</div>
+
+<!-- History panel -->
+<div class="panel">
+  <h2>History</h2>
+  <p style="font-size:12px;color:var(--muted);margin-bottom:8px">Click a saved favicon to restore its settings.</p>
+  <div class="history-row" id="historyRow"></div>
+  <div class="actions" style="margin-top:12px">
+    <button class="btn btn-secondary btn-sm" onclick="saveToHistory()">Save Current</button>
+    <button class="btn btn-secondary btn-sm" onclick="clearHistory()">Clear History</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const sizes = [16, 32, 48, 180, 512];
-let bgMode = 'solid';
-let shape = 'square';
+const ALL_SIZES=[16,32,48,64,128,180,192,512];
+const STORAGE_KEY='fds-favicon-history';
+let inputMode='text';
+let bgMode='solid';
+let shape='square';
+let uploadedImage=null;
+let logoImage=null;
 
-function setBg(mode, el) {
-  bgMode = mode;
-  document.querySelectorAll('.bg-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('solidRow').style.display = mode === 'solid' ? 'block' : 'none';
-  document.getElementById('gradientRow').style.display = mode === 'gradient' ? 'flex' : 'none';
+// Input mode tabs
+document.getElementById('inputTabs').addEventListener('click',e=>{
+  const btn=e.target.closest('[data-mode]');
+  if(!btn) return;
+  inputMode=btn.dataset.mode;
+  document.querySelectorAll('.input-tab').forEach(b=>b.classList.toggle('active',b.dataset.mode===inputMode));
+  document.querySelectorAll('.input-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pane'+inputMode.charAt(0).toUpperCase()+inputMode.slice(1)).classList.add('active');
+  render();
+});
+
+// BG mode
+document.getElementById('bgOptions').addEventListener('click',e=>{
+  const btn=e.target.closest('[data-bg]');
+  if(!btn) return;
+  bgMode=btn.dataset.bg;
+  document.querySelectorAll('#bgOptions .opt-btn').forEach(b=>b.classList.toggle('active',b.dataset.bg===bgMode));
+  document.getElementById('solidRow').style.display=bgMode==='solid'?'block':'none';
+  document.getElementById('gradientRow').style.display=bgMode.startsWith('gradient')?'flex':'none';
+  render();
+});
+
+// Shape
+document.getElementById('shapeOptions').addEventListener('click',e=>{
+  const btn=e.target.closest('[data-shape]');
+  if(!btn) return;
+  shape=btn.dataset.shape;
+  document.querySelectorAll('.shape-btn').forEach(b=>b.classList.toggle('active',b.dataset.shape===shape));
+  document.getElementById('radiusGroup').style.display=(shape==='rounded'||shape==='squircle')?'block':'none';
+  render();
+});
+
+// Radius slider
+document.getElementById('radiusSlider').addEventListener('input',e=>{
+  document.getElementById('radiusVal').textContent=e.target.value+'%';
+  render();
+});
+
+// Auto-render on changes
+['faviText','fontWeight','textColor','bgColor','grad1','grad2','fxBorderColor'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',render);
+});
+['fxShadow','fxBorder','fxGlow'].forEach(id=>{
+  document.getElementById(id).addEventListener('change',render);
+});
+document.getElementById('emojiInput').addEventListener('input',render);
+
+// Image upload
+document.getElementById('imageUpload').addEventListener('change',e=>{
+  const file=e.target.files[0];
+  if(!file) return;
+  const img=new Image();
+  img.onload=()=>{uploadedImage=img;render();};
+  img.src=URL.createObjectURL(file);
+});
+
+function pickEmoji(btn){
+  document.getElementById('emojiInput').value=btn.textContent.trim();
   render();
 }
 
-function setShape(s, el) {
-  shape = s;
-  document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  render();
+function importFromLogoMaker(){
+  try{
+    const data=localStorage.getItem('fds-logo-maker-export');
+    if(!data){showToast('No logo found. Export from Logo Maker first.');return;}
+    const img=new Image();
+    img.onload=()=>{logoImage=img;render();showToast('Logo imported');};
+    img.src=data;
+  }catch{showToast('Could not import logo');}
 }
 
-function getConfig() {
-  return {
-    text: document.getElementById('faviText').value || 'A',
-    textColor: document.getElementById('textColor').value,
-    fontWeight: document.getElementById('fontWeight').value,
-    bgColor: document.getElementById('bgColor').value,
-    grad1: document.getElementById('grad1').value,
-    grad2: document.getElementById('grad2').value,
+function getConfig(){
+  return{
+    text:document.getElementById('faviText').value||'A',
+    emoji:document.getElementById('emojiInput').value,
+    textColor:document.getElementById('textColor').value,
+    fontWeight:document.getElementById('fontWeight').value,
+    bgColor:document.getElementById('bgColor').value,
+    grad1:document.getElementById('grad1').value,
+    grad2:document.getElementById('grad2').value,
+    radius:parseInt(document.getElementById('radiusSlider').value),
+    shadow:document.getElementById('fxShadow').checked,
+    border:document.getElementById('fxBorder').checked,
+    borderColor:document.getElementById('fxBorderColor').value,
+    glow:document.getElementById('fxGlow').checked,
   };
 }
 
-function buildSVG(size) {
-  const c = getConfig();
-  const r = shape === 'circle' ? size / 2 : shape === 'rounded' ? size * 0.2 : 0;
-  let bg = '';
-  if (bgMode === 'solid') {
-    bg = `<rect width="${size}" height="${size}" rx="${r}" fill="${c.bgColor}"/>`;
-  } else if (bgMode === 'gradient') {
-    bg = `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${c.grad1}"/><stop offset="100%" stop-color="${c.grad2}"/></linearGradient></defs><rect width="${size}" height="${size}" rx="${r}" fill="url(#g)"/>`;
+function getRadius(size,cfg){
+  if(shape==='circle') return size/2;
+  if(shape==='square') return 0;
+  return size*cfg.radius/100;
+}
+
+function drawFavicon(canvas,size){
+  const cfg=getConfig();
+  const ctx=canvas.getContext('2d');
+  canvas.width=size;canvas.height=size;
+  ctx.clearRect(0,0,size,size);
+
+  const r=getRadius(size,cfg);
+
+  // Background
+  if(bgMode!=='transparent'){
+    ctx.beginPath();
+    roundRect(ctx,0,0,size,size,r);
+    ctx.closePath();
+    if(bgMode==='solid'){
+      ctx.fillStyle=cfg.bgColor;
+    } else {
+      let grad;
+      if(bgMode==='gradient-radial'){
+        grad=ctx.createRadialGradient(size/2,size/2,0,size/2,size/2,size/2);
+      } else {
+        grad=ctx.createLinearGradient(0,0,size,size);
+      }
+      grad.addColorStop(0,cfg.grad1);
+      grad.addColorStop(1,cfg.grad2);
+      ctx.fillStyle=grad;
+    }
+    ctx.fill();
   }
-  const fontSize = c.text.length > 2 ? size * 0.35 : c.text.length === 2 ? size * 0.4 : size * 0.55;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${bg}<text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" fill="${c.textColor}" font-family="Manrope,system-ui,sans-serif" font-weight="${c.fontWeight}" font-size="${fontSize}">${escapeXml(c.text)}</text></svg>`;
+
+  // Effects
+  if(cfg.shadow && bgMode!=='transparent'){
+    ctx.save();
+    ctx.shadowColor='rgba(0,0,0,0.3)';
+    ctx.shadowBlur=size*0.08;
+    ctx.shadowOffsetY=size*0.04;
+    ctx.beginPath();roundRect(ctx,size*0.05,size*0.05,size*0.9,size*0.9,r*0.9);ctx.closePath();
+    ctx.fillStyle='transparent';
+    ctx.fill();
+    ctx.restore();
+  }
+
+  if(cfg.border){
+    ctx.save();
+    const bw=Math.max(1,size*0.06);
+    ctx.lineWidth=bw;
+    ctx.strokeStyle=cfg.borderColor;
+    ctx.beginPath();roundRect(ctx,bw/2,bw/2,size-bw,size-bw,Math.max(0,r-bw/2));ctx.closePath();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  if(cfg.glow && bgMode!=='transparent'){
+    ctx.save();
+    ctx.shadowColor=cfg.bgColor||cfg.grad1;
+    ctx.shadowBlur=size*0.15;
+    ctx.beginPath();roundRect(ctx,size*0.1,size*0.1,size*0.8,size*0.8,r*0.8);ctx.closePath();
+    ctx.fillStyle='transparent';
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Content
+  if(inputMode==='image'&&uploadedImage){
+    ctx.save();
+    ctx.beginPath();roundRect(ctx,0,0,size,size,r);ctx.closePath();ctx.clip();
+    const s=Math.min(uploadedImage.width,uploadedImage.height);
+    const sx=(uploadedImage.width-s)/2, sy=(uploadedImage.height-s)/2;
+    ctx.drawImage(uploadedImage,sx,sy,s,s,0,0,size,size);
+    ctx.restore();
+  } else if(inputMode==='logo'&&logoImage){
+    ctx.save();
+    ctx.beginPath();roundRect(ctx,0,0,size,size,r);ctx.closePath();ctx.clip();
+    const s=Math.min(logoImage.width,logoImage.height);
+    const sx=(logoImage.width-s)/2, sy=(logoImage.height-s)/2;
+    ctx.drawImage(logoImage,sx,sy,s,s,0,0,size,size);
+    ctx.restore();
+  } else if(inputMode==='emoji'){
+    const emoji=cfg.emoji||'\u2B50';
+    const fontSize=size*0.65;
+    ctx.font=`${fontSize}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText(emoji,size/2,size/2+size*0.03);
+  } else {
+    const text=cfg.text;
+    const fontSize=text.length>2?size*0.35:text.length===2?size*0.4:size*0.55;
+    ctx.font=`${cfg.fontWeight} ${fontSize}px Manrope,system-ui,sans-serif`;
+    ctx.fillStyle=cfg.textColor;
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText(text,size/2,size/2+size*0.02);
+  }
 }
 
-function escapeXml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-function renderToCanvas(canvas, size) {
-  const svg = buildSVG(size);
-  const blob = new Blob([svg], { type: 'image/svg+xml' });
-  const url = URL.createObjectURL(blob);
-  const img = new Image();
-  img.onload = () => {
-    canvas.width = size; canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, size, size);
-    ctx.drawImage(img, 0, 0, size, size);
-    URL.revokeObjectURL(url);
-  };
-  img.src = url;
+function roundRect(ctx,x,y,w,h,r){
+  if(r<1){ctx.rect(x,y,w,h);return;}
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);
 }
 
-function render() {
-  const container = document.getElementById('previews');
-  container.innerHTML = '';
-  sizes.forEach(size => {
-    const displaySize = Math.min(size, 128);
-    const item = document.createElement('div');
-    item.className = 'preview-item';
-    const canvas = document.createElement('canvas');
-    canvas.className = 'preview-canvas';
-    canvas.style.width = displaySize + 'px';
-    canvas.style.height = displaySize + 'px';
+// Build SVG (for text/emoji only — images use PNG)
+function buildSVG(size){
+  const cfg=getConfig();
+  const r=getRadius(size,cfg);
+  let bg='';
+  if(bgMode==='solid') bg=`<rect width="${size}" height="${size}" rx="${r}" fill="${cfg.bgColor}"/>`;
+  else if(bgMode.startsWith('gradient')){
+    if(bgMode==='gradient-radial'){
+      bg=`<defs><radialGradient id="g"><stop offset="0%" stop-color="${cfg.grad1}"/><stop offset="100%" stop-color="${cfg.grad2}"/></radialGradient></defs><rect width="${size}" height="${size}" rx="${r}" fill="url(#g)"/>`;
+    } else {
+      bg=`<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${cfg.grad1}"/><stop offset="100%" stop-color="${cfg.grad2}"/></linearGradient></defs><rect width="${size}" height="${size}" rx="${r}" fill="url(#g)"/>`;
+    }
+  }
+  let border='';
+  if(cfg.border){
+    const bw=Math.max(1,size*0.06);
+    border=`<rect x="${bw/2}" y="${bw/2}" width="${size-bw}" height="${size-bw}" rx="${Math.max(0,r-bw/2)}" fill="none" stroke="${cfg.borderColor}" stroke-width="${bw}"/>`;
+  }
+  const text=inputMode==='emoji'?(cfg.emoji||'\u2B50'):cfg.text;
+  const fontSize=text.length>2?size*0.35:text.length===2?size*0.4:size*0.55;
+  return`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${bg}${border}<text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" fill="${cfg.textColor}" font-family="Manrope,system-ui,sans-serif" font-weight="${cfg.fontWeight}" font-size="${fontSize}">${escapeXml(text)}</text></svg>`;
+}
+
+function escapeXml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function render(){
+  // All sizes
+  const container=document.getElementById('previews');
+  container.innerHTML='';
+  ALL_SIZES.forEach(size=>{
+    const displaySize=Math.min(size,128);
+    const item=document.createElement('div');
+    item.className='preview-item';
+    const canvas=document.createElement('canvas');
+    canvas.className='preview-canvas';
+    canvas.style.width=displaySize+'px';
+    canvas.style.height=displaySize+'px';
     item.appendChild(canvas);
-    const label = document.createElement('div');
-    label.className = 'size-label';
-    label.textContent = size + 'px';
+    const label=document.createElement('div');
+    label.className='size-label';
+    label.textContent=size+'px';
     item.appendChild(label);
     container.appendChild(item);
-    renderToCanvas(canvas, size);
+    drawFavicon(canvas,size);
+  });
+
+  // Context previews
+  drawFavicon(document.getElementById('ctxTab'),16);
+  drawFavicon(document.getElementById('ctxUrl'),16);
+  drawFavicon(document.getElementById('ctxBm2'),16);
+  drawFavicon(document.getElementById('ctxMobile'),192);
+
+  // Fill other bookmark items with generic gray squares
+  ['ctxBm1','ctxBm3'].forEach(id=>{
+    const c=document.getElementById(id);
+    c.width=16;c.height=16;
+    const ctx=c.getContext('2d');
+    ctx.fillStyle='#d1d5db';
+    ctx.fillRect(0,0,16,16);
   });
 }
 
-function downloadSVG() {
-  const svg = buildSVG(512);
-  const blob = new Blob([svg], { type: 'image/svg+xml' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'favicon.svg';
-  a.click();
+// Downloads
+function downloadSVG(){
+  const svg=buildSVG(512);
+  dl(new Blob([svg],{type:'image/svg+xml'}),'favicon.svg');
+  showToast('SVG downloaded');
 }
 
-function downloadPNG(size) {
-  const svg = buildSVG(size);
-  const blob = new Blob([svg], { type: 'image/svg+xml' });
-  const url = URL.createObjectURL(blob);
-  const img = new Image();
-  img.onload = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = size; canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, size, size);
-    canvas.toBlob(b => {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(b);
-      a.download = `favicon-${size}.png`;
-      a.click();
+function downloadPNG(size){
+  const canvas=document.createElement('canvas');
+  drawFavicon(canvas,size);
+  canvas.toBlob(b=>{
+    dl(b,size<=64?`favicon-${size}.png`:size===180?'apple-touch-icon.png':`icon-${size}.png`);
+    showToast(`PNG ${size}px downloaded`);
+  });
+}
+
+function downloadICO(){
+  const canvas=document.createElement('canvas');
+  drawFavicon(canvas,32);
+  canvas.toBlob(pngBlob=>{
+    pngBlob.arrayBuffer().then(pngBuf=>{
+      const png=new Uint8Array(pngBuf);
+      const ico=new ArrayBuffer(6+16+png.length);
+      const view=new DataView(ico);
+      view.setUint16(0,0,true);
+      view.setUint16(2,1,true);
+      view.setUint16(4,1,true);
+      view.setUint8(6,32);
+      view.setUint8(7,32);
+      view.setUint8(8,0);
+      view.setUint8(9,0);
+      view.setUint16(10,1,true);
+      view.setUint16(12,32,true);
+      view.setUint32(14,png.length,true);
+      view.setUint32(18,22,true);
+      new Uint8Array(ico).set(png,22);
+      dl(new Blob([ico],{type:'image/x-icon'}),'favicon.ico');
+      showToast('ICO downloaded');
     });
-    URL.revokeObjectURL(url);
-  };
-  img.src = url;
+  });
 }
 
-function downloadICO() {
-  // ICO = PNG at 32px wrapped in ICO header
-  const svg = buildSVG(32);
-  const blob = new Blob([svg], { type: 'image/svg+xml' });
-  const url = URL.createObjectURL(blob);
-  const img = new Image();
-  img.onload = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 32; canvas.height = 32;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, 32, 32);
-    canvas.toBlob(pngBlob => {
-      pngBlob.arrayBuffer().then(pngBuf => {
-        const png = new Uint8Array(pngBuf);
-        const ico = new ArrayBuffer(6 + 16 + png.length);
-        const view = new DataView(ico);
-        view.setUint16(0, 0, true); // reserved
-        view.setUint16(2, 1, true); // ICO type
-        view.setUint16(4, 1, true); // 1 image
-        view.setUint8(6, 32);  // width
-        view.setUint8(7, 32);  // height
-        view.setUint8(8, 0);   // colors
-        view.setUint8(9, 0);   // reserved
-        view.setUint16(10, 1, true); // planes
-        view.setUint16(12, 32, true); // bpp
-        view.setUint32(14, png.length, true); // size
-        view.setUint32(18, 22, true); // offset
-        new Uint8Array(ico).set(png, 22);
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([ico], { type: 'image/x-icon' }));
-        a.download = 'favicon.ico';
-        a.click();
-      });
-    });
-    URL.revokeObjectURL(url);
-  };
-  img.src = url;
+function downloadPack(){
+  // Download each size individually since we can't create a real ZIP without a library
+  const sizes=[16,32,48,64,128,180,192,512];
+  let i=0;
+  function next(){
+    if(i>=sizes.length){
+      // Also download SVG and ICO
+      downloadSVG();
+      setTimeout(downloadICO,200);
+      showToast(`Downloaded ${sizes.length+2} files (all sizes + SVG + ICO)`);
+      return;
+    }
+    downloadPNG(sizes[i]);
+    i++;
+    setTimeout(next,150);
+  }
+  next();
 }
 
-function copyTags() {
-  const text = document.getElementById('htmlTags').textContent.trim();
-  navigator.clipboard.writeText(text);
+function copyTags(){
+  navigator.clipboard.writeText(document.getElementById('htmlTags').textContent.trim());
   showToast('HTML tags copied');
 }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
+function copyManifest(){
+  navigator.clipboard.writeText(document.getElementById('manifestSnippet').textContent.trim());
+  showToast('manifest.json snippet copied');
 }
 
+// History
+function saveToHistory(){
+  const canvas=document.createElement('canvas');
+  drawFavicon(canvas,64);
+  const dataUrl=canvas.toDataURL('image/png');
+  const cfg=getConfig();
+  const entry={dataUrl,inputMode,bgMode,shape,cfg,savedAt:Date.now()};
+  const history=loadHistory();
+  history.unshift(entry);
+  if(history.length>12) history.length=12;
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(history));
+  renderHistory();
+  showToast('Saved to history');
+}
+
+function loadHistory(){
+  try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[];}catch{return[];}
+}
+
+function renderHistory(){
+  const row=document.getElementById('historyRow');
+  const history=loadHistory();
+  if(!history.length){row.innerHTML='<p style="font-size:12px;color:var(--muted)">No saved favicons yet.</p>';return;}
+  row.innerHTML=history.map((h,i)=>{
+    return`<div class="history-item" onclick="restoreHistory(${i})"><img src="${h.dataUrl}" width="44" height="44" style="border-radius:4px;"></div>`;
+  }).join('');
+}
+
+function restoreHistory(idx){
+  const history=loadHistory();
+  const h=history[idx];
+  if(!h) return;
+  // Restore config
+  inputMode=h.inputMode||'text';
+  bgMode=h.bgMode||'solid';
+  shape=h.shape||'square';
+  const cfg=h.cfg||{};
+
+  document.querySelectorAll('.input-tab').forEach(b=>b.classList.toggle('active',b.dataset.mode===inputMode));
+  document.querySelectorAll('.input-pane').forEach(p=>p.classList.remove('active'));
+  const paneId='pane'+inputMode.charAt(0).toUpperCase()+inputMode.slice(1);
+  const pane=document.getElementById(paneId);
+  if(pane) pane.classList.add('active');
+
+  document.querySelectorAll('#bgOptions .opt-btn').forEach(b=>b.classList.toggle('active',b.dataset.bg===bgMode));
+  document.getElementById('solidRow').style.display=bgMode==='solid'?'block':'none';
+  document.getElementById('gradientRow').style.display=bgMode.startsWith('gradient')?'flex':'none';
+
+  document.querySelectorAll('.shape-btn').forEach(b=>b.classList.toggle('active',b.dataset.shape===shape));
+
+  if(cfg.text) document.getElementById('faviText').value=cfg.text;
+  if(cfg.emoji) document.getElementById('emojiInput').value=cfg.emoji;
+  if(cfg.textColor) document.getElementById('textColor').value=cfg.textColor;
+  if(cfg.fontWeight) document.getElementById('fontWeight').value=cfg.fontWeight;
+  if(cfg.bgColor) document.getElementById('bgColor').value=cfg.bgColor;
+  if(cfg.grad1) document.getElementById('grad1').value=cfg.grad1;
+  if(cfg.grad2) document.getElementById('grad2').value=cfg.grad2;
+  if(cfg.radius){document.getElementById('radiusSlider').value=cfg.radius;document.getElementById('radiusVal').textContent=cfg.radius+'%';}
+  document.getElementById('fxShadow').checked=!!cfg.shadow;
+  document.getElementById('fxBorder').checked=!!cfg.border;
+  if(cfg.borderColor) document.getElementById('fxBorderColor').value=cfg.borderColor;
+  document.getElementById('fxGlow').checked=!!cfg.glow;
+
+  render();
+  showToast('Restored from history');
+}
+
+function clearHistory(){
+  localStorage.removeItem(STORAGE_KEY);
+  renderHistory();
+  showToast('History cleared');
+}
+
+function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+
+// Init
 render();
+renderHistory();
 </script>
+<script src="/ai-queue.js"></script>
 <script src="/related.js"></script>
 </body>
 </html>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UI Kit - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Manrope',system-ui,sans-serif;background:#fafafa;color:#1a1a1a;min-height:100vh}
+a.back{display:inline-block;margin:24px 24px 0;color:#ec4899;text-decoration:none;font-weight:500}
+a.back:hover{text-decoration:underline}
+h1{font-size:28px;font-weight:700;margin:12px 24px 4px}
+p.sub{color:#6b7280;margin:0 24px 16px;font-size:14px}
+:root{--accent:#ec4899;--bg:#fafafa;--text:#1a1a1a;--panel:#ffffff;--line:#e5e7eb;--muted:#6b7280;--radius:8px}
+.app{display:flex;height:calc(100vh - 120px);margin:0 24px 20px;gap:16px}
+.sidebar{width:220px;flex-shrink:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow-y:auto;padding:12px}
+.sidebar h3{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:12px 0 6px;padding:0 8px}
+.sidebar h3:first-child{margin-top:4px}
+.cat-btn{display:block;width:100%;text-align:left;padding:7px 10px;border:none;background:none;border-radius:6px;font-family:inherit;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;transition:all .15s}
+.cat-btn:hover{background:#f3f4f6}
+.cat-btn.active{background:var(--accent);color:#fff}
+.cat-btn .count{float:right;font-size:11px;color:var(--muted);font-weight:400}
+.cat-btn.active .count{color:rgba(255,255,255,.7)}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.search{flex:1;min-width:200px;padding:8px 12px;border:1px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:13px;background:var(--panel)}
+.search:focus{outline:none;border-color:var(--accent)}
+.tb-btn{padding:6px 12px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--text)}
+.tb-btn:hover{border-color:var(--accent)}
+.tb-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.accent-pick{width:32px;height:32px;border:1px solid var(--line);border-radius:var(--radius);padding:2px;cursor:pointer}
+.grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;padding-bottom:20px}
+.comp-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:border-color .15s}
+.comp-card:hover{border-color:var(--accent)}
+.comp-card.hidden{display:none}
+.comp-preview{padding:20px;min-height:80px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;position:relative;background:var(--bg)}
+.comp-preview.dark-mode{background:#1a1a1a;color:#fff}
+.comp-info{padding:12px 16px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.comp-name{font-size:13px;font-weight:600}
+.comp-actions{display:flex;gap:4px}
+.comp-actions button{padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);cursor:pointer;font-size:11px;font-family:inherit;font-weight:500;transition:all .15s}
+.comp-actions button:hover{border-color:var(--accent);color:var(--accent)}
+.comp-actions button.fav{color:#f59e0b}
+.code-panel{display:none;border-top:1px solid var(--line);background:#fafafa}
+.code-panel.open{display:block}
+.code-tabs{display:flex;border-bottom:1px solid var(--line)}
+.code-tab{padding:6px 14px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--muted);font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px}
+.code-tab:hover{color:var(--text)}
+.code-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.code-content{position:relative}
+.code-content pre{padding:12px;font-size:12px;line-height:1.5;overflow-x:auto;max-height:200px;font-family:'Courier New',monospace;white-space:pre-wrap;word-break:break-all}
+.copy-btn{position:absolute;top:6px;right:6px;padding:4px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel);cursor:pointer;font-size:11px;font-family:inherit;font-weight:600;transition:all .15s}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent)}
+.recently-copied{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:12px}
+.recently-copied h4{font-size:12px;font-weight:600;margin-bottom:6px;color:var(--muted)}
+.recent-tags{display:flex;gap:4px;flex-wrap:wrap}
+.recent-tag{padding:3px 8px;border-radius:4px;font-size:11px;background:#f3f4f6;color:var(--text);cursor:pointer;border:none;font-family:inherit}
+.recent-tag:hover{background:var(--accent);color:#fff}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:#1a1a1a;color:#fff;padding:8px 20px;border-radius:8px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;z-index:999;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<a class="back" href="/">Back to FreeDesignStore</a>
+<h1>Copy-Paste UI Component Library</h1>
+<p class="sub">50+ production-ready HTML/CSS components. Click to view code, one-click copy in HTML, CSS, Tailwind, or React JSX.</p>
+<div class="toolbar" style="margin:0 24px 12px">
+<input class="search" id="search" placeholder="Search components..." autocomplete="off">
+<label style="font-size:12px;font-weight:600;color:#6b7280">Accent:</label>
+<input type="color" class="accent-pick" id="accentPick" value="#ec4899">
+<button class="tb-btn" id="darkToggle">Dark Preview</button>
+</div>
+<div id="recentBox" class="recently-copied" style="margin:0 24px 12px;display:none"><h4>Recently Copied</h4><div class="recent-tags" id="recentTags"></div></div>
+<div class="app">
+<div class="sidebar" id="sidebar"></div>
+<div class="grid" id="grid"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const CATS = [
+  { id:'buttons', label:'Buttons', icon:'', count:8 },
+  { id:'cards', label:'Cards', icon:'', count:6 },
+  { id:'navigation', label:'Navigation', icon:'', count:5 },
+  { id:'forms', label:'Forms', icon:'', count:6 },
+  { id:'modals', label:'Modals', icon:'', count:3 },
+  { id:'alerts', label:'Alerts', icon:'', count:4 },
+  { id:'badges', label:'Badges', icon:'', count:4 },
+  { id:'tables', label:'Tables', icon:'', count:3 },
+  { id:'lists', label:'Lists', icon:'', count:3 },
+  { id:'layout', label:'Layout', icon:'', count:8 }
+];
+
+function a(c){ return c || 'var(--accent)' }
+function ac(){ return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() }
+
+const COMPS = [
+  // Buttons (8)
+  {cat:'buttons',name:'Primary Button',html:`<button class="uk-btn uk-btn-primary">Get Started</button>`,css:`.uk-btn{padding:10px 20px;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s}.uk-btn:hover{opacity:.85}.uk-btn-primary{background:var(--accent);color:#fff}`,tw:'px-5 py-2.5 bg-pink-500 text-white font-semibold rounded-lg hover:opacity-85 transition',react:`<button className="px-5 py-2.5 bg-pink-500 text-white font-semibold rounded-lg hover:opacity-85 transition">Get Started</button>`},
+  {cat:'buttons',name:'Secondary Button',html:`<button class="uk-btn uk-btn-sec">Learn More</button>`,css:`.uk-btn{padding:10px 20px;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}.uk-btn-sec{background:#f3f4f6;color:#1a1a1a;border:1px solid #e5e7eb}.uk-btn-sec:hover{border-color:var(--accent);color:var(--accent)}`,tw:'px-5 py-2.5 bg-gray-100 text-gray-900 font-semibold rounded-lg border border-gray-200 hover:border-pink-500 hover:text-pink-500 transition',react:`<button className="px-5 py-2.5 bg-gray-100 text-gray-900 font-semibold rounded-lg border border-gray-200 hover:border-pink-500 hover:text-pink-500 transition">Learn More</button>`},
+  {cat:'buttons',name:'Ghost Button',html:`<button class="uk-btn uk-btn-ghost">Cancel</button>`,css:`.uk-btn{padding:10px 20px;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}.uk-btn-ghost{background:transparent;color:var(--accent)}.uk-btn-ghost:hover{background:rgba(236,72,153,.08)}`,tw:'px-5 py-2.5 bg-transparent text-pink-500 font-semibold rounded-lg hover:bg-pink-50 transition',react:`<button className="px-5 py-2.5 bg-transparent text-pink-500 font-semibold rounded-lg hover:bg-pink-50 transition">Cancel</button>`},
+  {cat:'buttons',name:'Outline Button',html:`<button class="uk-btn uk-btn-outline">Sign Up</button>`,css:`.uk-btn{padding:10px 20px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}.uk-btn-outline{background:transparent;border:2px solid var(--accent);color:var(--accent)}.uk-btn-outline:hover{background:var(--accent);color:#fff}`,tw:'px-5 py-2.5 border-2 border-pink-500 text-pink-500 font-semibold rounded-lg hover:bg-pink-500 hover:text-white transition',react:`<button className="px-5 py-2.5 border-2 border-pink-500 text-pink-500 font-semibold rounded-lg hover:bg-pink-500 hover:text-white transition">Sign Up</button>`},
+  {cat:'buttons',name:'Icon Button',html:`<button class="uk-btn uk-btn-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>`,css:`.uk-btn{border:none;border-radius:8px;font-family:inherit;cursor:pointer;transition:all .2s}.uk-btn-icon{width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;background:var(--accent);color:#fff;border-radius:50%}.uk-btn-icon:hover{opacity:.85}`,tw:'w-10 h-10 inline-flex items-center justify-center bg-pink-500 text-white rounded-full hover:opacity-85 transition',react:`<button className="w-10 h-10 inline-flex items-center justify-center bg-pink-500 text-white rounded-full hover:opacity-85 transition">\n  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>\n</button>`},
+  {cat:'buttons',name:'Loading Button',html:`<button class="uk-btn uk-btn-loading" disabled><span class="uk-spinner"></span> Loading...</button>`,css:`.uk-btn{padding:10px 20px;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s}.uk-btn-loading{background:var(--accent);color:#fff;opacity:.7;display:inline-flex;align-items:center;gap:8px}.uk-spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}`,tw:'px-5 py-2.5 bg-pink-500 text-white font-semibold rounded-lg opacity-70 inline-flex items-center gap-2',react:`<button className="px-5 py-2.5 bg-pink-500 text-white font-semibold rounded-lg opacity-70 inline-flex items-center gap-2" disabled>\n  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />\n  Loading...\n</button>`},
+  {cat:'buttons',name:'Button Group',html:`<div class="uk-btn-group"><button class="uk-btn uk-bg active">Day</button><button class="uk-btn uk-bg">Week</button><button class="uk-btn uk-bg">Month</button></div>`,css:`.uk-btn-group{display:inline-flex;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden}.uk-btn{padding:8px 16px;border:none;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}.uk-bg{background:#fff;color:#6b7280;border-right:1px solid #e5e7eb}.uk-bg:last-child{border-right:none}.uk-bg.active{background:var(--accent);color:#fff}.uk-bg:hover:not(.active){background:#f3f4f6}`,tw:'inline-flex border border-gray-200 rounded-lg overflow-hidden [&>button]:px-4 [&>button]:py-2 [&>button]:text-sm [&>button]:font-semibold',react:`<div className="inline-flex border border-gray-200 rounded-lg overflow-hidden">\n  <button className="px-4 py-2 text-sm font-semibold bg-pink-500 text-white">Day</button>\n  <button className="px-4 py-2 text-sm font-semibold bg-white text-gray-500 hover:bg-gray-100">Week</button>\n  <button className="px-4 py-2 text-sm font-semibold bg-white text-gray-500 hover:bg-gray-100">Month</button>\n</div>`},
+  {cat:'buttons',name:'Toggle Button',html:`<button class="uk-toggle" onclick="this.classList.toggle('on')"><span class="uk-toggle-dot"></span></button>`,css:`.uk-toggle{width:48px;height:26px;border-radius:13px;border:none;background:#d1d5db;position:relative;cursor:pointer;transition:background .2s;padding:0}.uk-toggle-dot{position:absolute;width:22px;height:22px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}.uk-toggle.on{background:var(--accent)}.uk-toggle.on .uk-toggle-dot{transform:translateX(22px)}`,tw:'w-12 h-6 rounded-full bg-gray-300 relative cursor-pointer peer-checked:bg-pink-500 transition',react:`const [on, setOn] = useState(false);\n<button\n  className={\`w-12 h-6 rounded-full relative transition \${on ? 'bg-pink-500' : 'bg-gray-300'}\`}\n  onClick={() => setOn(!on)}\n>\n  <span className={\`absolute w-5 h-5 rounded-full bg-white top-0.5 shadow transition \${on ? 'left-6' : 'left-0.5'}\`} />\n</button>`},
+
+  // Cards (6)
+  {cat:'cards',name:'Basic Card',html:`<div class="uk-card"><h3>Card Title</h3><p>A clean and simple card with some body text that describes content.</p></div>`,css:`.uk-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;max-width:320px}.uk-card h3{font-size:16px;font-weight:700;margin-bottom:8px}.uk-card p{font-size:14px;color:#6b7280;line-height:1.5}`,tw:'bg-white border border-gray-200 rounded-xl p-5 max-w-xs',react:`<div className="bg-white border border-gray-200 rounded-xl p-5 max-w-xs">\n  <h3 className="text-base font-bold mb-2">Card Title</h3>\n  <p className="text-sm text-gray-500 leading-relaxed">A clean and simple card with some body text.</p>\n</div>`},
+  {cat:'cards',name:'Image Card',html:`<div class="uk-icard"><div class="uk-icard-img" style="background:linear-gradient(135deg,#ec4899,#8b5cf6)"></div><div class="uk-icard-body"><h3>Featured Post</h3><p>Beautiful gradient placeholder showcasing the image card layout.</p></div></div>`,css:`.uk-icard{background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;max-width:320px}.uk-icard-img{height:160px}.uk-icard-body{padding:16px}.uk-icard-body h3{font-size:16px;font-weight:700;margin-bottom:6px}.uk-icard-body p{font-size:13px;color:#6b7280;line-height:1.5}`,tw:'bg-white border border-gray-200 rounded-xl overflow-hidden max-w-xs',react:`<div className="bg-white border border-gray-200 rounded-xl overflow-hidden max-w-xs">\n  <div className="h-40 bg-gradient-to-br from-pink-500 to-purple-500" />\n  <div className="p-4">\n    <h3 className="font-bold mb-1">Featured Post</h3>\n    <p className="text-sm text-gray-500">Beautiful gradient placeholder.</p>\n  </div>\n</div>`},
+  {cat:'cards',name:'Pricing Card',html:`<div class="uk-price"><div class="uk-price-badge">Popular</div><h3>Pro Plan</h3><div class="uk-price-amt">$29<span>/mo</span></div><ul><li>Unlimited projects</li><li>Priority support</li><li>Custom domain</li></ul><button class="uk-price-btn">Choose Plan</button></div>`,css:`.uk-price{background:#fff;border:2px solid var(--accent);border-radius:12px;padding:24px;text-align:center;max-width:280px;position:relative}.uk-price-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:3px 14px;border-radius:99px;font-size:12px;font-weight:600}.uk-price h3{font-size:18px;font-weight:700;margin:8px 0}.uk-price-amt{font-size:40px;font-weight:700;margin:8px 0}.uk-price-amt span{font-size:16px;color:#6b7280;font-weight:400}.uk-price ul{list-style:none;margin:16px 0;padding:0}.uk-price li{padding:6px 0;font-size:14px;color:#6b7280;border-bottom:1px solid #f3f4f6}.uk-price-btn{width:100%;padding:10px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}`,tw:'bg-white border-2 border-pink-500 rounded-xl p-6 text-center max-w-xs relative',react:`<div className="bg-white border-2 border-pink-500 rounded-xl p-6 text-center relative">\n  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-pink-500 text-white text-xs font-semibold px-3 py-1 rounded-full">Popular</span>\n  <h3 className="text-lg font-bold mt-2">Pro Plan</h3>\n  <div className="text-4xl font-bold my-2">$29<span className="text-base text-gray-500 font-normal">/mo</span></div>\n  <ul className="my-4 space-y-2 text-sm text-gray-500">\n    <li>Unlimited projects</li>\n    <li>Priority support</li>\n  </ul>\n  <button className="w-full py-2.5 bg-pink-500 text-white font-semibold rounded-lg">Choose Plan</button>\n</div>`},
+  {cat:'cards',name:'Testimonial Card',html:`<div class="uk-test"><p class="uk-test-q">"This tool completely changed how we design. Highly recommended for any team."</p><div class="uk-test-author"><div class="uk-test-avatar">JD</div><div><strong>Jane Doe</strong><br><span>CEO, Acme Inc</span></div></div></div>`,css:`.uk-test{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;max-width:360px}.uk-test-q{font-size:15px;line-height:1.6;color:#374151;margin-bottom:16px;font-style:italic}.uk-test-author{display:flex;align-items:center;gap:12px}.uk-test-avatar{width:40px;height:40px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}.uk-test-author strong{font-size:14px}.uk-test-author span{font-size:12px;color:#6b7280}`,tw:'bg-white border border-gray-200 rounded-xl p-5 max-w-sm',react:`<div className="bg-white border border-gray-200 rounded-xl p-5 max-w-sm">\n  <p className="text-gray-700 italic leading-relaxed mb-4">"This tool completely changed how we design."</p>\n  <div className="flex items-center gap-3">\n    <div className="w-10 h-10 rounded-full bg-pink-500 text-white flex items-center justify-center font-bold text-sm">JD</div>\n    <div>\n      <div className="font-bold text-sm">Jane Doe</div>\n      <div className="text-xs text-gray-500">CEO, Acme Inc</div>\n    </div>\n  </div>\n</div>`},
+  {cat:'cards',name:'Stat Card',html:`<div class="uk-stat"><div class="uk-stat-label">Revenue</div><div class="uk-stat-value">$48,200</div><div class="uk-stat-change up">+12.5%</div></div>`,css:`.uk-stat{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;max-width:200px}.uk-stat-label{font-size:13px;color:#6b7280;font-weight:500}.uk-stat-value{font-size:28px;font-weight:700;margin:4px 0}.uk-stat-change{font-size:13px;font-weight:600}.uk-stat-change.up{color:#10b981}.uk-stat-change.down{color:#ef4444}`,tw:'bg-white border border-gray-200 rounded-xl p-5',react:`<div className="bg-white border border-gray-200 rounded-xl p-5">\n  <div className="text-sm text-gray-500">Revenue</div>\n  <div className="text-2xl font-bold my-1">$48,200</div>\n  <div className="text-sm font-semibold text-green-500">+12.5%</div>\n</div>`},
+  {cat:'cards',name:'Profile Card',html:`<div class="uk-prof"><div class="uk-prof-cover" style="background:linear-gradient(135deg,#ec4899,#8b5cf6)"></div><div class="uk-prof-avatar">AS</div><h3>Alex Smith</h3><p>Product Designer</p><div class="uk-prof-stats"><div><strong>142</strong><span>Posts</span></div><div><strong>8.2k</strong><span>Followers</span></div><div><strong>312</strong><span>Following</span></div></div></div>`,css:`.uk-prof{background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;max-width:280px;text-align:center}.uk-prof-cover{height:80px}.uk-prof-avatar{width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;margin:-28px auto 8px;border:3px solid #fff}.uk-prof h3{font-size:16px;font-weight:700}.uk-prof>p{font-size:13px;color:#6b7280;margin-bottom:12px}.uk-prof-stats{display:flex;border-top:1px solid #e5e7eb;padding:12px}.uk-prof-stats div{flex:1;font-size:12px;color:#6b7280}.uk-prof-stats strong{display:block;font-size:15px;color:#1a1a1a}`,tw:'bg-white border border-gray-200 rounded-xl overflow-hidden max-w-xs text-center',react:`<div className="bg-white border border-gray-200 rounded-xl overflow-hidden text-center">\n  <div className="h-20 bg-gradient-to-br from-pink-500 to-purple-500" />\n  <div className="w-14 h-14 rounded-full bg-pink-500 text-white flex items-center justify-center font-bold text-lg mx-auto -mt-7 border-[3px] border-white">AS</div>\n  <h3 className="font-bold mt-2">Alex Smith</h3>\n  <p className="text-sm text-gray-500 mb-3">Product Designer</p>\n</div>`},
+
+  // Navigation (5)
+  {cat:'navigation',name:'Top Bar',html:`<nav class="uk-topbar"><div class="uk-topbar-brand">Brand</div><div class="uk-topbar-links"><a href="#">Home</a><a href="#">Features</a><a href="#">Pricing</a><a class="uk-topbar-cta" href="#">Sign Up</a></div></nav>`,css:`.uk-topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#fff;border:1px solid #e5e7eb;border-radius:12px}.uk-topbar-brand{font-weight:700;font-size:16px}.uk-topbar-links{display:flex;align-items:center;gap:16px}.uk-topbar-links a{font-size:14px;color:#6b7280;text-decoration:none;font-weight:500}.uk-topbar-links a:hover{color:#1a1a1a}.uk-topbar-cta{background:var(--accent);color:#fff!important;padding:6px 14px;border-radius:8px}`,tw:'flex items-center justify-between px-5 py-3 bg-white border border-gray-200 rounded-xl',react:`<nav className="flex items-center justify-between px-5 py-3 bg-white border border-gray-200 rounded-xl">\n  <span className="font-bold">Brand</span>\n  <div className="flex items-center gap-4">\n    <a className="text-sm text-gray-500 hover:text-gray-900" href="#">Home</a>\n    <a className="text-sm bg-pink-500 text-white px-3 py-1.5 rounded-lg" href="#">Sign Up</a>\n  </div>\n</nav>`},
+  {cat:'navigation',name:'Sidebar Nav',html:`<nav class="uk-sidenav"><a class="uk-sidenav-item active" href="#">Dashboard</a><a class="uk-sidenav-item" href="#">Projects</a><a class="uk-sidenav-item" href="#">Team</a><a class="uk-sidenav-item" href="#">Settings</a></nav>`,css:`.uk-sidenav{width:200px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:8px}.uk-sidenav-item{display:block;padding:10px 14px;border-radius:8px;font-size:14px;font-weight:500;color:#6b7280;text-decoration:none;transition:all .15s}.uk-sidenav-item:hover{background:#f3f4f6;color:#1a1a1a}.uk-sidenav-item.active{background:rgba(236,72,153,.08);color:var(--accent);font-weight:600}`,tw:'w-48 bg-white border border-gray-200 rounded-xl p-2 space-y-1',react:`<nav className="w-48 bg-white border border-gray-200 rounded-xl p-2 space-y-1">\n  <a className="block px-3 py-2 rounded-lg text-pink-500 bg-pink-50 font-semibold text-sm" href="#">Dashboard</a>\n  <a className="block px-3 py-2 rounded-lg text-gray-500 hover:bg-gray-100 text-sm" href="#">Projects</a>\n</nav>`},
+  {cat:'navigation',name:'Breadcrumb',html:`<nav class="uk-bread"><a href="#">Home</a><span class="uk-bread-sep">/</span><a href="#">Products</a><span class="uk-bread-sep">/</span><span class="uk-bread-current">Widget Pro</span></nav>`,css:`.uk-bread{display:flex;align-items:center;gap:8px;font-size:14px}.uk-bread a{color:#6b7280;text-decoration:none}.uk-bread a:hover{color:var(--accent)}.uk-bread-sep{color:#d1d5db}.uk-bread-current{color:#1a1a1a;font-weight:600}`,tw:'flex items-center gap-2 text-sm',react:`<nav className="flex items-center gap-2 text-sm">\n  <a className="text-gray-500 hover:text-pink-500" href="#">Home</a>\n  <span className="text-gray-300">/</span>\n  <span className="text-gray-900 font-semibold">Widget Pro</span>\n</nav>`},
+  {cat:'navigation',name:'Tabs',html:`<div class="uk-tabs"><button class="uk-tab active">Overview</button><button class="uk-tab">Features</button><button class="uk-tab">Pricing</button><button class="uk-tab">FAQ</button></div>`,css:`.uk-tabs{display:flex;border-bottom:2px solid #e5e7eb;gap:0}.uk-tab{padding:10px 18px;border:none;background:none;font-family:inherit;font-size:14px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}.uk-tab:hover{color:#1a1a1a}.uk-tab.active{color:var(--accent);border-bottom-color:var(--accent)}`,tw:'flex border-b-2 border-gray-200 [&>button]:px-4 [&>button]:py-2.5 [&>button]:text-sm [&>button]:font-semibold',react:`<div className="flex border-b-2 border-gray-200">\n  <button className="px-4 py-2.5 text-sm font-semibold text-pink-500 border-b-2 border-pink-500 -mb-[2px]">Overview</button>\n  <button className="px-4 py-2.5 text-sm font-semibold text-gray-500">Features</button>\n</div>`},
+  {cat:'navigation',name:'Pagination',html:`<nav class="uk-pag"><button class="uk-pag-btn">Prev</button><button class="uk-pag-num active">1</button><button class="uk-pag-num">2</button><button class="uk-pag-num">3</button><button class="uk-pag-dots">...</button><button class="uk-pag-num">12</button><button class="uk-pag-btn">Next</button></nav>`,css:`.uk-pag{display:flex;align-items:center;gap:4px}.uk-pag-btn,.uk-pag-num,.uk-pag-dots{padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:#6b7280;transition:all .15s}.uk-pag-num:hover,.uk-pag-btn:hover{border-color:var(--accent);color:var(--accent)}.uk-pag-num.active{background:var(--accent);color:#fff;border-color:var(--accent)}.uk-pag-dots{border:none;background:none;cursor:default}`,tw:'flex items-center gap-1',react:`<nav className="flex items-center gap-1">\n  <button className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-500 hover:border-pink-500">Prev</button>\n  <button className="px-3 py-2 bg-pink-500 text-white rounded-lg text-sm font-semibold">1</button>\n  <button className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-500">2</button>\n  <button className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-500 hover:border-pink-500">Next</button>\n</nav>`},
+
+  // Forms (6)
+  {cat:'forms',name:'Text Input',html:`<div class="uk-field"><label class="uk-label">Email Address</label><input class="uk-input" type="email" placeholder="you@example.com"></div>`,css:`.uk-field{max-width:320px}.uk-label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#374151}.uk-input{width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px;transition:border-color .15s;background:#fff}.uk-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(236,72,153,.1)}`,tw:'w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-pink-500 focus:ring-2 focus:ring-pink-100 outline-none',react:`<div className="max-w-xs">\n  <label className="block text-sm font-semibold mb-1.5 text-gray-700">Email Address</label>\n  <input className="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-pink-500 focus:ring-2 focus:ring-pink-100 outline-none" type="email" placeholder="you@example.com" />\n</div>`},
+  {cat:'forms',name:'Textarea',html:`<div class="uk-field"><label class="uk-label">Message</label><textarea class="uk-textarea" rows="3" placeholder="Write something..."></textarea></div>`,css:`.uk-field{max-width:400px}.uk-label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#374151}.uk-textarea{width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;transition:border-color .15s}.uk-textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(236,72,153,.1)}`,tw:'w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm resize-y focus:border-pink-500 focus:ring-2 focus:ring-pink-100 outline-none',react:`<textarea className="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm resize-y focus:border-pink-500 focus:ring-2 focus:ring-pink-100 outline-none" rows={3} placeholder="Write something..." />`},
+  {cat:'forms',name:'Select Dropdown',html:`<div class="uk-field"><label class="uk-label">Country</label><select class="uk-select"><option>United States</option><option>United Kingdom</option><option>Canada</option><option>Australia</option></select></div>`,css:`.uk-field{max-width:320px}.uk-label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#374151}.uk-select{width:100%;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px;background:#fff;transition:border-color .15s;appearance:auto}.uk-select:focus{outline:none;border-color:var(--accent)}`,tw:'w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:border-pink-500 outline-none',react:`<select className="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:border-pink-500 outline-none">\n  <option>United States</option>\n  <option>United Kingdom</option>\n</select>`},
+  {cat:'forms',name:'Checkbox & Radio',html:`<div class="uk-checks"><label class="uk-check"><input type="checkbox" checked> I agree to the terms</label><label class="uk-check"><input type="radio" name="plan" checked> Free plan</label><label class="uk-check"><input type="radio" name="plan"> Pro plan</label></div>`,css:`.uk-checks{display:flex;flex-direction:column;gap:8px}.uk-check{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer}.uk-check input{accent-color:var(--accent);width:16px;height:16px}`,tw:'space-y-2 [&_input]:accent-pink-500 [&_input]:w-4 [&_input]:h-4',react:`<div className="space-y-2">\n  <label className="flex items-center gap-2 text-sm cursor-pointer">\n    <input type="checkbox" className="accent-pink-500 w-4 h-4" defaultChecked /> I agree to the terms\n  </label>\n</div>`},
+  {cat:'forms',name:'Toggle Switch',html:`<label class="uk-switch"><input type="checkbox" checked><span class="uk-switch-track"><span class="uk-switch-thumb"></span></span><span class="uk-switch-label">Notifications</span></label>`,css:`.uk-switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-size:14px}.uk-switch input{display:none}.uk-switch-track{width:44px;height:24px;background:#d1d5db;border-radius:12px;position:relative;transition:background .2s}.uk-switch-thumb{position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}.uk-switch input:checked~.uk-switch-track{background:var(--accent)}.uk-switch input:checked~.uk-switch-track .uk-switch-thumb{transform:translateX(20px)}`,tw:'inline-flex items-center gap-2.5 cursor-pointer',react:`const [on, setOn] = useState(true);\n<label className="inline-flex items-center gap-2.5 cursor-pointer">\n  <div className={\`w-11 h-6 rounded-full relative transition \${on ? 'bg-pink-500' : 'bg-gray-300'}\`} onClick={() => setOn(!on)}>\n    <span className={\`absolute w-5 h-5 rounded-full bg-white top-0.5 shadow transition \${on ? 'left-[22px]' : 'left-0.5'}\`} />\n  </div>\n  <span className="text-sm">Notifications</span>\n</label>`},
+  {cat:'forms',name:'File Upload',html:`<div class="uk-upload"><div class="uk-upload-area"><div class="uk-upload-icon">&#8593;</div><p><strong>Click to upload</strong> or drag and drop</p><span>PNG, JPG or SVG (max 5MB)</span></div></div>`,css:`.uk-upload-area{border:2px dashed #e5e7eb;border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:border-color .15s;max-width:400px}.uk-upload-area:hover{border-color:var(--accent)}.uk-upload-icon{font-size:24px;color:var(--accent);margin-bottom:8px}.uk-upload-area p{font-size:14px;margin-bottom:4px}.uk-upload-area span{font-size:12px;color:#9ca3af}`,tw:'border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:border-pink-500 transition max-w-sm',react:`<div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:border-pink-500 transition">\n  <div className="text-2xl text-pink-500 mb-2">&#8593;</div>\n  <p className="text-sm"><strong>Click to upload</strong> or drag and drop</p>\n  <span className="text-xs text-gray-400">PNG, JPG or SVG (max 5MB)</span>\n</div>`},
+
+  // Modals (3)
+  {cat:'modals',name:'Dialog Modal',html:`<div class="uk-overlay"><div class="uk-modal"><div class="uk-modal-header"><h3>Confirm Action</h3><button class="uk-modal-close">&times;</button></div><div class="uk-modal-body"><p>Are you sure you want to proceed? This action cannot be undone.</p></div><div class="uk-modal-footer"><button class="uk-mbtn uk-mbtn-sec">Cancel</button><button class="uk-mbtn uk-mbtn-pri">Confirm</button></div></div></div>`,css:`.uk-overlay{position:relative;background:rgba(0,0,0,.3);border-radius:12px;padding:40px;display:flex;align-items:center;justify-content:center;min-height:240px}.uk-modal{background:#fff;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.15);max-width:400px;width:100%}.uk-modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e5e7eb}.uk-modal-header h3{font-size:16px;font-weight:700}.uk-modal-close{border:none;background:none;font-size:22px;cursor:pointer;color:#6b7280}.uk-modal-body{padding:20px;font-size:14px;color:#6b7280;line-height:1.6}.uk-modal-footer{display:flex;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid #e5e7eb}.uk-mbtn{padding:8px 16px;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}.uk-mbtn-pri{background:var(--accent);color:#fff}.uk-mbtn-sec{background:#f3f4f6;color:#374151}`,tw:'bg-white rounded-xl shadow-xl max-w-sm w-full',react:`<div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">\n  <div className="bg-white rounded-xl shadow-xl max-w-sm w-full">\n    <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">\n      <h3 className="font-bold">Confirm Action</h3>\n      <button className="text-gray-400 text-xl">&times;</button>\n    </div>\n    <div className="p-5 text-sm text-gray-500">Are you sure?</div>\n    <div className="flex justify-end gap-2 px-5 py-3 border-t border-gray-200">\n      <button className="px-4 py-2 bg-gray-100 rounded-lg text-sm font-semibold">Cancel</button>\n      <button className="px-4 py-2 bg-pink-500 text-white rounded-lg text-sm font-semibold">Confirm</button>\n    </div>\n  </div>\n</div>`},
+  {cat:'modals',name:'Confirm Modal',html:`<div class="uk-overlay"><div class="uk-confirm"><div class="uk-confirm-icon">!</div><h3>Delete Item?</h3><p>This will permanently remove the item from your library.</p><div class="uk-confirm-btns"><button class="uk-mbtn uk-mbtn-sec">Keep it</button><button class="uk-mbtn uk-mbtn-danger">Delete</button></div></div></div>`,css:`.uk-overlay{position:relative;background:rgba(0,0,0,.3);border-radius:12px;padding:40px;display:flex;align-items:center;justify-content:center;min-height:240px}.uk-confirm{background:#fff;border-radius:12px;padding:24px;text-align:center;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,.15)}.uk-confirm-icon{width:48px;height:48px;border-radius:50%;background:#fef2f2;color:#ef4444;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;margin:0 auto 12px}.uk-confirm h3{font-size:16px;font-weight:700;margin-bottom:8px}.uk-confirm p{font-size:14px;color:#6b7280;line-height:1.5;margin-bottom:16px}.uk-confirm-btns{display:flex;gap:8px;justify-content:center}.uk-mbtn{padding:8px 16px;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}.uk-mbtn-sec{background:#f3f4f6;color:#374151}.uk-mbtn-danger{background:#ef4444;color:#fff}`,tw:'bg-white rounded-xl p-6 text-center shadow-xl max-w-xs',react:`<div className="bg-white rounded-xl p-6 text-center shadow-xl max-w-xs">\n  <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center text-2xl font-bold mx-auto mb-3">!</div>\n  <h3 className="font-bold mb-2">Delete Item?</h3>\n  <p className="text-sm text-gray-500 mb-4">This will permanently remove the item.</p>\n  <div className="flex gap-2 justify-center">\n    <button className="px-4 py-2 bg-gray-100 rounded-lg text-sm font-semibold">Keep it</button>\n    <button className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold">Delete</button>\n  </div>\n</div>`},
+  {cat:'modals',name:'Drawer',html:`<div class="uk-drawer-wrap"><div class="uk-drawer"><div class="uk-drawer-header"><h3>Filters</h3><button class="uk-modal-close">&times;</button></div><div class="uk-drawer-body"><p>Category</p><p>Price Range</p><p>Rating</p><p>Brand</p></div></div></div>`,css:`.uk-drawer-wrap{position:relative;background:rgba(0,0,0,.15);border-radius:12px;min-height:240px;overflow:hidden;display:flex;justify-content:flex-end}.uk-drawer{width:260px;background:#fff;box-shadow:-4px 0 20px rgba(0,0,0,.1);display:flex;flex-direction:column}.uk-drawer-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e5e7eb}.uk-drawer-header h3{font-size:16px;font-weight:700}.uk-modal-close{border:none;background:none;font-size:22px;cursor:pointer;color:#6b7280}.uk-drawer-body{padding:20px;font-size:14px;color:#6b7280;display:flex;flex-direction:column;gap:16px}`,tw:'w-64 bg-white shadow-xl h-full flex flex-col',react:`<div className="fixed inset-0 bg-black/15 z-50 flex justify-end">\n  <div className="w-64 bg-white shadow-xl h-full flex flex-col">\n    <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">\n      <h3 className="font-bold">Filters</h3>\n      <button className="text-gray-400 text-xl">&times;</button>\n    </div>\n    <div className="p-5 text-sm text-gray-500 space-y-4">\n      <p>Category</p><p>Price Range</p>\n    </div>\n  </div>\n</div>`},
+
+  // Alerts (4)
+  {cat:'alerts',name:'Info Alert',html:`<div class="uk-alert uk-alert-info"><span class="uk-alert-icon">i</span><div><strong>Heads up!</strong> A new version is available. Please update when ready.</div></div>`,css:`.uk-alert{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:10px;font-size:14px;line-height:1.5;max-width:480px}.uk-alert strong{display:block;margin-bottom:2px}.uk-alert-icon{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}.uk-alert-info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af}.uk-alert-info .uk-alert-icon{background:#3b82f6;color:#fff}`,tw:'flex items-start gap-3 px-4 py-3.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-sm',react:`<div className="flex items-start gap-3 px-4 py-3.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-sm">\n  <span className="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-bold shrink-0">i</span>\n  <div><strong className="block">Heads up!</strong>A new version is available.</div>\n</div>`},
+  {cat:'alerts',name:'Success Alert',html:`<div class="uk-alert uk-alert-success"><span class="uk-alert-icon">&#10003;</span><div><strong>Success!</strong> Your changes have been saved successfully.</div></div>`,css:`.uk-alert{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:10px;font-size:14px;line-height:1.5;max-width:480px}.uk-alert strong{display:block;margin-bottom:2px}.uk-alert-icon{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}.uk-alert-success{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}.uk-alert-success .uk-alert-icon{background:#22c55e;color:#fff}`,tw:'flex items-start gap-3 px-4 py-3.5 rounded-lg bg-green-50 border border-green-200 text-green-800 text-sm',react:`<div className="flex items-start gap-3 px-4 py-3.5 rounded-lg bg-green-50 border border-green-200 text-green-800 text-sm">\n  <span className="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold shrink-0">&#10003;</span>\n  <div><strong className="block">Success!</strong>Your changes have been saved.</div>\n</div>`},
+  {cat:'alerts',name:'Warning Alert',html:`<div class="uk-alert uk-alert-warn"><span class="uk-alert-icon">&#9888;</span><div><strong>Warning</strong> Your trial expires in 3 days. Upgrade to keep access.</div></div>`,css:`.uk-alert{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:10px;font-size:14px;line-height:1.5;max-width:480px}.uk-alert strong{display:block;margin-bottom:2px}.uk-alert-icon{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}.uk-alert-warn{background:#fffbeb;border:1px solid #fde68a;color:#92400e}.uk-alert-warn .uk-alert-icon{background:#f59e0b;color:#fff}`,tw:'flex items-start gap-3 px-4 py-3.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm',react:`<div className="flex items-start gap-3 px-4 py-3.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm">\n  <span className="w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold shrink-0">&#9888;</span>\n  <div><strong className="block">Warning</strong>Your trial expires in 3 days.</div>\n</div>`},
+  {cat:'alerts',name:'Error Alert',html:`<div class="uk-alert uk-alert-error"><span class="uk-alert-icon">&times;</span><div><strong>Error</strong> Something went wrong. Please try again later.</div></div>`,css:`.uk-alert{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:10px;font-size:14px;line-height:1.5;max-width:480px}.uk-alert strong{display:block;margin-bottom:2px}.uk-alert-icon{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}.uk-alert-error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}.uk-alert-error .uk-alert-icon{background:#ef4444;color:#fff}`,tw:'flex items-start gap-3 px-4 py-3.5 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm',react:`<div className="flex items-start gap-3 px-4 py-3.5 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm">\n  <span className="w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs font-bold shrink-0">&times;</span>\n  <div><strong className="block">Error</strong>Something went wrong.</div>\n</div>`},
+
+  // Badges (4)
+  {cat:'badges',name:'Solid Badge',html:`<span class="uk-badge uk-badge-solid">New</span> <span class="uk-badge uk-badge-solid green">Active</span> <span class="uk-badge uk-badge-solid blue">Beta</span> <span class="uk-badge uk-badge-solid orange">Hot</span>`,css:`.uk-badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600}.uk-badge-solid{background:var(--accent);color:#fff}.uk-badge-solid.green{background:#22c55e}.uk-badge-solid.blue{background:#3b82f6}.uk-badge-solid.orange{background:#f59e0b}`,tw:'inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-pink-500 text-white',react:`<span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-pink-500 text-white">New</span>`},
+  {cat:'badges',name:'Outline Badge',html:`<span class="uk-badge uk-badge-out">Default</span> <span class="uk-badge uk-badge-out pink">Premium</span> <span class="uk-badge uk-badge-out green">Online</span>`,css:`.uk-badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600}.uk-badge-out{background:transparent;border:1.5px solid #d1d5db;color:#6b7280}.uk-badge-out.pink{border-color:var(--accent);color:var(--accent)}.uk-badge-out.green{border-color:#22c55e;color:#22c55e}`,tw:'inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold border-[1.5px] border-gray-300 text-gray-500',react:`<span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold border-[1.5px] border-pink-500 text-pink-500">Premium</span>`},
+  {cat:'badges',name:'Dot Badge',html:`<span class="uk-badge uk-badge-dot"><span class="uk-dot green"></span> Online</span> <span class="uk-badge uk-badge-dot"><span class="uk-dot red"></span> Busy</span> <span class="uk-badge uk-badge-dot"><span class="uk-dot yellow"></span> Away</span>`,css:`.uk-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:500;background:#f3f4f6;color:#374151}.uk-dot{width:8px;height:8px;border-radius:50%}.uk-dot.green{background:#22c55e}.uk-dot.red{background:#ef4444}.uk-dot.yellow{background:#f59e0b}`,tw:'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-700',react:`<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-700">\n  <span className="w-2 h-2 rounded-full bg-green-500" /> Online\n</span>`},
+  {cat:'badges',name:'Removable Badge',html:`<span class="uk-badge uk-badge-remove">React <button class="uk-badge-x">&times;</button></span> <span class="uk-badge uk-badge-remove">TypeScript <button class="uk-badge-x">&times;</button></span>`,css:`.uk-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 8px 4px 10px;border-radius:99px;font-size:12px;font-weight:500}.uk-badge-remove{background:#f3f4f6;color:#374151}.uk-badge-x{border:none;background:none;cursor:pointer;font-size:14px;color:#9ca3af;padding:0 2px;line-height:1}.uk-badge-x:hover{color:#ef4444}`,tw:'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-700',react:`<span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-700">\n  React\n  <button className="text-gray-400 hover:text-red-500 text-sm leading-none">&times;</button>\n</span>`},
+
+  // Tables (3)
+  {cat:'tables',name:'Basic Table',html:`<table class="uk-table"><thead><tr><th>Name</th><th>Role</th><th>Status</th></tr></thead><tbody><tr><td>Alex Smith</td><td>Designer</td><td>Active</td></tr><tr><td>Jane Doe</td><td>Developer</td><td>Active</td></tr><tr><td>Bob Lee</td><td>Manager</td><td>Away</td></tr></tbody></table>`,css:`.uk-table{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb}.uk-table th{text-align:left;padding:12px 16px;background:#f9fafb;font-weight:600;font-size:13px;color:#6b7280;border-bottom:1px solid #e5e7eb}.uk-table td{padding:12px 16px;border-bottom:1px solid #f3f4f6}.uk-table tr:last-child td{border-bottom:none}`,tw:'w-full text-sm bg-white border border-gray-200 rounded-xl overflow-hidden',react:`<table className="w-full text-sm bg-white border border-gray-200 rounded-xl overflow-hidden">\n  <thead className="bg-gray-50">\n    <tr><th className="text-left px-4 py-3 font-semibold text-gray-500 text-xs">Name</th></tr>\n  </thead>\n  <tbody>\n    <tr><td className="px-4 py-3 border-b border-gray-100">Alex Smith</td></tr>\n  </tbody>\n</table>`},
+  {cat:'tables',name:'Striped Table',html:`<table class="uk-table uk-table-striped"><thead><tr><th>Product</th><th>Price</th><th>Stock</th></tr></thead><tbody><tr><td>Widget A</td><td>$29</td><td>142</td></tr><tr><td>Widget B</td><td>$49</td><td>85</td></tr><tr><td>Widget C</td><td>$19</td><td>230</td></tr><tr><td>Widget D</td><td>$39</td><td>67</td></tr></tbody></table>`,css:`.uk-table{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb}.uk-table th{text-align:left;padding:12px 16px;background:#f9fafb;font-weight:600;font-size:13px;color:#6b7280;border-bottom:1px solid #e5e7eb}.uk-table td{padding:12px 16px}.uk-table-striped tbody tr:nth-child(even){background:#f9fafb}`,tw:'w-full text-sm bg-white border border-gray-200 rounded-xl overflow-hidden [&_tbody_tr:nth-child(even)]:bg-gray-50',react:`<table className="w-full text-sm bg-white border border-gray-200 rounded-xl overflow-hidden">\n  <thead className="bg-gray-50"><tr><th className="text-left px-4 py-3">Product</th></tr></thead>\n  <tbody className="[&>tr:nth-child(even)]:bg-gray-50">\n    <tr><td className="px-4 py-3">Widget A</td></tr>\n  </tbody>\n</table>`},
+  {cat:'tables',name:'Sortable Table',html:`<table class="uk-table"><thead><tr><th class="uk-sortable">Name <span>&#8597;</span></th><th class="uk-sortable">Date <span>&#8597;</span></th><th class="uk-sortable">Amount <span>&#8597;</span></th></tr></thead><tbody><tr><td>Invoice #001</td><td>Jan 15, 2025</td><td>$1,200</td></tr><tr><td>Invoice #002</td><td>Feb 03, 2025</td><td>$850</td></tr><tr><td>Invoice #003</td><td>Mar 22, 2025</td><td>$2,100</td></tr></tbody></table>`,css:`.uk-table{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb}.uk-table th{text-align:left;padding:12px 16px;background:#f9fafb;font-weight:600;font-size:13px;color:#6b7280;border-bottom:1px solid #e5e7eb}.uk-table td{padding:12px 16px;border-bottom:1px solid #f3f4f6}.uk-sortable{cursor:pointer;user-select:none}.uk-sortable:hover{color:var(--accent)}.uk-sortable span{font-size:11px;opacity:.5}`,tw:'w-full text-sm bg-white border border-gray-200 rounded-xl overflow-hidden [&_th]:cursor-pointer',react:`<table className="w-full text-sm bg-white border border-gray-200 rounded-xl overflow-hidden">\n  <thead className="bg-gray-50">\n    <tr>\n      <th className="text-left px-4 py-3 cursor-pointer hover:text-pink-500">Name &#8597;</th>\n    </tr>\n  </thead>\n</table>`},
+
+  // Lists (3)
+  {cat:'lists',name:'Basic List',html:`<ul class="uk-list"><li>Design system tokens</li><li>Component library</li><li>Accessibility audit</li><li>Performance review</li></ul>`,css:`.uk-list{list-style:none;padding:0;max-width:320px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}.uk-list li{padding:12px 16px;font-size:14px;border-bottom:1px solid #f3f4f6}.uk-list li:last-child{border-bottom:none}.uk-list li:hover{background:#f9fafb}`,tw:'list-none bg-white border border-gray-200 rounded-xl overflow-hidden max-w-xs divide-y divide-gray-100',react:`<ul className="list-none bg-white border border-gray-200 rounded-xl overflow-hidden max-w-xs divide-y divide-gray-100">\n  <li className="px-4 py-3 text-sm hover:bg-gray-50">Design system tokens</li>\n</ul>`},
+  {cat:'lists',name:'List with Icons',html:`<ul class="uk-list uk-list-icon"><li><span class="uk-li-icon" style="background:#dbeafe;color:#3b82f6">&#9733;</span> Starred items first</li><li><span class="uk-li-icon" style="background:#dcfce7;color:#22c55e">&#10003;</span> Completed tasks</li><li><span class="uk-li-icon" style="background:#fef3c7;color:#f59e0b">&#9888;</span> Pending review</li></ul>`,css:`.uk-list{list-style:none;padding:0;max-width:320px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}.uk-list-icon li{display:flex;align-items:center;gap:12px;padding:12px 16px;font-size:14px;border-bottom:1px solid #f3f4f6}.uk-list-icon li:last-child{border-bottom:none}.uk-li-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}`,tw:'list-none bg-white border border-gray-200 rounded-xl overflow-hidden max-w-xs',react:`<ul className="list-none bg-white border border-gray-200 rounded-xl overflow-hidden max-w-xs">\n  <li className="flex items-center gap-3 px-4 py-3 text-sm border-b border-gray-100">\n    <span className="w-7 h-7 rounded-lg bg-blue-100 text-blue-500 flex items-center justify-center text-xs">&#9733;</span>\n    Starred items first\n  </li>\n</ul>`},
+  {cat:'lists',name:'List with Actions',html:`<ul class="uk-list uk-list-action"><li><div><strong>project-alpha</strong><span>Updated 2 hours ago</span></div><button class="uk-la-btn">Edit</button></li><li><div><strong>design-system</strong><span>Updated yesterday</span></div><button class="uk-la-btn">Edit</button></li><li><div><strong>landing-page</strong><span>Updated 3 days ago</span></div><button class="uk-la-btn">Edit</button></li></ul>`,css:`.uk-list{list-style:none;padding:0;max-width:400px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}.uk-list-action li{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #f3f4f6}.uk-list-action li:last-child{border-bottom:none}.uk-list-action strong{display:block;font-size:14px}.uk-list-action span{font-size:12px;color:#9ca3af}.uk-la-btn{padding:5px 12px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}.uk-la-btn:hover{border-color:var(--accent);color:var(--accent)}`,tw:'list-none bg-white border border-gray-200 rounded-xl overflow-hidden max-w-md divide-y divide-gray-100',react:`<ul className="list-none bg-white border border-gray-200 rounded-xl overflow-hidden max-w-md divide-y divide-gray-100">\n  <li className="flex items-center justify-between px-4 py-3">\n    <div><div className="font-bold text-sm">project-alpha</div><div className="text-xs text-gray-400">Updated 2h ago</div></div>\n    <button className="px-3 py-1 border border-gray-200 rounded-md text-xs font-semibold hover:border-pink-500 hover:text-pink-500">Edit</button>\n  </li>\n</ul>`},
+
+  // Layout (8)
+  {cat:'layout',name:'Container',html:`<div class="uk-container"><p>A centered container with max-width and horizontal padding. Responsive and clean.</p></div>`,css:`.uk-container{max-width:1100px;margin:0 auto;padding:0 24px}`,tw:'max-w-5xl mx-auto px-6',react:`<div className="max-w-5xl mx-auto px-6">{children}</div>`},
+  {cat:'layout',name:'Grid 2 Columns',html:`<div class="uk-grid uk-grid-2"><div class="uk-grid-item">Column 1</div><div class="uk-grid-item">Column 2</div></div>`,css:`.uk-grid{display:grid;gap:16px}.uk-grid-2{grid-template-columns:repeat(2,1fr)}.uk-grid-item{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:20px;text-align:center;font-size:14px}`,tw:'grid grid-cols-2 gap-4',react:`<div className="grid grid-cols-2 gap-4">\n  <div className="bg-white border border-gray-200 rounded-lg p-5">Column 1</div>\n  <div className="bg-white border border-gray-200 rounded-lg p-5">Column 2</div>\n</div>`},
+  {cat:'layout',name:'Grid 3 Columns',html:`<div class="uk-grid uk-grid-3"><div class="uk-grid-item">Col 1</div><div class="uk-grid-item">Col 2</div><div class="uk-grid-item">Col 3</div></div>`,css:`.uk-grid{display:grid;gap:16px}.uk-grid-3{grid-template-columns:repeat(3,1fr)}.uk-grid-item{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:20px;text-align:center;font-size:14px}`,tw:'grid grid-cols-3 gap-4',react:`<div className="grid grid-cols-3 gap-4">\n  <div className="bg-white border border-gray-200 rounded-lg p-5">Col 1</div>\n  <div className="bg-white border border-gray-200 rounded-lg p-5">Col 2</div>\n  <div className="bg-white border border-gray-200 rounded-lg p-5">Col 3</div>\n</div>`},
+  {cat:'layout',name:'Grid 4 Columns',html:`<div class="uk-grid uk-grid-4"><div class="uk-grid-item">1</div><div class="uk-grid-item">2</div><div class="uk-grid-item">3</div><div class="uk-grid-item">4</div></div>`,css:`.uk-grid{display:grid;gap:16px}.uk-grid-4{grid-template-columns:repeat(4,1fr)}.uk-grid-item{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:20px;text-align:center;font-size:14px}`,tw:'grid grid-cols-4 gap-4',react:`<div className="grid grid-cols-4 gap-4">\n  <div className="bg-white border border-gray-200 rounded-lg p-5">1</div>\n  <div className="bg-white border border-gray-200 rounded-lg p-5">2</div>\n  <div className="bg-white border border-gray-200 rounded-lg p-5">3</div>\n  <div className="bg-white border border-gray-200 rounded-lg p-5">4</div>\n</div>`},
+  {cat:'layout',name:'Flex Row',html:`<div class="uk-flex-row"><div class="uk-flex-item">Left</div><div class="uk-flex-item grow">Center (grows)</div><div class="uk-flex-item">Right</div></div>`,css:`.uk-flex-row{display:flex;gap:12px;align-items:stretch}.uk-flex-item{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:16px;font-size:14px;text-align:center}.uk-flex-item.grow{flex:1}`,tw:'flex gap-3 items-stretch',react:`<div className="flex gap-3">\n  <div className="bg-white border border-gray-200 rounded-lg p-4">Left</div>\n  <div className="flex-1 bg-white border border-gray-200 rounded-lg p-4">Center</div>\n  <div className="bg-white border border-gray-200 rounded-lg p-4">Right</div>\n</div>`},
+  {cat:'layout',name:'Sidebar Layout',html:`<div class="uk-sidebar-layout"><aside class="uk-sidebar">Sidebar</aside><main class="uk-main">Main Content Area</main></div>`,css:`.uk-sidebar-layout{display:grid;grid-template-columns:240px 1fr;gap:16px;min-height:160px}.uk-sidebar{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:20px;font-size:14px}.uk-main{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:20px;font-size:14px}`,tw:'grid grid-cols-[240px_1fr] gap-4',react:`<div className="grid grid-cols-[240px_1fr] gap-4">\n  <aside className="bg-white border border-gray-200 rounded-lg p-5">Sidebar</aside>\n  <main className="bg-white border border-gray-200 rounded-lg p-5">Main Content</main>\n</div>`},
+  {cat:'layout',name:'Sticky Header',html:`<div class="uk-sticky-demo"><header class="uk-sticky-header">Sticky Header</header><div class="uk-sticky-body"><p>Scroll down to see the header stick to the top of this container.</p><p style="margin-top:60px">More content below...</p></div></div>`,css:`.uk-sticky-demo{height:200px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:12px;position:relative}.uk-sticky-header{position:sticky;top:0;background:#fff;padding:12px 20px;font-weight:700;font-size:14px;border-bottom:1px solid #e5e7eb;z-index:1}.uk-sticky-body{padding:20px;font-size:14px;color:#6b7280;min-height:300px}`,tw:'h-48 overflow-y-auto border border-gray-200 rounded-xl relative',react:`<div className="h-48 overflow-y-auto border border-gray-200 rounded-xl relative">\n  <header className="sticky top-0 bg-white px-5 py-3 font-bold text-sm border-b border-gray-200 z-10">Sticky Header</header>\n  <div className="p-5 text-sm text-gray-500 min-h-[300px]">Content...</div>\n</div>`},
+  {cat:'layout',name:'Hero Section',html:`<section class="uk-hero"><h1>Build something amazing</h1><p>A beautiful hero section with centered text, subtitle, and call-to-action buttons.</p><div class="uk-hero-btns"><button class="uk-hbtn pri">Get Started</button><button class="uk-hbtn sec">Learn More</button></div></section>`,css:`.uk-hero{text-align:center;padding:48px 24px;background:linear-gradient(135deg,rgba(236,72,153,.06),rgba(139,92,246,.06));border-radius:12px;border:1px solid #e5e7eb}.uk-hero h1{font-size:32px;font-weight:700;margin-bottom:8px}.uk-hero p{font-size:16px;color:#6b7280;max-width:500px;margin:0 auto 20px;line-height:1.6}.uk-hero-btns{display:flex;gap:10px;justify-content:center}.uk-hbtn{padding:10px 22px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;border:none}.uk-hbtn.pri{background:var(--accent);color:#fff}.uk-hbtn.sec{background:#fff;color:#374151;border:1px solid #e5e7eb}`,tw:'text-center py-12 px-6 bg-gradient-to-br from-pink-500/5 to-purple-500/5 rounded-xl border border-gray-200',react:`<section className="text-center py-12 px-6 bg-gradient-to-br from-pink-500/5 to-purple-500/5 rounded-xl border border-gray-200">\n  <h1 className="text-3xl font-bold mb-2">Build something amazing</h1>\n  <p className="text-gray-500 max-w-lg mx-auto mb-5">A beautiful hero section.</p>\n  <div className="flex gap-2.5 justify-center">\n    <button className="px-5 py-2.5 bg-pink-500 text-white font-semibold rounded-lg">Get Started</button>\n    <button className="px-5 py-2.5 bg-white text-gray-700 border border-gray-200 font-semibold rounded-lg">Learn More</button>\n  </div>\n</section>`}
+];
+
+let activeCat = 'all';
+let darkPreview = false;
+let favorites = JSON.parse(localStorage.getItem('uikit-favs') || '[]');
+let recentCopied = JSON.parse(localStorage.getItem('uikit-recent') || '[]');
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function buildSidebar() {
+  const sb = document.getElementById('sidebar');
+  let html = '<h3>Categories</h3>';
+  html += `<button class="cat-btn ${activeCat==='all'?'active':''}" data-cat="all">All <span class="count">${COMPS.length}</span></button>`;
+  html += `<button class="cat-btn ${activeCat==='favorites'?'active':''}" data-cat="favorites">Favorites <span class="count">${favorites.length}</span></button>`;
+  CATS.forEach(c => {
+    html += `<button class="cat-btn ${activeCat===c.id?'active':''}" data-cat="${c.id}">${c.label} <span class="count">${c.count}</span></button>`;
+  });
+  sb.innerHTML = html;
+  sb.querySelectorAll('.cat-btn').forEach(b => {
+    b.onclick = () => { activeCat = b.dataset.cat; buildSidebar(); filterCards(); };
+  });
+}
+
+function buildGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  COMPS.forEach((comp, i) => {
+    const card = document.createElement('div');
+    card.className = 'comp-card';
+    card.dataset.cat = comp.cat;
+    card.dataset.name = comp.name.toLowerCase();
+    card.dataset.idx = i;
+    const isFav = favorites.includes(comp.name);
+    card.innerHTML = `
+      <div class="comp-preview ${darkPreview?'dark-mode':''}">${comp.html}</div>
+      <div class="comp-info">
+        <span class="comp-name">${comp.name}</span>
+        <div class="comp-actions">
+          <button class="fav-btn ${isFav?'fav':''}" title="Favorite">${isFav?'&#9733;':'&#9734;'}</button>
+          <button class="code-toggle" title="View Code">&lt;/&gt;</button>
+        </div>
+      </div>
+      <div class="code-panel" id="cp-${i}">
+        <div class="code-tabs">
+          <button class="code-tab active" data-fmt="html">HTML</button>
+          <button class="code-tab" data-fmt="css">CSS</button>
+          <button class="code-tab" data-fmt="tw">Tailwind</button>
+          <button class="code-tab" data-fmt="react">React JSX</button>
+        </div>
+        <div class="code-content">
+          <pre id="pre-${i}"></pre>
+          <button class="copy-btn" data-idx="${i}">Copy</button>
+        </div>
+      </div>`;
+    // inject accent style into preview
+    const preview = card.querySelector('.comp-preview');
+    preview.style.setProperty('--accent', ac());
+    grid.appendChild(card);
+
+    card.querySelector('.fav-btn').onclick = () => toggleFav(comp.name);
+    card.querySelector('.code-toggle').onclick = () => toggleCode(i);
+    card.querySelector('.copy-btn').onclick = () => copyCode(i);
+    card.querySelectorAll('.code-tab').forEach(tab => {
+      tab.onclick = () => switchTab(i, tab.dataset.fmt);
+    });
+    // default show HTML
+    card.querySelector(`#pre-${i}`).textContent = comp.html;
+  });
+  filterCards();
+}
+
+function toggleCode(i) {
+  const panel = document.getElementById(`cp-${i}`);
+  panel.classList.toggle('open');
+}
+
+let activeFormats = {};
+function switchTab(i, fmt) {
+  activeFormats[i] = fmt;
+  const panel = document.getElementById(`cp-${i}`);
+  panel.querySelectorAll('.code-tab').forEach(t => t.classList.toggle('active', t.dataset.fmt === fmt));
+  const comp = COMPS[i];
+  const pre = document.getElementById(`pre-${i}`);
+  const map = { html: comp.html, css: comp.css, tw: comp.tw, react: comp.react };
+  pre.textContent = map[fmt] || '';
+}
+
+function copyCode(i) {
+  const fmt = activeFormats[i] || 'html';
+  const comp = COMPS[i];
+  const map = { html: comp.html, css: comp.css, tw: comp.tw, react: comp.react };
+  navigator.clipboard.writeText(map[fmt] || '').then(() => {
+    showToast(`Copied ${comp.name} (${fmt.toUpperCase()})`);
+    addRecent(comp.name);
+  });
+}
+
+function toggleFav(name) {
+  const idx = favorites.indexOf(name);
+  if (idx >= 0) favorites.splice(idx, 1);
+  else favorites.push(name);
+  localStorage.setItem('uikit-favs', JSON.stringify(favorites));
+  buildSidebar();
+  buildGrid();
+}
+
+function addRecent(name) {
+  recentCopied = recentCopied.filter(n => n !== name);
+  recentCopied.unshift(name);
+  if (recentCopied.length > 8) recentCopied.pop();
+  localStorage.setItem('uikit-recent', JSON.stringify(recentCopied));
+  renderRecent();
+}
+
+function renderRecent() {
+  const box = document.getElementById('recentBox');
+  const tags = document.getElementById('recentTags');
+  if (!recentCopied.length) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  tags.innerHTML = recentCopied.map(n => `<button class="recent-tag">${n}</button>`).join('');
+  tags.querySelectorAll('.recent-tag').forEach(t => {
+    t.onclick = () => {
+      const idx = COMPS.findIndex(c => c.name === t.textContent);
+      if (idx >= 0) {
+        const card = document.querySelector(`[data-idx="${idx}"]`);
+        if (card) { card.scrollIntoView({behavior:'smooth',block:'center'}); toggleCode(idx); }
+      }
+    };
+  });
+}
+
+function filterCards() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.comp-card').forEach(card => {
+    const matchCat = activeCat === 'all' || card.dataset.cat === activeCat || (activeCat === 'favorites' && favorites.includes(COMPS[parseInt(card.dataset.idx)].name));
+    const matchSearch = !q || card.dataset.name.includes(q);
+    card.classList.toggle('hidden', !(matchCat && matchSearch));
+  });
+}
+
+document.getElementById('search').addEventListener('input', filterCards);
+
+document.getElementById('darkToggle').addEventListener('click', function() {
+  darkPreview = !darkPreview;
+  this.classList.toggle('active', darkPreview);
+  this.textContent = darkPreview ? 'Light Preview' : 'Dark Preview';
+  document.querySelectorAll('.comp-preview').forEach(p => p.classList.toggle('dark-mode', darkPreview));
+});
+
+document.getElementById('accentPick').addEventListener('input', function() {
+  document.documentElement.style.setProperty('--accent', this.value);
+  document.querySelectorAll('.comp-preview').forEach(p => p.style.setProperty('--accent', this.value));
+});
+
+buildSidebar();
+buildGrid();
+renderRecent();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

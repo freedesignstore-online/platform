@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Open Graph Image Generator - FreeDesignStore</title>
-<link rel="icon" href="/favicon.ico">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>OG Image Maker - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@700&family=Inter:wght@400;700&family=Space+Grotesk:wght@500;700&family=DM+Sans:wght@400;700&family=Sora:wght@400;700&family=Outfit:wght@400;700&family=Plus+Jakarta+Sans:wght@400;700&family=Bricolage+Grotesque:wght@400;700&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
@@ -15,277 +15,603 @@ a:hover { text-decoration: underline; }
 .back:hover { color: #ec4899; }
 h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
 .subtitle { color: #6b7280; margin-bottom: 24px; font-size: 15px; }
-.container { max-width: 1100px; margin: 0 auto; }
-.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
-.layout { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
-@media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
-.canvas-area { display: flex; align-items: center; justify-content: center; background: repeating-conic-gradient(#e5e7eb 0% 25%, transparent 0% 50%) 50%/20px 20px; border-radius: 12px; padding: 20px; }
-#canvas { border-radius: 4px; box-shadow: 0 4px 20px rgba(0,0,0,.12); max-width: 100%; }
-label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 4px; margin-top: 14px; }
+.container { max-width: 1200px; margin: 0 auto; }
+.panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 20px; margin-bottom: 16px; }
+.layout { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
+@media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+.canvas-wrap { display: flex; align-items: center; justify-content: center; background: repeating-conic-gradient(#e5e7eb 0% 25%, transparent 0% 50%) 50%/20px 20px; border-radius: 12px; padding: 20px; }
+#canvas { border-radius: 4px; box-shadow: 0 4px 20px rgba(0,0,0,.12); max-width: 100%; cursor: crosshair; }
+.sidebar { max-height: 80vh; overflow-y: auto; }
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
+label { display: block; font-size: 12px; font-weight: 600; color: #6b7280; margin: 10px 0 3px; text-transform: uppercase; letter-spacing: .4px; }
 label:first-child { margin-top: 0; }
-select, input[type="text"] { width: 100%; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
-input[type="color"] { width: 100%; height: 36px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 3px; cursor: pointer; }
-.color-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.btn { padding: 10px 18px; border-radius: 8px; border: none; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s; width: 100%; }
-.btn-primary { background: #ec4899; color: #fff; margin-top: 20px; }
+select, input[type="text"] { width: 100%; padding: 7px 10px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 13px; background: #fff; }
+select:focus, input:focus { outline: none; border-color: #ec4899; }
+input[type="color"] { width: 100%; height: 32px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 2px; cursor: pointer; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.btn { padding: 8px 14px; border-radius: 8px; border: none; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; width: 100%; }
+.btn-primary { background: #ec4899; color: #fff; margin-top: 10px; }
 .btn-primary:hover { background: #db2777; }
-.btn-secondary { background: #fff; border: 1px solid #e5e7eb; color: #1a1a1a; margin-top: 8px; }
+.btn-secondary { background: #fff; border: 1px solid #e5e7eb; color: #1a1a1a; margin-top: 6px; }
 .btn-secondary:hover { border-color: #ec4899; }
-.meta-block { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 11px; word-break: break-all; margin-top: 16px; cursor: pointer; white-space: pre-wrap; }
+.btn-sm { padding: 5px 10px; font-size: 12px; margin-top: 0; }
+.meta-block { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; word-break: break-all; margin-top: 10px; cursor: pointer; white-space: pre-wrap; max-height: 120px; overflow-y: auto; }
 .meta-block:hover { border-color: #ec4899; }
-.hint { font-size: 11px; color: #6b7280; margin-top: 4px; }
+.hint { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+.section-title { font-size: 13px; font-weight: 700; color: #1a1a1a; margin: 14px 0 6px; padding-top: 10px; border-top: 1px solid #f3f4f6; }
+.section-title:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+.grad-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 4px; }
+.grad-swatch { width: 100%; aspect-ratio: 2/1; border-radius: 4px; cursor: pointer; border: 2px solid transparent; transition: border-color .15s; }
+.grad-swatch:hover, .grad-swatch.active { border-color: #ec4899; }
+.previews { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.preview-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px; }
+.preview-card h4 { font-size: 11px; font-weight: 600; color: #6b7280; margin-bottom: 6px; }
+.preview-mock { border-radius: 4px; overflow: hidden; background: #fff; border: 1px solid #e5e7eb; }
+.preview-mock img { width: 100%; display: block; }
+.history-strip { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0; margin-top: 6px; }
+.history-strip::-webkit-scrollbar { height: 3px; }
+.history-strip::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
+.history-item { width: 60px; height: 32px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; background-size: cover; background-position: center; }
+.history-item:hover { border-color: #ec4899; }
+.history-item.fav { border-color: #f59e0b; }
+.batch-area { margin-top: 10px; }
+.batch-area textarea { width: 100%; height: 60px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 12px; padding: 8px; resize: vertical; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 99; }
+.toast.show { opacity: 1; }
+.file-btn { font-size: 11px; border: none; padding: 0; margin-top: 2px; }
 </style>
 </head>
 <body>
 <div class="container">
   <a href="/" class="back">&larr; Back to FreeDesignStore</a>
-  <h1>Open Graph Image Generator</h1>
-  <p class="subtitle">Generate 1200x630 OG images for link previews. Download PNG and copy meta tags.</p>
+  <h1>OG Image Maker</h1>
+  <p class="subtitle">Create perfect 1200x630 Open Graph images. 10 templates, Google Fonts, gradient backgrounds, social previews.</p>
 
   <div class="layout">
-    <div class="panel canvas-area">
-      <canvas id="canvas" width="1200" height="630"></canvas>
+    <div>
+      <div class="panel canvas-wrap">
+        <canvas id="canvas" width="1200" height="630"></canvas>
+      </div>
+      <div class="previews" id="previews"></div>
     </div>
-    <div class="panel">
-      <label>Template</label>
-      <select id="template">
-        <option value="blog">Blog Post</option>
-        <option value="product">Product</option>
-        <option value="event">Event</option>
-        <option value="announcement">Announcement</option>
-      </select>
+    <div class="sidebar">
+      <div class="panel">
+        <div class="section-title">Template</div>
+        <select id="template">
+          <option value="blog">Blog Post</option>
+          <option value="product">Product Launch</option>
+          <option value="event">Event</option>
+          <option value="announce">Announcement</option>
+          <option value="tutorial">Tutorial</option>
+          <option value="quote">Quote</option>
+          <option value="stats">Stats</option>
+          <option value="compare">Comparison</option>
+          <option value="newsletter">Newsletter</option>
+          <option value="podcast">Podcast</option>
+        </select>
 
-      <label>Title</label>
-      <input type="text" id="title" value="Your Page Title Here" maxlength="70">
+        <div class="section-title">Text</div>
+        <label>Title</label>
+        <input type="text" id="titleIn" value="How to Build Better Products" maxlength="80">
+        <label>Subtitle</label>
+        <input type="text" id="subtitleIn" value="A practical guide for modern teams" maxlength="120">
+        <label>Author</label>
+        <input type="text" id="authorIn" value="Jane Smith" maxlength="40">
+        <label>Brand</label>
+        <input type="text" id="brandIn" value="FreeDesignStore" maxlength="40">
+        <label>Badge / Tag</label>
+        <input type="text" id="tagIn" value="Design" maxlength="30">
 
-      <label>Subtitle</label>
-      <input type="text" id="subtitleInput" value="A brief description of the content" maxlength="100">
-
-      <label>Author / Brand</label>
-      <input type="text" id="author" value="FreeDesignStore" maxlength="40">
-
-      <label>Tag / Date</label>
-      <input type="text" id="tag" value="Design Tools" maxlength="30">
-
-      <div class="color-row">
-        <div>
-          <label>Background</label>
-          <input type="color" id="bgColor" value="#1a1a1a">
+        <div class="section-title">Typography</div>
+        <div class="row2">
+          <div>
+            <label>Font</label>
+            <select id="fontSel">
+              <option value="Manrope">Manrope</option>
+              <option value="Inter">Inter</option>
+              <option value="Playfair Display">Playfair Display</option>
+              <option value="Space Grotesk">Space Grotesk</option>
+              <option value="DM Sans">DM Sans</option>
+              <option value="Sora">Sora</option>
+              <option value="Outfit">Outfit</option>
+              <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+              <option value="Bricolage Grotesque">Bricolage Grotesque</option>
+              <option value="IBM Plex Mono">IBM Plex Mono</option>
+            </select>
+          </div>
+          <div>
+            <label>Title Size</label>
+            <select id="titleSize">
+              <option value="48">48px</option>
+              <option value="52">52px</option>
+              <option value="56" selected>56px</option>
+              <option value="60">60px</option>
+              <option value="64">64px</option>
+              <option value="72">72px</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <label>Accent</label>
-          <input type="color" id="accentColor" value="#ec4899">
+        <div class="row2">
+          <div>
+            <label>Title Weight</label>
+            <select id="titleWeight">
+              <option value="400">Regular</option>
+              <option value="500">Medium</option>
+              <option value="600">Semibold</option>
+              <option value="700" selected>Bold</option>
+              <option value="800">Extra Bold</option>
+            </select>
+          </div>
+          <div>
+            <label>Subtitle Size</label>
+            <select id="subSize">
+              <option value="20">20px</option>
+              <option value="24" selected>24px</option>
+              <option value="28">28px</option>
+              <option value="32">32px</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="section-title">Background</div>
+        <select id="bgMode">
+          <option value="solid">Solid Color</option>
+          <option value="gradient" selected>Gradient</option>
+          <option value="image">Uploaded Image</option>
+        </select>
+        <div class="row3">
+          <div><label>Color 1</label><input type="color" id="bg1" value="#0f172a"></div>
+          <div><label>Color 2</label><input type="color" id="bg2" value="#1e293b"></div>
+          <div><label>Accent</label><input type="color" id="accent" value="#ec4899"></div>
+        </div>
+        <div class="row2">
+          <div><label>Text</label><input type="color" id="textCol" value="#ffffff"></div>
+          <div><label>Dim Overlay</label>
+            <select id="dimLevel">
+              <option value="0">None</option>
+              <option value="0.3">Light</option>
+              <option value="0.5" selected>Medium</option>
+              <option value="0.7">Heavy</option>
+              <option value="0.85">Very Heavy</option>
+            </select>
+          </div>
+        </div>
+        <div class="grad-grid" id="gradGrid"></div>
+        <label class="file-btn">Background Image</label>
+        <input type="file" id="bgFile" accept="image/*" style="font-size:11px;width:100%;">
+
+        <div class="section-title">Elements</div>
+        <label>Logo (corner)</label>
+        <input type="file" id="logoFile" accept="image/*" style="font-size:11px;width:100%;">
+        <div class="row2" style="margin-top:6px;">
+          <div>
+            <label>Logo Position</label>
+            <select id="logoPos">
+              <option value="tr">Top Right</option>
+              <option value="tl">Top Left</option>
+              <option value="br">Bottom Right</option>
+              <option value="bl">Bottom Left</option>
+            </select>
+          </div>
+          <div>
+            <label>Logo Size</label>
+            <select id="logoSize">
+              <option value="36">Small</option>
+              <option value="48" selected>Medium</option>
+              <option value="64">Large</option>
+            </select>
+          </div>
+        </div>
+        <label>Shapes</label>
+        <select id="shapes">
+          <option value="none">None</option>
+          <option value="dots">Dot Grid</option>
+          <option value="circles">Circles</option>
+          <option value="lines">Diagonal Lines</option>
+          <option value="corner">Corner Accent</option>
+          <option value="frame">Frame Border</option>
+        </select>
+
+        <div class="section-title">Export</div>
+        <button class="btn btn-primary" id="dl1x">Download PNG (1x)</button>
+        <button class="btn btn-secondary" id="dl2x">Download PNG (2x)</button>
+        <button class="btn btn-secondary" id="copyMeta">Copy Meta Tags</button>
+        <div class="meta-block" id="metaBlock"></div>
+
+        <div class="section-title">Batch Generate</div>
+        <div class="batch-area">
+          <textarea id="batchTitles" placeholder="Enter one title per line..."></textarea>
+          <button class="btn btn-secondary btn-sm" id="batchBtn" style="width:100%;margin-top:4px;">Generate All as ZIP</button>
+          <p class="hint">One title per line. Uses current template + settings.</p>
+        </div>
+
+        <div class="section-title">History</div>
+        <div class="history-strip" id="historyStrip"></div>
+        <div class="row2" style="margin-top:4px;">
+          <button class="btn btn-secondary btn-sm" id="favBtn">Favorite</button>
+          <button class="btn btn-secondary btn-sm" id="clearHist">Clear</button>
         </div>
       </div>
-      <div class="color-row">
-        <div>
-          <label>Text Color</label>
-          <input type="color" id="textColor" value="#ffffff">
-        </div>
-        <div>
-          <label>Bg Image</label>
-          <input type="file" id="bgImage" accept="image/*" style="margin-top:4px;font-size:11px;border:none;padding:0;">
-        </div>
-      </div>
-
-      <label>Logo</label>
-      <input type="file" id="logoInput" accept="image/*" style="font-size:11px;border:none;padding:0;">
-      <p class="hint">Placed in corner. Square PNG recommended.</p>
-
-      <button class="btn btn-primary" id="downloadBtn">Download PNG</button>
-      <button class="btn btn-secondary" id="copyMeta">Copy Meta Tags</button>
-
-      <div class="meta-block" id="metaBlock"></div>
     </div>
   </div>
 </div>
+<div class="toast" id="toast"></div>
 
 <script>
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const W = 1200, H = 630;
+const C = document.getElementById('canvas'), X = C.getContext('2d'), W = 1200, H = 630;
+C.style.width = '100%'; C.style.maxWidth = '700px';
 
-const templateSel = document.getElementById('template');
-const titleInput = document.getElementById('title');
-const subtitleInput = document.getElementById('subtitleInput');
-const authorInput = document.getElementById('author');
-const tagInput = document.getElementById('tag');
-const bgColorInput = document.getElementById('bgColor');
-const accentColorInput = document.getElementById('accentColor');
-const textColorInput = document.getElementById('textColor');
-const bgImageInput = document.getElementById('bgImage');
-const logoInput = document.getElementById('logoInput');
-const downloadBtn = document.getElementById('downloadBtn');
-const copyMetaBtn = document.getElementById('copyMeta');
-const metaBlock = document.getElementById('metaBlock');
+const GRADIENTS = [
+  ['#0f172a','#1e3a5f'],['#1a1a2e','#16213e'],['#0c0c1d','#1a1a40'],['#1b1b2f','#462255'],['#2d1b69','#11998e'],
+  ['#0f0c29','#302b63'],['#141e30','#243b55'],['#1f1c2c','#928dab'],['#000428','#004e92'],['#200122','#6f0000'],
+  ['#1a2980','#26d0ce'],['#373b44','#4286f4'],['#0f2027','#2c5364'],['#3a1c71','#d76d77'],['#642b73','#c6426e'],
+  ['#134e5e','#71b280'],['#283048','#859398'],['#4b134f','#c94b4b'],['#1e130c','#9a8478'],['#0b486b','#f56217']
+];
 
-let bgImg = null;
-let logoImg = null;
+const FONTS = ['Manrope','Inter','Playfair Display','Space Grotesk','DM Sans','Sora','Outfit','Plus Jakarta Sans','Bricolage Grotesque','IBM Plex Mono'];
 
-canvas.style.width = '100%';
-canvas.style.maxWidth = '700px';
+const $ = id => document.getElementById(id);
+let bgImg = null, logoImg = null;
+let history = JSON.parse(localStorage.getItem('ogm_history') || '[]');
+let favorites = JSON.parse(localStorage.getItem('ogm_favs') || '[]');
 
-function wrapText(text, x, y, maxW, lineH, align) {
-  ctx.textAlign = align || 'left';
-  const words = text.split(' ');
-  let line = '', lines = [];
-  words.forEach(word => {
-    const test = line + word + ' ';
-    if (ctx.measureText(test).width > maxW && line) { lines.push(line.trim()); line = word + ' '; }
-    else line = test;
+function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1800); }
+
+function wrapText(text, x, y, maxW, lineH, align, maxLines) {
+  X.textAlign = align || 'left';
+  const words = text.split(' '); let line = '', lines = [];
+  words.forEach(w => {
+    const t = line + w + ' ';
+    if (X.measureText(t).width > maxW && line) { lines.push(line.trim()); line = w + ' '; }
+    else line = t;
   });
   lines.push(line.trim());
-  lines.slice(0, 3).forEach((l, i) => ctx.fillText(l, x, y + i * lineH));
-  return lines.length * lineH;
+  lines.slice(0, maxLines || 3).forEach((l, i) => X.fillText(l, x, y + i * lineH));
+  return Math.min(lines.length, maxLines || 3) * lineH;
 }
 
-function render() {
-  const tpl = templateSel.value;
-  const bg = bgColorInput.value;
-  const ac = accentColorInput.value;
-  const tc = textColorInput.value;
-
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, W, H);
-
-  if (bgImg) {
-    const ir = bgImg.width / bgImg.height;
-    const cr = W / H;
-    let sw = bgImg.width, sh = bgImg.height, sx = 0, sy = 0;
-    if (ir > cr) { sw = bgImg.height * cr; sx = (bgImg.width - sw) / 2; }
-    else { sh = bgImg.width / cr; sy = (bgImg.height - sh) / 2; }
-    ctx.drawImage(bgImg, sx, sy, sw, sh, 0, 0, W, H);
-    ctx.fillStyle = bg + 'cc';
-    ctx.fillRect(0, 0, W, H);
+function drawShapes(shape, ac) {
+  if (shape === 'dots') {
+    X.fillStyle = ac + '22';
+    for (let gx = 40; gx < W; gx += 40) for (let gy = 40; gy < H; gy += 40) { X.beginPath(); X.arc(gx, gy, 2, 0, Math.PI * 2); X.fill(); }
+  } else if (shape === 'circles') {
+    X.strokeStyle = ac + '1a'; X.lineWidth = 1;
+    [[W * .8, H * .2, 200], [W * .1, H * .8, 150], [W * .5, H * .1, 100]].forEach(([cx, cy, r]) => { X.beginPath(); X.arc(cx, cy, r, 0, Math.PI * 2); X.stroke(); });
+  } else if (shape === 'lines') {
+    X.strokeStyle = ac + '15'; X.lineWidth = 1;
+    for (let i = -H; i < W + H; i += 60) { X.beginPath(); X.moveTo(i, 0); X.lineTo(i + H, H); X.stroke(); }
+  } else if (shape === 'corner') {
+    X.fillStyle = ac + '33';
+    X.beginPath(); X.moveTo(0, 0); X.lineTo(200, 0); X.lineTo(0, 200); X.closePath(); X.fill();
+    X.beginPath(); X.moveTo(W, H); X.lineTo(W - 200, H); X.lineTo(W, H - 200); X.closePath(); X.fill();
+  } else if (shape === 'frame') {
+    X.strokeStyle = ac; X.lineWidth = 3;
+    X.strokeRect(30, 30, W - 60, H - 60);
   }
+}
 
+function drawLogo() {
+  if (!logoImg) return;
+  const s = parseInt($('logoSize').value), pad = 50, pos = $('logoPos').value;
+  const lx = pos.includes('r') ? W - pad - s : pad;
+  const ly = pos.includes('b') ? H - pad - s : pad;
+  X.drawImage(logoImg, lx, ly, s, s);
+}
+
+function drawBadge(text, x, y, ac) {
+  if (!text) return;
+  X.font = '600 16px ' + getFont();
+  const tw = X.measureText(text.toUpperCase()).width;
+  X.fillStyle = ac; X.beginPath(); X.roundRect(x, y - 14, tw + 24, 28, 14); X.fill();
+  X.fillStyle = '#fff'; X.textAlign = 'left'; X.fillText(text.toUpperCase(), x + 12, y + 4);
+}
+
+function getFont() { return "'" + $('fontSel').value + "', system-ui"; }
+
+function render() {
+  const tpl = $('template').value;
+  const bg1 = $('bg1').value, bg2 = $('bg2').value, ac = $('accent').value, tc = $('textCol').value;
+  const mode = $('bgMode').value, font = getFont();
+  const title = $('titleIn').value, sub = $('subtitleIn').value, author = $('authorIn').value, brand = $('brandIn').value, tag = $('tagIn').value;
+  const tsz = parseInt($('titleSize').value), tw = $('titleWeight').value, ssz = parseInt($('subSize').value);
+  const shape = $('shapes').value, dim = parseFloat($('dimLevel').value);
   const pad = 80;
 
+  // Background
+  if (mode === 'image' && bgImg) {
+    const ir = bgImg.width / bgImg.height, cr = W / H;
+    let sw = bgImg.width, sh = bgImg.height, sx = 0, sy = 0;
+    if (ir > cr) { sw = bgImg.height * cr; sx = (bgImg.width - sw) / 2; } else { sh = bgImg.width / cr; sy = (bgImg.height - sh) / 2; }
+    X.drawImage(bgImg, sx, sy, sw, sh, 0, 0, W, H);
+    X.fillStyle = `rgba(0,0,0,${dim})`; X.fillRect(0, 0, W, H);
+  } else if (mode === 'gradient') {
+    const g = X.createLinearGradient(0, 0, W, H); g.addColorStop(0, bg1); g.addColorStop(1, bg2);
+    X.fillStyle = g; X.fillRect(0, 0, W, H);
+  } else {
+    X.fillStyle = bg1; X.fillRect(0, 0, W, H);
+  }
+
+  drawShapes(shape, ac);
+
+  // Templates
   if (tpl === 'blog') {
-    ctx.fillStyle = ac;
-    ctx.fillRect(pad, 160, 60, 5);
-    ctx.fillStyle = tc + '99';
-    ctx.font = '500 22px Manrope, system-ui';
-    ctx.textAlign = 'left';
-    ctx.fillText(tagInput.value.toUpperCase(), pad + 80, 170);
-    ctx.fillStyle = tc;
-    ctx.font = '800 56px Manrope, system-ui';
-    wrapText(titleInput.value, pad, 240, W - pad*2, 68, 'left');
-    ctx.fillStyle = tc + 'aa';
-    ctx.font = '400 26px Manrope, system-ui';
-    wrapText(subtitleInput.value, pad, 380, W - pad*2, 34, 'left');
-    ctx.fillStyle = ac;
-    ctx.font = '600 22px Manrope, system-ui';
-    ctx.fillText(authorInput.value, pad, H - 80);
+    X.fillStyle = ac; X.fillRect(pad, 170, 50, 4);
+    X.fillStyle = tc + '88'; X.font = `500 18px ${font}`; X.textAlign = 'left'; X.fillText(tag.toUpperCase(), pad + 62, 178);
+    X.fillStyle = tc; X.font = `${tw} ${tsz}px ${font}`;
+    const th = wrapText(title, pad, 230, W - pad * 2, tsz + 12, 'left', 3);
+    X.fillStyle = tc + 'aa'; X.font = `400 ${ssz}px ${font}`;
+    wrapText(sub, pad, 230 + th + 10, W - pad * 2, ssz + 8, 'left', 2);
+    X.fillStyle = ac; X.font = `600 20px ${font}`; X.textAlign = 'left'; X.fillText(author, pad, H - 70);
+    X.fillStyle = tc + '66'; X.font = `400 16px ${font}`; X.fillText(brand, pad, H - 44);
   } else if (tpl === 'product') {
-    ctx.fillStyle = ac + '22';
-    ctx.fillRect(W*0.55, 0, W*0.45, H);
-    ctx.fillStyle = tc;
-    ctx.font = '800 52px Manrope, system-ui';
-    wrapText(titleInput.value, pad, 200, W*0.5, 64, 'left');
-    ctx.fillStyle = tc + 'bb';
-    ctx.font = '400 24px Manrope, system-ui';
-    wrapText(subtitleInput.value, pad, 350, W*0.5, 32, 'left');
-    ctx.fillStyle = ac;
-    ctx.beginPath();
-    ctx.roundRect(pad, 440, 200, 50, 25);
-    ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.font = '600 20px Manrope, system-ui';
-    ctx.textAlign = 'center';
-    ctx.fillText(tagInput.value || 'Learn More', pad + 100, 470);
-    ctx.fillStyle = tc + '88';
-    ctx.font = '500 18px Manrope, system-ui';
-    ctx.textAlign = 'left';
-    ctx.fillText(authorInput.value, pad, H - 60);
+    X.fillStyle = ac + '18'; X.fillRect(W * .55, 0, W * .45, H);
+    drawBadge(tag, pad, 120, ac);
+    X.fillStyle = tc; X.font = `${tw} ${tsz}px ${font}`;
+    wrapText(title, pad, 190, W * .5, tsz + 10, 'left', 3);
+    X.fillStyle = tc + 'bb'; X.font = `400 ${ssz}px ${font}`;
+    wrapText(sub, pad, 380, W * .5, ssz + 6, 'left', 2);
+    X.fillStyle = ac; X.beginPath(); X.roundRect(pad, 460, 180, 44, 22); X.fill();
+    X.fillStyle = '#fff'; X.font = `600 16px ${font}`; X.textAlign = 'center'; X.fillText('Learn More', pad + 90, 487);
+    X.fillStyle = tc + '55'; X.font = `500 16px ${font}`; X.textAlign = 'left'; X.fillText(brand, pad, H - 50);
   } else if (tpl === 'event') {
-    const grad = ctx.createLinearGradient(0, 0, W, H);
-    grad.addColorStop(0, ac + '44');
-    grad.addColorStop(1, bg);
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = ac;
-    ctx.font = '700 24px Manrope, system-ui';
-    ctx.textAlign = 'center';
-    ctx.fillText(tagInput.value.toUpperCase(), W/2, 140);
-    ctx.fillStyle = tc;
-    ctx.font = '800 60px Manrope, system-ui';
-    wrapText(titleInput.value, W/2, 230, W - pad*2, 72, 'center');
-    ctx.fillStyle = tc + 'bb';
-    ctx.font = '400 26px Manrope, system-ui';
-    wrapText(subtitleInput.value, W/2, 400, W - pad*2, 34, 'center');
-    ctx.fillStyle = ac;
-    ctx.font = '600 20px Manrope, system-ui';
-    ctx.fillText(authorInput.value, W/2, H - 70);
-  } else { // announcement
-    ctx.fillStyle = ac;
-    ctx.fillRect(0, 0, W, 8);
-    ctx.fillRect(0, H - 8, W, 8);
-    ctx.fillStyle = tc;
-    ctx.font = '800 64px Manrope, system-ui';
-    ctx.textAlign = 'center';
-    wrapText(titleInput.value, W/2, H*0.38, W - pad*2, 78, 'center');
-    ctx.fillStyle = tc + 'aa';
-    ctx.font = '500 28px Manrope, system-ui';
-    ctx.fillText(subtitleInput.value.slice(0, 60), W/2, H*0.65);
-    ctx.fillStyle = ac;
-    ctx.font = '600 20px Manrope, system-ui';
-    ctx.fillText(authorInput.value + (tagInput.value ? '  |  ' + tagInput.value : ''), W/2, H - 50);
+    const g = X.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * .6);
+    g.addColorStop(0, ac + '33'); g.addColorStop(1, 'transparent');
+    X.fillStyle = g; X.fillRect(0, 0, W, H);
+    drawBadge(tag, W / 2 - 50, 110, ac);
+    X.fillStyle = tc; X.font = `${tw} ${tsz + 4}px ${font}`;
+    wrapText(title, W / 2, 200, W - pad * 2, tsz + 14, 'center', 3);
+    X.fillStyle = tc + 'bb'; X.font = `400 ${ssz}px ${font}`;
+    wrapText(sub, W / 2, 400, W - pad * 2, ssz + 8, 'center', 2);
+    X.fillStyle = tc + '88'; X.font = `500 18px ${font}`; X.textAlign = 'center';
+    X.fillText(author + (brand ? '  |  ' + brand : ''), W / 2, H - 60);
+  } else if (tpl === 'announce') {
+    X.fillStyle = ac; X.fillRect(0, 0, W, 6); X.fillRect(0, H - 6, W, 6);
+    X.fillStyle = tc; X.font = `${tw} ${tsz + 8}px ${font}`; X.textAlign = 'center';
+    wrapText(title, W / 2, H * .32, W - pad * 2, tsz + 18, 'center', 2);
+    X.fillStyle = tc + 'aa'; X.font = `500 ${ssz + 2}px ${font}`;
+    X.fillText(sub.slice(0, 70), W / 2, H * .62);
+    X.fillStyle = ac; X.font = `600 18px ${font}`;
+    X.fillText(brand + (tag ? '  |  ' + tag : ''), W / 2, H - 40);
+  } else if (tpl === 'tutorial') {
+    X.fillStyle = ac + '15'; X.fillRect(0, 0, 8, H);
+    X.fillStyle = ac; X.beginPath(); X.roundRect(pad, 80, 100, 36, 18); X.fill();
+    X.fillStyle = '#fff'; X.font = `600 14px ${font}`; X.textAlign = 'center'; X.fillText('TUTORIAL', pad + 50, 103);
+    X.fillStyle = tc; X.font = `${tw} ${tsz}px ${font}`; X.textAlign = 'left';
+    const th = wrapText(title, pad, 170, W - pad * 2 - 100, tsz + 10, 'left', 3);
+    X.fillStyle = tc + '99'; X.font = `400 ${ssz}px ${font}`;
+    wrapText(sub, pad, 170 + th + 12, W - pad * 2 - 100, ssz + 6, 'left', 2);
+    // Step indicators
+    X.fillStyle = ac + '44';
+    for (let i = 0; i < 4; i++) { X.beginPath(); X.roundRect(pad + i * 50, H - 80, 36, 36, 8); X.fill(); X.fillStyle = tc + '88'; X.font = `700 16px ${font}`; X.textAlign = 'center'; X.fillText('' + (i + 1), pad + i * 50 + 18, H - 57); X.fillStyle = ac + '44'; }
+    X.fillStyle = tc + '55'; X.font = `500 14px ${font}`; X.textAlign = 'left'; X.fillText(author + ' | ' + brand, pad + 220, H - 56);
+  } else if (tpl === 'quote') {
+    X.fillStyle = ac + '11';
+    X.beginPath(); X.arc(W * .15, H * .3, 200, 0, Math.PI * 2); X.fill();
+    X.fillStyle = ac + '22'; X.font = `800 180px ${font}`; X.textAlign = 'left'; X.fillText('"', pad - 10, 190);
+    X.fillStyle = tc; X.font = `600 ${tsz - 4}px ${font}`;
+    wrapText(title, W / 2, H * .33, W - pad * 2 - 40, tsz + 6, 'center', 3);
+    X.fillStyle = ac; X.fillRect(W / 2 - 30, H * .68, 60, 3);
+    X.fillStyle = tc + 'cc'; X.font = `500 22px ${font}`; X.textAlign = 'center'; X.fillText(author, W / 2, H * .75);
+    X.fillStyle = tc + '66'; X.font = `400 16px ${font}`; X.fillText(brand, W / 2, H * .75 + 30);
+  } else if (tpl === 'stats') {
+    X.fillStyle = ac; X.fillRect(0, 0, W, 5);
+    drawBadge(tag, pad, 90, ac);
+    X.fillStyle = tc; X.font = `${tw} ${tsz - 8}px ${font}`; X.textAlign = 'left';
+    X.fillText(title.slice(0, 40), pad, 160);
+    // Stat boxes
+    const stats = sub.split(',').map(s => s.trim()).filter(Boolean).slice(0, 4);
+    const bw = (W - pad * 2 - (stats.length - 1) * 20) / stats.length;
+    stats.forEach((s, i) => {
+      const bx = pad + i * (bw + 20);
+      X.fillStyle = ac + '11'; X.beginPath(); X.roundRect(bx, 220, bw, 160, 12); X.fill();
+      const parts = s.split(':');
+      X.fillStyle = ac; X.font = `800 48px ${font}`; X.textAlign = 'center'; X.fillText(parts[0] || s, bx + bw / 2, 300);
+      if (parts[1]) { X.fillStyle = tc + '88'; X.font = `500 16px ${font}`; X.fillText(parts[1].trim(), bx + bw / 2, 340); }
+    });
+    X.fillStyle = tc + '55'; X.font = `500 16px ${font}`; X.textAlign = 'left'; X.fillText(brand, pad, H - 50);
+  } else if (tpl === 'compare') {
+    X.fillStyle = tc; X.font = `${tw} ${tsz - 8}px ${font}`; X.textAlign = 'center';
+    X.fillText(title.slice(0, 50), W / 2, 80);
+    // Two columns
+    X.fillStyle = ac + '11'; X.beginPath(); X.roundRect(pad, 120, W / 2 - pad - 20, H - 180, 16); X.fill();
+    X.fillStyle = tc + '08'; X.beginPath(); X.roundRect(W / 2 + 20, 120, W / 2 - pad - 20, H - 180, 16); X.fill();
+    X.fillStyle = ac; X.font = `700 24px ${font}`; X.textAlign = 'center'; X.fillText('VS', W / 2, H / 2 + 8);
+    // Divider
+    X.fillStyle = ac + '33'; X.fillRect(W / 2 - 1, 140, 2, H - 220);
+    const sides = sub.split('|').map(s => s.trim());
+    X.fillStyle = tc; X.font = `600 28px ${font}`;
+    if (sides[0]) X.fillText(sides[0], pad + (W / 2 - pad - 20) / 2, 180);
+    if (sides[1]) X.fillText(sides[1], W / 2 + 20 + (W / 2 - pad - 20) / 2, 180);
+    X.fillStyle = tc + '55'; X.font = `500 14px ${font}`; X.textAlign = 'center'; X.fillText(brand, W / 2, H - 30);
+  } else if (tpl === 'newsletter') {
+    X.fillStyle = ac + '0d'; X.fillRect(0, 0, W, H);
+    X.fillStyle = ac; X.fillRect(pad, 100, W - pad * 2, 3);
+    X.fillStyle = tc + '44'; X.font = `600 18px ${font}`; X.textAlign = 'left'; X.fillText(brand.toUpperCase(), pad, 80);
+    X.fillStyle = tc; X.font = `${tw} ${tsz + 4}px ${font}`;
+    wrapText(title, pad, 180, W - pad * 2, tsz + 14, 'left', 2);
+    X.fillStyle = tc + 'aa'; X.font = `400 ${ssz}px ${font}`;
+    wrapText(sub, pad, 340, W - pad * 2, ssz + 8, 'left', 2);
+    drawBadge(tag, pad, 440, ac);
+    X.fillStyle = tc + '55'; X.font = `500 16px ${font}`; X.textAlign = 'left'; X.fillText('by ' + author, pad, H - 50);
+  } else if (tpl === 'podcast') {
+    // Waveform decoration
+    X.fillStyle = ac + '22';
+    for (let i = 0; i < 40; i++) {
+      const bh = 20 + Math.sin(i * .4) * 60 + Math.random() * 30;
+      X.fillRect(pad / 2 + i * 28, H - 100 - bh / 2, 12, bh);
+    }
+    X.fillStyle = ac; X.beginPath(); X.arc(pad + 30, 140, 40, 0, Math.PI * 2); X.fill();
+    X.fillStyle = '#fff'; X.font = '800 28px ' + font; X.textAlign = 'center'; X.fillText('>', pad + 33, 150);
+    X.fillStyle = tc + '66'; X.font = `600 16px ${font}`; X.textAlign = 'left'; X.fillText('EPISODE', pad + 90, 128);
+    X.fillStyle = tc; X.font = `600 24px ${font}`; X.fillText(tag || 'New Episode', pad + 90, 156);
+    X.fillStyle = tc; X.font = `${tw} ${tsz - 4}px ${font}`;
+    wrapText(title, pad, 240, W - pad * 2, tsz + 6, 'left', 2);
+    X.fillStyle = tc + 'aa'; X.font = `400 ${ssz}px ${font}`;
+    wrapText(sub, pad, 370, W - pad * 2, ssz + 6, 'left', 2);
+    X.fillStyle = tc + '55'; X.font = `500 16px ${font}`; X.textAlign = 'left'; X.fillText(author + ' | ' + brand, pad, H - 40);
   }
 
-  if (logoImg) {
-    const s = 48;
-    ctx.drawImage(logoImg, W - pad - s, pad/2, s, s);
-  }
-
+  drawLogo();
   updateMeta();
+  updatePreviews();
 }
 
 function updateMeta() {
-  const meta = `<meta property="og:title" content="${titleInput.value}">
-<meta property="og:description" content="${subtitleInput.value}">
+  const t = $('titleIn').value, d = $('subtitleIn').value;
+  $('metaBlock').textContent = `<meta property="og:title" content="${t}">
+<meta property="og:description" content="${d}">
 <meta property="og:image" content="https://yoursite.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">`;
-  metaBlock.textContent = meta;
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${t}">
+<meta name="twitter:description" content="${d}">
+<meta name="twitter:image" content="https://yoursite.com/og-image.png">`;
 }
 
-[templateSel].forEach(el => el.addEventListener('change', render));
-[titleInput, subtitleInput, authorInput, tagInput].forEach(el => el.addEventListener('input', render));
-[bgColorInput, accentColorInput, textColorInput].forEach(el => el.addEventListener('input', render));
+function updatePreviews() {
+  const dataUrl = C.toDataURL('image/png', 0.5);
+  const t = $('titleIn').value, d = $('subtitleIn').value;
+  $('previews').innerHTML = `
+  <div class="preview-card"><h4>Google Search</h4><div class="preview-mock" style="padding:10px;">
+    <div style="font-size:11px;color:#1a73e8;margin-bottom:2px;">yoursite.com</div>
+    <div style="font-size:13px;font-weight:600;color:#1a0dab;margin-bottom:3px;">${esc(t).slice(0,60)}</div>
+    <div style="font-size:11px;color:#4d5156;line-height:1.3;">${esc(d).slice(0,100)}</div>
+  </div></div>
+  <div class="preview-card"><h4>X (Twitter)</h4><div class="preview-mock">
+    <img src="${dataUrl}" style="aspect-ratio:1200/630;object-fit:cover;">
+    <div style="padding:6px 8px;border-top:1px solid #e5e7eb;">
+      <div style="font-size:12px;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${esc(t).slice(0,50)}</div>
+      <div style="font-size:10px;color:#6b7280;">yoursite.com</div>
+    </div>
+  </div></div>
+  <div class="preview-card"><h4>LinkedIn</h4><div class="preview-mock">
+    <img src="${dataUrl}" style="aspect-ratio:1200/630;object-fit:cover;">
+    <div style="padding:8px;background:#f3f2ef;">
+      <div style="font-size:12px;font-weight:600;">${esc(t).slice(0,60)}</div>
+      <div style="font-size:10px;color:#6b7280;margin-top:2px;">yoursite.com</div>
+    </div>
+  </div></div>
+  <div class="preview-card"><h4>Facebook</h4><div class="preview-mock">
+    <img src="${dataUrl}" style="aspect-ratio:1200/630;object-fit:cover;">
+    <div style="padding:8px;background:#f0f2f5;">
+      <div style="font-size:10px;color:#6b7280;text-transform:uppercase;">yoursite.com</div>
+      <div style="font-size:12px;font-weight:600;margin-top:2px;">${esc(t).slice(0,65)}</div>
+      <div style="font-size:10px;color:#6b7280;margin-top:1px;">${esc(d).slice(0,80)}</div>
+    </div>
+  </div></div>`;
+}
 
-bgImageInput.addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const img = new Image();
-  img.onload = () => { bgImg = img; render(); };
-  img.src = URL.createObjectURL(file);
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// Gradient grid
+const gg = $('gradGrid');
+GRADIENTS.forEach((cols, i) => {
+  const d = document.createElement('div');
+  d.className = 'grad-swatch'; d.style.background = `linear-gradient(135deg, ${cols[0]}, ${cols[1]})`;
+  d.addEventListener('click', () => {
+    $('bg1').value = cols[0]; $('bg2').value = cols[1]; $('bgMode').value = 'gradient';
+    gg.querySelectorAll('.grad-swatch').forEach(s => s.classList.remove('active'));
+    d.classList.add('active');
+    render();
+  });
+  gg.appendChild(d);
 });
 
-logoInput.addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const img = new Image();
-  img.onload = () => { logoImg = img; render(); };
-  img.src = URL.createObjectURL(file);
+// Event listeners
+['template','bgMode','fontSel','titleSize','titleWeight','subSize','shapes','logoPos','logoSize','dimLevel'].forEach(id =>
+  $(id).addEventListener('change', render));
+['titleIn','subtitleIn','authorIn','brandIn','tagIn'].forEach(id =>
+  $(id).addEventListener('input', render));
+['bg1','bg2','accent','textCol'].forEach(id =>
+  $(id).addEventListener('input', render));
+
+$('bgFile').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const img = new Image(); img.onload = () => { bgImg = img; $('bgMode').value = 'image'; render(); };
+  img.src = URL.createObjectURL(f);
+});
+$('logoFile').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const img = new Image(); img.onload = () => { logoImg = img; render(); };
+  img.src = URL.createObjectURL(f);
 });
 
-downloadBtn.addEventListener('click', () => {
-  const link = document.createElement('a');
-  link.download = 'og-image.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
+// Downloads
+function downloadPNG(scale) {
+  const c2 = document.createElement('canvas'); c2.width = W * scale; c2.height = H * scale;
+  const x2 = c2.getContext('2d'); x2.drawImage(C, 0, 0, W * scale, H * scale);
+  const a = document.createElement('a'); a.download = `og-image-${scale}x.png`; a.href = c2.toDataURL('image/png'); a.click();
+  saveHistory();
+  toast('Downloaded ' + scale + 'x PNG');
+}
+$('dl1x').addEventListener('click', () => downloadPNG(1));
+$('dl2x').addEventListener('click', () => downloadPNG(2));
+
+$('copyMeta').addEventListener('click', () => {
+  navigator.clipboard.writeText($('metaBlock').textContent);
+  toast('Meta tags copied');
+});
+$('metaBlock').addEventListener('click', () => {
+  navigator.clipboard.writeText($('metaBlock').textContent);
+  toast('Copied');
 });
 
-copyMetaBtn.addEventListener('click', () => {
-  navigator.clipboard.writeText(metaBlock.textContent);
-  copyMetaBtn.textContent = 'Copied!';
-  setTimeout(() => copyMetaBtn.textContent = 'Copy Meta Tags', 1500);
+// Batch
+$('batchBtn').addEventListener('click', async () => {
+  const lines = $('batchTitles').value.split('\n').map(l => l.trim()).filter(Boolean);
+  if (!lines.length) { toast('Enter titles first'); return; }
+  const origTitle = $('titleIn').value;
+  const blobs = [];
+  for (const line of lines) {
+    $('titleIn').value = line; render();
+    const blob = await new Promise(r => C.toBlob(b => r(b), 'image/png'));
+    blobs.push({ name: line.slice(0, 40).replace(/[^a-zA-Z0-9 ]/g, '') + '.png', blob });
+  }
+  $('titleIn').value = origTitle; render();
+  // Download individually (no zip library needed)
+  for (const { name, blob } of blobs) {
+    const a = document.createElement('a'); a.download = name; a.href = URL.createObjectURL(blob); a.click();
+    await new Promise(r => setTimeout(r, 200));
+  }
+  toast(`Downloaded ${blobs.length} images`);
 });
 
-metaBlock.addEventListener('click', () => navigator.clipboard.writeText(metaBlock.textContent));
+// History
+function saveHistory() {
+  const thumb = C.toDataURL('image/png', 0.15);
+  const entry = { thumb, template: $('template').value, title: $('titleIn').value, ts: Date.now(), fav: false };
+  history.unshift(entry);
+  if (history.length > 20) history = history.slice(0, 20);
+  localStorage.setItem('ogm_history', JSON.stringify(history));
+  renderHistory();
+}
 
+function renderHistory() {
+  const strip = $('historyStrip');
+  const all = [...favorites, ...history.filter(h => !h.fav)].slice(0, 20);
+  strip.innerHTML = all.map((h, i) => `<div class="history-item${h.fav ? ' fav' : ''}" data-idx="${i}" style="background-image:url(${h.thumb})" title="${esc(h.title)}"></div>`).join('');
+}
+
+$('favBtn').addEventListener('click', () => {
+  if (!history.length) return;
+  const entry = { ...history[0], fav: true };
+  favorites.unshift(entry);
+  if (favorites.length > 10) favorites = favorites.slice(0, 10);
+  localStorage.setItem('ogm_favs', JSON.stringify(favorites));
+  renderHistory();
+  toast('Added to favorites');
+});
+
+$('clearHist').addEventListener('click', () => {
+  history = []; localStorage.removeItem('ogm_history');
+  renderHistory();
+  toast('History cleared');
+});
+
+renderHistory();
 render();
 </script>
 <script src="/related.js"></script>

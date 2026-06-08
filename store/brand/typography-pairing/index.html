@@ -4,184 +4,581 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Typography Pairing Tool - FreeDesignStore</title>
+<meta name="description" content="Find perfect heading + body font combinations from 30 Google Fonts. 15 curated pairings, 5 preview contexts, visual type scale, CSS/Tailwind/SCSS export.">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600&family=Lora:wght@400;700&family=Montserrat:wght@400;600;700&family=Merriweather:wght@400;700&family=Raleway:wght@400;600&family=Source+Serif+4:wght@400;700&family=Poppins:wght@400;600;700&family=Crimson+Text:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=Lora:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800&family=Merriweather:wght@300;400;700;900&family=Raleway:wght@300;400;500;600;700&family=Source+Serif+4:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&family=Crimson+Text:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Sora:wght@300;400;500;600;700;800&family=Work+Sans:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700;800&family=Josefin+Sans:wght@300;400;500;600;700&family=Libre+Baskerville:wght@400;700&family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Serif:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,800;9..144,900&family=DM+Serif+Display&family=Bitter:wght@300;400;500;600;700;800&family=Roboto+Slab:wght@300;400;500;600;700;800&family=Cabin:wght@400;500;600;700&family=Karla:wght@300;400;500;600;700;800&family=Rubik:wght@300;400;500;600;700;800&family=Lexend:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
-a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
-a.back:hover { text-decoration: underline; }
-h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
-p.subtitle { color: #6b7280; margin-bottom: 24px; }
-.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
-.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 24px; }
-select, input[type="range"], input[type="text"] { font-family: inherit; font-size: 14px; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; }
-select { min-width: 160px; }
-.btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; transition: opacity .2s; }
-.btn:hover { opacity: .85; }
-.btn-primary { background: #ec4899; color: #fff; }
-.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
-.pairings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px; margin-bottom: 24px; }
-.pairing-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; cursor: pointer; transition: border-color .2s, box-shadow .2s; }
-.pairing-card:hover { border-color: #ec4899; box-shadow: 0 2px 8px rgba(236,72,153,.15); }
-.pairing-card.selected { border-color: #ec4899; box-shadow: 0 2px 8px rgba(236,72,153,.2); }
-.pairing-card .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: .5px; }
-.tag-classic { background: #fef3c7; color: #92400e; }
-.tag-modern { background: #dbeafe; color: #1e40af; }
-.tag-playful { background: #fce7f3; color: #9d174d; }
-.tag-elegant { background: #f3e8ff; color: #6b21a8; }
-.pairing-card h3 { font-size: 12px; color: #6b7280; font-weight: 500; margin-bottom: 8px; }
-.preview-section { margin-top: 24px; }
-.context-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-.context-tab { padding: 6px 14px; border-radius: 6px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; font-size: 13px; font-weight: 500; }
-.context-tab.active { background: #ec4899; color: #fff; border-color: #ec4899; }
-.preview-box { border: 1px solid #e5e7eb; border-radius: 12px; padding: 32px; min-height: 200px; }
-.sliders { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
-.slider-group label { display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px; }
-.slider-group input[type="range"] { width: 100%; padding: 0; }
-.slider-group .value { font-size: 12px; color: #6b7280; text-align: right; }
-textarea.custom-text { width: 100%; height: 60px; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; resize: vertical; margin-bottom: 16px; }
-.export-box { margin-top: 16px; }
-.export-box textarea { width: 100%; height: 100px; font-family: monospace; font-size: 13px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; resize: vertical; }
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#fafafa;--text:#1a1a1a;--accent:#ec4899;--panel:#ffffff;--line:#e5e7eb;--muted:#6b7280}
+body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:24px;padding-bottom:80px}
+a.back{display:inline-block;margin-bottom:24px;color:var(--accent);text-decoration:none;font-weight:500;font-size:.85rem}
+a.back:hover{text-decoration:underline}
+h1{font-size:28px;font-weight:700;margin-bottom:8px}
+p.subtitle{color:var(--muted);margin-bottom:24px;font-size:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:24px;margin-bottom:24px}
+.panel h2{font-size:16px;font-weight:700;margin-bottom:12px}
+.panel h3{font-size:14px;font-weight:600;margin-bottom:8px;color:var(--muted)}
+.btn{padding:8px 16px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-family:inherit;font-size:14px;transition:all .15s}
+.btn:hover{opacity:.85}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-secondary{background:#f3f4f6;color:var(--text);border:1px solid var(--line)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-ghost{background:none;border:none;color:var(--accent);padding:6px 10px;font-size:12px;font-weight:600}
+
+/* Mood tags */
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px}
+.tag-classic{background:#fef3c7;color:#92400e}
+.tag-modern{background:#dbeafe;color:#1e40af}
+.tag-playful{background:#fce7f3;color:#9d174d}
+.tag-elegant{background:#f3e8ff;color:#6b21a8}
+.tag-technical{background:#d1fae5;color:#065f46}
+.tag-editorial{background:#fee2e2;color:#991b1b}
+
+/* Pairing grid */
+.pairings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;margin-bottom:24px}
+.pairing-card{border:1px solid var(--line);border-radius:12px;padding:20px;cursor:pointer;transition:border-color .15s,box-shadow .15s;position:relative}
+.pairing-card:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(236,72,153,.1)}
+.pairing-card.selected{border-color:var(--accent);box-shadow:0 2px 12px rgba(236,72,153,.2)}
+.pairing-card .fav-btn{position:absolute;top:12px;right:12px;background:none;border:none;font-size:16px;cursor:pointer;opacity:.3;transition:opacity .15s}
+.pairing-card .fav-btn:hover,.pairing-card .fav-btn.fav{opacity:1}
+.pairing-card .pair-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.pairing-card .pair-fonts{font-size:12px;color:var(--muted);font-weight:500}
+
+/* Filter bar */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.filter-btn{padding:5px 12px;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;font-size:12px;font-weight:500;font-family:inherit;transition:all .15s}
+.filter-btn:hover{border-color:var(--accent)}
+.filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* Preview */
+.context-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.context-tab{padding:6px 14px;border-radius:6px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:13px;font-weight:500;font-family:inherit;transition:all .15s}
+.context-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.preview-box{border:1px solid var(--line);border-radius:12px;padding:32px;min-height:200px;overflow:hidden}
+
+/* Sliders */
+.sliders{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:20px}
+.slider-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:500}
+.slider-group input[type="range"]{width:100%;accent-color:var(--accent)}
+.slider-group .value{font-size:11px;color:var(--muted);text-align:right}
+.row-sliders{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* Type scale */
+.type-scale{border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:20px;overflow-x:auto}
+.scale-row{display:flex;align-items:baseline;gap:12px;padding:6px 0;border-bottom:1px solid #f3f4f6}
+.scale-row:last-child{border:none}
+.scale-label{font-size:11px;color:var(--muted);width:60px;flex-shrink:0;font-weight:600;text-align:right}
+.scale-px{font-size:11px;color:var(--muted);width:40px;flex-shrink:0}
+.scale-sample{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Compare mode */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:900px){.compare-grid{grid-template-columns:1fr}}
+.compare-card{border:1px solid var(--line);border-radius:12px;padding:20px}
+.compare-card h4{font-size:12px;color:var(--muted);margin-bottom:10px;font-weight:600}
+
+/* Export */
+.export-tabs{display:flex;gap:0;border-bottom:2px solid var(--line);margin-bottom:12px}
+.export-tab{padding:8px 14px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;color:var(--muted);transition:all .15s}
+.export-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.export-box textarea{width:100%;height:120px;font-family:'IBM Plex Mono',monospace;font-size:12px;padding:12px;border:1px solid var(--line);border-radius:8px;resize:vertical;background:#f9fafb}
+
+/* Contrast */
+.contrast-result{padding:12px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:16px}
+.contrast-pass{background:#dcfce7;color:#166534}
+.contrast-warn{background:#fef3c7;color:#92400e}
+.contrast-fail{background:#fee2e2;color:#991b1b}
+
+/* Favorites */
+.fav-section{margin-bottom:16px}
+.fav-chips{display:flex;gap:6px;flex-wrap:wrap}
+.fav-chip{padding:4px 10px;background:#fdf2f8;border:1px solid #fce7f3;border-radius:6px;font-size:11px;font-weight:600;color:var(--accent);cursor:pointer}
+
+textarea.custom-text{width:100%;height:50px;padding:10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;margin-bottom:16px}
+
+.toast{position:fixed;bottom:80px;right:24px;background:var(--text);color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:100}
+.toast.show{opacity:1}
 </style>
 </head>
 <body>
 <a class="back" href="/">Back to Store</a>
 <h1>Typography Pairing Tool</h1>
-<p class="subtitle">Find the perfect heading + body font combinations for your project.</p>
+<p class="subtitle">15 curated heading + body font pairings from 30 Google Fonts. Preview, compare, tune, and export.</p>
 
+<!-- Custom text -->
 <div class="panel">
   <textarea class="custom-text" id="customText" placeholder="Type custom preview text...">The quick brown fox jumps over the lazy dog. Design is not just what it looks like, design is how it works.</textarea>
 
+  <!-- Mood filter -->
+  <div class="filter-bar" id="filterBar">
+    <span style="font-size:12px;font-weight:600;color:var(--muted)">Filter:</span>
+    <button class="filter-btn active" data-mood="all">All</button>
+    <button class="filter-btn" data-mood="classic">Classic</button>
+    <button class="filter-btn" data-mood="modern">Modern</button>
+    <button class="filter-btn" data-mood="playful">Playful</button>
+    <button class="filter-btn" data-mood="elegant">Elegant</button>
+    <button class="filter-btn" data-mood="technical">Technical</button>
+    <button class="filter-btn" data-mood="editorial">Editorial</button>
+    <label style="margin-left:auto;font-size:12px;display:flex;align-items:center;gap:4px;color:var(--muted);font-weight:500"><input type="checkbox" id="showFavsOnly"> Favorites only</label>
+  </div>
+
+  <!-- Pairing grid -->
   <div class="pairings-grid" id="pairingsGrid"></div>
 
-  <h3 style="margin-bottom:12px;">Preview Selected Pairing</h3>
-  <div class="context-tabs" id="contextTabs">
-    <button class="context-tab active" data-ctx="hero">Hero</button>
-    <button class="context-tab" data-ctx="card">Card</button>
-    <button class="context-tab" data-ctx="article">Article</button>
-  </div>
-
-  <div class="sliders">
-    <div class="slider-group">
-      <label>Heading Size: <span id="hSizeVal">36px</span></label>
-      <input type="range" id="hSize" min="20" max="72" value="36" oninput="updatePreview()">
-    </div>
-    <div class="slider-group">
-      <label>Body Size: <span id="bSizeVal">16px</span></label>
-      <input type="range" id="bSize" min="12" max="24" value="16" oninput="updatePreview()">
-    </div>
-    <div class="slider-group">
-      <label>Line Height: <span id="lhVal">1.6</span></label>
-      <input type="range" id="lh" min="10" max="24" value="16" oninput="updatePreview()">
-    </div>
-    <div class="slider-group">
-      <label>Letter Spacing: <span id="lsVal">0px</span></label>
-      <input type="range" id="ls" min="-2" max="5" value="0" oninput="updatePreview()">
-    </div>
-  </div>
-
-  <div class="preview-box" id="previewBox"></div>
-
-  <div class="export-box">
-    <button class="btn btn-primary" onclick="exportCSS()" style="margin-top:16px;margin-bottom:8px;">Export CSS</button>
-    <textarea id="exportOutput" readonly placeholder="CSS output will appear here..."></textarea>
+  <!-- Favorites -->
+  <div class="fav-section" id="favSection" style="display:none">
+    <h3>Favorites</h3>
+    <div class="fav-chips" id="favChips"></div>
   </div>
 </div>
 
+<!-- Preview panel -->
+<div class="panel">
+  <h2>Preview Selected Pairing</h2>
+
+  <div class="context-tabs" id="contextTabs">
+    <button class="context-tab active" data-ctx="hero">Hero Section</button>
+    <button class="context-tab" data-ctx="blog">Blog Post</button>
+    <button class="context-tab" data-ctx="landing">Landing Page</button>
+    <button class="context-tab" data-ctx="dashboard">Dashboard</button>
+    <button class="context-tab" data-ctx="email">Email</button>
+  </div>
+
+  <!-- Sliders: heading -->
+  <h3>Heading</h3>
+  <div class="sliders">
+    <div class="slider-group"><label>Size: <span id="hSizeVal">36px</span></label><input type="range" id="hSize" min="16" max="80" value="36"></div>
+    <div class="slider-group"><label>Weight: <span id="hWeightVal">700</span></label><input type="range" id="hWeight" min="100" max="900" step="100" value="700"></div>
+    <div class="slider-group"><label>Line Height: <span id="hLhVal">1.2</span></label><input type="range" id="hLh" min="8" max="24" value="12"></div>
+    <div class="slider-group"><label>Letter Spacing: <span id="hLsVal">0px</span></label><input type="range" id="hLs" min="-3" max="8" value="0"></div>
+  </div>
+  <h3>Body</h3>
+  <div class="sliders">
+    <div class="slider-group"><label>Size: <span id="bSizeVal">16px</span></label><input type="range" id="bSize" min="12" max="28" value="16"></div>
+    <div class="slider-group"><label>Weight: <span id="bWeightVal">400</span></label><input type="range" id="bWeight" min="100" max="900" step="100" value="400"></div>
+    <div class="slider-group"><label>Line Height: <span id="bLhVal">1.6</span></label><input type="range" id="bLh" min="10" max="28" value="16"></div>
+    <div class="slider-group"><label>Letter Spacing: <span id="bLsVal">0px</span></label><input type="range" id="bLs" min="-2" max="5" value="0"></div>
+  </div>
+
+  <!-- Contrast check -->
+  <div class="contrast-result" id="contrastResult"></div>
+
+  <!-- Preview box -->
+  <div class="preview-box" id="previewBox"></div>
+</div>
+
+<!-- Type Scale -->
+<div class="panel">
+  <h2>Visual Type Scale</h2>
+  <div class="type-scale" id="typeScale"></div>
+</div>
+
+<!-- Compare mode -->
+<div class="panel">
+  <h2>Compare Mode <span style="font-size:12px;color:var(--muted);font-weight:400">(click 3 pairings while holding Shift)</span></h2>
+  <div class="compare-grid" id="compareGrid"></div>
+</div>
+
+<!-- Export -->
+<div class="panel">
+  <h2>Export</h2>
+  <div class="export-tabs" id="exportTabs">
+    <button class="export-tab active" data-fmt="css">CSS @import</button>
+    <button class="export-tab" data-fmt="tailwind">Tailwind Config</button>
+    <button class="export-tab" data-fmt="scss">SCSS Variables</button>
+    <button class="export-tab" data-fmt="json">JSON Tokens</button>
+  </div>
+  <div class="export-box">
+    <textarea id="exportOutput" readonly placeholder="Select a pairing to generate export code..."></textarea>
+    <button class="btn btn-secondary btn-sm" onclick="copyExport()" style="margin-top:8px">Copy to Clipboard</button>
+  </div>
+</div>
+
+<!-- Chrome AI suggestion -->
+<div class="panel">
+  <h2>AI Font Suggestion</h2>
+  <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Describe your project and Chrome AI will suggest the best pairing.</p>
+  <div style="display:flex;gap:8px">
+    <input type="text" id="aiPrompt" placeholder="e.g. A luxury jewelry brand with feminine elegance" style="flex:1;font-family:inherit;font-size:14px;padding:8px 12px;border:1px solid var(--line);border-radius:8px">
+    <button class="btn btn-primary" onclick="aiSuggest()">Suggest</button>
+  </div>
+  <div id="aiResult" style="margin-top:12px;font-size:13px;color:var(--muted)"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-const pairings = [
-  { heading: 'Playfair Display', body: 'Inter', mood: 'elegant', desc: 'Serif elegance meets clean sans' },
-  { heading: 'Montserrat', body: 'Merriweather', mood: 'classic', desc: 'Geometric sans + readable serif' },
-  { heading: 'Poppins', body: 'Inter', mood: 'modern', desc: 'Friendly geometric duo' },
-  { heading: 'Raleway', body: 'Lora', mood: 'elegant', desc: 'Thin sans with literary serif' },
-  { heading: 'Manrope', body: 'Source Serif 4', mood: 'modern', desc: 'Technical sans + refined serif' },
-  { heading: 'Playfair Display', body: 'Raleway', mood: 'classic', desc: 'High contrast serif + light sans' },
-  { heading: 'Poppins', body: 'Crimson Text', mood: 'playful', desc: 'Round sans with old-style serif' },
-  { heading: 'Montserrat', body: 'Inter', mood: 'modern', desc: 'Bold geometric + neutral body' },
-  { heading: 'Lora', body: 'Manrope', mood: 'classic', desc: 'Calligraphic serif + modern sans' },
-  { heading: 'Crimson Text', body: 'Raleway', mood: 'elegant', desc: 'Old-style serif + thin sans' },
+const PAIRINGS = [
+  {heading:'Playfair Display',body:'Inter',mood:'elegant',desc:'Serif elegance meets clean sans'},
+  {heading:'Montserrat',body:'Merriweather',mood:'classic',desc:'Geometric sans + readable serif'},
+  {heading:'Poppins',body:'Inter',mood:'modern',desc:'Friendly geometric duo'},
+  {heading:'Raleway',body:'Lora',mood:'elegant',desc:'Thin sans with literary serif'},
+  {heading:'Manrope',body:'Source Serif 4',mood:'modern',desc:'Technical sans + refined serif'},
+  {heading:'Playfair Display',body:'Raleway',mood:'classic',desc:'High contrast serif + light sans'},
+  {heading:'Poppins',body:'Crimson Text',mood:'playful',desc:'Round sans with old-style serif'},
+  {heading:'Space Grotesk',body:'IBM Plex Serif',mood:'technical',desc:'Geometric mono-feel + balanced serif'},
+  {heading:'Fraunces',body:'DM Sans',mood:'editorial',desc:'Quirky old-style serif + neutral sans'},
+  {heading:'DM Serif Display',body:'Karla',mood:'editorial',desc:'Bold display serif + humanist sans'},
+  {heading:'Archivo',body:'Libre Baskerville',mood:'classic',desc:'Strong grotesque + literary serif'},
+  {heading:'Sora',body:'Bitter',mood:'technical',desc:'Clean geometric + slab serif'},
+  {heading:'Outfit',body:'Cabin',mood:'playful',desc:'Rounded modern + friendly humanist'},
+  {heading:'Cormorant Garamond',body:'Lexend',mood:'elegant',desc:'Luxurious display serif + high-readability sans'},
+  {heading:'Rubik',body:'Work Sans',mood:'modern',desc:'Rounded neo-grotesque duo'},
 ];
 
+const SCALE_STEPS = [
+  {name:'4xl',mult:3.0},{name:'3xl',mult:2.25},{name:'2xl',mult:1.75},
+  {name:'xl',mult:1.375},{name:'lg',mult:1.125},{name:'base',mult:1.0},
+  {name:'sm',mult:0.875},{name:'xs',mult:0.75}
+];
+
+const FAVS_KEY = 'fds-typo-favs';
 let selectedIdx = 0;
 let context = 'hero';
+let exportFmt = 'css';
+let activeMood = 'all';
+let compareIndices = [];
+let favorites = new Set();
 
-function renderPairings() {
-  const grid = document.getElementById('pairingsGrid');
-  const text = document.getElementById('customText').value || 'The quick brown fox jumps over the lazy dog.';
-  grid.innerHTML = pairings.map((p, i) => `
-    <div class="pairing-card ${i === selectedIdx ? 'selected' : ''}" onclick="selectPairing(${i})">
-      <span class="tag tag-${p.mood}">${p.mood}</span>
-      <h3>${p.heading} + ${p.body}</h3>
-      <div style="font-family:'${p.heading}',serif;font-size:22px;font-weight:700;margin-bottom:8px;">${text.split('.')[0]}.</div>
-      <div style="font-family:'${p.body}',sans-serif;font-size:14px;line-height:1.5;color:#4b5563;">${text}</div>
-    </div>
-  `).join('');
+// Load favorites
+try{const f=JSON.parse(localStorage.getItem(FAVS_KEY)||'[]');favorites=new Set(f);}catch{}
+
+function saveFavs(){localStorage.setItem(FAVS_KEY,JSON.stringify([...favorites]));}
+
+// Render pairing cards
+function renderPairings(){
+  const grid=document.getElementById('pairingsGrid');
+  const text=document.getElementById('customText').value||'The quick brown fox jumps over the lazy dog.';
+  const favsOnly=document.getElementById('showFavsOnly').checked;
+
+  grid.innerHTML=PAIRINGS.map((p,i)=>{
+    if(activeMood!=='all'&&p.mood!==activeMood) return '';
+    if(favsOnly&&!favorites.has(i)) return '';
+    const isFav=favorites.has(i);
+    return`<div class="pairing-card${i===selectedIdx?' selected':''}" data-idx="${i}">
+      <button class="fav-btn${isFav?' fav':''}" data-fav="${i}" title="Favorite">${isFav?'\u2605':'\u2606'}</button>
+      <div class="pair-header"><span class="tag tag-${p.mood}">${p.mood}</span><span class="pair-fonts">${p.heading} + ${p.body}</span></div>
+      <div style="font-family:'${p.heading}',serif;font-size:20px;font-weight:700;margin-bottom:6px;line-height:1.2;">${text.split('.')[0]}.</div>
+      <div style="font-family:'${p.body}',sans-serif;font-size:13px;line-height:1.5;color:#4b5563;">${text}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">${p.desc}</div>
+    </div>`;
+  }).join('');
+
+  renderFavChips();
 }
 
-function selectPairing(i) { selectedIdx = i; renderPairings(); updatePreview(); }
+function renderFavChips(){
+  const section=document.getElementById('favSection');
+  const chips=document.getElementById('favChips');
+  if(!favorites.size){section.style.display='none';return;}
+  section.style.display='block';
+  chips.innerHTML=[...favorites].map(i=>{
+    const p=PAIRINGS[i];
+    return`<div class="fav-chip" data-idx="${i}">${p.heading} + ${p.body}</div>`;
+  }).join('');
+}
 
-function updatePreview() {
-  const p = pairings[selectedIdx];
-  const hSize = document.getElementById('hSize').value;
-  const bSize = document.getElementById('bSize').value;
-  const lh = (document.getElementById('lh').value / 10).toFixed(1);
-  const ls = document.getElementById('ls').value;
-  document.getElementById('hSizeVal').textContent = hSize + 'px';
-  document.getElementById('bSizeVal').textContent = bSize + 'px';
-  document.getElementById('lhVal').textContent = lh;
-  document.getElementById('lsVal').textContent = ls + 'px';
-  const text = document.getElementById('customText').value || 'The quick brown fox jumps over the lazy dog.';
-  const box = document.getElementById('previewBox');
-  const headStyle = `font-family:'${p.heading}',serif;font-size:${hSize}px;font-weight:700;letter-spacing:${ls}px;margin-bottom:16px;`;
-  const bodyStyle = `font-family:'${p.body}',sans-serif;font-size:${bSize}px;line-height:${lh};color:#4b5563;`;
-
-  if (context === 'hero') {
-    box.innerHTML = `<div style="text-align:center;padding:40px 20px;"><h2 style="${headStyle}">${text.split('.')[0]}.</h2><p style="${bodyStyle}max-width:600px;margin:0 auto;">${text}</p></div>`;
-  } else if (context === 'card') {
-    box.innerHTML = `<div style="max-width:350px;border:1px solid #e5e7eb;border-radius:12px;padding:24px;"><h3 style="${headStyle}font-size:${Math.round(hSize*0.7)}px;">Card Title</h3><p style="${bodyStyle}">${text.substring(0,120)}...</p><a style="color:#ec4899;font-weight:600;font-size:14px;text-decoration:none;margin-top:12px;display:inline-block;">Read more</a></div>`;
-  } else {
-    box.innerHTML = `<article style="max-width:640px;"><h1 style="${headStyle}">${text.split('.')[0]}.</h1><p style="${bodyStyle}margin-bottom:16px;">${text}</p><p style="${bodyStyle}">${text}</p></article>`;
+// Events
+document.getElementById('pairingsGrid').addEventListener('click',e=>{
+  const fav=e.target.closest('[data-fav]');
+  if(fav){
+    const i=parseInt(fav.dataset.fav);
+    if(favorites.has(i)) favorites.delete(i); else favorites.add(i);
+    saveFavs(); renderPairings(); return;
   }
-}
-
-function exportCSS() {
-  const p = pairings[selectedIdx];
-  const hSize = document.getElementById('hSize').value;
-  const bSize = document.getElementById('bSize').value;
-  const lh = (document.getElementById('lh').value / 10).toFixed(1);
-  const ls = document.getElementById('ls').value;
-  const css = `@import url('https://fonts.googleapis.com/css2?family=${p.heading.replace(/ /g,'+')}:wght@400;700&family=${p.body.replace(/ /g,'+')}:wght@400;500;600&display=swap');
-
-h1, h2, h3, h4 {
-  font-family: '${p.heading}', serif;
-  font-size: ${hSize}px;
-  font-weight: 700;
-  letter-spacing: ${ls}px;
-}
-
-body, p {
-  font-family: '${p.body}', sans-serif;
-  font-size: ${bSize}px;
-  line-height: ${lh};
-}`;
-  document.getElementById('exportOutput').value = css;
-}
-
-document.getElementById('customText').addEventListener('input', () => { renderPairings(); updatePreview(); });
-
-document.getElementById('contextTabs').addEventListener('click', e => {
-  if (e.target.classList.contains('context-tab')) {
-    document.querySelectorAll('.context-tab').forEach(t => t.classList.remove('active'));
-    e.target.classList.add('active');
-    context = e.target.dataset.ctx;
-    updatePreview();
+  const card=e.target.closest('[data-idx]');
+  if(!card) return;
+  const i=parseInt(card.dataset.idx);
+  if(e.shiftKey){
+    if(compareIndices.includes(i)) compareIndices=compareIndices.filter(x=>x!==i);
+    else{compareIndices.push(i);if(compareIndices.length>3)compareIndices.shift();}
+    renderCompare();
+    return;
   }
+  selectedIdx=i;
+  renderPairings();updatePreview();renderTypeScale();doExport();
 });
 
+document.getElementById('favChips').addEventListener('click',e=>{
+  const chip=e.target.closest('[data-idx]');
+  if(!chip) return;
+  selectedIdx=parseInt(chip.dataset.idx);
+  renderPairings();updatePreview();renderTypeScale();doExport();
+});
+
+document.getElementById('filterBar').addEventListener('click',e=>{
+  const btn=e.target.closest('[data-mood]');
+  if(!btn) return;
+  activeMood=btn.dataset.mood;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.mood===activeMood));
+  renderPairings();
+});
+
+document.getElementById('showFavsOnly').addEventListener('change',renderPairings);
+document.getElementById('customText').addEventListener('input',()=>{renderPairings();updatePreview();});
+
+document.getElementById('contextTabs').addEventListener('click',e=>{
+  const btn=e.target.closest('[data-ctx]');
+  if(!btn) return;
+  context=btn.dataset.ctx;
+  document.querySelectorAll('.context-tab').forEach(t=>t.classList.toggle('active',t.dataset.ctx===context));
+  updatePreview();
+});
+
+// Sliders
+document.querySelectorAll('.slider-group input[type="range"]').forEach(el=>{
+  el.addEventListener('input',()=>{updateSliderLabels();updatePreview();renderTypeScale();doExport();});
+});
+
+document.getElementById('exportTabs').addEventListener('click',e=>{
+  const btn=e.target.closest('[data-fmt]');
+  if(!btn) return;
+  exportFmt=btn.dataset.fmt;
+  document.querySelectorAll('.export-tab').forEach(t=>t.classList.toggle('active',t.dataset.fmt===exportFmt));
+  doExport();
+});
+
+function getSliders(){
+  return{
+    hSize:+document.getElementById('hSize').value,
+    hWeight:+document.getElementById('hWeight').value,
+    hLh:(document.getElementById('hLh').value/10).toFixed(1),
+    hLs:+document.getElementById('hLs').value,
+    bSize:+document.getElementById('bSize').value,
+    bWeight:+document.getElementById('bWeight').value,
+    bLh:(document.getElementById('bLh').value/10).toFixed(1),
+    bLs:+document.getElementById('bLs').value,
+  };
+}
+
+function updateSliderLabels(){
+  const s=getSliders();
+  document.getElementById('hSizeVal').textContent=s.hSize+'px';
+  document.getElementById('hWeightVal').textContent=s.hWeight;
+  document.getElementById('hLhVal').textContent=s.hLh;
+  document.getElementById('hLsVal').textContent=s.hLs+'px';
+  document.getElementById('bSizeVal').textContent=s.bSize+'px';
+  document.getElementById('bWeightVal').textContent=s.bWeight;
+  document.getElementById('bLhVal').textContent=s.bLh;
+  document.getElementById('bLsVal').textContent=s.bLs+'px';
+}
+
+function updatePreview(){
+  const p=PAIRINGS[selectedIdx];
+  const s=getSliders();
+  updateSliderLabels();
+  const text=document.getElementById('customText').value||'The quick brown fox jumps over the lazy dog.';
+  const box=document.getElementById('previewBox');
+
+  const hs=`font-family:'${p.heading}',serif;font-size:${s.hSize}px;font-weight:${s.hWeight};line-height:${s.hLh};letter-spacing:${s.hLs}px;`;
+  const bs=`font-family:'${p.body}',sans-serif;font-size:${s.bSize}px;font-weight:${s.bWeight};line-height:${s.bLh};letter-spacing:${s.bLs}px;color:#4b5563;`;
+
+  if(context==='hero'){
+    box.innerHTML=`<div style="text-align:center;padding:40px 20px;"><h2 style="${hs}margin-bottom:16px;">${text.split('.')[0]}.</h2><p style="${bs}max-width:600px;margin:0 auto;">${text}</p><div style="margin-top:24px;"><span style="display:inline-block;padding:10px 24px;background:var(--accent);color:#fff;border-radius:8px;font-family:'${p.body}',sans-serif;font-size:14px;font-weight:600;">Get Started</span></div></div>`;
+  } else if(context==='blog'){
+    box.innerHTML=`<article style="max-width:640px;margin:0 auto;"><div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-family:'${p.body}',sans-serif;">June 8, 2026 &middot; 5 min read</div><h1 style="${hs}margin-bottom:16px;">${text.split('.')[0]}.</h1><p style="${bs}margin-bottom:16px;">${text}</p><h2 style="${hs}font-size:${Math.round(s.hSize*.7)}px;margin-bottom:12px;">Why Typography Matters</h2><p style="${bs}">${text}</p><blockquote style="border-left:3px solid var(--accent);padding-left:16px;margin:20px 0;${bs}font-style:italic;opacity:.8;">${text.split('.')[0]}.</blockquote><p style="${bs}">${text}</p></article>`;
+  } else if(context==='landing'){
+    box.innerHTML=`<div><div style="text-align:center;padding:32px;background:linear-gradient(135deg,#fdf2f8,#f9fafb);border-radius:12px;margin-bottom:20px;"><h1 style="${hs}margin-bottom:8px;">Build Something Beautiful</h1><p style="${bs}max-width:500px;margin:0 auto;">We help teams create products that users love. Start your journey today.</p></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;"><div style="padding:20px;border:1px solid var(--line);border-radius:8px;"><h3 style="${hs}font-size:${Math.round(s.hSize*.5)}px;margin-bottom:8px;">Design</h3><p style="${bs}font-size:${Math.round(s.bSize*.9)}px;">Pixel-perfect interfaces that delight users at every interaction.</p></div><div style="padding:20px;border:1px solid var(--line);border-radius:8px;"><h3 style="${hs}font-size:${Math.round(s.hSize*.5)}px;margin-bottom:8px;">Develop</h3><p style="${bs}font-size:${Math.round(s.bSize*.9)}px;">Clean, maintainable code built with modern best practices.</p></div><div style="padding:20px;border:1px solid var(--line);border-radius:8px;"><h3 style="${hs}font-size:${Math.round(s.hSize*.5)}px;margin-bottom:8px;">Deploy</h3><p style="${bs}font-size:${Math.round(s.bSize*.9)}px;">Ship with confidence using automated testing and CI/CD.</p></div></div></div>`;
+  } else if(context==='dashboard'){
+    box.innerHTML=`<div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;"><h2 style="${hs}font-size:${Math.round(s.hSize*.6)}px;">Dashboard</h2><span style="${bs}font-size:12px;">Last updated: just now</span></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;"><div style="padding:16px;background:#f9fafb;border-radius:8px;"><div style="${bs}font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Revenue</div><div style="${hs}font-size:${Math.round(s.hSize*.7)}px;">$42,389</div></div><div style="padding:16px;background:#f9fafb;border-radius:8px;"><div style="${bs}font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Users</div><div style="${hs}font-size:${Math.round(s.hSize*.7)}px;">1,284</div></div><div style="padding:16px;background:#f9fafb;border-radius:8px;"><div style="${bs}font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Conversion</div><div style="${hs}font-size:${Math.round(s.hSize*.7)}px;">3.2%</div></div></div><table style="width:100%;${bs}font-size:13px;border-collapse:collapse;"><tr style="border-bottom:1px solid var(--line);"><th style="text-align:left;padding:8px;font-weight:600;">Name</th><th style="text-align:left;padding:8px;">Status</th><th style="text-align:right;padding:8px;">Amount</th></tr><tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:8px;">Enterprise Plan</td><td style="padding:8px;">Active</td><td style="padding:8px;text-align:right;">$299/mo</td></tr><tr><td style="padding:8px;">Starter Plan</td><td style="padding:8px;">Active</td><td style="padding:8px;text-align:right;">$29/mo</td></tr></table></div>`;
+  } else {
+    box.innerHTML=`<div style="max-width:600px;margin:0 auto;border:1px solid var(--line);border-radius:8px;overflow:hidden;"><div style="background:var(--accent);padding:24px;text-align:center;"><h1 style="${hs}font-size:${Math.round(s.hSize*.6)}px;color:#fff;">Weekly Digest</h1></div><div style="padding:24px;"><p style="${bs}margin-bottom:16px;">Hi there,</p><p style="${bs}margin-bottom:16px;">${text}</p><h2 style="${hs}font-size:${Math.round(s.hSize*.5)}px;margin-bottom:10px;">What's New</h2><p style="${bs}margin-bottom:20px;">${text.split('.').slice(0,2).join('.')}.</p><div style="text-align:center;"><span style="display:inline-block;padding:10px 24px;background:var(--accent);color:#fff;border-radius:6px;font-family:'${p.body}',sans-serif;font-size:14px;font-weight:600;">Read More</span></div></div><div style="background:#f9fafb;padding:16px;text-align:center;${bs}font-size:11px;color:#9ca3af;">You're receiving this because you subscribed. Unsubscribe</div></div>`;
+  }
+
+  checkContrast();
+}
+
+// Contrast check
+function checkContrast(){
+  const p=PAIRINGS[selectedIdx];
+  const s=getSliders();
+  // Approximate readability based on weight and size differences
+  const sizeRatio=s.hSize/s.bSize;
+  const weightDiff=Math.abs(s.hWeight-s.bWeight);
+  let score='';
+  if(sizeRatio>=1.5&&weightDiff>=200) score='Excellent contrast between heading and body. Clear visual hierarchy.';
+  else if(sizeRatio>=1.2&&weightDiff>=100) score='Good contrast. Heading and body are distinguishable.';
+  else score='Low contrast. Consider increasing size or weight difference for better hierarchy.';
+
+  const el=document.getElementById('contrastResult');
+  const cls=sizeRatio>=1.5&&weightDiff>=200?'contrast-pass':sizeRatio>=1.2?'contrast-warn':'contrast-fail';
+  el.className='contrast-result '+cls;
+  el.textContent=`${p.heading} (${s.hSize}px/${s.hWeight}) vs ${p.body} (${s.bSize}px/${s.bWeight}): ${score}`;
+}
+
+// Type scale
+function renderTypeScale(){
+  const p=PAIRINGS[selectedIdx];
+  const s=getSliders();
+  const el=document.getElementById('typeScale');
+  el.innerHTML=SCALE_STEPS.map(step=>{
+    const px=Math.round(s.bSize*step.mult);
+    const isHeading=step.mult>=1.375;
+    const font=isHeading?p.heading:p.body;
+    const weight=isHeading?s.hWeight:s.bWeight;
+    return`<div class="scale-row"><span class="scale-label">${step.name}</span><span class="scale-px">${px}px</span><div class="scale-sample" style="font-family:'${font}',sans-serif;font-size:${px}px;font-weight:${weight};line-height:1.3;">The quick brown fox jumps over the lazy dog</div></div>`;
+  }).join('');
+}
+
+// Compare mode
+function renderCompare(){
+  const grid=document.getElementById('compareGrid');
+  const text=document.getElementById('customText').value||'The quick brown fox jumps over the lazy dog.';
+  if(!compareIndices.length){
+    grid.innerHTML='<p style="font-size:12px;color:var(--muted);grid-column:1/-1">Hold Shift and click up to 3 pairings to compare them side by side.</p>';
+    return;
+  }
+  grid.innerHTML=compareIndices.map(i=>{
+    const p=PAIRINGS[i];
+    return`<div class="compare-card"><h4><span class="tag tag-${p.mood}">${p.mood}</span> ${p.heading} + ${p.body}</h4><div style="font-family:'${p.heading}',serif;font-size:22px;font-weight:700;margin-bottom:10px;line-height:1.2;">${text.split('.')[0]}.</div><div style="font-family:'${p.body}',sans-serif;font-size:14px;line-height:1.6;color:#4b5563;">${text}</div></div>`;
+  }).join('');
+}
+
+// Export
+function doExport(){
+  const p=PAIRINGS[selectedIdx];
+  const s=getSliders();
+  let output='';
+
+  if(exportFmt==='css'){
+    output=`@import url('https://fonts.googleapis.com/css2?family=${enc(p.heading)}:wght@${s.hWeight}&family=${enc(p.body)}:wght@${s.bWeight}&display=swap');
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: '${p.heading}', serif;
+  font-weight: ${s.hWeight};
+  line-height: ${s.hLh};
+  letter-spacing: ${s.hLs}px;
+}
+
+h1 { font-size: ${s.hSize}px; }
+h2 { font-size: ${Math.round(s.hSize*.75)}px; }
+h3 { font-size: ${Math.round(s.hSize*.6)}px; }
+
+body, p, li, td {
+  font-family: '${p.body}', sans-serif;
+  font-size: ${s.bSize}px;
+  font-weight: ${s.bWeight};
+  line-height: ${s.bLh};
+  letter-spacing: ${s.bLs}px;
+}`;
+  } else if(exportFmt==='tailwind'){
+    output=`// tailwind.config.js
+module.exports = {
+  theme: {
+    fontFamily: {
+      heading: ["'${p.heading}'", 'serif'],
+      body: ["'${p.body}'", 'sans-serif'],
+    },
+    fontSize: {
+      sm: ['${Math.round(s.bSize*.875)}px', { lineHeight: '${s.bLh}' }],
+      base: ['${s.bSize}px', { lineHeight: '${s.bLh}' }],
+      lg: ['${Math.round(s.bSize*1.125)}px', { lineHeight: '${s.bLh}' }],
+      xl: ['${Math.round(s.bSize*1.25)}px', { lineHeight: '${s.hLh}' }],
+      '2xl': ['${Math.round(s.hSize*.6)}px', { lineHeight: '${s.hLh}' }],
+      '3xl': ['${Math.round(s.hSize*.75)}px', { lineHeight: '${s.hLh}' }],
+      '4xl': ['${s.hSize}px', { lineHeight: '${s.hLh}' }],
+    },
+  },
+};`;
+  } else if(exportFmt==='scss'){
+    output=`// Typography Variables
+$font-heading: '${p.heading}', serif;
+$font-body: '${p.body}', sans-serif;
+
+$heading-weight: ${s.hWeight};
+$heading-line-height: ${s.hLh};
+$heading-letter-spacing: ${s.hLs}px;
+
+$body-weight: ${s.bWeight};
+$body-line-height: ${s.bLh};
+$body-letter-spacing: ${s.bLs}px;
+
+$font-size-base: ${s.bSize}px;
+$font-size-sm: ${Math.round(s.bSize*.875)}px;
+$font-size-lg: ${Math.round(s.bSize*1.125)}px;
+$font-size-xl: ${Math.round(s.bSize*1.25)}px;
+$font-size-h3: ${Math.round(s.hSize*.6)}px;
+$font-size-h2: ${Math.round(s.hSize*.75)}px;
+$font-size-h1: ${s.hSize}px;
+
+@mixin heading {
+  font-family: $font-heading;
+  font-weight: $heading-weight;
+  line-height: $heading-line-height;
+  letter-spacing: $heading-letter-spacing;
+}
+
+@mixin body-text {
+  font-family: $font-body;
+  font-weight: $body-weight;
+  line-height: $body-line-height;
+  letter-spacing: $body-letter-spacing;
+}`;
+  } else {
+    output=JSON.stringify({
+      heading:{family:p.heading,weight:s.hWeight,lineHeight:s.hLh,letterSpacing:`${s.hLs}px`,sizes:{h1:`${s.hSize}px`,h2:`${Math.round(s.hSize*.75)}px`,h3:`${Math.round(s.hSize*.6)}px`}},
+      body:{family:p.body,weight:s.bWeight,lineHeight:s.bLh,letterSpacing:`${s.bLs}px`,sizes:{base:`${s.bSize}px`,sm:`${Math.round(s.bSize*.875)}px`,lg:`${Math.round(s.bSize*1.125)}px`}},
+      scale:SCALE_STEPS.map(st=>({name:st.name,px:Math.round(s.bSize*st.mult)})),
+      googleFontsUrl:`https://fonts.googleapis.com/css2?family=${enc(p.heading)}:wght@${s.hWeight}&family=${enc(p.body)}:wght@${s.bWeight}&display=swap`
+    },null,2);
+  }
+  document.getElementById('exportOutput').value=output;
+}
+
+function enc(f){return f.replace(/ /g,'+');}
+
+function copyExport(){
+  navigator.clipboard.writeText(document.getElementById('exportOutput').value);
+  showToast('Copied to clipboard');
+}
+
+// Chrome AI suggestion
+function aiSuggest(){
+  const desc=document.getElementById('aiPrompt').value.trim();
+  if(!desc){showToast('Enter a project description');return;}
+
+  const pairingNames=PAIRINGS.map((p,i)=>`${i}: ${p.heading}+${p.body} (${p.mood})`).join(', ');
+  const prompt=`Given these font pairings: ${pairingNames}
+
+The user's project: "${desc}"
+
+Pick the single best pairing index (0-${PAIRINGS.length-1}) and explain in 1-2 sentences why. Reply as JSON: {"index":N,"reason":"..."}`;
+
+  AIQueue.add({
+    id:'typo-suggest-'+Date.now(),
+    tool:'Typography Pairing',
+    description:`Font suggestion for: ${desc.slice(0,40)}...`,
+    prompt,
+    systemPrompt:'You are a typography expert. Be concise. Reply only with the JSON requested.',
+    onComplete(result){
+      try{
+        const cleaned=result.replace(/```json?\n?/g,'').replace(/```/g,'').trim();
+        const data=JSON.parse(cleaned);
+        if(typeof data.index==='number'&&data.index>=0&&data.index<PAIRINGS.length){
+          selectedIdx=data.index;
+          renderPairings();updatePreview();renderTypeScale();doExport();
+          document.getElementById('aiResult').innerHTML=`<strong>Suggested:</strong> ${PAIRINGS[data.index].heading} + ${PAIRINGS[data.index].body} &mdash; ${data.reason||''}`;
+        }
+      }catch{
+        document.getElementById('aiResult').textContent='AI returned: '+result;
+      }
+    }
+  });
+
+  document.getElementById('aiResult').textContent='Queued AI suggestion...';
+}
+
+// Toast
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+
+// Init
 renderPairings();
 updatePreview();
+renderTypeScale();
+renderCompare();
+doExport();
 </script>
+<script src="/ai-queue.js"></script>
 <script src="/related.js"></script>
 </body>
 </html>

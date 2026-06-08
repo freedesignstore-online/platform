@@ -12,63 +12,96 @@ body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color
 a { color: #ec4899; text-decoration: none; }
 a:hover { text-decoration: underline; }
 .back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; font-size: 14px; color: #6b7280; }
-.back:hover { color: #ec4899; }
+.back:hover { color: #ec4899; text-decoration: none; }
 h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
 .subtitle { color: #6b7280; margin-bottom: 24px; font-size: 15px; }
-.container { max-width: 1100px; margin: 0 auto; }
-.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
-.preview-area { width: 100%; height: 300px; border-radius: 12px; margin-bottom: 20px; position: relative; cursor: pointer; transition: height .3s; }
+.container { max-width: 1200px; margin: 0 auto; }
+.panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
+.preview-area { width: 100%; height: 320px; border-radius: 12px; position: relative; cursor: pointer; transition: all .3s; overflow: hidden; }
 .preview-area.fullscreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1000; border-radius: 0; margin: 0; }
-.fs-hint { position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,.5); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 11px; }
-.controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-@media (max-width: 700px) { .controls { grid-template-columns: 1fr; } }
-label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 6px; }
-select, input[type="number"] { width: 100%; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
-input[type="range"] { width: 100%; accent-color: #ec4899; }
-.stops { display: flex; flex-direction: column; gap: 8px; }
-.stop-row { display: flex; gap: 8px; align-items: center; }
-.stop-row input[type="color"] { width: 40px; height: 36px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 2px; cursor: pointer; }
-.stop-row input[type="number"] { width: 70px; }
-.btn { padding: 8px 16px; border-radius: 8px; border: none; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; }
-.btn-primary { background: #ec4899; color: #fff; }
-.btn-primary:hover { background: #db2777; }
-.btn-secondary { background: #fff; border: 1px solid #e5e7eb; color: #1a1a1a; }
-.btn-secondary:hover { border-color: #ec4899; }
-.btn-sm { padding: 6px 10px; font-size: 12px; }
-.btn-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
-.actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
-.code-block { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 13px; word-break: break-all; margin-top: 12px; cursor: pointer; position: relative; }
-.code-block:hover::after { content: 'Click to copy'; position: absolute; top: -24px; right: 0; font-size: 11px; color: #ec4899; font-family: 'Manrope', system-ui; }
-.presets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; margin-top: 12px; }
-.preset-swatch { width: 100%; aspect-ratio: 1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: border-color .15s; }
-.preset-swatch:hover { border-color: #ec4899; }
-h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
-.mesh-controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
-.mesh-controls input[type="color"] { width: 100%; height: 40px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 2px; cursor: pointer; }
-.tab-bar { display: flex; gap: 4px; margin-bottom: 16px; }
-.tab { padding: 8px 16px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 500; }
+.fs-hint { position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,.5); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 11px; pointer-events: none; }
+.preview-area.fullscreen .fs-hint { display: none; }
+.tab-bar { display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap; }
+.tab { padding: 8px 16px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 500; transition: all .15s; }
+.tab:hover { border-color: #ec4899; }
 .tab.active { background: #ec4899; color: #fff; border-color: #ec4899; }
 .section { display: none; }
 .section.active { display: block; }
+.controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 700px) { .controls { grid-template-columns: 1fr; } }
+label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 6px; }
+label.mt { margin-top: 14px; }
+select, input[type="number"] { width: 100%; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+select:focus, input:focus { outline: none; border-color: #ec4899; }
+input[type="range"] { width: 100%; accent-color: #ec4899; }
+.range-row { display: flex; align-items: center; gap: 8px; }
+.range-row input[type="range"] { flex: 1; }
+.range-val { font-size: 12px; color: #6b7280; min-width: 40px; text-align: right; }
+.stops-container { max-height: 220px; overflow-y: auto; }
+.stop-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; padding: 6px; background: #f9fafb; border-radius: 6px; }
+.stop-row input[type="color"] { width: 36px; height: 32px; border: 1px solid #e5e7eb; border-radius: 6px; padding: 2px; cursor: pointer; flex-shrink: 0; }
+.stop-row input[type="number"] { width: 56px; padding: 4px 6px; font-size: 12px; }
+.stop-row input[type="range"] { flex: 1; min-width: 60px; }
+.btn { padding: 8px 16px; border-radius: 8px; border: none; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: #ec4899; color: #fff; }
+.btn-secondary { background: #fff; border: 1px solid #e5e7eb; color: #1a1a1a; }
+.btn-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+.code-block { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; word-break: break-all; margin-top: 12px; cursor: pointer; max-height: 120px; overflow-y: auto; position: relative; white-space: pre-wrap; }
+.code-block:hover::after { content: 'Click to copy'; position: absolute; top: -22px; right: 0; font-size: 11px; color: #ec4899; font-family: 'Manrope', system-ui; }
+h3 { font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+.presets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; }
+.preset-swatch { width: 100%; aspect-ratio: 1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all .15s; position: relative; }
+.preset-swatch:hover { border-color: #ec4899; transform: scale(1.05); }
+.preset-swatch .preset-label { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,.5); color: #fff; font-size: 9px; text-align: center; padding: 2px; border-radius: 0 0 6px 6px; opacity: 0; transition: opacity .15s; }
+.preset-swatch:hover .preset-label { opacity: 1; }
+.preset-cat { font-size: 12px; font-weight: 600; color: #6b7280; margin: 14px 0 8px; text-transform: uppercase; letter-spacing: .5px; }
+.mesh-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mesh-point { display: flex; flex-direction: column; gap: 6px; padding: 10px; background: #f9fafb; border-radius: 8px; }
+.mesh-point input[type="color"] { width: 100%; height: 36px; border: 1px solid #e5e7eb; border-radius: 6px; padding: 2px; cursor: pointer; }
+.mesh-point label { font-size: 11px; margin: 0; }
+.layer-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; margin-bottom: 10px; position: relative; background: #fff; }
+.layer-card .remove-layer { position: absolute; top: 8px; right: 8px; background: none; border: none; color: #dc2626; cursor: pointer; font-size: 16px; }
+.layer-header { font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 8px; }
+.use-as-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.use-card { border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; text-align: center; }
+.use-card.text-demo { font-size: 32px; font-weight: 700; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.use-card.btn-demo { border-radius: 10px; color: #fff; font-weight: 600; font-size: 15px; }
+.use-card.card-demo { border-radius: 10px; padding: 24px; color: #fff; font-weight: 600; }
+.favs-grid { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.fav-swatch { width: 40px; height: 40px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; position: relative; }
+.fav-swatch:hover { border-color: #ec4899; }
+.fav-swatch .fav-rm { position: absolute; top: -4px; right: -4px; width: 14px; height: 14px; border-radius: 50%; background: #dc2626; color: #fff; font-size: 9px; display: none; align-items: center; justify-content: center; cursor: pointer; border: none; line-height: 1; }
+.fav-swatch:hover .fav-rm { display: flex; }
+.animate-toggle { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.animate-toggle input { accent-color: #ec4899; }
+.history-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.history-swatch { width: 36px; height: 36px; border-radius: 6px; cursor: pointer; border: 1px solid #e5e7eb; }
+.history-swatch:hover { border-color: #ec4899; }
+@keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
 </style>
 </head>
 <body>
 <div class="container">
   <a href="/" class="back">&larr; Back to FreeDesignStore</a>
   <h1>Gradient & Background Maker</h1>
-  <p class="subtitle">Create beautiful gradients and mesh backgrounds. Copy CSS or download as PNG.</p>
+  <p class="subtitle">Create linear, radial, conic, and mesh gradients. Multi-layer support. Export CSS, Tailwind, SVG, or PNG.</p>
 
   <div class="panel">
-    <div class="preview-area" id="preview">
-      <span class="fs-hint">Click for fullscreen</span>
+    <div class="preview-area" id="preview" onclick="toggleFS()">
+      <span class="fs-hint">Click or press F for fullscreen</span>
     </div>
   </div>
 
   <div class="panel">
-    <div class="tab-bar">
+    <div class="tab-bar" id="tabBar">
       <button class="tab active" data-tab="gradient">Gradient</button>
       <button class="tab" data-tab="mesh">Mesh</button>
-      <button class="tab" data-tab="presets">Presets</button>
+      <button class="tab" data-tab="layers">Multi-Layer</button>
+      <button class="tab" data-tab="presets">40 Presets</button>
+      <button class="tab" data-tab="use">Use As...</button>
     </div>
 
     <div class="section active" id="sec-gradient">
@@ -81,236 +114,578 @@ h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
             <option value="conic">Conic</option>
           </select>
 
-          <label style="margin-top:14px">Angle (linear/conic)</label>
-          <input type="range" id="angle" min="0" max="360" value="135">
-          <span id="angleVal" style="font-size:12px;color:#6b7280">135deg</span>
+          <label class="mt">Angle</label>
+          <div class="range-row">
+            <input type="range" id="angle" min="0" max="360" value="135">
+            <span class="range-val" id="angleVal">135&deg;</span>
+          </div>
+
+          <div id="radialControls" style="display:none;">
+            <label class="mt">Radial Shape</label>
+            <select id="radialShape">
+              <option value="circle">Circle</option>
+              <option value="ellipse">Ellipse</option>
+            </select>
+            <label class="mt">Center Position</label>
+            <div style="display:flex;gap:8px;">
+              <div style="flex:1;"><label style="font-size:11px;">X%</label><input type="number" id="radialX" value="50" min="0" max="100"></div>
+              <div style="flex:1;"><label style="font-size:11px;">Y%</label><input type="number" id="radialY" value="50" min="0" max="100"></div>
+            </div>
+          </div>
+
+          <div class="animate-toggle">
+            <input type="checkbox" id="animateToggle">
+            <label style="margin:0;cursor:pointer;" for="animateToggle">Animate gradient</label>
+          </div>
         </div>
         <div>
           <label>Color Stops</label>
-          <div class="stops" id="stops"></div>
-          <button class="btn btn-secondary btn-sm" id="addStop" style="margin-top:8px">+ Add Stop</button>
+          <div class="stops-container" id="stops"></div>
+          <button class="btn btn-secondary btn-sm" id="addStop" style="margin-top:8px;">+ Add Stop</button>
         </div>
       </div>
 
       <div class="actions">
         <button class="btn btn-primary" id="copyCSS">Copy CSS</button>
+        <button class="btn btn-secondary" id="copyTailwind">Copy Tailwind</button>
+        <button class="btn btn-secondary" id="copySVG">Copy SVG</button>
         <button class="btn btn-secondary" id="downloadPNG">Download PNG</button>
-        <button class="btn btn-secondary" id="toggleFS">Fullscreen</button>
+        <button class="btn btn-secondary" id="toggleFSBtn">Fullscreen</button>
+        <button class="btn btn-secondary" id="favBtn">Save Favorite</button>
       </div>
-      <div class="code-block" id="codeBlock"></div>
+      <div class="code-block" id="codeBlock" onclick="navigator.clipboard.writeText(this.textContent)"></div>
     </div>
 
     <div class="section" id="sec-mesh">
       <h3>Mesh Gradient (4 color blobs)</h3>
-      <div class="mesh-controls" id="meshColors">
-        <input type="color" value="#ec4899" data-i="0">
-        <input type="color" value="#8b5cf6" data-i="1">
-        <input type="color" value="#06b6d4" data-i="2">
-        <input type="color" value="#f97316" data-i="3">
-      </div>
-      <div class="actions" style="margin-top:14px">
+      <p style="font-size:13px;color:#9ca3af;margin-bottom:12px;">Adjust colors, positions, sizes, and blur for each point.</p>
+      <div class="mesh-grid" id="meshGrid"></div>
+      <div class="actions" style="margin-top:14px;">
         <button class="btn btn-primary" id="applyMesh">Apply Mesh</button>
         <button class="btn btn-secondary" id="randomMesh">Randomize</button>
+        <button class="btn btn-secondary" id="copyMeshCSS">Copy CSS</button>
+      </div>
+    </div>
+
+    <div class="section" id="sec-layers">
+      <h3>Multi-Layer Gradients</h3>
+      <p style="font-size:13px;color:#9ca3af;margin-bottom:12px;">Stack multiple gradients like CSS multiple backgrounds.</p>
+      <div id="layersContainer"></div>
+      <button class="btn btn-secondary" id="addLayer" style="margin-top:8px;">+ Add Layer</button>
+      <div class="actions">
+        <button class="btn btn-primary" id="applyLayers">Apply Layers</button>
+        <button class="btn btn-secondary" id="copyLayersCSS">Copy CSS</button>
       </div>
     </div>
 
     <div class="section" id="sec-presets">
-      <h3>Preset Gradients</h3>
-      <div class="presets-grid" id="presetsGrid"></div>
+      <h3>40 Curated Presets</h3>
+      <div id="presetsContainer"></div>
+    </div>
+
+    <div class="section" id="sec-use">
+      <h3>Preview on Elements</h3>
+      <div class="use-as-grid" id="useGrid">
+        <div class="use-card text-demo" id="useText">Gradient Text</div>
+        <div class="use-card btn-demo" id="useBtn">Click Me</div>
+        <div class="use-card card-demo" id="useCard">Card Background</div>
+        <div class="use-card" id="useBorder" style="border:3px solid transparent;font-weight:600;">Border Gradient</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div style="display:flex;gap:24px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:200px;">
+        <h3>Favorites</h3>
+        <div class="favs-grid" id="favsGrid"></div>
+      </div>
+      <div style="flex:1;min-width:200px;">
+        <h3>History</h3>
+        <div class="history-row" id="historyRow"></div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-const preview = document.getElementById('preview');
-const gradType = document.getElementById('gradType');
-const angleInput = document.getElementById('angle');
-const angleVal = document.getElementById('angleVal');
-const stopsEl = document.getElementById('stops');
-const addStopBtn = document.getElementById('addStop');
-const codeBlock = document.getElementById('codeBlock');
-const copyBtn = document.getElementById('copyCSS');
-const downloadBtn = document.getElementById('downloadPNG');
-const toggleFSBtn = document.getElementById('toggleFS');
-const tabs = document.querySelectorAll('.tab');
-const sections = document.querySelectorAll('.section');
+const preview=document.getElementById('preview');
+const gradType=document.getElementById('gradType');
+const angleInput=document.getElementById('angle');
+const angleValEl=document.getElementById('angleVal');
+const stopsEl=document.getElementById('stops');
+const codeBlock=document.getElementById('codeBlock');
+const radialControls=document.getElementById('radialControls');
+const radialShape=document.getElementById('radialShape');
+const radialX=document.getElementById('radialX');
+const radialY=document.getElementById('radialY');
+const animateToggle=document.getElementById('animateToggle');
 
-let stops = [
-  { color: '#ec4899', pos: 0 },
-  { color: '#8b5cf6', pos: 50 },
-  { color: '#06b6d4', pos: 100 }
-];
-let currentCSS = '';
-let isMesh = false;
+let stops=[{color:'#ec4899',pos:0,opacity:1},{color:'#8b5cf6',pos:50,opacity:1},{color:'#06b6d4',pos:100,opacity:1}];
+let currentCSS='';
+let mode='gradient'; // gradient | mesh | layers
+let favorites=JSON.parse(localStorage.getItem('fds-grad-favs')||'[]');
+let history=JSON.parse(localStorage.getItem('fds-grad-history')||'[]');
 
-const presets = [
-  ['#667eea','#764ba2'],['#f093fb','#f5576c'],['#4facfe','#00f2fe'],['#43e97b','#38f9d7'],
-  ['#fa709a','#fee140'],['#a18cd1','#fbc2eb'],['#fccb90','#d57eeb'],['#e0c3fc','#8ec5fc'],
-  ['#f5576c','#ff9a9e'],['#667eea','#06b6d4'],['#ff9a9e','#fecfef'],['#a1c4fd','#c2e9fb'],
-  ['#d4fc79','#96e6a1'],['#84fab0','#8fd3f4'],['#cfd9df','#e2ebf0'],['#ffecd2','#fcb69f'],
-  ['#ff9966','#ff5e62'],['#00c6ff','#0072ff'],['#f857a6','#ff5858'],['#ffe259','#ffa751'],
-  ['#c471f5','#fa71cd'],['#48c6ef','#6f86d6'],['#feada6','#f5efef'],['#accbee','#e7f0fd']
+// Mesh state
+let meshPoints=[
+  {color:'#ec4899',x:20,y:30,size:50,blur:40},
+  {color:'#8b5cf6',x:80,y:20,size:50,blur:40},
+  {color:'#06b6d4',x:70,y:80,size:50,blur:40},
+  {color:'#f97316',x:20,y:80,size:50,blur:40}
 ];
 
-function renderStops() {
-  stopsEl.innerHTML = stops.map((s, i) => `
+// Layer state
+let layers=[];
+
+// Presets
+const PRESETS={
+  'Warm':[
+    {name:'Sunset',stops:['#f97316','#ec4899']},
+    {name:'Fire',stops:['#dc2626','#f97316','#fbbf24']},
+    {name:'Peach',stops:['#ffecd2','#fcb69f']},
+    {name:'Coral',stops:['#ff9a9e','#fecfef']},
+    {name:'Mango',stops:['#ffe259','#ffa751']}
+  ],
+  'Cool':[
+    {name:'Ocean',stops:['#667eea','#764ba2']},
+    {name:'Sky',stops:['#4facfe','#00f2fe']},
+    {name:'Arctic',stops:['#a1c4fd','#c2e9fb']},
+    {name:'Ice',stops:['#e0c3fc','#8ec5fc']},
+    {name:'Deep Sea',stops:['#00c6ff','#0072ff']}
+  ],
+  'Sunset':[
+    {name:'Dusk',stops:['#fa709a','#fee140']},
+    {name:'Twilight',stops:['#f093fb','#f5576c']},
+    {name:'Golden',stops:['#ff9966','#ff5e62']},
+    {name:'Dawn',stops:['#fccb90','#d57eeb']},
+    {name:'Amber',stops:['#f6d365','#fda085']}
+  ],
+  'Ocean':[
+    {name:'Lagoon',stops:['#43e97b','#38f9d7']},
+    {name:'Teal',stops:['#48c6ef','#6f86d6']},
+    {name:'Reef',stops:['#84fab0','#8fd3f4']},
+    {name:'Deep',stops:['#667eea','#06b6d4']},
+    {name:'Wave',stops:['#0093E9','#80D0C7']}
+  ],
+  'Neon':[
+    {name:'Electric',stops:['#f857a6','#ff5858']},
+    {name:'Plasma',stops:['#c471f5','#fa71cd']},
+    {name:'Glow',stops:['#a18cd1','#fbc2eb']},
+    {name:'Laser',stops:['#ff0844','#ffb199']},
+    {name:'Cyber',stops:['#8EC5FC','#E0C3FC']}
+  ],
+  'Pastel':[
+    {name:'Blush',stops:['#ffecd2','#fcb69f']},
+    {name:'Lavender',stops:['#e0c3fc','#8ec5fc']},
+    {name:'Mint',stops:['#d4fc79','#96e6a1']},
+    {name:'Cotton',stops:['#accbee','#e7f0fd']},
+    {name:'Rose',stops:['#feada6','#f5efef']}
+  ],
+  'Dark':[
+    {name:'Midnight',stops:['#0f0c29','#302b63','#24243e']},
+    {name:'Carbon',stops:['#1a1a2e','#16213e','#0f3460']},
+    {name:'Void',stops:['#000000','#434343']},
+    {name:'Obsidian',stops:['#141E30','#243B55']},
+    {name:'Abyss',stops:['#200122','#6f0000']}
+  ],
+  'Nature':[
+    {name:'Forest',stops:['#11998e','#38ef7d']},
+    {name:'Leaf',stops:['#d4fc79','#96e6a1']},
+    {name:'Earth',stops:['#b79891','#94716b']},
+    {name:'Spring',stops:['#c9d6ff','#e2e2e2']},
+    {name:'Moss',stops:['#134E5E','#71B280']}
+  ]
+};
+
+function hexToRgba(hex,a){
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function renderStops(){
+  stopsEl.innerHTML=stops.map((s,i)=>`
     <div class="stop-row">
-      <input type="color" value="${s.color}" data-i="${i}" class="stop-color">
-      <input type="number" value="${s.pos}" min="0" max="100" data-i="${i}" class="stop-pos">
-      <span style="font-size:11px;color:#6b7280">%</span>
-      ${stops.length > 2 ? `<button class="btn btn-danger btn-sm stop-rm" data-i="${i}">x</button>` : ''}
+      <input type="color" value="${s.color}" data-i="${i}" class="sc">
+      <input type="range" min="0" max="100" value="${s.pos}" data-i="${i}" class="sp" title="Position: ${s.pos}%">
+      <input type="range" min="0" max="100" value="${Math.round(s.opacity*100)}" data-i="${i}" class="so" title="Opacity: ${Math.round(s.opacity*100)}%" style="width:50px;">
+      <span style="font-size:10px;color:#9ca3af;width:28px;">${s.pos}%</span>
+      ${stops.length>2?`<button class="btn btn-danger btn-sm sr" data-i="${i}" style="padding:2px 6px;">x</button>`:''}
     </div>
   `).join('');
 }
 
-function getGradientCSS() {
-  const type = gradType.value;
-  const angle = angleInput.value;
-  const colorStops = stops.map(s => `${s.color} ${s.pos}%`).join(', ');
-  if (type === 'linear') return `linear-gradient(${angle}deg, ${colorStops})`;
-  if (type === 'radial') return `radial-gradient(circle, ${colorStops})`;
+function getGradientCSS(){
+  const type=gradType.value;
+  const angle=angleInput.value;
+  const colorStops=stops.map(s=>`${hexToRgba(s.color,s.opacity)} ${s.pos}%`).join(', ');
+  if(type==='linear')return `linear-gradient(${angle}deg, ${colorStops})`;
+  if(type==='radial'){
+    const shape=radialShape.value;
+    const x=radialX.value,y=radialY.value;
+    return `radial-gradient(${shape} at ${x}% ${y}%, ${colorStops})`;
+  }
   return `conic-gradient(from ${angle}deg, ${colorStops})`;
 }
 
-function update() {
-  if (isMesh) return;
-  currentCSS = getGradientCSS();
-  preview.style.background = currentCSS;
-  codeBlock.textContent = `background: ${currentCSS};`;
-}
-
-function applyMesh() {
-  isMesh = true;
-  const colors = [...document.querySelectorAll('#meshColors input')].map(i => i.value);
-  const css = `background: ${colors[0]};
-background-image:
-  radial-gradient(at 20% 30%, ${colors[0]}88 0px, transparent 50%),
-  radial-gradient(at 80% 20%, ${colors[1]}88 0px, transparent 50%),
-  radial-gradient(at 70% 80%, ${colors[2]}88 0px, transparent 50%),
-  radial-gradient(at 20% 80%, ${colors[3]}88 0px, transparent 50%);
-filter: blur(0px);`;
-  preview.style.cssText = `width:100%;height:300px;border-radius:12px;margin-bottom:20px;position:relative;cursor:pointer;${css}`;
-  currentCSS = css;
-  codeBlock.textContent = css;
-}
-
-stopsEl.addEventListener('input', e => {
-  const i = parseInt(e.target.dataset.i);
-  if (e.target.classList.contains('stop-color')) stops[i].color = e.target.value;
-  if (e.target.classList.contains('stop-pos')) stops[i].pos = parseInt(e.target.value);
-  isMesh = false;
-  update();
-});
-
-stopsEl.addEventListener('click', e => {
-  if (e.target.classList.contains('stop-rm')) {
-    stops.splice(parseInt(e.target.dataset.i), 1);
-    renderStops();
-    update();
+function update(){
+  if(mode!=='gradient')return;
+  currentCSS=getGradientCSS();
+  const anim=animateToggle.checked;
+  if(anim){
+    preview.style.background=currentCSS;
+    preview.style.backgroundSize='200% 200%';
+    preview.style.animation='gradientShift 4s ease infinite';
+  }else{
+    preview.style.background=currentCSS;
+    preview.style.backgroundSize='';
+    preview.style.animation='';
   }
+  codeBlock.textContent=`background: ${currentCSS};`;
+  updateUseAs(currentCSS);
+  addHistory(currentCSS);
+}
+
+function updateUseAs(css){
+  const t=document.getElementById('useText');
+  const b=document.getElementById('useBtn');
+  const c=document.getElementById('useCard');
+  const bd=document.getElementById('useBorder');
+  t.style.background=css;t.style.webkitBackgroundClip='text';t.style.backgroundClip='text';
+  b.style.background=css;
+  c.style.background=css;
+  bd.style.borderImage=css+' 1';
+}
+
+function addHistory(css){
+  if(history.length&&history[0]===css)return;
+  history.unshift(css);
+  if(history.length>12)history.length=12;
+  localStorage.setItem('fds-grad-history',JSON.stringify(history));
+  renderHistory();
+}
+
+stopsEl.addEventListener('input',e=>{
+  const i=+e.target.dataset.i;
+  if(e.target.classList.contains('sc'))stops[i].color=e.target.value;
+  if(e.target.classList.contains('sp'))stops[i].pos=+e.target.value;
+  if(e.target.classList.contains('so'))stops[i].opacity=+e.target.value/100;
+  mode='gradient';update();renderStops();
+});
+stopsEl.addEventListener('click',e=>{
+  if(e.target.classList.contains('sr')){stops.splice(+e.target.dataset.i,1);renderStops();update();}
+});
+document.getElementById('addStop').addEventListener('click',()=>{
+  stops.push({color:'#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0'),pos:50,opacity:1});
+  renderStops();mode='gradient';update();
 });
 
-addStopBtn.addEventListener('click', () => {
-  stops.push({ color: '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0'), pos: 50 });
-  renderStops();
-  isMesh = false;
-  update();
+gradType.addEventListener('change',()=>{
+  radialControls.style.display=gradType.value==='radial'?'block':'none';
+  mode='gradient';update();
 });
+angleInput.addEventListener('input',()=>{angleValEl.innerHTML=angleInput.value+'&deg;';mode='gradient';update();});
+[radialShape,radialX,radialY].forEach(el=>el.addEventListener('input',()=>{mode='gradient';update();}));
+animateToggle.addEventListener('change',()=>{mode='gradient';update();});
 
-gradType.addEventListener('change', () => { isMesh = false; update(); });
-angleInput.addEventListener('input', () => { angleVal.textContent = angleInput.value + 'deg'; isMesh = false; update(); });
+// Fullscreen
+function toggleFS(){preview.classList.toggle('fullscreen');}
+document.getElementById('toggleFSBtn').addEventListener('click',toggleFS);
+document.addEventListener('keydown',e=>{if(e.key==='f'||e.key==='F'){if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;toggleFS();}if(e.key==='Escape')preview.classList.remove('fullscreen');});
 
-copyBtn.addEventListener('click', () => {
+// Copy/Export
+document.getElementById('copyCSS').addEventListener('click',()=>{
   navigator.clipboard.writeText(codeBlock.textContent);
-  copyBtn.textContent = 'Copied!';
-  setTimeout(() => copyBtn.textContent = 'Copy CSS', 1500);
+  document.getElementById('copyCSS').textContent='Copied!';
+  setTimeout(()=>document.getElementById('copyCSS').textContent='Copy CSS',1500);
 });
 
-codeBlock.addEventListener('click', () => {
-  navigator.clipboard.writeText(codeBlock.textContent);
+document.getElementById('copyTailwind').addEventListener('click',()=>{
+  const css=currentCSS.replace(/\s+/g,' ');
+  const tw=`bg-[${css.replace(/ /g,'_')}]`;
+  navigator.clipboard.writeText(`style="background: ${currentCSS}"`);
+  document.getElementById('copyTailwind').textContent='Copied!';
+  setTimeout(()=>document.getElementById('copyTailwind').textContent='Copy Tailwind',1500);
 });
 
-downloadBtn.addEventListener('click', () => {
-  const canvas = document.createElement('canvas');
-  canvas.width = 1920; canvas.height = 1080;
-  const ctx = canvas.getContext('2d');
-  if (isMesh) {
-    const colors = [...document.querySelectorAll('#meshColors input')].map(i => i.value);
-    ctx.fillStyle = colors[0];
-    ctx.fillRect(0, 0, 1920, 1080);
-    const blobs = [[384,324,colors[0]],[1536,216,colors[1]],[1344,864,colors[2]],[384,864,colors[3]]];
-    blobs.forEach(([x,y,c]) => {
-      const g = ctx.createRadialGradient(x, y, 0, x, y, 500);
-      g.addColorStop(0, c + '88');
-      g.addColorStop(1, 'transparent');
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, 1920, 1080);
+document.getElementById('copySVG').addEventListener('click',()=>{
+  const svg=gradientToSVG();
+  navigator.clipboard.writeText(svg);
+  document.getElementById('copySVG').textContent='Copied!';
+  setTimeout(()=>document.getElementById('copySVG').textContent='Copy SVG',1500);
+});
+
+function gradientToSVG(){
+  const w=1920,h=1080;
+  let defs='';
+  const type=gradType.value;
+  const angle=+angleInput.value;
+  if(type==='linear'){
+    const rad=(angle-90)*Math.PI/180;
+    const x1=50-50*Math.cos(rad),y1=50-50*Math.sin(rad);
+    const x2=50+50*Math.cos(rad),y2=50+50*Math.sin(rad);
+    defs=`<linearGradient id="g" x1="${x1}%" y1="${y1}%" x2="${x2}%" y2="${y2}%">${stops.map(s=>`<stop offset="${s.pos}%" stop-color="${s.color}" stop-opacity="${s.opacity}"/>`).join('')}</linearGradient>`;
+  }else if(type==='radial'){
+    const cx=radialX.value,cy=radialY.value;
+    defs=`<radialGradient id="g" cx="${cx}%" cy="${cy}%" r="50%">${stops.map(s=>`<stop offset="${s.pos}%" stop-color="${s.color}" stop-opacity="${s.opacity}"/>`).join('')}</radialGradient>`;
+  }else{
+    defs=`<linearGradient id="g">${stops.map(s=>`<stop offset="${s.pos}%" stop-color="${s.color}" stop-opacity="${s.opacity}"/>`).join('')}</linearGradient>`;
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><defs>${defs}</defs><rect width="${w}" height="${h}" fill="url(#g)"/></svg>`;
+}
+
+document.getElementById('downloadPNG').addEventListener('click',()=>{
+  const canvas=document.createElement('canvas');canvas.width=1920;canvas.height=1080;
+  const ctx=canvas.getContext('2d');
+  if(mode==='mesh'){drawMeshCanvas(ctx,1920,1080);}
+  else{drawGradientCanvas(ctx,1920,1080);}
+  const a=document.createElement('a');a.download='gradient.png';a.href=canvas.toDataURL('image/png');a.click();
+});
+
+function drawGradientCanvas(ctx,w,h){
+  const type=gradType.value;
+  const angle=+angleInput.value;
+  let grad;
+  if(type==='linear'){
+    const rad=(angle-90)*Math.PI/180;
+    const cx=w/2,cy=h/2,len=Math.max(w,h)/2;
+    grad=ctx.createLinearGradient(cx-Math.cos(rad)*len,cy-Math.sin(rad)*len,cx+Math.cos(rad)*len,cy+Math.sin(rad)*len);
+  }else if(type==='radial'){
+    const px=(+radialX.value/100)*w,py=(+radialY.value/100)*h;
+    grad=ctx.createRadialGradient(px,py,0,px,py,Math.max(w,h)/2);
+  }else{
+    grad=ctx.createConicGradient(angle*Math.PI/180,w/2,h/2);
+  }
+  stops.forEach(s=>{
+    const r=parseInt(s.color.slice(1,3),16),g=parseInt(s.color.slice(3,5),16),b=parseInt(s.color.slice(5,7),16);
+    grad.addColorStop(s.pos/100,`rgba(${r},${g},${b},${s.opacity})`);
+  });
+  ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
+}
+
+function drawMeshCanvas(ctx,w,h){
+  ctx.fillStyle=meshPoints[0].color;ctx.fillRect(0,0,w,h);
+  meshPoints.forEach(p=>{
+    const px=(p.x/100)*w,py=(p.y/100)*h,radius=(p.size/100)*Math.max(w,h);
+    const g=ctx.createRadialGradient(px,py,0,px,py,radius);
+    g.addColorStop(0,p.color+'cc');g.addColorStop(1,'transparent');
+    ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+  });
+}
+
+// Mesh
+function renderMeshGrid(){
+  const grid=document.getElementById('meshGrid');
+  grid.innerHTML=meshPoints.map((p,i)=>`
+    <div class="mesh-point">
+      <label>Point ${i+1}</label>
+      <input type="color" value="${p.color}" data-i="${i}" class="mc">
+      <label>Position X: ${p.x}%</label>
+      <input type="range" min="0" max="100" value="${p.x}" data-i="${i}" data-prop="x">
+      <label>Position Y: ${p.y}%</label>
+      <input type="range" min="0" max="100" value="${p.y}" data-i="${i}" data-prop="y">
+      <label>Size: ${p.size}%</label>
+      <input type="range" min="10" max="100" value="${p.size}" data-i="${i}" data-prop="size">
+      <label>Blur: ${p.blur}px</label>
+      <input type="range" min="0" max="80" value="${p.blur}" data-i="${i}" data-prop="blur">
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('input').forEach(el=>{
+    el.addEventListener('input',e=>{
+      const i=+e.target.dataset.i;
+      if(e.target.classList.contains('mc'))meshPoints[i].color=e.target.value;
+      else{const prop=e.target.dataset.prop;meshPoints[i][prop]=+e.target.value;}
+      renderMeshGrid();
     });
-  } else {
-    const type = gradType.value;
-    const angle = parseInt(angleInput.value);
-    let grad;
-    if (type === 'linear') {
-      const rad = (angle - 90) * Math.PI / 180;
-      const cx = 960, cy = 540, len = 1100;
-      grad = ctx.createLinearGradient(cx - Math.cos(rad)*len, cy - Math.sin(rad)*len, cx + Math.cos(rad)*len, cy + Math.sin(rad)*len);
-    } else if (type === 'radial') {
-      grad = ctx.createRadialGradient(960, 540, 0, 960, 540, 960);
-    } else {
-      grad = ctx.createConicGradient(angle * Math.PI / 180, 960, 540);
-    }
-    stops.forEach(s => grad.addColorStop(s.pos / 100, s.color));
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 1920, 1080);
-  }
-  const link = document.createElement('a');
-  link.download = 'gradient.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
+  });
+}
+
+function getMeshCSS(){
+  const bgs=meshPoints.map(p=>`radial-gradient(at ${p.x}% ${p.y}%, ${p.color}cc 0px, transparent ${p.size}%)`).join(',\n  ');
+  return `background: ${meshPoints[0].color};\nbackground-image:\n  ${bgs};\nfilter: blur(${meshPoints[0].blur}px);`;
+}
+
+document.getElementById('applyMesh').addEventListener('click',()=>{
+  mode='mesh';
+  const css=getMeshCSS();
+  currentCSS=css;
+  preview.style.cssText=`width:100%;height:320px;border-radius:12px;position:relative;cursor:pointer;overflow:hidden;${css}`;
+  codeBlock.textContent=css;
+  updateUseAs(preview.style.background);
+  addHistory(preview.style.background);
 });
 
-preview.addEventListener('click', () => preview.classList.toggle('fullscreen'));
-toggleFSBtn.addEventListener('click', () => preview.classList.toggle('fullscreen'));
-
-tabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    tabs.forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    sections.forEach(s => s.classList.remove('active'));
-    document.getElementById('sec-' + tab.dataset.tab).classList.add('active');
+document.getElementById('randomMesh').addEventListener('click',()=>{
+  meshPoints.forEach(p=>{
+    p.color='#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0');
+    p.x=10+Math.floor(Math.random()*80);
+    p.y=10+Math.floor(Math.random()*80);
+    p.size=30+Math.floor(Math.random()*40);
   });
+  renderMeshGrid();
+  document.getElementById('applyMesh').click();
 });
 
-document.getElementById('applyMesh').addEventListener('click', applyMesh);
-document.getElementById('randomMesh').addEventListener('click', () => {
-  document.querySelectorAll('#meshColors input').forEach(inp => {
-    inp.value = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0');
+document.getElementById('copyMeshCSS').addEventListener('click',()=>{
+  navigator.clipboard.writeText(getMeshCSS());
+  document.getElementById('copyMeshCSS').textContent='Copied!';
+  setTimeout(()=>document.getElementById('copyMeshCSS').textContent='Copy CSS',1500);
+});
+
+// Multi-Layer
+function renderLayers(){
+  const cont=document.getElementById('layersContainer');
+  cont.innerHTML=layers.map((l,i)=>`
+    <div class="layer-card">
+      <button class="remove-layer" data-i="${i}">&times;</button>
+      <div class="layer-header">Layer ${i+1}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <select data-i="${i}" class="lt" style="width:100px;padding:4px 8px;font-size:12px;">
+          <option value="linear"${l.type==='linear'?' selected':''}>Linear</option>
+          <option value="radial"${l.type==='radial'?' selected':''}>Radial</option>
+          <option value="conic"${l.type==='conic'?' selected':''}>Conic</option>
+        </select>
+        <input type="color" value="${l.c1}" data-i="${i}" class="lc1" style="width:32px;height:28px;border:1px solid #e5e7eb;border-radius:4px;padding:1px;">
+        <input type="color" value="${l.c2}" data-i="${i}" class="lc2" style="width:32px;height:28px;border:1px solid #e5e7eb;border-radius:4px;padding:1px;">
+        <span style="font-size:11px;color:#9ca3af;">Angle:</span>
+        <input type="number" value="${l.angle}" data-i="${i}" class="la" style="width:50px;padding:3px;font-size:12px;" min="0" max="360">
+        <span style="font-size:11px;color:#9ca3af;">Opacity:</span>
+        <input type="range" min="0" max="100" value="${Math.round(l.opacity*100)}" data-i="${i}" class="lo" style="width:60px;">
+      </div>
+    </div>
+  `).join('');
+
+  cont.querySelectorAll('select, input').forEach(el=>{
+    el.addEventListener('input',e=>{
+      const i=+e.target.dataset.i;
+      if(e.target.classList.contains('lt'))layers[i].type=e.target.value;
+      if(e.target.classList.contains('lc1'))layers[i].c1=e.target.value;
+      if(e.target.classList.contains('lc2'))layers[i].c2=e.target.value;
+      if(e.target.classList.contains('la'))layers[i].angle=+e.target.value;
+      if(e.target.classList.contains('lo'))layers[i].opacity=+e.target.value/100;
+    });
   });
-  applyMesh();
+  cont.querySelectorAll('.remove-layer').forEach(b=>{
+    b.onclick=()=>{layers.splice(+b.dataset.i,1);renderLayers();};
+  });
+}
+
+document.getElementById('addLayer').addEventListener('click',()=>{
+  layers.push({type:'linear',c1:'#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0'),c2:'#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0'),angle:Math.floor(Math.random()*360),opacity:0.5});
+  renderLayers();
+});
+
+document.getElementById('applyLayers').addEventListener('click',()=>{
+  if(!layers.length)return;
+  mode='layers';
+  const css=getLayersCSS();
+  currentCSS=css;
+  preview.style.cssText=`width:100%;height:320px;border-radius:12px;position:relative;cursor:pointer;overflow:hidden;background:${css};`;
+  codeBlock.textContent=`background: ${css};`;
+  updateUseAs(css);
+  addHistory(css);
+});
+
+function getLayersCSS(){
+  return layers.map(l=>{
+    const c1=hexToRgba(l.c1,l.opacity),c2=hexToRgba(l.c2,l.opacity);
+    if(l.type==='linear')return `linear-gradient(${l.angle}deg, ${c1}, ${c2})`;
+    if(l.type==='radial')return `radial-gradient(circle, ${c1}, ${c2})`;
+    return `conic-gradient(from ${l.angle}deg, ${c1}, ${c2})`;
+  }).join(', ');
+}
+
+document.getElementById('copyLayersCSS').addEventListener('click',()=>{
+  navigator.clipboard.writeText(`background: ${getLayersCSS()};`);
+  document.getElementById('copyLayersCSS').textContent='Copied!';
+  setTimeout(()=>document.getElementById('copyLayersCSS').textContent='Copy CSS',1500);
 });
 
 // Presets
-const presetsGrid = document.getElementById('presetsGrid');
-presets.forEach(p => {
-  const div = document.createElement('div');
-  div.className = 'preset-swatch';
-  div.style.background = `linear-gradient(135deg, ${p[0]}, ${p[1]})`;
-  div.addEventListener('click', () => {
-    stops = [{ color: p[0], pos: 0 }, { color: p[1], pos: 100 }];
-    renderStops();
-    isMesh = false;
-    update();
-    tabs.forEach(t => t.classList.remove('active'));
-    tabs[0].classList.add('active');
-    sections.forEach(s => s.classList.remove('active'));
-    sections[0].classList.add('active');
+function renderPresets(){
+  const cont=document.getElementById('presetsContainer');
+  cont.innerHTML='';
+  Object.entries(PRESETS).forEach(([cat,items])=>{
+    const label=document.createElement('div');label.className='preset-cat';label.textContent=cat;cont.appendChild(label);
+    const grid=document.createElement('div');grid.className='presets-grid';
+    items.forEach(p=>{
+      const div=document.createElement('div');div.className='preset-swatch';
+      div.style.background=`linear-gradient(135deg, ${p.stops.join(', ')})`;
+      div.innerHTML=`<span class="preset-label">${p.name}</span>`;
+      div.addEventListener('click',()=>{
+        stops=p.stops.map((c,i)=>({color:c,pos:Math.round(i/(p.stops.length-1)*100),opacity:1}));
+        mode='gradient';
+        renderStops();update();
+        switchTab('gradient');
+      });
+      grid.appendChild(div);
+    });
+    cont.appendChild(grid);
   });
-  presetsGrid.appendChild(div);
+}
+
+// Tabs
+const tabs=document.querySelectorAll('.tab');
+const sections=document.querySelectorAll('.section');
+function switchTab(name){
+  tabs.forEach(t=>{t.classList.toggle('active',t.dataset.tab===name);});
+  sections.forEach(s=>{s.classList.toggle('active',s.id==='sec-'+name);});
+}
+tabs.forEach(tab=>tab.addEventListener('click',()=>switchTab(tab.dataset.tab)));
+
+// Favorites
+document.getElementById('favBtn').addEventListener('click',()=>{
+  if(!currentCSS)return;
+  favorites.push(currentCSS);
+  localStorage.setItem('fds-grad-favs',JSON.stringify(favorites));
+  renderFavs();
+  document.getElementById('favBtn').textContent='Saved!';
+  setTimeout(()=>document.getElementById('favBtn').textContent='Save Favorite',1500);
 });
 
-document.querySelectorAll('#meshColors input').forEach(inp => inp.addEventListener('input', applyMesh));
+function renderFavs(){
+  const grid=document.getElementById('favsGrid');
+  grid.innerHTML=favorites.length?favorites.map((f,i)=>`
+    <div class="fav-swatch" style="background:${f}" data-i="${i}">
+      <button class="fav-rm" data-i="${i}">&times;</button>
+    </div>
+  `).join(''):'<span style="font-size:12px;color:#9ca3af;">No favorites yet</span>';
+  grid.querySelectorAll('.fav-swatch').forEach(el=>{
+    el.addEventListener('click',e=>{
+      if(e.target.classList.contains('fav-rm')){
+        favorites.splice(+e.target.dataset.i,1);
+        localStorage.setItem('fds-grad-favs',JSON.stringify(favorites));
+        renderFavs();return;
+      }
+      preview.style.background=favorites[+el.dataset.i];
+      preview.style.backgroundSize='';preview.style.animation='';
+      currentCSS=favorites[+el.dataset.i];
+      codeBlock.textContent=`background: ${currentCSS};`;
+    });
+  });
+}
 
+function renderHistory(){
+  const row=document.getElementById('historyRow');
+  row.innerHTML=history.length?history.slice(0,12).map((h,i)=>`<div class="history-swatch" style="background:${h}" data-i="${i}"></div>`).join(''):'<span style="font-size:12px;color:#9ca3af;">No history yet</span>';
+  row.querySelectorAll('.history-swatch').forEach(el=>{
+    el.addEventListener('click',()=>{
+      preview.style.background=history[+el.dataset.i];
+      preview.style.backgroundSize='';preview.style.animation='';
+      currentCSS=history[+el.dataset.i];
+      codeBlock.textContent=`background: ${currentCSS};`;
+    });
+  });
+}
+
+// Init
 renderStops();
+renderMeshGrid();
+renderLayers();
+renderPresets();
+renderFavs();
+renderHistory();
 update();
 </script>
 <script src="/related.js"></script>
