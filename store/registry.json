@@ -359,6 +359,33 @@
       "iconBg": "#ec4899",
       "category": "uiux",
       "section": "components"
+    },
+    {
+      "id": "user-flow",
+      "name": "User Flow Builder",
+      "description": "Draw screen flows. 4 node types, bezier connections, labels, auto-layout, minimap. Export SVG/PNG.",
+      "icon": "🔀",
+      "iconBg": "#3b82f6",
+      "category": "uiux",
+      "section": "components"
+    },
+    {
+      "id": "sitemap-builder",
+      "name": "Sitemap Generator",
+      "description": "Visual page hierarchy tree. Drag to reparent, import URLs, export XML sitemap for SEO.",
+      "icon": "🗺️",
+      "iconBg": "#10b981",
+      "category": "uiux",
+      "section": "components"
+    },
+    {
+      "id": "design-handoff",
+      "name": "Design Handoff Sheet",
+      "description": "Upload mockup, add measurement pins, extract colors, redlines. Export HTML specs for developers.",
+      "icon": "📏",
+      "iconBg": "#f97316",
+      "category": "uiux",
+      "section": "components"
     }
   ]
 }
