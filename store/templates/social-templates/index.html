@@ -325,7 +325,7 @@ function bind(id, key, parse) {
   const el=$(id); if(!el) return;
   el.addEventListener('input', () => { S[key]=parse?parse(el.value):el.value; render(); });
 }
-['heading','heading'],['headingFont','headingFont'],['headingWeight','headingWeight'],
+[['heading','heading'],['headingFont','headingFont'],['headingWeight','headingWeight'],
 ['headingSize','headingSize',Number],['headingColor','headingColor'],
 ['subheading','sub'],['subSize','subSize',Number],['subColor','subColor'],
 ['bodyText','body'],['bodySize','bodySize',Number],['bodyColor','bodyColor'],
@@ -336,10 +336,10 @@ function bind(id, key, parse) {
 ].forEach(a => bind(...a));
 
 // --- BG type toggle ---
+const bgMap={solid:'bgSolidOpts',linear:'bgLinearOpts',radial:'bgRadialOpts',image:'bgImageOpts',preset:'bgPresetOpts'};
 function toggleBgOpts() {
-  ['bgSolidOpts','bgLinearOpts','bgRadialOpts','bgImageOpts','bgPresetOpts'].forEach(id => $(id).hidden=true);
-  ({solid:'bgSolidOpts',linear:'bgLinearOpts',radial:'bgRadialOpts',image:'bgImageOpts',preset:'bgPresetOpts'})[S.bgType]
-    && ($(({solid:'bgSolidOpts',linear:'bgLinearOpts',radial:'bgRadialOpts',image:'bgImageOpts',preset:'bgPresetOpts'})[S.bgType]).hidden=false);
+  Object.values(bgMap).forEach(id=>$(id).hidden=true);
+  if(bgMap[S.bgType]) $(bgMap[S.bgType]).hidden=false;
 }
 $('bgType').addEventListener('change', e => { S.bgType=e.target.value; toggleBgOpts(); render(); });
 
