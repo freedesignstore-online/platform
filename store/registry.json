@@ -199,15 +199,6 @@
       "section": "images"
     },
     {
-      "id": "storybook-maker",
-      "name": "Story Book Maker",
-      "description": "Create page-based zines/books. 5 layouts, image upload, flipbook preview. Export printable HTML.",
-      "icon": "📖",
-      "iconBg": "#f59e0b",
-      "category": "templates",
-      "section": "templates"
-    },
-    {
       "id": "stock-photos",
       "name": "Stock Photo Library",
       "description": "Free stock photos. Browse categories, upload your own (IndexedDB), connect Unsplash API. Favorites + history.",
@@ -314,6 +305,24 @@
       "iconBg": "#f59e0b",
       "category": "images",
       "section": "images"
+    },
+    {
+      "id": "ui-kit",
+      "name": "UI Component Library",
+      "description": "50+ copy-paste HTML/CSS components. Buttons, cards, forms, tables, modals. HTML, Tailwind, React JSX export.",
+      "icon": "🧩",
+      "iconBg": "#6366f1",
+      "category": "components",
+      "section": "components"
+    },
+    {
+      "id": "layout-builder",
+      "name": "CSS Layout Builder",
+      "description": "Visual Grid + Flexbox editor. Drag cells, set fr/px/%, named areas. Export CSS, Tailwind, HTML.",
+      "icon": "📐",
+      "iconBg": "#3b82f6",
+      "category": "components",
+      "section": "components"
     }
   ]
 }
