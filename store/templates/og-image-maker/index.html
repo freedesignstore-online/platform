@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open Graph Image Generator - FreeDesignStore</title>
+<link rel="icon" href="/favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+a { color: #ec4899; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; font-size: 14px; color: #6b7280; }
+.back:hover { color: #ec4899; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.subtitle { color: #6b7280; margin-bottom: 24px; font-size: 15px; }
+.container { max-width: 1100px; margin: 0 auto; }
+.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
+.layout { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
+@media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+.canvas-area { display: flex; align-items: center; justify-content: center; background: repeating-conic-gradient(#e5e7eb 0% 25%, transparent 0% 50%) 50%/20px 20px; border-radius: 12px; padding: 20px; }
+#canvas { border-radius: 4px; box-shadow: 0 4px 20px rgba(0,0,0,.12); max-width: 100%; }
+label { display: block; font-size: 13px; font-weight: 500; color: #6b7280; margin-bottom: 4px; margin-top: 14px; }
+label:first-child { margin-top: 0; }
+select, input[type="text"] { width: 100%; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+input[type="color"] { width: 100%; height: 36px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 3px; cursor: pointer; }
+.color-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.btn { padding: 10px 18px; border-radius: 8px; border: none; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s; width: 100%; }
+.btn-primary { background: #ec4899; color: #fff; margin-top: 20px; }
+.btn-primary:hover { background: #db2777; }
+.btn-secondary { background: #fff; border: 1px solid #e5e7eb; color: #1a1a1a; margin-top: 8px; }
+.btn-secondary:hover { border-color: #ec4899; }
+.meta-block { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 11px; word-break: break-all; margin-top: 16px; cursor: pointer; white-space: pre-wrap; }
+.meta-block:hover { border-color: #ec4899; }
+.hint { font-size: 11px; color: #6b7280; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="back">&larr; Back to FreeDesignStore</a>
+  <h1>Open Graph Image Generator</h1>
+  <p class="subtitle">Generate 1200x630 OG images for link previews. Download PNG and copy meta tags.</p>
+
+  <div class="layout">
+    <div class="panel canvas-area">
+      <canvas id="canvas" width="1200" height="630"></canvas>
+    </div>
+    <div class="panel">
+      <label>Template</label>
+      <select id="template">
+        <option value="blog">Blog Post</option>
+        <option value="product">Product</option>
+        <option value="event">Event</option>
+        <option value="announcement">Announcement</option>
+      </select>
+
+      <label>Title</label>
+      <input type="text" id="title" value="Your Page Title Here" maxlength="70">
+
+      <label>Subtitle</label>
+      <input type="text" id="subtitleInput" value="A brief description of the content" maxlength="100">
+
+      <label>Author / Brand</label>
+      <input type="text" id="author" value="FreeDesignStore" maxlength="40">
+
+      <label>Tag / Date</label>
+      <input type="text" id="tag" value="Design Tools" maxlength="30">
+
+      <div class="color-row">
+        <div>
+          <label>Background</label>
+          <input type="color" id="bgColor" value="#1a1a1a">
+        </div>
+        <div>
+          <label>Accent</label>
+          <input type="color" id="accentColor" value="#ec4899">
+        </div>
+      </div>
+      <div class="color-row">
+        <div>
+          <label>Text Color</label>
+          <input type="color" id="textColor" value="#ffffff">
+        </div>
+        <div>
+          <label>Bg Image</label>
+          <input type="file" id="bgImage" accept="image/*" style="margin-top:4px;font-size:11px;border:none;padding:0;">
+        </div>
+      </div>
+
+      <label>Logo</label>
+      <input type="file" id="logoInput" accept="image/*" style="font-size:11px;border:none;padding:0;">
+      <p class="hint">Placed in corner. Square PNG recommended.</p>
+
+      <button class="btn btn-primary" id="downloadBtn">Download PNG</button>
+      <button class="btn btn-secondary" id="copyMeta">Copy Meta Tags</button>
+
+      <div class="meta-block" id="metaBlock"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const W = 1200, H = 630;
+
+const templateSel = document.getElementById('template');
+const titleInput = document.getElementById('title');
+const subtitleInput = document.getElementById('subtitleInput');
+const authorInput = document.getElementById('author');
+const tagInput = document.getElementById('tag');
+const bgColorInput = document.getElementById('bgColor');
+const accentColorInput = document.getElementById('accentColor');
+const textColorInput = document.getElementById('textColor');
+const bgImageInput = document.getElementById('bgImage');
+const logoInput = document.getElementById('logoInput');
+const downloadBtn = document.getElementById('downloadBtn');
+const copyMetaBtn = document.getElementById('copyMeta');
+const metaBlock = document.getElementById('metaBlock');
+
+let bgImg = null;
+let logoImg = null;
+
+canvas.style.width = '100%';
+canvas.style.maxWidth = '700px';
+
+function wrapText(text, x, y, maxW, lineH, align) {
+  ctx.textAlign = align || 'left';
+  const words = text.split(' ');
+  let line = '', lines = [];
+  words.forEach(word => {
+    const test = line + word + ' ';
+    if (ctx.measureText(test).width > maxW && line) { lines.push(line.trim()); line = word + ' '; }
+    else line = test;
+  });
+  lines.push(line.trim());
+  lines.slice(0, 3).forEach((l, i) => ctx.fillText(l, x, y + i * lineH));
+  return lines.length * lineH;
+}
+
+function render() {
+  const tpl = templateSel.value;
+  const bg = bgColorInput.value;
+  const ac = accentColorInput.value;
+  const tc = textColorInput.value;
+
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  if (bgImg) {
+    const ir = bgImg.width / bgImg.height;
+    const cr = W / H;
+    let sw = bgImg.width, sh = bgImg.height, sx = 0, sy = 0;
+    if (ir > cr) { sw = bgImg.height * cr; sx = (bgImg.width - sw) / 2; }
+    else { sh = bgImg.width / cr; sy = (bgImg.height - sh) / 2; }
+    ctx.drawImage(bgImg, sx, sy, sw, sh, 0, 0, W, H);
+    ctx.fillStyle = bg + 'cc';
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  const pad = 80;
+
+  if (tpl === 'blog') {
+    ctx.fillStyle = ac;
+    ctx.fillRect(pad, 160, 60, 5);
+    ctx.fillStyle = tc + '99';
+    ctx.font = '500 22px Manrope, system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText(tagInput.value.toUpperCase(), pad + 80, 170);
+    ctx.fillStyle = tc;
+    ctx.font = '800 56px Manrope, system-ui';
+    wrapText(titleInput.value, pad, 240, W - pad*2, 68, 'left');
+    ctx.fillStyle = tc + 'aa';
+    ctx.font = '400 26px Manrope, system-ui';
+    wrapText(subtitleInput.value, pad, 380, W - pad*2, 34, 'left');
+    ctx.fillStyle = ac;
+    ctx.font = '600 22px Manrope, system-ui';
+    ctx.fillText(authorInput.value, pad, H - 80);
+  } else if (tpl === 'product') {
+    ctx.fillStyle = ac + '22';
+    ctx.fillRect(W*0.55, 0, W*0.45, H);
+    ctx.fillStyle = tc;
+    ctx.font = '800 52px Manrope, system-ui';
+    wrapText(titleInput.value, pad, 200, W*0.5, 64, 'left');
+    ctx.fillStyle = tc + 'bb';
+    ctx.font = '400 24px Manrope, system-ui';
+    wrapText(subtitleInput.value, pad, 350, W*0.5, 32, 'left');
+    ctx.fillStyle = ac;
+    ctx.beginPath();
+    ctx.roundRect(pad, 440, 200, 50, 25);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = '600 20px Manrope, system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(tagInput.value || 'Learn More', pad + 100, 470);
+    ctx.fillStyle = tc + '88';
+    ctx.font = '500 18px Manrope, system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText(authorInput.value, pad, H - 60);
+  } else if (tpl === 'event') {
+    const grad = ctx.createLinearGradient(0, 0, W, H);
+    grad.addColorStop(0, ac + '44');
+    grad.addColorStop(1, bg);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = ac;
+    ctx.font = '700 24px Manrope, system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(tagInput.value.toUpperCase(), W/2, 140);
+    ctx.fillStyle = tc;
+    ctx.font = '800 60px Manrope, system-ui';
+    wrapText(titleInput.value, W/2, 230, W - pad*2, 72, 'center');
+    ctx.fillStyle = tc + 'bb';
+    ctx.font = '400 26px Manrope, system-ui';
+    wrapText(subtitleInput.value, W/2, 400, W - pad*2, 34, 'center');
+    ctx.fillStyle = ac;
+    ctx.font = '600 20px Manrope, system-ui';
+    ctx.fillText(authorInput.value, W/2, H - 70);
+  } else { // announcement
+    ctx.fillStyle = ac;
+    ctx.fillRect(0, 0, W, 8);
+    ctx.fillRect(0, H - 8, W, 8);
+    ctx.fillStyle = tc;
+    ctx.font = '800 64px Manrope, system-ui';
+    ctx.textAlign = 'center';
+    wrapText(titleInput.value, W/2, H*0.38, W - pad*2, 78, 'center');
+    ctx.fillStyle = tc + 'aa';
+    ctx.font = '500 28px Manrope, system-ui';
+    ctx.fillText(subtitleInput.value.slice(0, 60), W/2, H*0.65);
+    ctx.fillStyle = ac;
+    ctx.font = '600 20px Manrope, system-ui';
+    ctx.fillText(authorInput.value + (tagInput.value ? '  |  ' + tagInput.value : ''), W/2, H - 50);
+  }
+
+  if (logoImg) {
+    const s = 48;
+    ctx.drawImage(logoImg, W - pad - s, pad/2, s, s);
+  }
+
+  updateMeta();
+}
+
+function updateMeta() {
+  const meta = `<meta property="og:title" content="${titleInput.value}">
+<meta property="og:description" content="${subtitleInput.value}">
+<meta property="og:image" content="https://yoursite.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">`;
+  metaBlock.textContent = meta;
+}
+
+[templateSel].forEach(el => el.addEventListener('change', render));
+[titleInput, subtitleInput, authorInput, tagInput].forEach(el => el.addEventListener('input', render));
+[bgColorInput, accentColorInput, textColorInput].forEach(el => el.addEventListener('input', render));
+
+bgImageInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const img = new Image();
+  img.onload = () => { bgImg = img; render(); };
+  img.src = URL.createObjectURL(file);
+});
+
+logoInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const img = new Image();
+  img.onload = () => { logoImg = img; render(); };
+  img.src = URL.createObjectURL(file);
+});
+
+downloadBtn.addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = 'og-image.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+
+copyMetaBtn.addEventListener('click', () => {
+  navigator.clipboard.writeText(metaBlock.textContent);
+  copyMetaBtn.textContent = 'Copied!';
+  setTimeout(() => copyMetaBtn.textContent = 'Copy Meta Tags', 1500);
+});
+
+metaBlock.addEventListener('click', () => navigator.clipboard.writeText(metaBlock.textContent));
+
+render();
+</script>
+<script src="/related.js"></script>
+</body>
+</html>

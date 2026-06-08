@@ -71,6 +71,24 @@
       "iconBg": "#6366f1",
       "category": "images",
       "section": "images"
+    },
+    {
+      "id": "social-templates",
+      "name": "Social Media Templates",
+      "description": "Platform-sized templates for Instagram, X, LinkedIn. Edit text, colors, download PNG.",
+      "icon": "📱",
+      "iconBg": "#ec4899",
+      "category": "templates",
+      "section": "templates"
+    },
+    {
+      "id": "og-image-maker",
+      "name": "OG Image Maker",
+      "description": "Generate Open Graph images for link previews. Blog, product, event templates. 1200x630 PNG.",
+      "icon": "🖼️",
+      "iconBg": "#8b5cf6",
+      "category": "templates",
+      "section": "templates"
     }
   ]
 }
