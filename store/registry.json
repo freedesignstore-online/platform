@@ -200,8 +200,8 @@
     },
     {
       "id": "stock-photos",
-      "name": "Stock Photo Library",
-      "description": "Download FDS-hosted and community stock photos, search Unsplash, and submit original photos for free release.",
+      "name": "Visual Asset Library",
+      "description": "Generate, upload, and download community photos, illustrations, icons, patterns, textures, and Unsplash photos.",
       "icon": "📷",
       "iconBg": "#06b6d4",
       "category": "images",

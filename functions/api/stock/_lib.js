@@ -3,7 +3,23 @@ const PENDING_INDEX = "stock:index:pending";
 const ITEM_PREFIX = "stock:item:";
 const MAX_ITEMS = 500;
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
-const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
+const MAX_SVG_SIZE = 1024 * 1024;
+const ALLOWED_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/avif",
+  "image/svg+xml",
+]);
+const ASSET_TYPES = new Set([
+  "photo",
+  "illustration",
+  "icon",
+  "pattern",
+  "texture",
+  "background",
+  "ui",
+]);
 
 export function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -32,7 +48,7 @@ export function requireStore(env) {
     return {
       missing: true,
       response: error(
-        "Stock upload storage is not configured. Bind FDS_STOCK_BUCKET to R2 and FDS_STOCK_KV to KV.",
+        "Community asset storage is not configured. Bind FDS_STOCK_BUCKET to R2 and FDS_STOCK_KV to KV.",
         503
       ),
     };
@@ -90,6 +106,7 @@ export function publicItem(item) {
     source: "community",
     title: item.title,
     category: item.category,
+    assetType: item.assetType || "photo",
     author: item.author,
     license: item.license,
     tags: item.tags || [],
@@ -121,6 +138,7 @@ export function safeFilename(name, contentType) {
     "image/png": "png",
     "image/webp": "webp",
     "image/avif": "avif",
+    "image/svg+xml": "svg",
   }[contentType] || "jpg";
   const base = String(name || "stock-photo")
     .replace(/\.[^.]+$/, "")
@@ -136,12 +154,42 @@ export function validateFile(file) {
     return "Image file is required.";
   }
   if (!ALLOWED_TYPES.has(file.type)) {
-    return "Only JPG, PNG, WebP, and AVIF images are accepted.";
+    return "Only JPG, PNG, WebP, AVIF, and SVG assets are accepted.";
+  }
+  if (file.type === "image/svg+xml" && file.size > MAX_SVG_SIZE) {
+    return "SVG assets must be under 1 MB.";
   }
   if (!file.size || file.size > MAX_FILE_SIZE) {
-    return "Images must be under 8 MB.";
+    return "Image assets must be under 8 MB.";
   }
   return null;
+}
+
+export function cleanAssetType(value) {
+  const type = String(value || "photo").toLowerCase();
+  return ASSET_TYPES.has(type) ? type : "photo";
+}
+
+export async function fileBytes(file) {
+  const buffer = await file.arrayBuffer();
+  if (file.type !== "image/svg+xml") {
+    return buffer;
+  }
+  const text = new TextDecoder().decode(buffer);
+  const unsafe = [
+    /<script[\s>]/i,
+    /<foreignObject[\s>]/i,
+    /\son[a-z]+\s*=/i,
+    /javascript:/i,
+    /data:text\/html/i,
+    /<iframe[\s>]/i,
+    /<object[\s>]/i,
+    /<embed[\s>]/i,
+  ];
+  if (!/<svg[\s>]/i.test(text) || unsafe.some((pattern) => pattern.test(text))) {
+    throw new Error("SVG contains unsupported or unsafe markup.");
+  }
+  return new TextEncoder().encode(text).buffer;
 }
 
 export { PUBLIC_INDEX, PENDING_INDEX };

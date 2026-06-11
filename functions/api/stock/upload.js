@@ -2,9 +2,11 @@ import {
   PENDING_INDEX,
   PUBLIC_INDEX,
   addToIndex,
+  cleanAssetType,
   cleanTags,
   cleanText,
   error,
+  fileBytes,
   json,
   putItem,
   requireStore,
@@ -47,6 +49,7 @@ export async function onRequestPost({ request, env }) {
     title: cleanText(form.get("title"), filename.replace(/\.[^.]+$/, ""), 120),
     author: cleanText(form.get("author"), "Anonymous contributor", 80),
     category: cleanText(form.get("category"), "Community", 40),
+    assetType: cleanAssetType(form.get("assetType")),
     license: cleanText(form.get("license"), "FreeDesignStore Free Release", 80),
     tags: cleanTags(form.get("tags")),
     contentType: file.type,
@@ -55,7 +58,14 @@ export async function onRequestPost({ request, env }) {
     updatedAt: now,
   };
 
-  await store.bucket.put(objectKey, await file.arrayBuffer(), {
+  let body;
+  try {
+    body = await fileBytes(file);
+  } catch (err) {
+    return error(err.message);
+  }
+
+  await store.bucket.put(objectKey, body, {
     httpMetadata: {
       contentType: file.type,
       contentDisposition: `inline; filename="${filename}"`,
@@ -63,6 +73,7 @@ export async function onRequestPost({ request, env }) {
     customMetadata: {
       stockId: id,
       status,
+      assetType: item.assetType,
       author: item.author,
       license: item.license,
     },
@@ -76,7 +87,7 @@ export async function onRequestPost({ request, env }) {
     id,
     message:
       status === "public"
-        ? "Photo published."
-        : "Photo submitted for review.",
+        ? "Asset published."
+        : "Asset submitted for review.",
   });
 }

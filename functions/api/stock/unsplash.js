@@ -34,6 +34,7 @@ export async function onRequestGet({ request, env }) {
     items: (data.results || []).map((photo) => ({
       id: `unsplash-${photo.id}`,
       source: "unsplash",
+      assetType: "photo",
       title: photo.alt_description || photo.description || query,
       category: "Unsplash",
       author: photo.user?.name || "Unsplash photographer",

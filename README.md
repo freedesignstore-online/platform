@@ -20,7 +20,7 @@ Part of [Open Frontier](https://openfrontier.pages.dev). Every tool is a single 
 - Image Resizer — platform presets, custom crop
 - Icon Library — 200+ SVG icons, searchable
 - Gradient Maker — linear/radial/mesh, copy CSS
-- Stock Photo Library — FDS/community downloads, contributor uploads, Unsplash search
+- Visual Asset Library — generated SVGs, community uploads, FDS assets, Unsplash search
 
 ### Templates (`/templates/`)
 - Social Media Templates — IG, X, LinkedIn sized

@@ -6,13 +6,13 @@ export async function onRequestGet({ params, request, env }) {
 
   const id = params.id;
   const item = await getItem(store.kv, id);
-  if (!item) return error("Image not found.", 404);
+  if (!item) return error("Asset not found.", 404);
   if (item.status !== "public" && !isAdmin(request, env)) {
-    return error("Image is not public.", 404);
+    return error("Asset is not public.", 404);
   }
 
   const object = await store.bucket.get(item.objectKey);
-  if (!object) return error("Image file not found.", 404);
+  if (!object) return error("Asset file not found.", 404);
 
   const url = new URL(request.url);
   const filename = item.filename || `${id}.jpg`;
@@ -20,6 +20,10 @@ export async function onRequestGet({ params, request, env }) {
   object.writeHttpMetadata(headers);
   headers.set("etag", object.httpEtag);
   headers.set("cache-control", item.status === "public" ? "public, max-age=86400" : "no-store");
+  if (item.contentType === "image/svg+xml") {
+    headers.set("content-security-policy", "default-src 'none'; img-src data:; style-src 'unsafe-inline'; sandbox");
+    headers.set("x-content-type-options", "nosniff");
+  }
   headers.set(
     "content-disposition",
     url.searchParams.has("download")
