@@ -459,6 +459,7 @@ async function authMe(request: Request, config: OAuthConfig): Promise<Response> 
     authenticated: true,
     accountId: payload.uid,
     accountName: payload.name || payload.uid,
+    isAdmin: roles.includes('admin'),
     canPublish: roles.includes('publisher'),
   }));
 }
