@@ -623,9 +623,9 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
   }
 }
 
-async function authenticateRequest(request: Request, env: Env): Promise<McpProps> {
+async function authenticateRequest(request: Request, env: Env, options: { allowSessionCookie?: boolean } = {}): Promise<McpProps> {
   const auth = request.headers.get('Authorization') || '';
-  let sessionToken = readMcpSessionCookie(request) || '';
+  let sessionToken = options.allowSessionCookie ? readMcpSessionCookie(request) || '' : '';
   if (auth.startsWith('Bearer ')) {
     const token = auth.slice(7).trim();
     const adminToken = env.MCP_ADMIN_TOKEN || env.STOCK_ADMIN_TOKEN;
@@ -685,7 +685,9 @@ export default {
         'Create:   create_svg_asset, create_asset_from_url (creator/admin token)',
         'Admin:    moderate_asset, delete_asset',
         '',
-        'Auth: OAuth 2.1 browser sign-in, or Authorization: Bearer <creator token, STOCK_ADMIN_TOKEN, or MCP_ADMIN_TOKEN>',
+        browserAuthEnabled
+          ? 'Auth: FDS OAuth 2.1 browser sign-in, or Authorization: Bearer <creator token, STOCK_ADMIN_TOKEN, or MCP_ADMIN_TOKEN>'
+          : 'Auth: Authorization: Bearer <creator token, STOCK_ADMIN_TOKEN, or MCP_ADMIN_TOKEN>',
         'Unsplash: link off for download; do not mirror into FDS.',
       ].join('\n'), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
     }
@@ -700,7 +702,7 @@ export default {
     }
 
     if (url.pathname.startsWith('/mcp')) {
-      const auth = await authenticateRequest(request, env);
+      const auth = await authenticateRequest(request, env, { allowSessionCookie: browserAuthEnabled });
       if (request.method !== 'OPTIONS' && browserAuthEnabled && !auth.accountId) {
         const bearer = request.headers.get('Authorization')?.replace(/^Bearer\s+/i, '');
         return createAuthChallenge({ issuer }, bearer ? 'invalid_token' : undefined);
