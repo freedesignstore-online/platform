@@ -454,7 +454,13 @@ async function authMe(request: Request, config: OAuthConfig): Promise<Response> 
     headers.append('Set-Cookie', clearSessionCookie());
     return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
   }
-  return noStore(json({ authenticated: true, accountId: payload.uid, accountName: payload.name || payload.uid }));
+  const roles = [...(payload.roles || []), ...((payload.appRoles?.fds) || [])];
+  return noStore(json({
+    authenticated: true,
+    accountId: payload.uid,
+    accountName: payload.name || payload.uid,
+    canPublish: roles.includes('publisher'),
+  }));
 }
 
 function authLogout(request: Request): Response {
