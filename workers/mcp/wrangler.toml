@@ -11,7 +11,7 @@ PUBLIC_MCP_BASE_URL = "https://freedesignstore.pages.dev"
 # Secrets:
 #   STOCK_ADMIN_TOKEN - same value used by the Pages Functions upload backend.
 #   MCP_ADMIN_TOKEN   - optional separate write token for MCP clients.
-#   SESSION_SIGNING_KEY - signs/verifies FDS MCP OAuth sessions when FDS auth is enabled.
+#   SESSION_SIGNING_KEY - signs/verifies FDS creator sessions and MCP OAuth tokens.
 #   FDS_CREATOR_TOKENS - optional static creator-token map.
 #
 # Before deploy, replace the KV id with the namespace bound to the Pages project

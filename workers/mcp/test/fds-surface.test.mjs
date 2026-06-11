@@ -31,12 +31,20 @@ test('worker config has no FAS public route or FAS auth start', async () => {
   assert.doesNotMatch(wrangler, /\[\[routes\]\]/);
 });
 
-test('worker landing text uses FDS endpoint and bearer-token auth when browser auth is disabled', async () => {
+test('worker supports FDS OAuth without FAS auth routing', async () => {
   const source = await readRepo('workers/mcp/src/index.ts');
+  const oauth = await readRepo('workers/mcp/src/oauth-provider.ts');
+  const session = await readRepo('workers/mcp/src/session.ts');
   assert.match(source, /https:\/\/freedesignstore\.pages\.dev\/mcp/);
-  assert.match(source, /Browser sign-in: not enabled until FDS auth is configured\./);
-  assert.match(source, /Auth: Authorization: Bearer <creator token, STOCK_ADMIN_TOKEN, or MCP_ADMIN_TOKEN>/);
-  assert.doesNotMatch(source, /api\.freeappstore|fds-mcp\.freeappstore/);
+  assert.match(source, /Browser sign-in: https:\/\/freedesignstore\.pages\.dev\/\.fds\/auth\/start/);
+  assert.match(source, /Auth: FDS OAuth 2\.1 browser sign-in/);
+  assert.match(source, /canPublish/);
+  assert.match(source, /trusted-publisher creator permission/);
+  assert.match(oauth, /authorization_endpoint: `\$\{config\.issuer\}\/authorize`/);
+  assert.match(oauth, /token_endpoint: `\$\{config\.issuer\}\/token`/);
+  assert.match(oauth, /Creator sign-in code/);
+  assert.match(session, /FDS session token signing and verification/);
+  assert.doesNotMatch(`${source}\n${oauth}\n${session}`, /freeappstore|api\.freeappstore|fds-mcp\.freeappstore|AUTH_START|fas_session|fasSession|FAS-compatible/i);
 });
 
 test('Pages proxy maps any public MCP surface path to the backend worker', async () => {
@@ -81,10 +89,10 @@ test('creator console exposes the FDS MCP catalog workflow', async () => {
   assert.match(homeHtml, /href="\/console\/"/);
   assert.match(consoleHtml, /Creator Console - FreeDesignStore/);
   assert.match(consoleHtml, /const MCP_ENDPOINT='\/mcp'/);
-  assert.match(consoleHtml, /authorization.*Bearer/);
+  assert.match(consoleHtml, /\/\.fds\/auth\/start\?return_to=\/console\//);
+  assert.match(consoleHtml, /credentials:'include'/);
   assert.match(consoleHtml, /tools\/call/);
   assert.match(consoleHtml, /create_svg_asset/);
   assert.match(consoleHtml, /my_assets/);
-  assert.match(consoleHtml, /sessionStorage/);
-  assert.doesNotMatch(consoleHtml, /freeappstore\.online|api\.freeappstore|fds-mcp\.freeappstore/i);
+  assert.doesNotMatch(consoleHtml, /bearer token|sessionStorage|localStorage|freeappstore\.online|api\.freeappstore|fds-mcp\.freeappstore/i);
 });

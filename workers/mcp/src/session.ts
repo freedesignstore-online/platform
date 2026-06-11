@@ -1,12 +1,28 @@
-// FAS-compatible session token verification.
+// FDS session token signing and verification.
 // Tokens are HMAC-SHA256 signed: base64url(payload) + "." + base64url(hmac).
 
 export interface SessionPayload {
   uid: string;
+  name?: string;
   roles?: string[];
   appRoles?: Record<string, string[]>;
   iat: number;
   exp: number;
+}
+
+export async function signSession(
+  payload: Pick<SessionPayload, 'uid' | 'name' | 'roles' | 'appRoles'>,
+  signingKey: string,
+  ttlSeconds: number,
+): Promise<string> {
+  const now = Math.floor(Date.now() / 1000);
+  const body = b64urlString(JSON.stringify({
+    ...payload,
+    iat: now,
+    exp: now + ttlSeconds,
+  }));
+  const sig = await hmac(body, signingKey);
+  return `${body}.${sig}`;
 }
 
 export async function verifySession(token: string, signingKey: string): Promise<SessionPayload | null> {
@@ -42,6 +58,10 @@ function b64urlBytes(bytes: Uint8Array): string {
   let bin = '';
   for (const b of bytes) bin += String.fromCharCode(b);
   return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function b64urlString(value: string): string {
+  return b64urlBytes(new TextEncoder().encode(value));
 }
 
 function b64urlDecode(value: string): string {

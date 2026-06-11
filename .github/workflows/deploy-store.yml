@@ -88,10 +88,13 @@ jobs:
             if (!body.ok || body.tools !== 10) throw new Error(`bad health ${JSON.stringify(body)}`);
           });
 
-          await retry('MCP unauthenticated guard', async () => {
+          await retry('MCP OAuth challenge', async () => {
             const res = await fetch(`${base}/mcp`, { cache: 'no-store' });
             const text = await res.text();
             if (res.status !== 401) throw new Error(`expected 401, got ${res.status}`);
-            if (!text.includes('FDS creator/admin bearer token')) throw new Error(`unexpected body ${text}`);
+            const challenge = res.headers.get('www-authenticate') || '';
+            if (!challenge.includes(`${base}/.well-known/oauth-protected-resource/mcp`)) {
+              throw new Error(`missing FDS OAuth resource metadata: ${challenge || text}`);
+            }
           });
           NODE

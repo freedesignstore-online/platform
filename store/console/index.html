@@ -19,7 +19,7 @@
       <button data-view="create">Create SVG</button>
       <button data-view="settings">Connection</button>
     </div>
-    <small>FDS auth is not enabled yet. This console uses an explicit FDS MCP bearer token and talks only to the FDS MCP endpoint.</small>
+    <small>Sign in with your FreeDesignStore creator account. The console talks to the FDS MCP endpoint with a secure session cookie.</small>
   </aside>
   <main class="main">
     <header class="top">
@@ -28,18 +28,11 @@
     </header>
     <div class="content">
       <section id="loginPanel" class="panel">
-        <h2>Connect Creator Account</h2>
-        <p>Paste an FDS creator or admin bearer token to manage your catalog submissions. The token is stored only in this browser session unless you choose to remember it.</p>
-        <div class="form">
-          <div class="field">
-            <label for="tokenInput">FDS MCP bearer token</label>
-            <input id="tokenInput" type="password" autocomplete="off" placeholder="Paste token">
-          </div>
-          <label class="small"><input id="rememberToken" type="checkbox"> Remember on this device</label>
-          <div class="actions">
-            <button id="connectBtn" class="btn">Connect</button>
-            <button id="clearBtn" class="btn secondary">Clear token</button>
-          </div>
+        <h2>Sign In</h2>
+        <p>Use your FreeDesignStore creator account to manage catalog submissions. MCP tokens stay server-side; this browser receives only a secure httpOnly session cookie.</p>
+        <div class="actions">
+          <button id="signInBtn" class="btn">Sign in to FDS</button>
+          <button id="checkSessionBtn" class="btn secondary">Check session</button>
         </div>
       </section>
 
@@ -86,7 +79,7 @@
       <section id="settings" class="panel view hidden">
         <h2>Connection</h2>
         <p>MCP endpoint: <strong>https://freedesignstore.pages.dev/mcp</strong></p>
-        <p>Browser sign-in will be enabled only after FDS has its own identity provider. This console does not use FAS or PAS auth.</p>
+        <p>Claude and other MCP clients connect to the same endpoint and complete FDS OAuth in the browser. The console uses the same FDS session.</p>
         <div class="actions"><button id="disconnectBtn" class="btn danger">Disconnect</button></div>
       </section>
 
@@ -101,16 +94,17 @@
 const MCP_ENDPOINT='/mcp';
 const PROTOCOL_VERSION='2025-06-18';
 const $=id=>document.getElementById(id);
-const state={token:sessionStorage.getItem('fds_mcp_token')||localStorage.getItem('fds_mcp_token')||'',sessionId:'',nextId:1,user:null,status:null,assets:[]};
+const state={sessionId:'',nextId:1,user:null,status:null,assets:[]};
 
 function log(message){$('log').textContent=`${new Date().toLocaleTimeString()}  ${message}\n`+$('log').textContent;}
 function setConnected(on){$('statusDot').classList.toggle('ok',on);$('userLabel').textContent=on&&state.user?`${state.user.accountName||state.user.accountId}${state.user.isAdmin?' (admin)':''}`:'Not connected';$('loginPanel').classList.toggle('hidden',on);}
-function tokenHeaders(){return {'content-type':'application/json','accept':'application/json, text/event-stream','authorization':`Bearer ${state.token}`,...(state.sessionId?{'mcp-session-id':state.sessionId}:{})};}
+function tokenHeaders(){return {'content-type':'application/json','accept':'application/json, text/event-stream',...(state.sessionId?{'mcp-session-id':state.sessionId}:{})};}
 function parseSse(text){const line=text.split('\n').find(row=>row.startsWith('data: '));if(!line) return null;return JSON.parse(line.slice(6));}
-async function mcpPost(payload){if(!state.token) throw new Error('Connect with an FDS MCP bearer token first.');const res=await fetch(MCP_ENDPOINT,{method:'POST',headers:tokenHeaders(),body:JSON.stringify(payload)});const session=res.headers.get('mcp-session-id');if(session) state.sessionId=session;if(res.status===202) return null;const text=await res.text();if(!res.ok) throw new Error(text||`MCP HTTP ${res.status}`);const msg=(res.headers.get('content-type')||'').includes('text/event-stream')?parseSse(text):JSON.parse(text);if(msg?.error) throw new Error(msg.error.message||JSON.stringify(msg.error));return msg?.result??msg;}
+async function mcpPost(payload){const res=await fetch(MCP_ENDPOINT,{method:'POST',headers:tokenHeaders(),body:JSON.stringify(payload),credentials:'include'});const session=res.headers.get('mcp-session-id');if(session) state.sessionId=session;if(res.status===202) return null;const text=await res.text();if(!res.ok) throw new Error(res.status===401?'Sign in with FreeDesignStore first.':text||`MCP HTTP ${res.status}`);const msg=(res.headers.get('content-type')||'').includes('text/event-stream')?parseSse(text):JSON.parse(text);if(msg?.error) throw new Error(msg.error.message||JSON.stringify(msg.error));return msg?.result??msg;}
 async function initialize(){state.sessionId='';await mcpPost({jsonrpc:'2.0',id:state.nextId++,method:'initialize',params:{protocolVersion:PROTOCOL_VERSION,capabilities:{},clientInfo:{name:'fds-creator-console',version:'1.0.0'}}});await mcpPost({jsonrpc:'2.0',method:'notifications/initialized'});}
 async function callTool(name,args={}){const result=await mcpPost({jsonrpc:'2.0',id:state.nextId++,method:'tools/call',params:{name,arguments:args}});const text=result?.content?.find(item=>item.type==='text')?.text||'';try{return JSON.parse(text);}catch{return text;}}
 async function refreshAll(){await initialize();state.user=await callTool('whoami');state.status=await callTool('catalog_status');state.assets=await callTool('my_assets');render();log(`Loaded ${state.assets.length} asset(s).`);}
+async function checkSession(){const res=await fetch('/.fds/auth/me',{credentials:'include',cache:'no-store'});const user=res.ok?await res.json():{authenticated:false};if(!user.authenticated){state.user=null;state.status=null;state.assets=[];render();log('Not signed in.');return false;}state.user=user;setConnected(true);log(`Signed in as ${state.user.accountName||state.user.accountId}.`);return true;}
 function render(){setConnected(Boolean(state.user?.authenticated));$('publicCount').textContent=state.status?.publicCount??'-';$('pendingCount').textContent=state.status?.pendingCount??'-';$('mineCount').textContent=state.assets?.length??'-';$('adminFlag').textContent=state.user?.isAdmin?'Yes':'No';$('assetList').innerHTML=state.assets.length?state.assets.map(assetCard).join(''):'<div class="empty">No assets yet.</div>';}
 function assetCard(a){const status=String(a.status||'pending');return `<div class="asset"><div><h3>${escapeHtml(a.title)}</h3><div class="meta"><span class="pill ${status}">${escapeHtml(status)}</span><span class="pill">${escapeHtml(a.assetType||'asset')}</span><span class="pill">${escapeHtml(a.filename||'')}</span><span class="pill">${escapeHtml(a.contentType||'')}</span></div><p class="small">${escapeHtml(a.category||'')} · ${escapeHtml((a.tags||[]).join(', '))}</p></div><div class="links">${a.url?`<a href="${escapeAttr(a.url)}" target="_blank" rel="noopener">Open</a>`:''}${a.download?`<a href="${escapeAttr(a.download)}" target="_blank" rel="noopener">Download</a>`:''}</div></div>`;}
 function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
@@ -121,12 +115,12 @@ function previewSvg(){const svg=makeSvg();$('svgPreview').innerHTML=svg;return s
 
 document.querySelectorAll('.nav button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));$(btn.dataset.view).classList.remove('hidden');$('viewTitle').textContent=btn.textContent;}));
 document.querySelectorAll('[data-refresh]').forEach(btn=>btn.addEventListener('click',()=>refreshAll().catch(err=>log(`Refresh failed: ${err.message}`))));
-$('connectBtn').addEventListener('click',async()=>{state.token=$('tokenInput').value.trim();if(!state.token) return log('Token is required.');($('rememberToken').checked?localStorage:sessionStorage).setItem('fds_mcp_token',state.token);if(!$('rememberToken').checked)localStorage.removeItem('fds_mcp_token');try{await refreshAll();log('Connected.');}catch(err){setConnected(false);log(`Connect failed: ${err.message}`);}});
-$('clearBtn').addEventListener('click',()=>{localStorage.removeItem('fds_mcp_token');sessionStorage.removeItem('fds_mcp_token');state.token='';state.user=null;state.assets=[];state.status=null;setConnected(false);render();$('tokenInput').value='';log('Token cleared.');});
-$('disconnectBtn').addEventListener('click',()=>$('clearBtn').click());
+$('signInBtn').addEventListener('click',()=>{location.href='/.fds/auth/start?return_to=/console/';});
+$('checkSessionBtn').addEventListener('click',()=>checkSession().then(ok=>ok&&refreshAll()).catch(err=>log(`Session check failed: ${err.message}`)));
+$('disconnectBtn').addEventListener('click',async()=>{await fetch('/.fds/auth/logout',{method:'POST',credentials:'include'});state.user=null;state.assets=[];state.status=null;state.sessionId='';render();log('Signed out.');});
 $('previewBtn').addEventListener('click',()=>{previewSvg();log('Preview updated.');});
 $('createBtn').addEventListener('click',async()=>{try{const svg=previewSvg();const result=await callTool('create_svg_asset',{title:$('assetTitle').value.trim()||'Console SVG Asset',svg,asset_type:$('assetType').value,category:$('assetCategory').value.trim(),author:$('assetAuthor').value.trim(),license:$('assetLicense').value.trim(),tags:$('assetTags').value.split(',').map(t=>t.trim()).filter(Boolean),publish:false});log(`Created pending asset: ${result?.item?.id||result?.id||'created'}`);await refreshAll();}catch(err){log(`Create failed: ${err.message}`);}});
-if(state.token){$('tokenInput').value=state.token;refreshAll().catch(err=>log(`Saved token failed: ${err.message}`));}
+checkSession().then(ok=>ok&&refreshAll()).catch(err=>log(`Session check failed: ${err.message}`));
 previewSvg();
 </script>
 </body>

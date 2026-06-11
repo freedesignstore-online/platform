@@ -17,7 +17,7 @@ It follows the FAS/FAGS/PAGS pattern: a dedicated Cloudflare Worker using `agent
 - `moderate_asset` - publishes or rejects pending assets.
 - `delete_asset` - deletes catalog metadata and the R2 object.
 
-Creator writes use the FDS MCP endpoint at `https://freedesignstore.pages.dev/mcp`. Static creator tokens are currently supported for automation. Admin actions require `Authorization: Bearer <STOCK_ADMIN_TOKEN>` or `MCP_ADMIN_TOKEN`.
+Creator writes use the FDS MCP endpoint at `https://freedesignstore.pages.dev/mcp`. Claude and other remote MCP clients should use FDS OAuth/PKCE browser sign-in. Static creator tokens remain supported for automation. Admin actions require `Authorization: Bearer <STOCK_ADMIN_TOKEN>` or `MCP_ADMIN_TOKEN`.
 
 ## Legal Guardrails
 
@@ -34,7 +34,7 @@ Before deploying in a new environment, wire it to the same production storage us
 1. Create or identify the R2 bucket bound to Pages as `FDS_STOCK_BUCKET`.
 2. Create or identify the KV namespace bound to Pages as `FDS_STOCK_KV`.
 3. Confirm `workers/mcp/wrangler.toml` uses the real namespace id. If your R2 bucket is not named `fds-stock-assets`, replace that too.
-4. Set the admin write token, FAS session signing key, and optional creator-token map:
+4. Set the admin write token, FDS session signing key, and creator account map:
 
 ```sh
 cd workers/mcp
@@ -47,7 +47,7 @@ npx wrangler secret put FDS_CREATOR_TOKENS
 
 ```json
 [
-  { "accountId": "creator-id", "name": "Creator Name", "token": "secret-token" }
+  { "accountId": "creator-id", "name": "Creator Name", "token": "secret-token", "canPublish": false }
 ]
 ```
 
@@ -55,9 +55,11 @@ or:
 
 ```json
 {
-  "creator-id": { "name": "Creator Name", "token": "secret-token" }
+  "creator-id": { "name": "Creator Name", "token": "secret-token", "canPublish": false }
 }
 ```
+
+Set `canPublish: true` only for trusted creators whose generated/uploaded assets may go public immediately. Other creator submissions stay pending for review.
 
 Then deploy:
 
@@ -80,10 +82,14 @@ Connect from an MCP client:
 }
 ```
 
-For writes, use a client that can send the bearer token header to the remote MCP server.
+Claude-style remote MCP clients should connect directly to:
 
-Browser sign-in is intentionally disabled until FDS has its own identity provider and OAuth credentials. FDS and FAS are separate products for separate audiences; FDS must not use FAS as its public auth provider.
+```text
+https://freedesignstore.pages.dev/mcp
+```
 
-The MCP worker still contains OAuth support, but it is only enabled when an FDS-owned `AUTH_START` is configured. Until then, use explicit FDS creator/admin bearer tokens for MCP writes.
+The client discovers the OAuth metadata, opens the FDS authorization page on `freedesignstore.pages.dev`, and exchanges the authorization code for an access token. The user signs in with an FDS creator account; no FAS/PAS auth route is used.
 
-The public FDS origin proxies the whole MCP surface to the backend Worker: `/mcp`, `/register`, `/authorize`, `/token`, `/.well-known/oauth-*`, and `/.fds/auth/*`. That keeps the external integration FDS-branded when FDS auth is turned on.
+For automation, bearer tokens are still accepted, but they are not the human creator UX.
+
+The public FDS origin proxies the whole MCP surface to the backend Worker: `/mcp`, `/register`, `/authorize`, `/token`, `/.well-known/oauth-*`, and `/.fds/auth/*`. That keeps the external integration FDS-branded.

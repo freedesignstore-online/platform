@@ -1,4 +1,4 @@
-import { verifySession } from './session.js';
+import { signSession, verifySession } from './session.js';
 
 const AUTH_PREFIX = '/.fds/auth';
 const SESSION_COOKIE_NAME = '__Host-fds_mcp_session';
@@ -6,14 +6,32 @@ const NONCE_COOKIE_NAME = '__Host-fds_mcp_auth_nonce';
 const AUTH_IN_FLIGHT_COOKIE = 'fds_mcp_oauth_inflight';
 const SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
 const NONCE_TTL_SECONDS = 10 * 60;
-const AUTH_PROVIDERS = ['github', 'google'] as const;
-type AuthProvider = (typeof AUTH_PROVIDERS)[number];
+
+export interface CreatorAccount {
+  accountId: string;
+  name: string;
+  token: string;
+  canPublish?: boolean;
+}
 
 interface OAuthConfig {
   issuer: string;
-  authStart: string;
   kv: KVNamespace;
   sessionSigningKey: string;
+  creatorAccounts: CreatorAccount[];
+}
+
+interface ClientRegistration {
+  client_id: string;
+  redirect_uris: string[];
+  client_name?: string | null;
+}
+
+interface AuthRequest {
+  clientId: string;
+  redirectUri: string;
+  codeChallenge: string;
+  state: string | null;
 }
 
 export function createAuthChallenge(config: Pick<OAuthConfig, 'issuer'>, error?: 'invalid_token'): Response {
@@ -52,9 +70,13 @@ export async function handleOAuthRoute(request: Request, config: OAuthConfig): P
   }
 
   if (path === AUTH_PREFIX || path === `${AUTH_PREFIX}/start`) return authStart(request, config);
-  if (path === `${AUTH_PREFIX}/callback`) return authCallback(request, config);
+  if (path === `${AUTH_PREFIX}/login`) return authLogin(request, config);
+  if (path === `${AUTH_PREFIX}/approve`) return authApprove(request, config);
   if (path === `${AUTH_PREFIX}/me`) return authMe(request, config);
   if (path === `${AUTH_PREFIX}/logout`) return authLogout(request);
+  if (path === `${AUTH_PREFIX}/callback` || path === '/oauth/callback' || path === '/authorize/continue') {
+    return new Response('This FDS auth server signs users in directly. Restart authorization from /authorize.', { status: 410 });
+  }
   if (path === '/.well-known/oauth-protected-resource' || path === '/.well-known/oauth-protected-resource/mcp') {
     return json({ resource: `${config.issuer}/mcp`, authorization_servers: [config.issuer] });
   }
@@ -72,8 +94,6 @@ export async function handleOAuthRoute(request: Request, config: OAuthConfig): P
   }
   if (path === '/register' && request.method === 'POST') return register(request, config);
   if (path === '/authorize' && request.method === 'GET') return authorize(request, config);
-  if (path === '/authorize/continue' && request.method === 'GET') return continueAuthorize(request, config);
-  if (path === '/oauth/callback' && request.method === 'GET') return oauthCallback(request, config);
   if (path === '/token' && request.method === 'POST') return tokenExchange(request, config);
   return null;
 }
@@ -84,6 +104,7 @@ function json(data: unknown, status = 200): Response {
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'no-store',
     },
   });
 }
@@ -181,23 +202,9 @@ function sameOriginPath(baseUrl: URL, raw: string | null): string {
   }
 }
 
-function nonceMatches(request: Request, url: URL): boolean {
-  const nonce = url.searchParams.get('nonce');
+function nonceMatches(request: Request, nonce: string | null): boolean {
   if (!nonce) return false;
   return readCookie(request.headers.get('Cookie'), NONCE_COOKIE_NAME) === nonce;
-}
-
-function authProvider(raw: string | null): AuthProvider | null {
-  return AUTH_PROVIDERS.includes(raw as AuthProvider) ? (raw as AuthProvider) : null;
-}
-
-function authStartUrl(config: OAuthConfig, callbackUrl: URL, provider: AuthProvider): string {
-  const authUrl = new URL(config.authStart);
-  if (provider !== 'github') authUrl.pathname = authUrl.pathname.replace('/auth/github/', `/auth/${provider}/`);
-  authUrl.searchParams.set('response_mode', 'query');
-  authUrl.searchParams.set('app_id', 'mcp');
-  authUrl.searchParams.set('return_to', callbackUrl.toString());
-  return authUrl.toString();
 }
 
 function escapeHtml(value: string): string {
@@ -210,13 +217,101 @@ function escapeHtml(value: string): string {
   })[ch]!);
 }
 
-function authPage(config: OAuthConfig, nonce: string, clientName: string | null): Response {
-  const continueUrl = (provider: AuthProvider) => {
-    const url = new URL('/authorize/continue', config.issuer);
-    url.searchParams.set('nonce', nonce);
-    url.searchParams.set('provider', provider);
-    return url.toString();
-  };
+function timingSafeEqual(a: string, b: string): boolean {
+  const maxLen = Math.max(a.length, b.length);
+  let diff = a.length ^ b.length;
+  for (let i = 0; i < maxLen; i += 1) diff |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
+  return diff === 0;
+}
+
+function findCreator(config: OAuthConfig, accountId: string, token: string): CreatorAccount | null {
+  const normalized = accountId.toLowerCase().trim();
+  return config.creatorAccounts.find((account) => (
+    account.accountId.toLowerCase() === normalized && timingSafeEqual(account.token, token)
+  )) || null;
+}
+
+async function sessionForCreator(config: OAuthConfig, creator: CreatorAccount): Promise<string> {
+  const roles = creator.canPublish ? ['creator', 'publisher'] : ['creator'];
+  return signSession(
+    {
+      uid: creator.accountId,
+      name: creator.name,
+      roles,
+      appRoles: { fds: roles },
+    },
+    config.sessionSigningKey,
+    SESSION_TTL_SECONDS,
+  );
+}
+
+async function currentSession(request: Request, config: OAuthConfig) {
+  const token = readMcpSessionCookie(request);
+  if (!token) return null;
+  const payload = await verifySession(token, config.sessionSigningKey);
+  if (!payload?.uid) return null;
+  return { token, payload };
+}
+
+function signInPage(params: {
+  config: OAuthConfig;
+  nonce: string;
+  returnPath?: string;
+  authNonce?: string;
+  clientName?: string | null;
+  error?: string;
+}): Response {
+  const action = new URL(`${AUTH_PREFIX}/login`, params.config.issuer);
+  const name = params.clientName ? escapeHtml(params.clientName) : 'FreeDesignStore';
+  const heading = params.authNonce ? 'Connect FreeDesignStore MCP' : 'Sign in to FreeDesignStore';
+  const intro = params.authNonce
+    ? `${name} wants to create and manage catalog assets as your FDS creator account.`
+    : 'Sign in to manage your creator catalog and MCP submissions.';
+  const response = html(`<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${heading}</title>
+  <style>
+    :root{color-scheme:light;background:#f6f7f9;color:#17202a;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px}
+    main{width:min(100%,460px);background:#fff;border:1px solid #d9dee7;border-radius:10px;box-shadow:0 18px 50px rgba(25,36,55,.12);padding:30px}
+    h1{font-size:24px;line-height:1.2;margin:0 0 12px}
+    p{line-height:1.55;color:#4b5563;margin:0 0 20px}
+    form{display:grid;gap:12px}
+    label{display:grid;gap:6px;font-size:12px;font-weight:750;color:#364152}
+    input{width:100%;border:1px solid #cfd6e3;border-radius:8px;padding:11px;font:inherit}
+    button{border:1px solid #111827;background:#111827;color:#fff;border-radius:8px;padding:11px 16px;font:inherit;font-weight:800;cursor:pointer}
+    .error{border:1px solid #f3b8b1;background:#fff1f0;color:#b42318;border-radius:8px;padding:10px 12px;font-size:13px}
+    small{display:block;margin-top:16px;color:#697386;line-height:1.45}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>${heading}</h1>
+    <p>${intro}</p>
+    ${params.error ? `<div class="error">${escapeHtml(params.error)}</div>` : ''}
+    <form method="post" action="${escapeHtml(action.toString())}">
+      <input type="hidden" name="nonce" value="${escapeHtml(params.nonce)}">
+      ${params.returnPath ? `<input type="hidden" name="return_to" value="${escapeHtml(params.returnPath)}">` : ''}
+      ${params.authNonce ? `<input type="hidden" name="auth_nonce" value="${escapeHtml(params.authNonce)}">` : ''}
+      <label>Creator ID<input name="account_id" autocomplete="username" required autofocus></label>
+      <label>Creator sign-in code<input name="creator_code" type="password" autocomplete="current-password" required></label>
+      <button type="submit">${params.authNonce ? 'Connect MCP Client' : 'Sign In'}</button>
+    </form>
+    <small>FDS sets a secure httpOnly session cookie. MCP clients receive OAuth access tokens; users never paste bearer tokens into the console.</small>
+  </main>
+</body>
+</html>`, 200, {
+    'Set-Cookie': `${AUTH_IN_FLIGHT_COOKIE}=1; Max-Age=600; Path=/; Secure; HttpOnly; SameSite=Lax`,
+  });
+  response.headers.append('Set-Cookie', nonceCookie(params.nonce));
+  return response;
+}
+
+function consentPage(config: OAuthConfig, nonce: string, clientName: string | null, accountName: string): Response {
+  const action = new URL(`${AUTH_PREFIX}/approve`, config.issuer);
   const name = clientName ? escapeHtml(clientName) : 'your MCP client';
   return html(`<!doctype html>
 <html lang="en">
@@ -225,41 +320,43 @@ function authPage(config: OAuthConfig, nonce: string, clientName: string | null)
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Connect FreeDesignStore MCP</title>
   <style>
-    :root{color-scheme:light;background:#f6f7f9;color:#17202a;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px}
-    main{width:min(100%,460px);background:#fff;border:1px solid #d9dee7;border-radius:10px;box-shadow:0 18px 50px rgba(25,36,55,.12);padding:30px}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f6f7f9;color:#17202a;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:24px}
+    main{width:min(100%,460px);background:#fff;border:1px solid #d9dee7;border-radius:10px;padding:30px;box-shadow:0 18px 50px rgba(25,36,55,.12)}
     h1{font-size:24px;line-height:1.2;margin:0 0 12px}
-    p{line-height:1.55;color:#4b5563;margin:0 0 22px}
-    .actions{display:flex;gap:10px;flex-wrap:wrap}
-    a{display:inline-flex;align-items:center;justify-content:center;border-radius:8px;padding:11px 16px;text-decoration:none;font-weight:750;background:#111827;color:#fff}
-    a.secondary{background:#fff;color:#111827;border:1px solid #cfd6e3}
-    small{display:block;margin-top:18px;color:#697386;line-height:1.45}
+    p,li{line-height:1.55;color:#4b5563}
+    form{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+    button{border:1px solid #111827;background:#111827;color:#fff;border-radius:8px;padding:11px 16px;font:inherit;font-weight:800;cursor:pointer}
+    a{display:inline-flex;align-items:center;color:#111827;font-weight:750;text-decoration:none;padding:11px 0}
   </style>
 </head>
 <body>
   <main>
     <h1>Connect FreeDesignStore MCP</h1>
-    <p>${name} wants to use FreeDesignStore catalog tools as your creator account.</p>
-    <div class="actions">
-      <a href="${escapeHtml(continueUrl('github'))}" autofocus>Continue with GitHub</a>
-      <a class="secondary" href="${escapeHtml(continueUrl('google'))}">Continue with Google</a>
-    </div>
-    <small>This signs you in through FreeDesignStore auth and returns control to your MCP client.</small>
+    <p>${name} will use FDS as <strong>${escapeHtml(accountName)}</strong>.</p>
+    <ul>
+      <li>Create and submit design assets to your creator catalog.</li>
+      <li>List your FDS assets and catalog status.</li>
+      <li>Publish only when your account has publishing permission.</li>
+    </ul>
+    <form method="post" action="${escapeHtml(action.toString())}">
+      <input type="hidden" name="nonce" value="${escapeHtml(nonce)}">
+      <button type="submit">Allow</button>
+      <a href="/">Cancel</a>
+    </form>
   </main>
 </body>
-</html>`, 200, {
-    'Set-Cookie': `${AUTH_IN_FLIGHT_COOKIE}=1; Max-Age=120; Path=/; Secure; HttpOnly; SameSite=Lax`,
-  });
+</html>`);
 }
 
-function directSignedInPage(config: OAuthConfig, userId: string): Response {
+function signedInPage(config: OAuthConfig, userId: string): Response {
+  const consoleUrl = new URL('/console/', config.issuer);
   const meUrl = new URL(`${AUTH_PREFIX}/me`, config.issuer);
   return html(`<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Signed in to FreeDesignStore MCP</title>
+  <title>Signed in to FreeDesignStore</title>
   <style>
     body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f6f7f9;color:#17202a;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:24px}
     main{width:min(100%,460px);background:#fff;border:1px solid #d9dee7;border-radius:10px;padding:30px;box-shadow:0 18px 50px rgba(25,36,55,.12)}
@@ -271,9 +368,10 @@ function directSignedInPage(config: OAuthConfig, userId: string): Response {
 </head>
 <body>
   <main>
-    <h1>Signed in to FreeDesignStore MCP</h1>
-    <p>You are signed in as <code>${escapeHtml(userId)}</code>. MCP clients can continue their authorization flow from here.</p>
-    <p><a href="${escapeHtml(meUrl.toString())}">Check current MCP auth session</a></p>
+    <h1>Signed in to FreeDesignStore</h1>
+    <p>You are signed in as <code>${escapeHtml(userId)}</code>.</p>
+    <p><a href="${escapeHtml(consoleUrl.toString())}">Open Creator Console</a></p>
+    <p><a href="${escapeHtml(meUrl.toString())}">Check current auth session</a></p>
   </main>
 </body>
 </html>`);
@@ -285,63 +383,77 @@ function redirectWithAuthError(url: URL, returnPath: string, reason: string, coo
   return redirect(dest.toString(), 303, cookies);
 }
 
-function directCallbackUrl(config: OAuthConfig, nonce: string, returnPath: string): URL {
-  const callback = new URL(`${AUTH_PREFIX}/callback`, config.issuer);
-  callback.searchParams.set('nonce', nonce);
-  callback.searchParams.set('return_to', returnPath);
-  return callback;
-}
-
-function oauthCallbackUrl(config: OAuthConfig, nonce: string): URL {
-  const callback = new URL('/oauth/callback', config.issuer);
-  callback.searchParams.set('nonce', nonce);
-  return callback;
-}
-
 async function authStart(request: Request, config: OAuthConfig): Promise<Response> {
   if (request.method !== 'GET') return methodNotAllowed('GET');
+  const session = await currentSession(request, config);
   const url = new URL(request.url);
-  const provider = authProvider(url.searchParams.get('provider')) ?? 'github';
-  const returnPath = sameOriginPath(url, url.searchParams.get('return_to'));
+  const returnPath = sameOriginPath(url, url.searchParams.get('return_to') || '/console/');
+  if (session) return redirect(new URL(returnPath, url.origin).toString(), 303);
   const nonce = crypto.randomUUID();
-  return redirect(authStartUrl(config, directCallbackUrl(config, nonce, returnPath), provider), 302, [nonceCookie(nonce)]);
+  return signInPage({ config, nonce, returnPath });
 }
 
-async function authCallback(request: Request, config: OAuthConfig): Promise<Response> {
-  if (request.method !== 'GET') return methodNotAllowed('GET');
+async function authLogin(request: Request, config: OAuthConfig): Promise<Response> {
+  if (request.method !== 'POST') return methodNotAllowed('POST');
   const url = new URL(request.url);
-  const returnPath = sameOriginPath(url, url.searchParams.get('return_to'));
-  if (!nonceMatches(request, url)) return redirectWithAuthError(url, returnPath, 'invalid_state', [clearNonceCookie()]);
+  const form = await request.formData();
+  const nonce = String(form.get('nonce') || '');
+  const returnPath = sameOriginPath(url, String(form.get('return_to') || '/console/'));
+  const authNonce = String(form.get('auth_nonce') || '');
 
-  const fasSession = url.searchParams.get('fas_session');
-  if (!fasSession) return redirectWithAuthError(url, returnPath, 'missing_session', [clearNonceCookie()]);
-
-  const payload = await verifySession(fasSession, config.sessionSigningKey);
-  if (!payload) return redirectWithAuthError(url, returnPath, 'invalid_session', [clearNonceCookie()]);
-
-  if (returnPath === '/') {
-    const response = directSignedInPage(config, payload.uid);
-    const headers = new Headers(response.headers);
-    headers.append('Set-Cookie', sessionCookie(fasSession));
-    headers.append('Set-Cookie', clearNonceCookie());
-    return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+  if (!nonceMatches(request, nonce)) {
+    return authNonce
+      ? new Response('Invalid or expired sign-in state. Restart authorization from your MCP client.', { status: 400 })
+      : redirectWithAuthError(url, returnPath, 'invalid_state', [clearNonceCookie()]);
   }
 
-  return redirect(new URL(returnPath, url.origin).toString(), 303, [sessionCookie(fasSession), clearNonceCookie()]);
+  const creator = findCreator(config, String(form.get('account_id') || ''), String(form.get('creator_code') || ''));
+  if (!creator) {
+    return signInPage({
+      config,
+      nonce,
+      returnPath: authNonce ? undefined : returnPath,
+      authNonce: authNonce || undefined,
+      error: 'Invalid creator ID or sign-in code.',
+    });
+  }
+
+  const sessionToken = await sessionForCreator(config, creator);
+  const cookies = [sessionCookie(sessionToken), clearNonceCookie()];
+  if (authNonce) {
+    return issueAuthorizationCode(config, authNonce, sessionToken, cookies);
+  }
+
+  if (returnPath === '/') {
+    const response = signedInPage(config, creator.accountId);
+    const headers = new Headers(response.headers);
+    for (const cookie of cookies) headers.append('Set-Cookie', cookie);
+    return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+  }
+  return redirect(new URL(returnPath, url.origin).toString(), 303, cookies);
+}
+
+async function authApprove(request: Request, config: OAuthConfig): Promise<Response> {
+  if (request.method !== 'POST') return methodNotAllowed('POST');
+  const form = await request.formData();
+  const nonce = String(form.get('nonce') || '');
+  const session = await currentSession(request, config);
+  if (!session) return new Response('Session expired. Restart authorization from your MCP client.', { status: 401 });
+  return issueAuthorizationCode(config, nonce, session.token, [clearInFlightCookie()]);
 }
 
 async function authMe(request: Request, config: OAuthConfig): Promise<Response> {
   if (request.method !== 'GET') return methodNotAllowed('GET');
   const token = readMcpSessionCookie(request);
-  if (!token) return noStore(json({ authenticated: false, error: 'not signed in' }, 401));
+  if (!token) return noStore(json({ authenticated: false }));
   const payload = await verifySession(token, config.sessionSigningKey);
-  if (!payload) {
-    const res = noStore(json({ authenticated: false, error: 'invalid session' }, 401));
+  if (!payload?.uid) {
+    const res = noStore(json({ authenticated: false, error: 'invalid session' }));
     const headers = new Headers(res.headers);
     headers.append('Set-Cookie', clearSessionCookie());
     return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
   }
-  return noStore(json({ authenticated: true, accountId: payload.uid, accountName: payload.uid }));
+  return noStore(json({ authenticated: true, accountId: payload.uid, accountName: payload.name || payload.uid }));
 }
 
 function authLogout(request: Request): Response {
@@ -401,50 +513,39 @@ async function authorize(request: Request, config: OAuthConfig): Promise<Respons
 
   const clientRaw = await config.kv.get(`client:${clientId}`);
   if (!clientRaw) return new Response('invalid client_id', { status: 400 });
-  const client = JSON.parse(clientRaw) as { redirect_uris: string[]; client_name?: string | null };
+  const client = JSON.parse(clientRaw) as ClientRegistration;
   if (!client.redirect_uris.includes(redirectUri)) return new Response('redirect_uri not registered', { status: 400 });
 
   const nonce = crypto.randomUUID();
   await config.kv.put(`authreq:${nonce}`, JSON.stringify({ clientId, redirectUri, codeChallenge, state }), { expirationTtl: 600 });
 
-  return authPage(config, nonce, client.client_name ?? null);
+  const session = await currentSession(request, config);
+  if (session) return consentPage(config, nonce, client.client_name ?? null, session.payload.name || session.payload.uid);
+
+  const signInNonce = crypto.randomUUID();
+  return signInPage({ config, nonce: signInNonce, authNonce: nonce, clientName: client.client_name ?? null });
 }
 
-async function continueAuthorize(request: Request, config: OAuthConfig): Promise<Response> {
-  const url = new URL(request.url);
-  const nonce = url.searchParams.get('nonce');
-  const provider = authProvider(url.searchParams.get('provider')) ?? 'github';
-  if (!nonce) return new Response('missing nonce', { status: 400 });
-  const reqRaw = await config.kv.get(`authreq:${nonce}`);
-  if (!reqRaw) return new Response('invalid or expired nonce', { status: 400 });
-  return redirect(authStartUrl(config, oauthCallbackUrl(config, nonce), provider));
-}
-
-async function oauthCallback(request: Request, config: OAuthConfig): Promise<Response> {
-  const url = new URL(request.url);
-  const nonce = url.searchParams.get('nonce');
-  const fasSession = url.searchParams.get('fas_session');
-  if (!nonce || !fasSession) return new Response('missing nonce or fas_session', { status: 400 });
-
+async function issueAuthorizationCode(config: OAuthConfig, nonce: string, sessionToken: string, cookies: string[] = []): Promise<Response> {
   const reqRaw = await config.kv.get(`authreq:${nonce}`);
   if (!reqRaw) return new Response('invalid or expired nonce', { status: 400 });
   await config.kv.delete(`authreq:${nonce}`);
 
-  const payload = await verifySession(fasSession, config.sessionSigningKey);
-  if (!payload) return new Response('invalid session', { status: 400 });
+  const payload = await verifySession(sessionToken, config.sessionSigningKey);
+  if (!payload?.uid) return new Response('invalid session', { status: 400 });
 
-  const authReq = JSON.parse(reqRaw) as { clientId: string; redirectUri: string; codeChallenge: string; state: string | null };
+  const authReq = JSON.parse(reqRaw) as AuthRequest;
   const code = crypto.randomUUID();
   await config.kv.put(
     `code:${code}`,
-    JSON.stringify({ fasSession, codeChallenge: authReq.codeChallenge, redirectUri: authReq.redirectUri, clientId: authReq.clientId }),
+    JSON.stringify({ sessionToken, codeChallenge: authReq.codeChallenge, redirectUri: authReq.redirectUri, clientId: authReq.clientId }),
     { expirationTtl: 600 },
   );
 
   const clientRedirect = new URL(authReq.redirectUri);
   clientRedirect.searchParams.set('code', code);
   if (authReq.state) clientRedirect.searchParams.set('state', authReq.state);
-  return redirect(clientRedirect.toString(), 302, [clearInFlightCookie()]);
+  return redirect(clientRedirect.toString(), 302, [...cookies, clearInFlightCookie()]);
 }
 
 async function tokenExchange(request: Request, config: OAuthConfig): Promise<Response> {
@@ -460,14 +561,17 @@ async function tokenExchange(request: Request, config: OAuthConfig): Promise<Res
   if (!codeRaw) return json({ error: 'invalid_grant' }, 400);
   await config.kv.delete(`code:${code}`);
 
-  const codeData = JSON.parse(codeRaw) as { fasSession: string; codeChallenge: string; redirectUri: string; clientId: string };
+  const codeData = JSON.parse(codeRaw) as { sessionToken: string; codeChallenge: string; redirectUri: string; clientId: string };
   if (codeData.redirectUri !== redirectUri || codeData.clientId !== clientId) return json({ error: 'invalid_grant' }, 400);
 
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(codeVerifier));
   const computed = btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   if (computed !== codeData.codeChallenge) return json({ error: 'invalid_grant', error_description: 'PKCE verification failed' }, 400);
 
+  const session = await verifySession(codeData.sessionToken, config.sessionSigningKey);
+  if (!session?.uid) return json({ error: 'invalid_grant', error_description: 'session expired' }, 400);
+
   const accessToken = crypto.randomUUID();
-  await config.kv.put(`token:${accessToken}`, codeData.fasSession, { expirationTtl: 86_400 });
+  await config.kv.put(`token:${accessToken}`, codeData.sessionToken, { expirationTtl: 86_400 });
   return json({ access_token: accessToken, token_type: 'bearer', expires_in: 86_400 });
 }

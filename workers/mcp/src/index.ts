@@ -1,7 +1,7 @@
 import { McpAgent } from 'agents/mcp';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { createAuthChallenge, handleOAuthRoute, readMcpSessionCookie, resolveOAuthToken } from './oauth-provider.js';
+import { createAuthChallenge, handleOAuthRoute, readMcpSessionCookie, resolveOAuthToken, type CreatorAccount } from './oauth-provider.js';
 import { verifySession } from './session.js';
 
 interface Env {
@@ -12,7 +12,6 @@ interface Env {
   FDS_CREATOR_TOKENS?: string;
   CREATOR_TOKENS?: string;
   API_BASE?: string;
-  AUTH_START?: string;
   OAUTH_KV?: KVNamespace;
   SESSION_SIGNING_KEY?: string;
   PUBLIC_BASE_URL?: string;
@@ -22,6 +21,7 @@ interface Env {
 
 interface McpProps extends Record<string, unknown> {
   isAdmin?: boolean;
+  canPublish?: boolean;
   accountId?: string;
   accountName?: string;
 }
@@ -48,7 +48,6 @@ interface CatalogItem {
 }
 
 type AssetType = 'photo' | 'illustration' | 'icon' | 'pattern' | 'texture' | 'background' | 'ui';
-type CreatorAccount = { accountId: string; name: string; token: string };
 
 const PUBLIC_INDEX = 'stock:index:public';
 const PENDING_INDEX = 'stock:index:pending';
@@ -194,15 +193,17 @@ function parseCreatorAccounts(env: Env): CreatorAccount[] {
           accountId: cleanText(entry?.accountId || entry?.id, '', 80),
           name: cleanText(entry?.name, entry?.accountId || entry?.id || 'Creator', 80),
           token: String(entry?.token || ''),
+          canPublish: Boolean(entry?.canPublish || entry?.publisher || (Array.isArray(entry?.roles) && entry.roles.includes('publisher'))),
         }))
         .filter((entry) => entry.accountId && entry.token);
     }
     if (parsed && typeof parsed === 'object') {
-      return Object.entries(parsed as Record<string, { name?: string; token?: string } | string>)
+      return Object.entries(parsed as Record<string, { name?: string; token?: string; canPublish?: boolean; publisher?: boolean; roles?: string[] } | string>)
         .map(([accountId, value]) => {
           const token = typeof value === 'string' ? value : String(value?.token || '');
           const name = typeof value === 'string' ? accountId : cleanText(value?.name, accountId, 80);
-          return { accountId: cleanText(accountId, '', 80), name, token };
+          const canPublish = typeof value === 'string' ? false : Boolean(value?.canPublish || value?.publisher || (Array.isArray(value?.roles) && value.roles.includes('publisher')));
+          return { accountId: cleanText(accountId, '', 80), name, token, canPublish };
         })
         .filter((entry) => entry.accountId && entry.token);
     }
@@ -385,6 +386,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
           accountAuthenticated: Boolean(currentProps(this.props).accountId),
           accountId: currentProps(this.props).accountId,
           isAdmin: Boolean(currentProps(this.props).isAdmin),
+          canPublish: Boolean(currentProps(this.props).canPublish || currentProps(this.props).isAdmin),
         });
       },
     );
@@ -400,6 +402,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
           accountId: props.accountId || null,
           accountName: props.accountName || null,
           isAdmin: Boolean(props.isAdmin),
+          canPublish: Boolean(props.canPublish || props.isAdmin),
         });
       },
     );
@@ -479,7 +482,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         author: z.string().optional().describe('Author or contributor credit'),
         license: z.string().optional().describe('License label shown to users'),
         tags: z.array(z.string()).optional().describe('Search tags'),
-        publish: z.boolean().optional().describe('Publish immediately instead of leaving pending. Admin only; creator submissions stay pending.'),
+        publish: z.boolean().optional().describe('Publish immediately instead of leaving pending. Requires admin or trusted-publisher creator permission.'),
       },
       async ({ title, svg, asset_type = 'illustration', category, author, license, tags, publish = false }) => {
         const props = currentProps(this.props);
@@ -501,7 +504,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
           author: author || props.accountName,
           license,
           tags,
-          publish: Boolean(props.isAdmin && publish),
+          publish: Boolean((props.isAdmin || props.canPublish) && publish),
           ownerAccountId: props.accountId,
           ownerName: props.accountName,
         });
@@ -520,7 +523,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         author: z.string().optional().describe('Author or contributor credit'),
         license: z.string().optional().describe('License label shown to users'),
         tags: z.array(z.string()).optional().describe('Search tags'),
-        publish: z.boolean().optional().describe('Publish immediately instead of leaving pending. Admin only; creator submissions stay pending.'),
+        publish: z.boolean().optional().describe('Publish immediately instead of leaving pending. Requires admin or trusted-publisher creator permission.'),
       },
       async ({ url, title, asset_type = 'photo', category, author, license, tags, publish = false }) => {
         const props = currentProps(this.props);
@@ -562,7 +565,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
           author: author || props.accountName,
           license,
           tags,
-          publish: Boolean(props.isAdmin && publish),
+          publish: Boolean((props.isAdmin || props.canPublish) && publish),
           sourceUrl: parsed.toString(),
           ownerAccountId: props.accountId,
           ownerName: props.accountName,
@@ -634,7 +637,7 @@ async function authenticateRequest(request: Request, env: Env, options: { allowS
     }
     const creator = parseCreatorAccounts(env).find((account) => account.token === token);
     if (creator) {
-      return { isAdmin: false, accountId: safeAccountId(creator.accountId), accountName: creator.name };
+      return { isAdmin: false, canPublish: Boolean(creator.canPublish), accountId: safeAccountId(creator.accountId), accountName: creator.name };
     }
     sessionToken = token;
     if (env.OAUTH_KV) {
@@ -646,10 +649,12 @@ async function authenticateRequest(request: Request, env: Env, options: { allowS
   if (env.SESSION_SIGNING_KEY) {
     const session = await verifySession(sessionToken, env.SESSION_SIGNING_KEY);
     if (session?.uid) {
+      const roles = [...(session.roles || []), ...((session.appRoles?.fds) || [])];
       return {
         isAdmin: false,
+        canPublish: roles.includes('publisher'),
         accountId: safeAccountId(session.uid),
-        accountName: session.uid,
+        accountName: session.name || session.uid,
       };
     }
   }
@@ -660,14 +665,15 @@ export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     const url = new URL(request.url);
     const issuer = publicMcpBase(env, url);
-    const browserAuthEnabled = Boolean(env.AUTH_START && env.OAUTH_KV && env.SESSION_SIGNING_KEY);
+    const creatorAccounts = parseCreatorAccounts(env);
+    const browserAuthEnabled = Boolean(env.OAUTH_KV && env.SESSION_SIGNING_KEY && creatorAccounts.length);
 
-    if (env.AUTH_START && env.OAUTH_KV && env.SESSION_SIGNING_KEY) {
+    if (env.OAUTH_KV && env.SESSION_SIGNING_KEY && creatorAccounts.length) {
       const oauthRes = await handleOAuthRoute(request, {
         issuer,
-        authStart: env.AUTH_START,
         kv: env.OAUTH_KV,
         sessionSigningKey: env.SESSION_SIGNING_KEY,
+        creatorAccounts,
       });
       if (oauthRes) return oauthRes;
     }
