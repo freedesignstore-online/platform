@@ -48,6 +48,15 @@ interface CatalogItem {
 }
 
 type AssetType = 'photo' | 'illustration' | 'icon' | 'pattern' | 'texture' | 'background' | 'ui';
+const designSkillIds = [
+  'asset-brief-builder',
+  'svg-illustration-director',
+  'icon-set-designer',
+  'stock-photo-curator',
+  'license-safety-reviewer',
+  'publish-ready-asset-reviewer',
+] as const;
+type DesignSkillId = (typeof designSkillIds)[number];
 
 const PUBLIC_INDEX = 'stock:index:public';
 const PENDING_INDEX = 'stock:index:pending';
@@ -70,6 +79,153 @@ const unsafeSvg = [
   /<iframe[\s>]/i,
   /<object[\s>]/i,
   /<embed[\s>]/i,
+];
+
+interface DesignSkill {
+  id: DesignSkillId;
+  title: string;
+  purpose: string;
+  whenToUse: string;
+  questions: string[];
+  outputContract: string[];
+  suggestedTools: string[];
+}
+
+const DESIGN_SKILLS: DesignSkill[] = [
+  {
+    id: 'asset-brief-builder',
+    title: 'Asset Brief Builder',
+    purpose: 'Turn a vague visual request into a concrete FreeDesignStore asset brief before creating, uploading, or ingesting an asset.',
+    whenToUse: 'Before create_svg_asset, create_asset_from_url, or a creator upload when the request is still broad or missing usage details.',
+    questions: [
+      'What will the asset be used for: hero, icon, social post, deck, mockup, UI, pattern, or background?',
+      'Who is the intended user or audience?',
+      'Which asset type fits best: photo, illustration, icon, pattern, texture, background, or UI?',
+      'What dimensions, aspect ratio, file type, and transparency requirements matter?',
+      'What visual style, mood, palette, and density should it have?',
+      'What must be avoided: brands, people, copyrighted characters, unsafe claims, or sensitive contexts?',
+      'Should the asset be published immediately, submitted for review, or kept as a draft?',
+    ],
+    outputContract: [
+      'Short title suitable for catalog search.',
+      'Asset type and category.',
+      'Prompt or production notes.',
+      'Tags, author credit, and license label.',
+      'Rights and safety notes.',
+      'Suggested MCP tool call and whether publish should be true.',
+    ],
+    suggestedTools: ['asset_policy', 'create_svg_asset', 'create_asset_from_url'],
+  },
+  {
+    id: 'svg-illustration-director',
+    title: 'SVG Illustration Director',
+    purpose: 'Create safe, useful SVG illustrations that can be stored in the FreeDesignStore catalog and reused by designers.',
+    whenToUse: 'When the user asks an MCP client to generate an illustration, vector scene, pattern, background, or simple UI graphic for FDS.',
+    questions: [
+      'What is the scene or concept?',
+      'What should be the main focal object?',
+      'Should it feel editorial, product, SaaS, playful, technical, minimal, or decorative?',
+      'What colors should dominate and which colors should be avoided?',
+      'Does the asset need transparent background, fixed aspect ratio, or text-free output?',
+      'Is it intended for public reuse by the FDS community?',
+    ],
+    outputContract: [
+      'Complete SVG markup with a single root svg element.',
+      'Title and desc accessibility text.',
+      'Safe shapes, paths, gradients, and text only.',
+      'No scripts, event handlers, foreignObject, iframe, object, embed, or unsafe URLs.',
+      'Catalog metadata: title, category, asset type, tags, author, and license.',
+      'Use publish true only for trusted creators or admins.',
+    ],
+    suggestedTools: ['create_svg_asset', 'my_assets'],
+  },
+  {
+    id: 'icon-set-designer',
+    title: 'Icon Set Designer',
+    purpose: 'Design coherent icon assets with consistent grid, stroke, naming, and export rules.',
+    whenToUse: 'When creating icons, icon families, interface glyphs, toolbar symbols, or small SVG assets for FDS.',
+    questions: [
+      'What object, action, or concept should each icon represent?',
+      'Is the style outline, filled, duotone, sharp, rounded, or pixel?',
+      'What grid should be used: 16, 20, 24, 32, or 48?',
+      'What stroke width, corner radius, and optical alignment rules apply?',
+      'Should the icon be standalone or part of a named set?',
+      'Should the SVG use currentColor or fixed colors?',
+    ],
+    outputContract: [
+      'One icon concept per asset unless the requested output is explicitly a set preview.',
+      'Consistent viewBox and visual weight.',
+      'Clear title, tags, and category.',
+      'No embedded raster images or external references.',
+      'Safe SVG markup suitable for create_svg_asset.',
+    ],
+    suggestedTools: ['create_svg_asset', 'list_assets'],
+  },
+  {
+    id: 'stock-photo-curator',
+    title: 'Stock Photo Curator',
+    purpose: 'Choose whether a photo should be FDS-hosted, uploaded by a rights holder, or linked off to Unsplash.',
+    whenToUse: 'When adding photographs, stock-style images, screenshots, mockup photos, or external image references to the catalog.',
+    questions: [
+      'Did the creator take the photo or have explicit permission to release it for free?',
+      'Does the photo include recognizable people, private property, sensitive locations, trademarks, or documents?',
+      'Is the source Unsplash or another third-party stock site?',
+      'Is the intended action upload, direct URL ingest, or link-off attribution?',
+      'What category, tags, and use cases help designers find it?',
+      'Is the image technically useful: sharp, uncropped, inspectable, and not misleading?',
+    ],
+    outputContract: [
+      'Rights decision: FDS-host, link off, reject, or ask for proof.',
+      'Attribution and license label.',
+      'Catalog title, category, tags, and asset type.',
+      'If source is Unsplash, link users to Unsplash for download instead of mirroring into FDS.',
+      'If source is a permitted non-Unsplash HTTPS image, use create_asset_from_url.',
+    ],
+    suggestedTools: ['asset_policy', 'create_asset_from_url', 'list_assets'],
+  },
+  {
+    id: 'license-safety-reviewer',
+    title: 'License Safety Reviewer',
+    purpose: 'Check rights, attribution, unsafe SVG markup, privacy, trademarks, and Unsplash handling before publication.',
+    whenToUse: 'Before publishing a pending asset, ingesting an external URL, or accepting a creator upload into the public catalog.',
+    questions: [
+      'Who owns or created the asset?',
+      'What license or release lets FDS offer it for free download?',
+      'Does it contain people, private information, trademarks, or third-party artwork?',
+      'Does SVG markup contain script, event handlers, unsafe URLs, foreignObject, iframe, object, or embed?',
+      'Is the source URL from Unsplash or a blocked/private network?',
+      'Would a designer understand the asset allowed reuse from the metadata?',
+    ],
+    outputContract: [
+      'Pass, needs revision, reject, or link-off decision.',
+      'Reasons tied to rights, privacy, safety, or technical quality.',
+      'Required metadata changes.',
+      'Recommended MCP moderation action when applicable.',
+    ],
+    suggestedTools: ['asset_policy', 'get_asset', 'moderate_asset'],
+  },
+  {
+    id: 'publish-ready-asset-reviewer',
+    title: 'Publish Ready Asset Reviewer',
+    purpose: 'Decide whether a pending design asset is ready to publish, needs revision, or should be rejected.',
+    whenToUse: 'After an asset has been created, uploaded, or submitted and before it becomes publicly downloadable from FDS.',
+    questions: [
+      'Is the asset useful to a designer without more context?',
+      'Are title, category, tags, author, license, and asset type specific enough?',
+      'Does the preview render correctly and match the asset type?',
+      'Are rights and source provenance acceptable?',
+      'Are there duplicates, low-quality variants, unsafe content, or misleading metadata?',
+      'Should this be public now, kept pending, or removed?',
+    ],
+    outputContract: [
+      'Decision: publish, request revision, reject, or delete.',
+      'Short reviewer note.',
+      'Metadata corrections if needed.',
+      'If approved by an admin, call moderate_asset with publish.',
+      'If unsafe or invalid, call moderate_asset with reject or delete_asset when appropriate.',
+    ],
+    suggestedTools: ['get_asset', 'moderate_asset', 'delete_asset'],
+  },
 ];
 
 const txt = (text: string) => ({ content: [{ type: 'text' as const, text }] });
@@ -175,6 +331,49 @@ function itemForAccount(env: Env, item: CatalogItem) {
     contentType: item.contentType,
     size: item.size,
     sourceUrl: item.sourceUrl,
+  };
+}
+
+function designSkillSummary(skill: DesignSkill) {
+  return {
+    id: skill.id,
+    title: skill.title,
+    purpose: skill.purpose,
+    whenToUse: skill.whenToUse,
+    suggestedTools: skill.suggestedTools,
+  };
+}
+
+function applyDesignSkill(skill: DesignSkill, context: string, mode: 'questions' | 'checklist' | 'tool_plan') {
+  const base = {
+    skill: designSkillSummary(skill),
+    context,
+    rule: 'Do not publish assets unless rights, safety, usefulness, and metadata are clear. Unsplash must link off instead of being mirrored into FDS.',
+  };
+  if (mode === 'questions') {
+    return {
+      ...base,
+      questions: skill.questions,
+      stopCondition: 'Stop asking when the agent can satisfy the output contract without inventing rights, provenance, source facts, or metadata.',
+    };
+  }
+  if (mode === 'tool_plan') {
+    return {
+      ...base,
+      toolPlan: skill.suggestedTools.map((tool, index) => ({ step: index + 1, tool })),
+      outputContract: skill.outputContract,
+    };
+  }
+  return {
+    ...base,
+    checklist: skill.outputContract,
+    qualityGate: [
+      'Rights and source provenance are explicit.',
+      'Unsplash assets are linked off, not mirrored.',
+      'SVG output avoids scripts, event handlers, foreignObject, embeds, iframes, and unsafe URLs.',
+      'Title, category, tags, author, license, and asset type are useful to designers.',
+      'Public publication is limited to admins or trusted creators.',
+    ],
   };
 }
 
@@ -364,6 +563,43 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         '- The MCP `create_asset_from_url` tool rejects unsplash.com and images.unsplash.com URLs.',
         '- Generated illustrations/icons/patterns can be stored when the submitter has rights to share the output.',
       ].join('\n')),
+    );
+
+    this.server.tool(
+      'list_design_skills',
+      'List the published FreeDesignStore design asset skills agents should use before briefing, creating, curating, reviewing, or publishing design assets.',
+      {},
+      async () => jsonText({
+        skills: DESIGN_SKILLS.map(designSkillSummary),
+        publicUrl: `${publicBase(this.env)}/skills/`,
+      }),
+    );
+
+    this.server.tool(
+      'get_design_skill',
+      'Get one published FreeDesignStore design asset skill by id.',
+      {
+        skill_id: z.enum(designSkillIds).describe('Design skill id'),
+      },
+      async ({ skill_id }) => {
+        const skill = DESIGN_SKILLS.find((item) => item.id === skill_id);
+        return skill ? jsonText(skill) : txt(`Unknown design skill: ${skill_id}`);
+      },
+    );
+
+    this.server.tool(
+      'apply_design_skill',
+      'Apply a published FreeDesignStore design asset skill to a request and return questions, a checklist, or a tool plan.',
+      {
+        skill_id: z.enum(designSkillIds).describe('Design skill id'),
+        context: z.string().optional().describe('User request, asset metadata, pending asset notes, or review context'),
+        mode: z.enum(['questions', 'checklist', 'tool_plan']).optional().describe('How to apply the skill'),
+      },
+      async ({ skill_id, context = '', mode = 'checklist' }) => {
+        const skill = DESIGN_SKILLS.find((item) => item.id === skill_id);
+        if (!skill) return txt(`Unknown design skill: ${skill_id}`);
+        return jsonText(applyDesignSkill(skill, context, mode));
+      },
     );
 
     this.server.tool(
@@ -687,6 +923,7 @@ export default {
           ? 'Browser sign-in: https://freedesignstore.pages.dev/.fds/auth/start'
           : 'Browser sign-in: not enabled until FDS auth is configured.',
         '',
+        'Skills:   list_design_skills, get_design_skill, apply_design_skill',
         'Read:     asset_policy, catalog_status, whoami, list_assets, my_assets, get_asset',
         'Create:   create_svg_asset, create_asset_from_url (creator/admin token)',
         'Admin:    moderate_asset, delete_asset',
@@ -703,7 +940,7 @@ export default {
       return Response.json({
         ok: typeof store !== 'string',
         storage: typeof store === 'string' ? 'missing' : 'configured',
-        tools: 10,
+        tools: 13,
       });
     }
 

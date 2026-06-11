@@ -20,7 +20,10 @@ test('public MCP discovery advertises the FDS Pages endpoint only', async () => 
   const discovery = JSON.parse(await readRepo('store/.well-known/mcp.json'));
   assert.equal(discovery.servers[0].endpoint, 'https://freedesignstore.pages.dev/mcp');
   assert.equal(discovery.servers[0].transport, 'streamable-http');
-  assert.equal(discovery.servers[0].tools.length, 10);
+  assert.equal(discovery.servers[0].tools.length, 13);
+  for (const tool of ['list_design_skills', 'get_design_skill', 'apply_design_skill']) {
+    assert.ok(discovery.servers[0].tools.some((item) => item.name === tool), `missing ${tool}`);
+  }
   assert.doesNotMatch(JSON.stringify(discovery), /freeappstore|fds-mcp/i);
 });
 
@@ -80,6 +83,9 @@ test('docs mention the complete FDS public MCP surface', async () => {
   for (const route of ['/mcp', '/register', '/authorize', '/token', '/.well-known/oauth-*', '/.fds/auth/*']) {
     assert.match(docs, new RegExp(route.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
+  for (const tool of ['list_design_skills', 'get_design_skill', 'apply_design_skill']) {
+    assert.match(docs, new RegExp(tool));
+  }
 });
 
 test('creator console exposes the FDS MCP catalog workflow', async () => {
@@ -98,4 +104,39 @@ test('creator console exposes the FDS MCP catalog workflow', async () => {
   assert.match(consoleHtml, /create_svg_asset/);
   assert.match(consoleHtml, /my_assets/);
   assert.doesNotMatch(consoleHtml, /bearer token|sessionStorage|localStorage|freeappstore\.online|api\.freeappstore|fds-mcp\.freeappstore/i);
+});
+
+test('published design skills mirror FIS/PAGS skill publishing pattern', async () => {
+  const manifest = JSON.parse(await readRepo('store/skills/manifest.json'));
+  const skillsPage = await readRepo('store/skills/index.html');
+  const mcpSource = await readRepo('workers/mcp/src/index.ts');
+  const homeHtml = await readRepo('store/index.html');
+  const sitemap = await readRepo('store/sitemap.xml');
+
+  assert.equal(manifest.mcp, 'https://freedesignstore.pages.dev/mcp');
+  assert.ok(Array.isArray(manifest.skills));
+  assert.equal(manifest.skills.length, 6);
+  assert.match(homeHtml, /href="\/skills\/"/);
+  assert.match(skillsPage, /list_design_skills/);
+  assert.match(skillsPage, /apply_design_skill/);
+  assert.match(sitemap, /https:\/\/freedesignstore\.pages\.dev\/skills\//);
+
+  const ids = new Set();
+  for (const skill of manifest.skills) {
+    assert.ok(skill.id, 'skill id required');
+    assert.ok(skill.title, 'skill title required');
+    assert.ok(skill.path?.startsWith('/skills/'), `bad skill path: ${skill.path}`);
+    assert.ok(!ids.has(skill.id), `duplicate skill id: ${skill.id}`);
+    ids.add(skill.id);
+
+    const markdown = await readRepo(`store${skill.path}`);
+    assert.match(markdown, new RegExp(`# ${skill.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
+    assert.match(skillsPage, new RegExp(skill.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.match(mcpSource, new RegExp(`'${skill.id}'`));
+    assert.match(sitemap, new RegExp(skill.path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
+
+  for (const tool of ['list_design_skills', 'get_design_skill', 'apply_design_skill']) {
+    assert.match(mcpSource, new RegExp(`'${tool}'`));
+  }
 });

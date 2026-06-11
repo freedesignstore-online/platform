@@ -12,6 +12,18 @@
           "description": "Read catalog hosting rules, including Unsplash link-off policy"
         },
         {
+          "name": "list_design_skills",
+          "description": "List published FDS design asset playbooks"
+        },
+        {
+          "name": "get_design_skill",
+          "description": "Get one published FDS design asset playbook"
+        },
+        {
+          "name": "apply_design_skill",
+          "description": "Apply a design asset playbook as questions, a checklist, or a tool plan"
+        },
+        {
           "name": "catalog_status",
           "description": "Check storage readiness and asset counts"
         },

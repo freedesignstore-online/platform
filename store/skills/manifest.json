@@ -1,0 +1,49 @@
+{
+  "version": "2026-06-11",
+  "description": "Canonical FreeDesignStore design asset playbooks. MCP exposes these through list_design_skills, get_design_skill, and apply_design_skill.",
+  "mcp": "https://freedesignstore.pages.dev/mcp",
+  "skills": [
+    {
+      "id": "asset-brief-builder",
+      "title": "Asset Brief Builder",
+      "path": "/skills/asset-brief-builder.md",
+      "summary": "Turn a vague visual request into a concrete asset brief before creating or uploading.",
+      "suggestedTools": ["asset_policy", "create_svg_asset", "create_asset_from_url"]
+    },
+    {
+      "id": "svg-illustration-director",
+      "title": "SVG Illustration Director",
+      "path": "/skills/svg-illustration-director.md",
+      "summary": "Create safe, useful SVG illustrations that are ready for FDS catalog submission.",
+      "suggestedTools": ["create_svg_asset", "my_assets"]
+    },
+    {
+      "id": "icon-set-designer",
+      "title": "Icon Set Designer",
+      "path": "/skills/icon-set-designer.md",
+      "summary": "Design coherent icon assets with consistent grid, stroke, naming, and export rules.",
+      "suggestedTools": ["create_svg_asset", "list_assets"]
+    },
+    {
+      "id": "stock-photo-curator",
+      "title": "Stock Photo Curator",
+      "path": "/skills/stock-photo-curator.md",
+      "summary": "Choose whether a photo should be FDS-hosted, uploaded by a rights holder, or linked off to Unsplash.",
+      "suggestedTools": ["asset_policy", "create_asset_from_url", "list_assets"]
+    },
+    {
+      "id": "license-safety-reviewer",
+      "title": "License Safety Reviewer",
+      "path": "/skills/license-safety-reviewer.md",
+      "summary": "Check rights, attribution, unsafe SVG markup, privacy, trademarks, and Unsplash handling before publication.",
+      "suggestedTools": ["asset_policy", "get_asset", "moderate_asset"]
+    },
+    {
+      "id": "publish-ready-asset-reviewer",
+      "title": "Publish Ready Asset Reviewer",
+      "path": "/skills/publish-ready-asset-reviewer.md",
+      "summary": "Decide whether a pending design asset is ready to publish, needs revision, or should be rejected.",
+      "suggestedTools": ["get_asset", "moderate_asset", "delete_asset"]
+    }
+  ]
+}

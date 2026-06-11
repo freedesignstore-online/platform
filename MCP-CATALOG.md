@@ -7,6 +7,9 @@ It follows the FAS/FAGS/PAGS pattern: a dedicated Cloudflare Worker using `agent
 ## Tools
 
 - `asset_policy` - explains what can be hosted and the Unsplash rule.
+- `list_design_skills` - lists the published FDS design asset playbooks.
+- `get_design_skill` - returns one published design asset playbook.
+- `apply_design_skill` - applies a playbook as questions, checklist, or tool plan.
 - `catalog_status` - checks storage bindings and counts public/pending assets.
 - `whoami` - shows the authenticated creator/admin account for the MCP session.
 - `list_assets` - lists public assets, or pending assets with admin auth.
@@ -18,6 +21,16 @@ It follows the FAS/FAGS/PAGS pattern: a dedicated Cloudflare Worker using `agent
 - `delete_asset` - deletes catalog metadata and the R2 object.
 
 Creator writes use the FDS MCP endpoint at `https://freedesignstore.pages.dev/mcp`. Claude and other remote MCP clients should use FDS OAuth/PKCE browser sign-in. Static creator tokens remain supported for automation. Admin actions require `Authorization: Bearer <STOCK_ADMIN_TOKEN>` or `MCP_ADMIN_TOKEN`.
+
+## Published Skills
+
+FDS publishes canonical design asset playbooks the same way FreeIdeaStore publishes idea skills: public Markdown files plus a manifest at `/skills/`, and matching MCP tools for agents.
+
+- Public index: `https://freedesignstore.pages.dev/skills/`
+- Manifest: `https://freedesignstore.pages.dev/skills/manifest.json`
+- MCP tools: `list_design_skills`, `get_design_skill`, `apply_design_skill`
+
+Use these skills before briefing, creating, uploading, reviewing, or publishing assets. They keep agents aligned on legal hosting rules, SVG safety, Unsplash link-off behavior, metadata quality, and trusted-publisher moderation.
 
 ## Legal Guardrails
 
