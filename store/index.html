@@ -25,6 +25,22 @@ nav a{color:var(--muted)}nav a:hover{color:var(--text);text-decoration:none}
 .hero p{color:var(--muted);font-size:.9rem;max-width:600px;margin:0 auto .6rem;line-height:1.5}
 .badge{display:inline-block;padding:.2rem .6rem;border-radius:99px;font-size:.72rem;font-weight:600;background:var(--panel);border:1px solid var(--line);color:var(--muted);margin:.1rem}
 .badge.ai{background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.3);color:#8b5cf6}
+.stock-feature{max-width:1100px;margin:.8rem auto 1rem;padding:0 1.5rem}
+.stock-feature-head{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:.65rem}
+.stock-feature h2{font-family:'Fraunces',serif;font-size:1.2rem;line-height:1.1}
+.stock-feature p{color:var(--muted);font-size:.76rem;line-height:1.45;max-width:520px;margin-top:.2rem}
+.stock-link{font-size:.72rem;font-weight:700;white-space:nowrap}
+.stock-grid{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;gap:.65rem}
+.stock-card{position:relative;height:142px;border-radius:10px;overflow:hidden;background:#111;color:white;text-decoration:none;border:1px solid var(--line)}
+.stock-card:hover{text-decoration:none;transform:translateY(-1px);box-shadow:0 8px 22px rgba(0,0,0,.12)}
+.stock-card img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.02)}
+.stock-card:first-child{grid-row:span 2;height:292px}
+.stock-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.64))}
+.stock-caption{position:absolute;left:.75rem;right:.75rem;bottom:.65rem;z-index:1;display:flex;align-items:end;justify-content:space-between;gap:.5rem}
+.stock-caption strong{font-size:.78rem;line-height:1.15}
+.stock-caption span{font-size:.62rem;color:rgba(255,255,255,.82);white-space:nowrap}
+@media (max-width:800px){.stock-feature-head{align-items:flex-start;flex-direction:column}.stock-grid{grid-template-columns:1fr 1fr}.stock-card:first-child{grid-row:auto;grid-column:span 2;height:210px}}
+@media (max-width:520px){.stock-grid{grid-template-columns:1fr}.stock-card:first-child{grid-column:auto}.stock-card,.stock-card:first-child{height:190px}}
 .filters{max-width:1100px;margin:0 auto;padding:.6rem 1.5rem;display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center}
 .filter-btn{background:var(--panel);border:1px solid var(--line);color:var(--muted);padding:.3rem .7rem;border-radius:99px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
 .filter-btn:hover{border-color:var(--accent);color:var(--text)}
@@ -56,6 +72,33 @@ footer a{color:var(--accent)}
 <p>46 professional design tools. Logos, palettes, Tailwind themes, CSS animations, UI components, image processing. Free, in your browser.</p>
 <span class="badge">46 Tools</span><span class="badge">No Signup</span><span class="badge">Free SVG/PNG</span><span class="badge ai">AI-Powered</span>
 </section>
+<section class="stock-feature" aria-labelledby="stock-feature-title">
+<div class="stock-feature-head">
+<div>
+<h2 id="stock-feature-title">Featured free stock images</h2>
+<p>FDS-hosted downloads plus Unsplash browsing for mockups, decks, social posts, and landing pages.</p>
+</div>
+<a class="stock-link" href="/images/stock-photos/">Open Stock Photos -></a>
+</div>
+<div class="stock-grid">
+<a class="stock-card" href="/images/stock-photos/" aria-label="Browse workspace stock photos">
+<img src="/assets/stock/workspace-studio.jpg" alt="Bright creative workspace with glass walls" loading="lazy">
+<div class="stock-caption"><strong>Workspace</strong><span>FDS hosted</span></div>
+</a>
+<a class="stock-card" href="/images/stock-photos/" aria-label="Browse technology stock photos">
+<img src="/assets/stock/product-tech.jpg" alt="Laptop screen on a desk for technology projects" loading="lazy">
+<div class="stock-caption"><strong>Technology</strong><span>FDS hosted</span></div>
+</a>
+<a class="stock-card" href="/images/stock-photos/" aria-label="Browse road trip stock photos">
+<img src="/assets/stock/desert-road.jpg" alt="Open road through a mountain landscape" loading="lazy">
+<div class="stock-caption"><strong>Road Trips</strong><span>FDS hosted</span></div>
+</a>
+<a class="stock-card" href="/images/stock-photos/" aria-label="Browse travel stock photos">
+<img src="/assets/stock/mountain-layers.jpg" alt="Layered mountains at sunrise" loading="lazy">
+<div class="stock-caption"><strong>Travel</strong><span>FDS hosted</span></div>
+</a>
+</div>
+</section>
 <div class="filters">
 <button class="filter-btn active" data-cat="all">All (46)</button>
 <button class="filter-btn" data-cat="brand">Brand (16)</button>
@@ -85,7 +128,7 @@ footer a{color:var(--accent)}
 <a href="/templates/wireframe-kit/" class="card" data-cat="templates"><div class="card-icon" style="background:#6b7280">📐</div><div class="card-body"><div class="card-name">Wireframe Builder</div><div class="card-desc">Drag-and-drop wireframe components. Snap to grid, resize, 3 page presets. Export SVG/PNG.</div></div><span class="card-cta">Open →</span></a>
 <a href="/brand/contrast-checker/" class="card" data-cat="brand"><div class="card-icon" style="background:#10b981">👁️</div><div class="card-body"><div class="card-name">Contrast Checker</div><div class="card-desc">WCAG contrast ratio calculator. AA/AAA pass/fail, accessible alternatives, batch palette check.</div></div><span class="card-cta">Open →</span></a>
 <a href="/images/pattern-maker/" class="card" data-cat="images"><div class="card-icon" style="background:#8b5cf6">🔲</div><div class="card-body"><div class="card-name">Pattern Generator</div><div class="card-desc">Seamless patterns: dots, lines, waves, hexagons. Layers, 20 presets. Download SVG/PNG/CSS.</div></div><span class="card-cta">Open →</span></a>
-<a href="/images/stock-photos/" class="card" data-cat="images"><div class="card-icon" style="background:#06b6d4">📷</div><div class="card-body"><div class="card-name">Stock Photo Library</div><div class="card-desc">Free stock photos. Browse categories, upload your own (IndexedDB), connect Unsplash API. Favorites + history.</div></div><span class="card-cta">Open →</span></a>
+<a href="/images/stock-photos/" class="card" data-cat="images"><div class="card-icon" style="background:#06b6d4">📷</div><div class="card-body"><div class="card-name">Stock Photo Library</div><div class="card-desc">Download FDS-hosted stock photos, browse Unsplash, and prepare contributor release packs.</div></div><span class="card-cta">Open →</span></a>
 <a href="/images/free-logos/" class="card" data-cat="images"><div class="card-icon" style="background:#f59e0b">✨</div><div class="card-body"><div class="card-name">Free Logo Templates</div><div class="card-desc">24+ customizable SVG logo templates. Edit text, colors, icons. Download instantly. Favorites saved locally.</div></div><span class="card-cta">Open →</span></a>
 <a href="/images/asset-manager/" class="card" data-cat="images"><div class="card-icon" style="background:#6366f1">📁</div><div class="card-body"><div class="card-name">Personal Asset Manager</div><div class="card-desc">Local-first design library. Upload, organize, tag, search, export. All stored on YOUR device (IndexedDB).</div></div><span class="card-cta">Open →</span></a>
 <a href="/images/format-converter/" class="card" data-cat="images"><div class="card-icon" style="background:#3b82f6">🔄</div><div class="card-body"><div class="card-name">Format Converter</div><div class="card-desc">Convert between PNG, JPEG, WebP, AVIF, BMP, ICO, Base64, SVG trace. Batch mode, EXIF strip, DPI control.</div></div><span class="card-cta">Open →</span></a>
