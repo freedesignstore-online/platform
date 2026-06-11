@@ -1,7 +1,7 @@
 import { McpAgent } from 'agents/mcp';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { createAuthChallenge, handleOAuthRoute, resolveOAuthToken } from './oauth-provider.js';
+import { createAuthChallenge, handleOAuthRoute, readMcpSessionCookie, resolveOAuthToken } from './oauth-provider.js';
 import { verifySession } from './session.js';
 
 interface Env {
@@ -619,21 +619,24 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
 
 async function authenticateRequest(request: Request, env: Env): Promise<McpProps> {
   const auth = request.headers.get('Authorization') || '';
-  if (!auth.startsWith('Bearer ')) return {};
-  const token = auth.slice(7).trim();
-  const adminToken = env.MCP_ADMIN_TOKEN || env.STOCK_ADMIN_TOKEN;
-  if (adminToken && token === adminToken) {
-    return { isAdmin: true, accountId: 'admin', accountName: 'FreeDesignStore Admin' };
+  let sessionToken = readMcpSessionCookie(request) || '';
+  if (auth.startsWith('Bearer ')) {
+    const token = auth.slice(7).trim();
+    const adminToken = env.MCP_ADMIN_TOKEN || env.STOCK_ADMIN_TOKEN;
+    if (adminToken && token === adminToken) {
+      return { isAdmin: true, accountId: 'admin', accountName: 'FreeDesignStore Admin' };
+    }
+    const creator = parseCreatorAccounts(env).find((account) => account.token === token);
+    if (creator) {
+      return { isAdmin: false, accountId: safeAccountId(creator.accountId), accountName: creator.name };
+    }
+    sessionToken = token;
+    if (env.OAUTH_KV) {
+      const resolved = await resolveOAuthToken(token, env.OAUTH_KV);
+      if (resolved) sessionToken = resolved;
+    }
   }
-  const creator = parseCreatorAccounts(env).find((account) => account.token === token);
-  if (creator) {
-    return { isAdmin: false, accountId: safeAccountId(creator.accountId), accountName: creator.name };
-  }
-  let sessionToken = token;
-  if (env.OAUTH_KV) {
-    const resolved = await resolveOAuthToken(token, env.OAUTH_KV);
-    if (resolved) sessionToken = resolved;
-  }
+  if (!sessionToken) return {};
   if (env.SESSION_SIGNING_KEY) {
     const session = await verifySession(sessionToken, env.SESSION_SIGNING_KEY);
     if (session?.uid) {
@@ -667,6 +670,7 @@ export default {
         'FreeDesignStore Catalog MCP Server v0.1.0',
         '',
         'Connect: npx mcp-remote https://fds-mcp.freeappstore.online/mcp',
+        'Browser sign-in: https://fds-mcp.freeappstore.online/.fds/auth/start',
         '',
         'Read:     asset_policy, catalog_status, whoami, list_assets, my_assets, get_asset',
         'Create:   create_svg_asset, create_asset_from_url (creator/admin token)',

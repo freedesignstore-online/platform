@@ -81,3 +81,11 @@ Connect from an MCP client:
 ```
 
 For writes, use a client that can send the bearer token header to the remote MCP server.
+
+Browser sign-in is available at:
+
+```text
+https://fds-mcp.freeappstore.online/.fds/auth/start
+```
+
+The browser flow redirects through FreeAppStore auth, stores a host-only HttpOnly MCP session cookie on the MCP host, and exposes the current browser session at `/.fds/auth/me`. MCP clients still use the standard OAuth discovery, registration, `/authorize`, and `/token` flow.
