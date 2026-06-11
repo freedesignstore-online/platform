@@ -91,6 +91,9 @@ test('creator console exposes the FDS MCP catalog workflow', async () => {
   assert.match(consoleHtml, /const MCP_ENDPOINT='\/mcp'/);
   assert.match(consoleHtml, /\/\.fds\/auth\/start\?return_to=\/console\//);
   assert.match(consoleHtml, /credentials:'include'/);
+  assert.match(consoleHtml, /id="profilePanel"/);
+  assert.match(consoleHtml, /id="profileSignOutBtn"/);
+  assert.match(consoleHtml, /Trusted publisher/);
   assert.match(consoleHtml, /tools\/call/);
   assert.match(consoleHtml, /create_svg_asset/);
   assert.match(consoleHtml, /my_assets/);
