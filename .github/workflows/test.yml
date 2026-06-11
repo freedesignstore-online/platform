@@ -1,0 +1,30 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: workers/mcp/package-lock.json
+      - name: Install MCP worker dependencies
+        working-directory: workers/mcp
+        run: npm ci
+      - name: Run MCP regression tests
+        working-directory: workers/mcp
+        run: npm test
+      - name: Typecheck MCP worker
+        working-directory: workers/mcp
+        run: npm run typecheck
+      - name: Compile Pages Functions
+        run: ./workers/mcp/node_modules/.bin/wrangler pages functions build functions --outfile /tmp/fds-functions-build/worker.js
