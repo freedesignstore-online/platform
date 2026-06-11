@@ -108,7 +108,7 @@ h1{font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-botto
       <button class="btn btn-secondary" id="connectBtn">Use Key</button>
       <span class="status" id="apiStatus">Unsplash server search will be used when configured</span>
     </div>
-    <p class="notice">Unsplash photos are displayed from Unsplash URLs with attribution and download tracking. FDS/community assets are served from this site.</p>
+    <p class="notice">Unsplash photos are displayed from Unsplash URLs with photographer credit and links back to Unsplash. FDS/community assets are served and downloaded from this site.</p>
   </section>
 
   <section class="section active" id="librarySection">
@@ -281,6 +281,9 @@ function render(){
 function photoCard(photo){
   const sourceClass=photo.source==='unsplash'?'unsplash':photo.source==='community'?'community':'';
   const sourceLabel=photo.source==='hosted'?'FDS':photo.source==='community'?'Community':'Unsplash';
+  const primaryAction=photo.source==='unsplash'
+    ? `<button class="btn btn-primary btn-small" onclick="openUnsplash('${escapeHtml(photo.id)}')">Open on Unsplash</button>`
+    : `<button class="btn btn-primary btn-small" onclick="downloadPhoto('${escapeHtml(photo.id)}')">Download</button>`;
   const credit=photo.source==='unsplash' && photo.creditUrl
     ? `<a href="${escapeHtml(photo.creditUrl)}" target="_blank" rel="noopener">${escapeHtml(photo.author)}</a> on <a href="https://unsplash.com/?utm_source=FreeDesignStore&utm_medium=referral" target="_blank" rel="noopener">Unsplash</a>`
     : `${escapeHtml(photo.author)} - ${escapeHtml(photo.license)}`;
@@ -291,7 +294,7 @@ function photoCard(photo){
       <p class="meta">${credit}</p>
       <div class="tags"><span class="tag">${escapeHtml(photo.assetType||'photo')}</span>${(photo.tags||[]).slice(0,3).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
       <div class="actions">
-        <button class="btn btn-primary btn-small" onclick="downloadPhoto('${escapeHtml(photo.id)}')">Download</button>
+        ${primaryAction}
         <button class="btn btn-secondary btn-small" onclick="copyCredit('${escapeHtml(photo.id)}')">Copy Credit</button>
       </div>
     </div>
@@ -365,21 +368,16 @@ function findPhoto(id){
 async function downloadPhoto(id){
   const photo=findPhoto(id);
   if(!photo) return;
-  if(photo.source==='unsplash'){
-    if(photo.downloadLocation){
-      try{
-        await fetch('/api/stock/unsplash',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({downloadLocation:photo.downloadLocation})});
-      }catch(err){
-        if(apiKey) try{ await fetch(`${photo.downloadLocation}?client_id=${encodeURIComponent(apiKey)}`); }catch(innerErr){}
-      }
-    }
-    window.open(photo.download||photo.photoUrl||photo.url,'_blank','noopener');
-    return;
-  }
   const a=document.createElement('a');
   a.href=photo.download||photo.url;
   a.download=`${photo.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'stock-photo'}.jpg`;
   a.click();
+}
+
+function openUnsplash(id){
+  const photo=findPhoto(id);
+  if(!photo) return;
+  window.open(photo.photoUrl||photo.creditUrl||photo.url,'_blank','noopener');
 }
 
 function copyCredit(id){
