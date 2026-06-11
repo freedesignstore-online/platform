@@ -17,7 +17,7 @@ It follows the FAS/FAGS/PAGS pattern: a dedicated Cloudflare Worker using `agent
 - `moderate_asset` - publishes or rejects pending assets.
 - `delete_asset` - deletes catalog metadata and the R2 object.
 
-Creator writes use MCP OAuth/browser sign-in at `https://fds-mcp.freeappstore.online/mcp`. Static creator tokens are still supported for automation. Admin actions require `Authorization: Bearer <STOCK_ADMIN_TOKEN>` or `MCP_ADMIN_TOKEN`.
+Creator writes use the FDS MCP endpoint at `https://freedesignstore.pages.dev/mcp`. Static creator tokens are currently supported for automation. Admin actions require `Authorization: Bearer <STOCK_ADMIN_TOKEN>` or `MCP_ADMIN_TOKEN`.
 
 ## Legal Guardrails
 
@@ -74,7 +74,7 @@ Connect from an MCP client:
   "mcpServers": {
     "freedesignstore": {
       "command": "npx",
-      "args": ["mcp-remote", "https://fds-mcp.freeappstore.online/mcp"]
+      "args": ["mcp-remote", "https://freedesignstore.pages.dev/mcp"]
     }
   }
 }
@@ -82,10 +82,6 @@ Connect from an MCP client:
 
 For writes, use a client that can send the bearer token header to the remote MCP server.
 
-Browser sign-in is available at:
+Browser sign-in is intentionally disabled until FDS has its own identity provider and OAuth credentials. FDS and FAS are separate products for separate audiences; FDS must not use FAS as its public auth provider.
 
-```text
-https://fds-mcp.freeappstore.online/.fds/auth/start
-```
-
-The browser flow redirects through FreeAppStore auth, stores a host-only HttpOnly MCP session cookie on the MCP host, and exposes the current browser session at `/.fds/auth/me`. MCP clients still use the standard OAuth discovery, registration, `/authorize`, and `/token` flow.
+The MCP worker still contains OAuth support, but it is only enabled when an FDS-owned `AUTH_START` is configured. Until then, use explicit FDS creator/admin bearer tokens for MCP writes.

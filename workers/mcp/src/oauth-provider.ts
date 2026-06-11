@@ -244,7 +244,7 @@ function authPage(config: OAuthConfig, nonce: string, clientName: string | null)
       <a href="${escapeHtml(continueUrl('github'))}" autofocus>Continue with GitHub</a>
       <a class="secondary" href="${escapeHtml(continueUrl('google'))}">Continue with Google</a>
     </div>
-    <small>This signs you in through FreeAppStore auth and returns control to your MCP client.</small>
+    <small>This signs you in through FreeDesignStore auth and returns control to your MCP client.</small>
   </main>
 </body>
 </html>`, 200, {

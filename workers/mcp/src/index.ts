@@ -16,6 +16,7 @@ interface Env {
   OAUTH_KV?: KVNamespace;
   SESSION_SIGNING_KEY?: string;
   PUBLIC_BASE_URL?: string;
+  PUBLIC_MCP_BASE_URL?: string;
   MCP_OBJECT: DurableObjectNamespace;
 }
 
@@ -57,6 +58,7 @@ const MAX_ITEMS = 500;
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 const MAX_SVG_SIZE = 1024 * 1024;
 const PUBLIC_BASE_FALLBACK = 'https://freedesignstore.pages.dev';
+const PUBLIC_MCP_BASE_FALLBACK = 'https://freedesignstore.pages.dev';
 
 const assetTypes = ['photo', 'illustration', 'icon', 'pattern', 'texture', 'background', 'ui'] as const;
 const allowedTypes = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/svg+xml']);
@@ -114,6 +116,10 @@ function safeFilename(name: string, contentType: string): string {
 
 function publicBase(env: Env): string {
   return (env.PUBLIC_BASE_URL || PUBLIC_BASE_FALLBACK).replace(/\/$/, '');
+}
+
+function publicMcpBase(env: Env, requestUrl: URL): string {
+  return (env.PUBLIC_MCP_BASE_URL || (requestUrl.host ? `${requestUrl.protocol}//${requestUrl.host}` : PUBLIC_MCP_BASE_FALLBACK)).replace(/\/$/, '');
 }
 
 function publicItem(env: Env, item: CatalogItem) {
@@ -653,12 +659,13 @@ async function authenticateRequest(request: Request, env: Env): Promise<McpProps
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     const url = new URL(request.url);
-    const issuer = `${url.protocol}//${url.host}`;
+    const issuer = publicMcpBase(env, url);
+    const browserAuthEnabled = Boolean(env.AUTH_START && env.OAUTH_KV && env.SESSION_SIGNING_KEY);
 
-    if (env.OAUTH_KV && env.SESSION_SIGNING_KEY) {
+    if (env.AUTH_START && env.OAUTH_KV && env.SESSION_SIGNING_KEY) {
       const oauthRes = await handleOAuthRoute(request, {
         issuer,
-        authStart: env.AUTH_START || `${env.API_BASE || 'https://api.freeappstore.online'}/v1/auth/github/start`,
+        authStart: env.AUTH_START,
         kv: env.OAUTH_KV,
         sessionSigningKey: env.SESSION_SIGNING_KEY,
       });
@@ -669,8 +676,10 @@ export default {
       return new Response([
         'FreeDesignStore Catalog MCP Server v0.1.0',
         '',
-        'Connect: npx mcp-remote https://fds-mcp.freeappstore.online/mcp',
-        'Browser sign-in: https://fds-mcp.freeappstore.online/.fds/auth/start',
+        'Connect: npx mcp-remote https://freedesignstore.pages.dev/mcp',
+        browserAuthEnabled
+          ? 'Browser sign-in: https://freedesignstore.pages.dev/.fds/auth/start'
+          : 'Browser sign-in: not enabled until FDS auth is configured.',
         '',
         'Read:     asset_policy, catalog_status, whoami, list_assets, my_assets, get_asset',
         'Create:   create_svg_asset, create_asset_from_url (creator/admin token)',
@@ -692,9 +701,15 @@ export default {
 
     if (url.pathname.startsWith('/mcp')) {
       const auth = await authenticateRequest(request, env);
-      if (request.method !== 'OPTIONS' && env.OAUTH_KV && env.SESSION_SIGNING_KEY && !auth.accountId) {
+      if (request.method !== 'OPTIONS' && browserAuthEnabled && !auth.accountId) {
         const bearer = request.headers.get('Authorization')?.replace(/^Bearer\s+/i, '');
         return createAuthChallenge({ issuer }, bearer ? 'invalid_token' : undefined);
+      }
+      if (request.method !== 'OPTIONS' && !browserAuthEnabled && !auth.accountId) {
+        return new Response('Authentication required. Use an FDS creator/admin bearer token.', {
+          status: 401,
+          headers: { 'Access-Control-Allow-Origin': '*' },
+        });
       }
       if (auth.accountId) {
         (ctx as unknown as { props?: McpProps }).props = {

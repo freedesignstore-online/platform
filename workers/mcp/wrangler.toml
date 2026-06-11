@@ -5,14 +5,13 @@ compatibility_flags = ["nodejs_compat"]
 workers_dev = true
 
 [vars]
-API_BASE = "https://api.freeappstore.online"
-AUTH_START = "https://api.freeappstore.online/v1/auth/github/start"
 PUBLIC_BASE_URL = "https://freedesignstore.pages.dev"
+PUBLIC_MCP_BASE_URL = "https://freedesignstore.pages.dev"
 
 # Secrets:
 #   STOCK_ADMIN_TOKEN - same value used by the Pages Functions upload backend.
 #   MCP_ADMIN_TOKEN   - optional separate write token for MCP clients.
-#   SESSION_SIGNING_KEY - same value used by FAS auth.
+#   SESSION_SIGNING_KEY - signs/verifies FDS MCP OAuth sessions when FDS auth is enabled.
 #   FDS_CREATOR_TOKENS - optional static creator-token map.
 #
 # Before deploy, replace the KV id with the namespace bound to the Pages project
@@ -29,10 +28,6 @@ id = "157d8b3edc6343b585cea227e9085165"
 [[r2_buckets]]
 binding = "FDS_STOCK_BUCKET"
 bucket_name = "fds-stock-assets"
-
-[[routes]]
-pattern = "fds-mcp.freeappstore.online/*"
-zone_name = "freeappstore.online"
 
 [durable_objects]
 bindings = [
