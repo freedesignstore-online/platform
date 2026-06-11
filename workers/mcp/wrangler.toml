@@ -15,6 +15,7 @@ PUBLIC_MCP_BASE_URL = "https://freedesignstore.pages.dev"
 #   FDS_CREATOR_TOKENS - optional static creator-token map.
 #   GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET - GitHub OAuth app for creator sign-in.
 #   GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET - optional Google OAuth app for creator sign-in.
+#   GOOGLE_OAUTH_ENABLED=true - enable Google only after its callback URL is authorized.
 #
 # Before deploy, replace the KV id with the namespace bound to the Pages project
 # as FDS_STOCK_KV. The R2 bucket name must match the Pages FDS_STOCK_BUCKET bucket.

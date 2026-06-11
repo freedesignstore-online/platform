@@ -64,7 +64,7 @@ OAuth callback URLs:
 - GitHub: `https://freedesignstore.pages.dev/.fds/auth/github/callback`
 - Google: `https://freedesignstore.pages.dev/.fds/auth/google/callback`
 
-Google OAuth is optional. GitHub should be configured before exposing the creator console.
+Google OAuth is optional. GitHub should be configured before exposing the creator console. Google stays hidden unless `GOOGLE_OAUTH_ENABLED=true` is set after the Google OAuth client has the FDS callback URL authorized.
 
 Static automation tokens can also be configured:
 

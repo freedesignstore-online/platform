@@ -18,6 +18,7 @@ interface Env {
   GITHUB_CLIENT_SECRET?: string;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
+  GOOGLE_OAUTH_ENABLED?: string;
   PUBLIC_BASE_URL?: string;
   PUBLIC_MCP_BASE_URL?: string;
   MCP_OBJECT: DurableObjectNamespace;
@@ -918,7 +919,8 @@ export default {
     const url = new URL(request.url);
     const issuer = publicMcpBase(env, url);
     const creatorAccounts = parseCreatorAccounts(env);
-    const providerAuthEnabled = Boolean((env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) || (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET));
+    const googleOAuthEnabled = env.GOOGLE_OAUTH_ENABLED === 'true';
+    const providerAuthEnabled = Boolean((env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) || (googleOAuthEnabled && env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET));
     const browserAuthEnabled = Boolean(env.OAUTH_KV && env.SESSION_SIGNING_KEY && (providerAuthEnabled || creatorAccounts.length));
 
     if (env.OAUTH_KV && env.SESSION_SIGNING_KEY && (providerAuthEnabled || creatorAccounts.length)) {
@@ -929,8 +931,8 @@ export default {
         creatorAccounts,
         githubClientId: env.GITHUB_CLIENT_ID,
         githubClientSecret: env.GITHUB_CLIENT_SECRET,
-        googleClientId: env.GOOGLE_CLIENT_ID,
-        googleClientSecret: env.GOOGLE_CLIENT_SECRET,
+        googleClientId: googleOAuthEnabled ? env.GOOGLE_CLIENT_ID : undefined,
+        googleClientSecret: googleOAuthEnabled ? env.GOOGLE_CLIENT_SECRET : undefined,
       });
       if (oauthRes) return oauthRes;
     }

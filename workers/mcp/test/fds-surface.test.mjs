@@ -41,6 +41,7 @@ test('worker supports FDS OAuth without FAS auth routing', async () => {
   assert.match(source, /https:\/\/freedesignstore\.pages\.dev\/mcp/);
   assert.match(source, /Browser sign-in: https:\/\/freedesignstore\.pages\.dev\/\.fds\/auth\/start/);
   assert.match(source, /Auth: FDS OAuth 2\.1 browser sign-in/);
+  assert.match(source, /GOOGLE_OAUTH_ENABLED === 'true'/);
   assert.match(source, /canPublish/);
   assert.match(source, /trusted-publisher creator permission/);
   assert.match(oauth, /authorization_endpoint: `\$\{config\.issuer\}\/authorize`/);
