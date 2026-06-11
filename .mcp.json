@@ -2,7 +2,7 @@
   "mcpServers": {
     "freedesignstore": {
       "command": "npx",
-      "args": ["mcp-remote", "https://freedesignstore-mcp.serge-the-dev.workers.dev/mcp"]
+      "args": ["mcp-remote", "https://fds-mcp.freeappstore.online/mcp"]
     }
   }
 }

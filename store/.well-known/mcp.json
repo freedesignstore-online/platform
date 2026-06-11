@@ -4,7 +4,7 @@
     {
       "name": "FreeDesignStore Catalog",
       "description": "Tools for reading and populating the FreeDesignStore community visual asset catalog. Supports FDS-hosted/community photos, generated SVG illustrations, icons, patterns, textures, and moderation. Unsplash assets are linked with attribution and are not mirrored into FDS.",
-      "endpoint": "https://freedesignstore-mcp.serge-the-dev.workers.dev/mcp",
+      "endpoint": "https://fds-mcp.freeappstore.online/mcp",
       "transport": "streamable-http",
       "tools": [
         {

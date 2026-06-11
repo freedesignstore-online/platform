@@ -1,6 +1,8 @@
 import { McpAgent } from 'agents/mcp';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+import { createAuthChallenge, handleOAuthRoute, resolveOAuthToken } from './oauth-provider.js';
+import { verifySession } from './session.js';
 
 interface Env {
   FDS_STOCK_BUCKET?: R2Bucket;
@@ -9,6 +11,10 @@ interface Env {
   MCP_ADMIN_TOKEN?: string;
   FDS_CREATOR_TOKENS?: string;
   CREATOR_TOKENS?: string;
+  API_BASE?: string;
+  AUTH_START?: string;
+  OAUTH_KV?: KVNamespace;
+  SESSION_SIGNING_KEY?: string;
   PUBLIC_BASE_URL?: string;
   MCP_OBJECT: DurableObjectNamespace;
 }
@@ -606,24 +612,50 @@ async function authenticateRequest(request: Request, env: Env): Promise<McpProps
   if (creator) {
     return { isAdmin: false, accountId: safeAccountId(creator.accountId), accountName: creator.name };
   }
+  let sessionToken = token;
+  if (env.OAUTH_KV) {
+    const resolved = await resolveOAuthToken(token, env.OAUTH_KV);
+    if (resolved) sessionToken = resolved;
+  }
+  if (env.SESSION_SIGNING_KEY) {
+    const session = await verifySession(sessionToken, env.SESSION_SIGNING_KEY);
+    if (session?.uid) {
+      return {
+        isAdmin: false,
+        accountId: safeAccountId(session.uid),
+        accountName: session.uid,
+      };
+    }
+  }
   return {};
 }
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     const url = new URL(request.url);
+    const issuer = `${url.protocol}//${url.host}`;
+
+    if (env.OAUTH_KV && env.SESSION_SIGNING_KEY) {
+      const oauthRes = await handleOAuthRoute(request, {
+        issuer,
+        authStart: env.AUTH_START || `${env.API_BASE || 'https://api.freeappstore.online'}/v1/auth/github/start`,
+        kv: env.OAUTH_KV,
+        sessionSigningKey: env.SESSION_SIGNING_KEY,
+      });
+      if (oauthRes) return oauthRes;
+    }
 
     if (url.pathname === '/' || url.pathname === '') {
       return new Response([
         'FreeDesignStore Catalog MCP Server v0.1.0',
         '',
-        'Connect: npx mcp-remote https://freedesignstore-mcp.serge-the-dev.workers.dev/mcp',
+        'Connect: npx mcp-remote https://fds-mcp.freeappstore.online/mcp',
         '',
         'Read:     asset_policy, catalog_status, whoami, list_assets, my_assets, get_asset',
         'Create:   create_svg_asset, create_asset_from_url (creator/admin token)',
         'Admin:    moderate_asset, delete_asset',
         '',
-        'Auth: Authorization: Bearer <creator token, STOCK_ADMIN_TOKEN, or MCP_ADMIN_TOKEN>',
+        'Auth: OAuth 2.1 browser sign-in, or Authorization: Bearer <creator token, STOCK_ADMIN_TOKEN, or MCP_ADMIN_TOKEN>',
         'Unsplash: link off for download; do not mirror into FDS.',
       ].join('\n'), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
     }
@@ -639,8 +671,18 @@ export default {
 
     if (url.pathname.startsWith('/mcp')) {
       const auth = await authenticateRequest(request, env);
+      if (request.method !== 'OPTIONS' && env.OAUTH_KV && env.SESSION_SIGNING_KEY && !auth.accountId) {
+        const bearer = request.headers.get('Authorization')?.replace(/^Bearer\s+/i, '');
+        return createAuthChallenge({ issuer }, bearer ? 'invalid_token' : undefined);
+      }
+      if (auth.accountId) {
+        (ctx as unknown as { props?: McpProps }).props = {
+          ...((ctx as unknown as { props?: McpProps }).props || {}),
+          ...auth,
+        };
+      }
       const sessionId = request.headers.get('mcp-session-id');
-      if (sessionId) {
+      if (auth.accountId && sessionId) {
         try {
           const id = env.MCP_OBJECT.idFromName(`streamable-http:${sessionId}`);
           const stub = env.MCP_OBJECT.get(id) as unknown as { setAuth(p: McpProps): Promise<void> };

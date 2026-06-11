@@ -17,7 +17,7 @@ It follows the FAS/FAGS/PAGS pattern: a dedicated Cloudflare Worker using `agent
 - `moderate_asset` - publishes or rejects pending assets.
 - `delete_asset` - deletes catalog metadata and the R2 object.
 
-Creator writes require `Authorization: Bearer <creator token>`. Admin actions require `Authorization: Bearer <STOCK_ADMIN_TOKEN>` or `MCP_ADMIN_TOKEN`.
+Creator writes use MCP OAuth/browser sign-in at `https://fds-mcp.freeappstore.online/mcp`. Static creator tokens are still supported for automation. Admin actions require `Authorization: Bearer <STOCK_ADMIN_TOKEN>` or `MCP_ADMIN_TOKEN`.
 
 ## Legal Guardrails
 
@@ -34,11 +34,12 @@ Before deploying in a new environment, wire it to the same production storage us
 1. Create or identify the R2 bucket bound to Pages as `FDS_STOCK_BUCKET`.
 2. Create or identify the KV namespace bound to Pages as `FDS_STOCK_KV`.
 3. Confirm `workers/mcp/wrangler.toml` uses the real namespace id. If your R2 bucket is not named `fds-stock-assets`, replace that too.
-4. Set the admin write token and optional creator-token map:
+4. Set the admin write token, FAS session signing key, and optional creator-token map:
 
 ```sh
 cd workers/mcp
 npx wrangler secret put STOCK_ADMIN_TOKEN
+npx wrangler secret put SESSION_SIGNING_KEY
 npx wrangler secret put FDS_CREATOR_TOKENS
 ```
 
@@ -73,7 +74,7 @@ Connect from an MCP client:
   "mcpServers": {
     "freedesignstore": {
       "command": "npx",
-      "args": ["mcp-remote", "https://freedesignstore-mcp.serge-the-dev.workers.dev/mcp"]
+      "args": ["mcp-remote", "https://fds-mcp.freeappstore.online/mcp"]
     }
   }
 }
