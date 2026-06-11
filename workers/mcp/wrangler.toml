@@ -16,7 +16,7 @@ PUBLIC_BASE_URL = "https://freedesignstore.pages.dev"
 
 [[kv_namespaces]]
 binding = "FDS_STOCK_KV"
-id = "00000000000000000000000000000000"
+id = "ed27d698c5bb4c36a3ef4247eb5629ed"
 
 [[r2_buckets]]
 binding = "FDS_STOCK_BUCKET"

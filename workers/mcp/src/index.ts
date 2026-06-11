@@ -501,7 +501,7 @@ export default {
       return new Response([
         'FreeDesignStore Catalog MCP Server v0.1.0',
         '',
-        'Connect: npx mcp-remote https://<deployed-worker>/mcp',
+        'Connect: npx mcp-remote https://freedesignstore-mcp.serge-the-dev.workers.dev/mcp',
         '',
         'Read:     asset_policy, catalog_status, list_assets, get_asset',
         'Write:    create_svg_asset, create_asset_from_url, moderate_asset, delete_asset',

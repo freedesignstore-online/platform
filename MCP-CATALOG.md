@@ -25,11 +25,13 @@ The MCP worker rejects `unsplash.com` and `images.unsplash.com` URLs in `create_
 
 The worker lives in `workers/mcp`.
 
-Before deploying, wire it to the same production storage used by the Pages Functions:
+Production storage is managed in Cloudflare and the values are stored in Doppler `fas/prd` with `FDS_`-prefixed names because the Doppler workplace is currently at its project limit.
+
+Before deploying in a new environment, wire it to the same production storage used by the Pages Functions:
 
 1. Create or identify the R2 bucket bound to Pages as `FDS_STOCK_BUCKET`.
 2. Create or identify the KV namespace bound to Pages as `FDS_STOCK_KV`.
-3. Replace the dummy KV id in `workers/mcp/wrangler.toml` with the real namespace id. If your R2 bucket is not named `fds-stock-assets`, replace that too.
+3. Confirm `workers/mcp/wrangler.toml` uses the real namespace id. If your R2 bucket is not named `fds-stock-assets`, replace that too.
 4. Set the write token:
 
 ```sh
@@ -52,7 +54,7 @@ Connect from an MCP client:
   "mcpServers": {
     "freedesignstore": {
       "command": "npx",
-      "args": ["mcp-remote", "https://freedesignstore-mcp.<account>.workers.dev/mcp"]
+      "args": ["mcp-remote", "https://freedesignstore-mcp.serge-the-dev.workers.dev/mcp"]
     }
   }
 }

@@ -1,0 +1,45 @@
+{
+  "version": "1.0",
+  "servers": [
+    {
+      "name": "FreeDesignStore Catalog",
+      "description": "Tools for reading and populating the FreeDesignStore community visual asset catalog. Supports FDS-hosted/community photos, generated SVG illustrations, icons, patterns, textures, and moderation. Unsplash assets are linked with attribution and are not mirrored into FDS.",
+      "endpoint": "https://freedesignstore-mcp.serge-the-dev.workers.dev/mcp",
+      "transport": "streamable-http",
+      "tools": [
+        {
+          "name": "asset_policy",
+          "description": "Read catalog hosting rules, including Unsplash link-off policy"
+        },
+        {
+          "name": "catalog_status",
+          "description": "Check storage readiness and asset counts"
+        },
+        {
+          "name": "list_assets",
+          "description": "List public or admin-visible pending catalog assets"
+        },
+        {
+          "name": "get_asset",
+          "description": "Get one asset's metadata and download URL"
+        },
+        {
+          "name": "create_svg_asset",
+          "description": "Create a hosted generated SVG asset"
+        },
+        {
+          "name": "create_asset_from_url",
+          "description": "Ingest a public non-Unsplash HTTPS image URL"
+        },
+        {
+          "name": "moderate_asset",
+          "description": "Publish or reject a pending asset"
+        },
+        {
+          "name": "delete_asset",
+          "description": "Delete catalog metadata and the R2 object"
+        }
+      ]
+    }
+  ]
+}
