@@ -201,7 +201,7 @@
     {
       "id": "stock-photos",
       "name": "Stock Photo Library",
-      "description": "Download FDS-hosted stock photos, browse Unsplash, and prepare contributor release packs.",
+      "description": "Download FDS-hosted and community stock photos, search Unsplash, and submit original photos for free release.",
       "icon": "📷",
       "iconBg": "#06b6d4",
       "category": "images",

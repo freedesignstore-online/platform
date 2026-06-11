@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Free Stock Photo Library - FreeDesignStore</title>
-<meta name="description" content="Download free FDS-hosted stock photos, browse Unsplash photos, and prepare your own free photo releases.">
+<meta name="description" content="Download FDS-hosted, community-released, and Unsplash stock photos. Submit your own photos for free public release.">
 <link rel="icon" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--accent:#ec4899;--accent-dark:#db2777;--bg:#f8fafc;--text:#111827;--muted:#6b7280;--panel:#fff;--line:#e5e7eb;--soft:#fdf2f8;--ok:#059669}
+:root{--accent:#ec4899;--accent-dark:#db2777;--bg:#f8fafc;--text:#111827;--muted:#6b7280;--panel:#fff;--line:#e5e7eb;--soft:#fdf2f8;--ok:#059669;--warn:#b45309}
 body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 .shell{max-width:1220px;margin:0 auto;padding:22px}
@@ -17,14 +17,14 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 .back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--muted);font-weight:700}.back:hover{color:var(--accent);text-decoration:none}
 .hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:end;margin-bottom:18px}
 h1{font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-bottom:8px}
-.subtitle{color:var(--muted);font-size:15px;line-height:1.55;max-width:720px}
+.subtitle{color:var(--muted);font-size:15px;line-height:1.55;max-width:760px}
 .stats{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .pill{display:inline-flex;align-items:center;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 10px;color:var(--muted);font-size:12px;font-weight:800;white-space:nowrap}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.05);padding:16px;margin-bottom:16px}
 .toolbar{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
 .search{display:flex;gap:8px;min-width:0}
-.search input,.api input,.release-form input,.release-form select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13px;background:#fff}
-.search input:focus,.api input:focus,.release-form input:focus,.release-form select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(236,72,153,.1)}
+.search input,.api input,.upload-form input,.upload-form select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13px;background:#fff}
+.search input:focus,.api input:focus,.upload-form input:focus,.upload-form select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(236,72,153,.1)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 13px;border-radius:8px;border:1px solid transparent;font:inherit;font-size:13px;font-weight:800;cursor:pointer;transition:.15s;white-space:nowrap}
 .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-dark)}
 .btn-secondary{background:#fff;border-color:var(--line);color:var(--text)}.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
@@ -34,15 +34,16 @@ h1{font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-botto
 .tab,.filter{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:7px 12px;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
 .tab.active,.filter.active{background:var(--accent);border-color:var(--accent);color:#fff}
 .api{display:flex;gap:8px;align-items:center;margin-top:12px}
-.api .status{font-size:12px;color:var(--muted);min-width:170px}.api .status.active{color:var(--ok);font-weight:800}
+.api .status{font-size:12px;color:var(--muted);min-width:210px}.api .status.active{color:var(--ok);font-weight:800}
 .notice{font-size:12px;line-height:1.5;color:#475569;background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:12px}
+.notice.warn{color:#78350f;background:#fffbeb;border-color:#fde68a}
 .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:14px}
 .photo-card{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05)}
 .photo-card img{width:100%;height:220px;object-fit:cover;display:block;background:#e5e7eb}
 .photo-body{padding:11px}
 .photo-title{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:6px}
 .photo-title strong{font-size:14px;line-height:1.25}.source{font-size:10px;font-weight:800;color:#fff;background:#111827;border-radius:999px;padding:3px 7px;white-space:nowrap}
-.source.unsplash{background:#64748b}.source.local{background:#059669}
+.source.unsplash{background:#64748b}.source.community{background:#059669}
 .meta{color:var(--muted);font-size:12px;line-height:1.45;margin-bottom:10px;min-height:34px}
 .tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:11px}.tag{font-size:11px;color:#be185d;background:var(--soft);border-radius:999px;padding:3px 7px;font-weight:700}
 .actions{display:flex;gap:7px;flex-wrap:wrap}.actions .btn{flex:1}
@@ -50,12 +51,16 @@ h1{font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-botto
 .empty{display:none;text-align:center;color:var(--muted);padding:34px;border:1px dashed var(--line);border-radius:10px;background:#fff}
 .drop-zone{border:2px dashed var(--line);border-radius:10px;background:#fff;padding:28px;text-align:center;color:var(--muted);cursor:pointer;margin-bottom:12px}
 .drop-zone.dragover{border-color:var(--accent);background:var(--soft)}
-.release-form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
-.release-form .wide{grid-column:span 2}
+.upload-form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.upload-form .wide{grid-column:span 2}
+.checks{grid-column:1/-1;display:grid;gap:8px;font-size:12px;color:#475569}
+.checks label{display:flex;gap:8px;align-items:flex-start}.checks input{margin-top:2px}
 .upload-preview{display:flex;gap:14px;align-items:center;margin-bottom:12px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px}
 .upload-preview img{width:120px;height:82px;object-fit:cover;border-radius:8px;background:#e5e7eb}
 .upload-preview p{font-size:13px;color:var(--muted);line-height:1.45}
-@media (max-width:820px){.hero{grid-template-columns:1fr}.stats{justify-content:flex-start}.toolbar,.release-form{grid-template-columns:1fr}.api,.search{flex-direction:column;align-items:stretch}.api .status{min-width:0}.release-form .wide{grid-column:auto}.photo-card img{height:190px}}
+.submit-status{font-size:13px;font-weight:800;color:var(--muted)}
+.submit-status.ok{color:var(--ok)}.submit-status.warn{color:var(--warn)}
+@media (max-width:820px){.hero{grid-template-columns:1fr}.stats{justify-content:flex-start}.toolbar,.upload-form{grid-template-columns:1fr}.api,.search{flex-direction:column;align-items:stretch}.api .status{min-width:0}.upload-form .wide{grid-column:auto}.photo-card img{height:190px}}
 </style>
 </head>
 <body>
@@ -67,12 +72,12 @@ h1{font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-botto
   <section class="hero">
     <div>
       <h1>Free Stock Photo Library</h1>
-      <p class="subtitle">Download real stock images from FreeDesignStore-hosted files or Unsplash. Contributors can prepare free release packs from their own uploads.</p>
+      <p class="subtitle">Download FDS-hosted photos, public community releases, and Unsplash results. Submit original photos to release them free for other creators.</p>
     </div>
     <div class="stats">
-      <span class="pill">FDS-hosted downloads</span>
-      <span class="pill">Unsplash source</span>
-      <span class="pill">Contributor releases</span>
+      <span class="pill">FDS-hosted</span>
+      <span class="pill">Community uploads</span>
+      <span class="pill">Unsplash API</span>
     </div>
   </section>
 
@@ -80,8 +85,9 @@ h1{font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-botto
     <div class="tabs" role="tablist" aria-label="Stock photo sources">
       <button class="tab active" data-source="all">All Sources</button>
       <button class="tab" data-source="hosted">FDS Hosted</button>
+      <button class="tab" data-source="community">Community</button>
       <button class="tab" data-source="unsplash">Unsplash</button>
-      <button class="tab" data-source="releases">My Releases</button>
+      <button class="tab" data-source="submit">Submit Photos</button>
     </div>
     <div class="toolbar">
       <div class="search">
@@ -92,11 +98,11 @@ h1{font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-botto
     </div>
     <div class="filters" id="filters"></div>
     <div class="api">
-      <input id="apiKey" type="password" placeholder="Optional Unsplash Access Key for live search">
-      <button class="btn btn-secondary" id="connectBtn">Connect Unsplash</button>
-      <span class="status" id="apiStatus">Curated Unsplash photos enabled</span>
+      <input id="apiKey" type="password" placeholder="Optional personal Unsplash Access Key fallback">
+      <button class="btn btn-secondary" id="connectBtn">Use Key</button>
+      <span class="status" id="apiStatus">Unsplash server search will be used when configured</span>
     </div>
-    <p class="notice">FDS-hosted files download from this site. Unsplash API results use Unsplash image URLs and trigger Unsplash download tracking when an access key is connected.</p>
+    <p class="notice">Unsplash photos are displayed from Unsplash URLs with attribution and download tracking. FDS/community photos are served from this site.</p>
   </section>
 
   <section class="section active" id="librarySection">
@@ -104,35 +110,39 @@ h1{font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-botto
     <p class="empty" id="emptyState">No matching photos.</p>
   </section>
 
-  <section class="section" id="releaseSection">
+  <section class="section" id="submitSection">
     <div class="panel">
       <div class="drop-zone" id="dropZone">
         <strong>Drop photos here or click to choose files</strong>
-        <p style="font-size:12px;margin-top:6px;">Saved locally in this browser, then exported as a free release pack.</p>
-        <input type="file" id="fileInput" multiple accept="image/*" hidden>
+        <p style="font-size:12px;margin-top:6px;">JPG, PNG, WebP, or AVIF. 8 MB max per image.</p>
+        <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,image/webp,image/avif" hidden>
       </div>
       <div id="pendingUploads"></div>
-      <div class="release-form">
-        <input class="wide" id="releaseTitle" placeholder="Release title">
-        <input id="releaseAuthor" placeholder="Author or studio">
-        <select id="releaseLicense">
+      <div class="upload-form">
+        <input class="wide" id="uploadTitle" placeholder="Photo title">
+        <input id="uploadAuthor" placeholder="Author or studio">
+        <select id="uploadCategory">
+          <option>Community</option><option>Business</option><option>Technology</option><option>Travel</option><option>Nature</option><option>People</option><option>Workspace</option><option>Abstract</option>
+        </select>
+        <select id="uploadLicense">
           <option value="FreeDesignStore Free Release">FreeDesignStore Free Release</option>
           <option value="CC0/Public Domain dedication">CC0/Public Domain dedication</option>
-          <option value="Unsplash-style free use">Unsplash-style free use</option>
         </select>
-        <input class="wide" id="releaseTags" placeholder="Tags, comma separated">
-        <button class="btn btn-primary" id="saveReleaseBtn">Save Free Release</button>
-        <button class="btn btn-secondary" id="exportPackBtn">Export Release Pack</button>
+        <input class="wide" id="uploadTags" placeholder="Tags, comma separated">
+        <button class="btn btn-primary" id="submitBtn">Submit for Free Release</button>
+        <span class="submit-status" id="submitStatus"></span>
+        <div class="checks">
+          <label><input type="checkbox" id="rightsConsent"> I own the photo or have the rights to release it here. I am not uploading someone else's stock image or an Unsplash photo.</label>
+          <label><input type="checkbox" id="releaseConsent"> I agree to release this photo for free public use under the selected license.</label>
+        </div>
       </div>
-      <p class="notice">This static version creates a local release pack. Public uploads need Cloudflare R2/KV plus moderation before files can safely appear for everyone.</p>
+      <p class="notice warn">Uploads are stored in Cloudflare R2 and metadata in KV. By default, new submissions are pending until approved unless AUTO_PUBLISH_STOCK_UPLOADS is enabled.</p>
     </div>
-    <div class="gallery" id="releaseGallery"></div>
-    <p class="empty" id="releaseEmpty">No local releases yet.</p>
   </section>
 </main>
 
 <script>
-const CATEGORIES=['Business','Technology','Travel','Nature','People','Workspace','Abstract'];
+const CATEGORIES=['Business','Technology','Travel','Nature','People','Workspace','Abstract','Community','Unsplash'];
 const HOSTED_PHOTOS=[
   {id:'fds-workspace-studio',source:'hosted',title:'Workspace Studio',category:'Workspace',author:'FreeDesignStore',license:'FreeDesignStore hosted collection',url:'/assets/stock/workspace-studio.jpg',download:'/assets/stock/workspace-studio.jpg',tags:['office','startup','interior']},
   {id:'fds-product-tech',source:'hosted',title:'Product Review',category:'Technology',author:'FreeDesignStore',license:'FreeDesignStore hosted collection',url:'/assets/stock/product-tech.jpg',download:'/assets/stock/product-tech.jpg',tags:['laptop','product','screen']},
@@ -141,21 +151,12 @@ const HOSTED_PHOTOS=[
   {id:'fds-desk-laptop',source:'hosted',title:'Desk Laptop',category:'Business',author:'FreeDesignStore',license:'FreeDesignStore hosted collection',url:'/assets/stock/desk-laptop.jpg',download:'/assets/stock/desk-laptop.jpg',tags:['desk','work','computer']},
   {id:'fds-team-workshop',source:'hosted',title:'Team Workshop',category:'People',author:'FreeDesignStore',license:'FreeDesignStore hosted collection',url:'/assets/stock/team-workshop.jpg',download:'/assets/stock/team-workshop.jpg',tags:['team','meeting','collaboration']}
 ];
-const CURATED_UNSPLASH=[
-  {id:'u-workspace',source:'unsplash',title:'Creative Workspace',category:'Workspace',author:'Unsplash contributor',license:'Unsplash License',url:'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=700&q=80',download:'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=max&w=2400&q=90',tags:['office','interior','studio']},
-  {id:'u-tech',source:'unsplash',title:'Technology Detail',category:'Technology',author:'Unsplash contributor',license:'Unsplash License',url:'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=700&q=80',download:'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=max&w=2400&q=90',tags:['laptop','interface','product']},
-  {id:'u-road',source:'unsplash',title:'Open Road',category:'Travel',author:'Unsplash contributor',license:'Unsplash License',url:'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=700&q=80',download:'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=max&w=2400&q=90',tags:['road','mountain','editorial']},
-  {id:'u-mountains',source:'unsplash',title:'Soft Mountains',category:'Nature',author:'Unsplash contributor',license:'Unsplash License',url:'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=700&q=80',download:'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=max&w=2400&q=90',tags:['mountains','sunset','background']},
-  {id:'u-desk',source:'unsplash',title:'Working Desk',category:'Business',author:'Unsplash contributor',license:'Unsplash License',url:'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=700&q=80',download:'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=max&w=2400&q=90',tags:['desk','office','workspace']},
-  {id:'u-team',source:'unsplash',title:'Team Session',category:'People',author:'Unsplash contributor',license:'Unsplash License',url:'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=700&q=80',download:'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=max&w=2400&q=90',tags:['team','people','workshop']}
-];
 let activeSource='all';
 let activeCategory='All';
 let apiKey=localStorage.getItem('unsplash_key')||'';
 let apiResults=[];
-let releases=[];
+let communityPhotos=[];
 let pendingFiles=[];
-let db;
 
 const $=id=>document.getElementById(id);
 
@@ -163,45 +164,15 @@ function escapeHtml(value){
   return String(value||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
 
-function openDB(){
-  return new Promise((resolve,reject)=>{
-    const req=indexedDB.open('FDSStockPhotos',2);
-    req.onupgradeneeded=e=>{
-      const d=e.target.result;
-      if(!d.objectStoreNames.contains('releases')) d.createObjectStore('releases',{keyPath:'id'});
-    };
-    req.onsuccess=e=>{db=e.target.result;resolve(db)};
-    req.onerror=()=>reject(req.error);
-  });
-}
-
-function getReleases(){
-  return new Promise(resolve=>{
-    const tx=db.transaction('releases','readonly');
-    const req=tx.objectStore('releases').getAll();
-    req.onsuccess=()=>resolve(req.result||[]);
-    req.onerror=()=>resolve([]);
-  });
-}
-
-function putRelease(item){
-  return new Promise(resolve=>{
-    const tx=db.transaction('releases','readwrite');
-    tx.objectStore('releases').put(item);
-    tx.oncomplete=resolve;
-  });
-}
-
 async function init(){
-  await openDB();
-  releases=await getReleases();
   if(apiKey){
     $('apiKey').value=apiKey;
-    $('apiStatus').textContent='Unsplash API connected';
+    $('apiStatus').textContent='Personal Unsplash key saved';
     $('apiStatus').classList.add('active');
   }
   bindEvents();
   renderFilters();
+  await loadCommunityPhotos();
   render();
 }
 
@@ -210,8 +181,8 @@ function bindEvents(){
     btn.addEventListener('click',()=>{
       activeSource=btn.dataset.source;
       document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b===btn));
-      $('releaseSection').classList.toggle('active',activeSource==='releases');
-      $('librarySection').classList.toggle('active',activeSource!=='releases');
+      $('submitSection').classList.toggle('active',activeSource==='submit');
+      $('librarySection').classList.toggle('active',activeSource!=='submit');
       render();
     });
   });
@@ -219,8 +190,7 @@ function bindEvents(){
   $('resetBtn').onclick=()=>{$('searchInput').value='';activeCategory='All';apiResults=[];renderFilters();render()};
   $('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
   $('connectBtn').onclick=connectUnsplash;
-  $('saveReleaseBtn').onclick=saveRelease;
-  $('exportPackBtn').onclick=exportPack;
+  $('submitBtn').onclick=submitPhotos;
   const zone=$('dropZone');
   zone.onclick=()=>$('fileInput').click();
   zone.ondragover=e=>{e.preventDefault();zone.classList.add('dragover')};
@@ -236,36 +206,51 @@ function renderFilters(){
   });
 }
 
+async function loadCommunityPhotos(){
+  try{
+    const res=await fetch('/api/stock/list');
+    if(!res.ok) throw new Error('not configured');
+    const data=await res.json();
+    communityPhotos=(data.items||[]).map(item=>({...item,source:'community'}));
+  }catch(err){
+    communityPhotos=[];
+  }
+}
+
 function allPhotos(){
-  return [...HOSTED_PHOTOS,...CURATED_UNSPLASH,...apiResults,...releases.map(r=>({...r,source:'local'}))];
+  return [...HOSTED_PHOTOS,...communityPhotos,...apiResults];
 }
 
 function filteredPhotos(){
   const q=$('searchInput').value.trim().toLowerCase();
   let photos=allPhotos();
   if(activeSource==='hosted') photos=photos.filter(p=>p.source==='hosted');
+  if(activeSource==='community') photos=photos.filter(p=>p.source==='community');
   if(activeSource==='unsplash') photos=photos.filter(p=>p.source==='unsplash');
-  if(activeSource==='all') photos=photos.filter(p=>p.source!=='local');
+  if(activeSource==='all') photos=photos.filter(p=>p.source!=='unsplash' || apiResults.length);
   if(activeCategory!=='All') photos=photos.filter(p=>p.category===activeCategory);
   if(q) photos=photos.filter(p=>[p.title,p.author,p.category,p.license,...(p.tags||[])].join(' ').toLowerCase().includes(q));
   return photos;
 }
 
 function render(){
-  if(activeSource==='releases') return renderReleaseList();
+  if(activeSource==='submit') return;
   const photos=filteredPhotos();
   $('gallery').innerHTML=photos.map(photoCard).join('');
   $('emptyState').style.display=photos.length?'none':'block';
 }
 
 function photoCard(photo){
-  const sourceClass=photo.source==='unsplash'?'unsplash':photo.source==='local'?'local':'';
-  const sourceLabel=photo.source==='hosted'?'FDS':photo.source==='local'?'Release':'Unsplash';
+  const sourceClass=photo.source==='unsplash'?'unsplash':photo.source==='community'?'community':'';
+  const sourceLabel=photo.source==='hosted'?'FDS':photo.source==='community'?'Community':'Unsplash';
+  const credit=photo.source==='unsplash' && photo.creditUrl
+    ? `<a href="${escapeHtml(photo.creditUrl)}" target="_blank" rel="noopener">${escapeHtml(photo.author)}</a> on <a href="https://unsplash.com/?utm_source=FreeDesignStore&utm_medium=referral" target="_blank" rel="noopener">Unsplash</a>`
+    : `${escapeHtml(photo.author)} - ${escapeHtml(photo.license)}`;
   return `<article class="photo-card">
     <img src="${escapeHtml(photo.url)}" alt="${escapeHtml(photo.title)}" loading="lazy">
     <div class="photo-body">
       <div class="photo-title"><strong>${escapeHtml(photo.title)}</strong><span class="source ${sourceClass}">${sourceLabel}</span></div>
-      <p class="meta">${escapeHtml(photo.author)} - ${escapeHtml(photo.license)}</p>
+      <p class="meta">${credit}</p>
       <div class="tags">${(photo.tags||[]).slice(0,4).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
       <div class="actions">
         <button class="btn btn-primary btn-small" onclick="downloadPhoto('${escapeHtml(photo.id)}')">Download</button>
@@ -277,14 +262,25 @@ function photoCard(photo){
 
 async function search(){
   const q=$('searchInput').value.trim();
-  if(apiKey && q){
-    $('apiStatus').textContent='Searching Unsplash...';
-    try{
+  if((activeSource==='unsplash' || activeSource==='all') && q){
+    await searchUnsplash(q);
+  }
+  render();
+}
+
+async function searchUnsplash(q){
+  $('apiStatus').textContent='Searching Unsplash...';
+  try{
+    let data;
+    const serverRes=await fetch(`/api/stock/unsplash?q=${encodeURIComponent(q)}`);
+    if(serverRes.ok){
+      data=await serverRes.json();
+    }else if(apiKey){
       const res=await fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(q)}&per_page=24&client_id=${encodeURIComponent(apiKey)}`);
       if(!res.ok) throw new Error('Unsplash API error');
-      const data=await res.json();
-      apiResults=data.results.map(photo=>({
-        id:`api-${photo.id}`,
+      const raw=await res.json();
+      data={items:raw.results.map(photo=>({
+        id:`unsplash-${photo.id}`,
         source:'unsplash',
         title:photo.alt_description||photo.description||q,
         category:'Unsplash',
@@ -293,32 +289,34 @@ async function search(){
         url:photo.urls.small,
         download:photo.urls.full||photo.urls.raw,
         downloadLocation:photo.links.download_location,
-        creditUrl:`${photo.links.html}?utm_source=FreeDesignStore&utm_medium=referral`,
+        creditUrl:`${photo.user.links.html}?utm_source=FreeDesignStore&utm_medium=referral`,
+        photoUrl:`${photo.links.html}?utm_source=FreeDesignStore&utm_medium=referral`,
         tags:(photo.tags||[]).map(t=>t.title).filter(Boolean).slice(0,4)
-      }));
-      $('apiStatus').textContent=`${apiResults.length} Unsplash results`;
-      $('apiStatus').classList.add('active');
-    }catch(err){
-      $('apiStatus').textContent='Unsplash search failed';
-      $('apiStatus').classList.remove('active');
+      }))};
+    }else{
+      throw new Error('Unsplash not configured');
     }
+    apiResults=(data.items||[]).filter(item=>item.url);
+    $('apiStatus').textContent=`${apiResults.length} Unsplash results`;
+    $('apiStatus').classList.add('active');
+  }catch(err){
+    apiResults=[];
+    $('apiStatus').textContent='Unsplash search needs server config or a personal key';
+    $('apiStatus').classList.remove('active');
   }
-  render();
 }
 
 function connectUnsplash(){
   apiKey=$('apiKey').value.trim();
   if(apiKey){
     localStorage.setItem('unsplash_key',apiKey);
-    $('apiStatus').textContent='Unsplash API connected';
+    $('apiStatus').textContent='Personal Unsplash key saved';
     $('apiStatus').classList.add('active');
   }else{
     localStorage.removeItem('unsplash_key');
-    apiResults=[];
-    $('apiStatus').textContent='Curated Unsplash photos enabled';
+    $('apiStatus').textContent='Unsplash server search will be used when configured';
     $('apiStatus').classList.remove('active');
   }
-  render();
 }
 
 function findPhoto(id){
@@ -328,29 +326,21 @@ function findPhoto(id){
 async function downloadPhoto(id){
   const photo=findPhoto(id);
   if(!photo) return;
-  if(photo.downloadLocation && apiKey){
-    try{ await fetch(`${photo.downloadLocation}?client_id=${encodeURIComponent(apiKey)}`); }catch(err){}
-  }
-  const filename=`${photo.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'stock-photo'}.jpg`;
-  if(photo.source==='hosted' || photo.source==='local'){
-    const a=document.createElement('a');
-    a.href=photo.download||photo.url;
-    a.download=filename;
-    a.click();
+  if(photo.source==='unsplash'){
+    if(photo.downloadLocation){
+      try{
+        await fetch('/api/stock/unsplash',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({downloadLocation:photo.downloadLocation})});
+      }catch(err){
+        if(apiKey) try{ await fetch(`${photo.downloadLocation}?client_id=${encodeURIComponent(apiKey)}`); }catch(innerErr){}
+      }
+    }
+    window.open(photo.download||photo.photoUrl||photo.url,'_blank','noopener');
     return;
   }
-  try{
-    const res=await fetch(photo.download||photo.url);
-    const blob=await res.blob();
-    const href=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=href;
-    a.download=filename;
-    a.click();
-    URL.revokeObjectURL(href);
-  }catch(err){
-    window.open(photo.download||photo.url,'_blank','noopener');
-  }
+  const a=document.createElement('a');
+  a.href=photo.download||photo.url;
+  a.download=`${photo.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'stock-photo'}.jpg`;
+  a.click();
 }
 
 function copyCredit(id){
@@ -366,55 +356,61 @@ function handleFiles(files){
   pendingFiles=[];
   const list=Array.from(files).filter(file=>file.type.startsWith('image/'));
   if(!list.length) return;
-  Promise.all(list.map(file=>new Promise(resolve=>{
-    const reader=new FileReader();
-    reader.onload=()=>resolve({name:file.name,data:reader.result,size:file.size});
-    reader.readAsDataURL(file);
-  }))).then(items=>{
-    pendingFiles=items;
-    $('pendingUploads').innerHTML=items.map(item=>`<div class="upload-preview"><img src="${item.data}" alt="${escapeHtml(item.name)}"><p><strong>${escapeHtml(item.name)}</strong><br>${Math.round(item.size/1024)} KB ready for release metadata.</p></div>`).join('');
-    if(!$('releaseTitle').value && items[0]) $('releaseTitle').value=items[0].name.replace(/\.[^.]+$/,'').replace(/[-_]+/g,' ');
-  });
+  pendingFiles=list;
+  $('pendingUploads').innerHTML=list.map(file=>`<div class="upload-preview"><img src="${URL.createObjectURL(file)}" alt="${escapeHtml(file.name)}"><p><strong>${escapeHtml(file.name)}</strong><br>${Math.round(file.size/1024)} KB ready to submit.</p></div>`).join('');
+  if(!$('uploadTitle').value && list[0]) $('uploadTitle').value=list[0].name.replace(/\.[^.]+$/,'').replace(/[-_]+/g,' ');
 }
 
-async function saveRelease(){
-  if(!pendingFiles.length) return;
-  const title=$('releaseTitle').value.trim()||'Community photo release';
-  const author=$('releaseAuthor').value.trim()||'Anonymous contributor';
-  const license=$('releaseLicense').value;
-  const tags=$('releaseTags').value.split(',').map(t=>t.trim()).filter(Boolean);
-  for(const file of pendingFiles){
-    await putRelease({
-      id:'release-'+Date.now()+'-'+Math.random().toString(36).slice(2),
-      title:pendingFiles.length>1?`${title} - ${file.name.replace(/\.[^.]+$/,'')}`:title,
-      author,license,tags,
-      category:'Community',
-      url:file.data,
-      download:file.data,
-      createdAt:new Date().toISOString()
-    });
+async function submitPhotos(){
+  const status=$('submitStatus');
+  status.className='submit-status';
+  if(!pendingFiles.length){
+    status.textContent='Choose at least one image first.';
+    status.classList.add('warn');
+    return;
   }
-  releases=await getReleases();
+  if(!$('rightsConsent').checked || !$('releaseConsent').checked){
+    status.textContent='Confirm rights and free release terms first.';
+    status.classList.add('warn');
+    return;
+  }
+  status.textContent='Uploading...';
+  let ok=0;
+  let pending=0;
+  for(const file of pendingFiles){
+    const form=new FormData();
+    form.append('file',file);
+    form.append('title',$('uploadTitle').value.trim()||file.name.replace(/\.[^.]+$/,''));
+    form.append('author',$('uploadAuthor').value.trim()||'Anonymous contributor');
+    form.append('category',$('uploadCategory').value);
+    form.append('license',$('uploadLicense').value);
+    form.append('tags',$('uploadTags').value);
+    form.append('rightsConsent','yes');
+    form.append('releaseConsent','yes');
+    const res=await fetch('/api/stock/upload',{method:'POST',body:form});
+    if(!res.ok){
+      const data=await res.json().catch(()=>({error:'Upload failed'}));
+      status.textContent=data.error||'Upload failed.';
+      status.classList.add('warn');
+      return;
+    }
+    const data=await res.json();
+    ok++;
+    if(data.status==='pending') pending++;
+  }
   pendingFiles=[];
   $('pendingUploads').innerHTML='';
   $('fileInput').value='';
-  renderReleaseList();
-}
-
-function renderReleaseList(){
-  $('releaseGallery').innerHTML=releases.map(r=>photoCard({...r,source:'local'})).join('');
-  $('releaseEmpty').style.display=releases.length?'none':'block';
-}
-
-function exportPack(){
-  const payload={version:1,exportedAt:new Date().toISOString(),releases};
-  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-  const href=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=href;
-  a.download='freedesignstore-stock-release-pack.json';
-  a.click();
-  URL.revokeObjectURL(href);
+  status.textContent=pending?`${ok} photo(s) submitted for review.`:`${ok} photo(s) published.`;
+  status.classList.add('ok');
+  await loadCommunityPhotos();
+  if(!pending){
+    activeSource='community';
+    document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.source==='community'));
+    $('submitSection').classList.remove('active');
+    $('librarySection').classList.add('active');
+    render();
+  }
 }
 
 init();
