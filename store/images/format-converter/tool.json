@@ -1,0 +1,58 @@
+{
+  "$schema": "https://openfrontier.one/schemas/browser-tool-v0.1.json",
+  "schemaVersion": "0.1",
+  "id": "ofo.design.image-convert",
+  "name": "Image Format Converter",
+  "description": "Convert SVG and browser-decodable images to PNG, JPEG, or WebP locally.",
+  "url": "https://freedesignstore.pages.dev/images/format-converter/",
+  "privacy": "local-only",
+  "deterministic": true,
+  "inputSchema": {
+    "type": "object",
+    "required": ["input"],
+    "properties": {
+      "input": {
+        "type": "object",
+        "description": "One of file, svg, dataUrl, or CORS-accessible url."
+      },
+      "options": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "enum": ["image/png", "image/jpeg", "image/webp"],
+            "default": "image/png"
+          },
+          "width": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "height": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxWidth": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "quality": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "background": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "output": {
+    "type": "artifact",
+    "transport": "blob"
+  },
+  "permissions": [
+    "input:provided-file",
+    "compute:canvas",
+    "output:create-file"
+  ]
+}
