@@ -85,3 +85,5 @@ For writes, use a client that can send the bearer token header to the remote MCP
 Browser sign-in is intentionally disabled until FDS has its own identity provider and OAuth credentials. FDS and FAS are separate products for separate audiences; FDS must not use FAS as its public auth provider.
 
 The MCP worker still contains OAuth support, but it is only enabled when an FDS-owned `AUTH_START` is configured. Until then, use explicit FDS creator/admin bearer tokens for MCP writes.
+
+The public FDS origin proxies the whole MCP surface to the backend Worker: `/mcp`, `/register`, `/authorize`, `/token`, `/.well-known/oauth-*`, and `/.fds/auth/*`. That keeps the external integration FDS-branded when FDS auth is turned on.
