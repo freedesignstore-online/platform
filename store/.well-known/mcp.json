@@ -16,8 +16,16 @@
           "description": "Check storage readiness and asset counts"
         },
         {
+          "name": "whoami",
+          "description": "Show the authenticated creator/admin account"
+        },
+        {
           "name": "list_assets",
           "description": "List public or admin-visible pending catalog assets"
+        },
+        {
+          "name": "my_assets",
+          "description": "List assets owned by the authenticated creator account"
         },
         {
           "name": "get_asset",
@@ -25,11 +33,11 @@
         },
         {
           "name": "create_svg_asset",
-          "description": "Create a hosted generated SVG asset"
+          "description": "Create a hosted generated SVG asset under the authenticated account"
         },
         {
           "name": "create_asset_from_url",
-          "description": "Ingest a public non-Unsplash HTTPS image URL"
+          "description": "Ingest a public non-Unsplash HTTPS image URL under the authenticated account"
         },
         {
           "name": "moderate_asset",

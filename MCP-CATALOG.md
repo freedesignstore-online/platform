@@ -8,14 +8,16 @@ It follows the FAS/FAGS/PAGS pattern: a dedicated Cloudflare Worker using `agent
 
 - `asset_policy` - explains what can be hosted and the Unsplash rule.
 - `catalog_status` - checks storage bindings and counts public/pending assets.
+- `whoami` - shows the authenticated creator/admin account for the MCP session.
 - `list_assets` - lists public assets, or pending assets with admin auth.
+- `my_assets` - lists assets owned by the authenticated creator account.
 - `get_asset` - returns metadata and download URL for one asset.
-- `create_svg_asset` - stores a generated SVG illustration/icon/pattern/background.
-- `create_asset_from_url` - fetches a public HTTPS image and stores it in R2.
+- `create_svg_asset` - stores a generated SVG illustration/icon/pattern/background under the authenticated account.
+- `create_asset_from_url` - fetches a public HTTPS non-Unsplash image and stores it in R2 under the authenticated account.
 - `moderate_asset` - publishes or rejects pending assets.
 - `delete_asset` - deletes catalog metadata and the R2 object.
 
-Writes require `Authorization: Bearer <STOCK_ADMIN_TOKEN>` or `MCP_ADMIN_TOKEN`.
+Creator writes require `Authorization: Bearer <creator token>`. Admin actions require `Authorization: Bearer <STOCK_ADMIN_TOKEN>` or `MCP_ADMIN_TOKEN`.
 
 ## Legal Guardrails
 
@@ -32,11 +34,28 @@ Before deploying in a new environment, wire it to the same production storage us
 1. Create or identify the R2 bucket bound to Pages as `FDS_STOCK_BUCKET`.
 2. Create or identify the KV namespace bound to Pages as `FDS_STOCK_KV`.
 3. Confirm `workers/mcp/wrangler.toml` uses the real namespace id. If your R2 bucket is not named `fds-stock-assets`, replace that too.
-4. Set the write token:
+4. Set the admin write token and optional creator-token map:
 
 ```sh
 cd workers/mcp
 npx wrangler secret put STOCK_ADMIN_TOKEN
+npx wrangler secret put FDS_CREATOR_TOKENS
+```
+
+`FDS_CREATOR_TOKENS` is JSON. Supported shapes:
+
+```json
+[
+  { "accountId": "creator-id", "name": "Creator Name", "token": "secret-token" }
+]
+```
+
+or:
+
+```json
+{
+  "creator-id": { "name": "Creator Name", "token": "secret-token" }
+}
 ```
 
 Then deploy:

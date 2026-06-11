@@ -7,12 +7,16 @@ interface Env {
   FDS_STOCK_KV?: KVNamespace;
   STOCK_ADMIN_TOKEN?: string;
   MCP_ADMIN_TOKEN?: string;
+  FDS_CREATOR_TOKENS?: string;
+  CREATOR_TOKENS?: string;
   PUBLIC_BASE_URL?: string;
   MCP_OBJECT: DurableObjectNamespace;
 }
 
 interface McpProps extends Record<string, unknown> {
   isAdmin?: boolean;
+  accountId?: string;
+  accountName?: string;
 }
 
 interface CatalogItem {
@@ -30,14 +34,18 @@ interface CatalogItem {
   size: number;
   source?: 'community' | 'mcp';
   sourceUrl?: string;
+  ownerAccountId?: string;
+  ownerName?: string;
   createdAt: string;
   updatedAt?: string;
 }
 
 type AssetType = 'photo' | 'illustration' | 'icon' | 'pattern' | 'texture' | 'background' | 'ui';
+type CreatorAccount = { accountId: string; name: string; token: string };
 
 const PUBLIC_INDEX = 'stock:index:public';
 const PENDING_INDEX = 'stock:index:pending';
+const ACCOUNT_INDEX_PREFIX = 'stock:index:account:';
 const ITEM_PREFIX = 'stock:item:';
 const MAX_ITEMS = 500;
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
@@ -131,8 +139,63 @@ function assertAdmin(props: McpProps): string | null {
   return props.isAdmin ? null : 'Not authorized. Connect with Authorization: Bearer <STOCK_ADMIN_TOKEN> or MCP_ADMIN_TOKEN.';
 }
 
+function assertAccount(props: McpProps): string | null {
+  return props.accountId ? null : 'Not authenticated. Connect with a creator token or admin token.';
+}
+
 function currentProps(props: McpProps | undefined): McpProps {
   return props || {};
+}
+
+function safeAccountId(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-|-$/g, '').slice(0, 80) || 'creator';
+}
+
+function accountIndexKey(accountId: string): string {
+  return `${ACCOUNT_INDEX_PREFIX}${safeAccountId(accountId)}`;
+}
+
+function itemForAccount(env: Env, item: CatalogItem) {
+  return {
+    ...publicItem(env, item),
+    ownerAccountId: item.ownerAccountId,
+    ownerName: item.ownerName,
+    filename: item.filename,
+    contentType: item.contentType,
+    size: item.size,
+    sourceUrl: item.sourceUrl,
+  };
+}
+
+function isOwner(props: McpProps, item: CatalogItem): boolean {
+  return Boolean(props.accountId && item.ownerAccountId && safeAccountId(props.accountId) === safeAccountId(item.ownerAccountId));
+}
+
+function parseCreatorAccounts(env: Env): CreatorAccount[] {
+  const raw = env.FDS_CREATOR_TOKENS || env.CREATOR_TOKENS || '';
+  if (!raw.trim()) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      return parsed
+        .map((entry) => ({
+          accountId: cleanText(entry?.accountId || entry?.id, '', 80),
+          name: cleanText(entry?.name, entry?.accountId || entry?.id || 'Creator', 80),
+          token: String(entry?.token || ''),
+        }))
+        .filter((entry) => entry.accountId && entry.token);
+    }
+    if (parsed && typeof parsed === 'object') {
+      return Object.entries(parsed as Record<string, { name?: string; token?: string } | string>)
+        .map(([accountId, value]) => {
+          const token = typeof value === 'string' ? value : String(value?.token || '');
+          const name = typeof value === 'string' ? accountId : cleanText(value?.name, accountId, 80);
+          return { accountId: cleanText(accountId, '', 80), name, token };
+        })
+        .filter((entry) => entry.accountId && entry.token);
+    }
+  } catch {}
+  return [];
 }
 
 async function readIndex(kv: KVNamespace, key: string): Promise<string[]> {
@@ -193,6 +256,8 @@ async function createAsset(params: {
   tags?: string[] | string;
   publish?: boolean;
   sourceUrl?: string;
+  ownerAccountId?: string;
+  ownerName?: string;
 }) {
   const size = params.bytes.byteLength;
   if (!allowedTypes.has(params.contentType)) return { ok: false, error: 'Only JPG, PNG, WebP, AVIF, and SVG assets are accepted.' };
@@ -234,13 +299,16 @@ async function createAsset(params: {
     size,
     source: 'mcp',
     sourceUrl: params.sourceUrl,
+    ownerAccountId: params.ownerAccountId ? safeAccountId(params.ownerAccountId) : undefined,
+    ownerName: params.ownerName,
     createdAt: now,
   };
 
   await putItem(params.kv, item);
   await addToIndex(params.kv, status === 'public' ? PUBLIC_INDEX : PENDING_INDEX, id);
+  if (item.ownerAccountId) await addToIndex(params.kv, accountIndexKey(item.ownerAccountId), id);
 
-  return { ok: true, item: publicItem(params.env, item), admin: { id, status, objectKey, size } };
+  return { ok: true, item: itemForAccount(params.env, item), admin: { id, status, objectKey, size, ownerAccountId: item.ownerAccountId } };
 }
 
 export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
@@ -286,8 +354,45 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
           publicCount: publicIds.length,
           pendingCount: pendingIds.length,
           publicBaseUrl: publicBase(this.env),
-          writesEnabled: Boolean(currentProps(this.props).isAdmin),
+          accountAuthenticated: Boolean(currentProps(this.props).accountId),
+          accountId: currentProps(this.props).accountId,
+          isAdmin: Boolean(currentProps(this.props).isAdmin),
         });
+      },
+    );
+
+    this.server.tool(
+      'whoami',
+      'Show the authenticated creator/admin account for this MCP session.',
+      {},
+      async () => {
+        const props = currentProps(this.props);
+        return jsonText({
+          authenticated: Boolean(props.accountId),
+          accountId: props.accountId || null,
+          accountName: props.accountName || null,
+          isAdmin: Boolean(props.isAdmin),
+        });
+      },
+    );
+
+    this.server.tool(
+      'my_assets',
+      'List assets owned by the authenticated creator account.',
+      {
+        status: z.enum(['all', 'public', 'pending', 'rejected']).optional().describe('Filter by asset status'),
+        limit: z.number().int().min(1).max(100).optional().describe('Maximum assets to return'),
+      },
+      async ({ status = 'all', limit = 50 }) => {
+        const props = currentProps(this.props);
+        const authError = assertAccount(props);
+        if (authError) return txt(authError);
+        const store = requireStore(this.env);
+        if (typeof store === 'string') return txt(store);
+        const ids = await readIndex(store.kv, accountIndexKey(props.accountId || ''));
+        const items = (await Promise.all(ids.map((id) => getItem(store.kv, id)))).filter((item): item is CatalogItem => Boolean(item));
+        const filtered = items.filter((item) => status === 'all' || item.status === status).slice(0, limit);
+        return jsonText(filtered.map((item) => itemForAccount(this.env, item)));
       },
     );
 
@@ -330,20 +435,14 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         const item = await getItem(store.kv, id);
         if (!item) return txt(`Asset not found: ${id}`);
         const props = currentProps(this.props);
-        if (item.status !== 'public' && !props.isAdmin) return txt(assertAdmin(props) || 'Not authorized.');
-        return jsonText({
-          ...publicItem(this.env, item),
-          filename: item.filename,
-          contentType: item.contentType,
-          size: item.size,
-          sourceUrl: item.sourceUrl,
-        });
+        if (item.status !== 'public' && !props.isAdmin && !isOwner(props, item)) return txt('Not authorized to view this asset.');
+        return jsonText(itemForAccount(this.env, item));
       },
     );
 
     this.server.tool(
       'create_svg_asset',
-      'Create a hosted SVG illustration, icon, pattern, background, or UI asset. Requires admin auth.',
+      'Create a hosted SVG illustration, icon, pattern, background, or UI asset under the authenticated creator account.',
       {
         title: z.string().describe('Asset title'),
         svg: z.string().describe('Complete SVG markup'),
@@ -352,10 +451,11 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         author: z.string().optional().describe('Author or contributor credit'),
         license: z.string().optional().describe('License label shown to users'),
         tags: z.array(z.string()).optional().describe('Search tags'),
-        publish: z.boolean().optional().describe('Publish immediately instead of leaving pending'),
+        publish: z.boolean().optional().describe('Publish immediately instead of leaving pending. Admin only; creator submissions stay pending.'),
       },
       async ({ title, svg, asset_type = 'illustration', category, author, license, tags, publish = false }) => {
-        const authError = assertAdmin(currentProps(this.props));
+        const props = currentProps(this.props);
+        const authError = assertAccount(props);
         if (authError) return txt(authError);
         const store = requireStore(this.env);
         if (typeof store === 'string') return txt(store);
@@ -370,10 +470,12 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
           title,
           assetType: asset_type,
           category,
-          author,
+          author: author || props.accountName,
           license,
           tags,
-          publish,
+          publish: Boolean(props.isAdmin && publish),
+          ownerAccountId: props.accountId,
+          ownerName: props.accountName,
         });
         return jsonText(result);
       },
@@ -381,7 +483,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
 
     this.server.tool(
       'create_asset_from_url',
-      'Fetch a public image URL and host it in the FDS catalog. Unsplash URLs are rejected. Requires admin auth.',
+      'Fetch a public image URL and host it in the FDS catalog under the authenticated creator account. Unsplash URLs are rejected.',
       {
         url: z.string().url().describe('Direct public image URL to ingest'),
         title: z.string().describe('Asset title'),
@@ -390,10 +492,11 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         author: z.string().optional().describe('Author or contributor credit'),
         license: z.string().optional().describe('License label shown to users'),
         tags: z.array(z.string()).optional().describe('Search tags'),
-        publish: z.boolean().optional().describe('Publish immediately instead of leaving pending'),
+        publish: z.boolean().optional().describe('Publish immediately instead of leaving pending. Admin only; creator submissions stay pending.'),
       },
       async ({ url, title, asset_type = 'photo', category, author, license, tags, publish = false }) => {
-        const authError = assertAdmin(currentProps(this.props));
+        const props = currentProps(this.props);
+        const authError = assertAccount(props);
         if (authError) return txt(authError);
         const store = requireStore(this.env);
         if (typeof store === 'string') return txt(store);
@@ -427,11 +530,13 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
           title,
           assetType: asset_type,
           category,
-          author,
+          author: author || props.accountName,
           license,
           tags,
-          publish,
+          publish: Boolean(props.isAdmin && publish),
           sourceUrl: parsed.toString(),
+          ownerAccountId: props.accountId,
+          ownerName: props.accountName,
         });
         return jsonText(result);
       },
@@ -465,20 +570,24 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
 
     this.server.tool(
       'delete_asset',
-      'Delete a catalog asset and its R2 object. Requires admin auth.',
+      'Delete a catalog asset and its R2 object. Admins can delete any asset; creators can delete their own unpublished assets.',
       { id: z.string().describe('Catalog asset id') },
       async ({ id }) => {
-        const authError = assertAdmin(currentProps(this.props));
+        const props = currentProps(this.props);
+        const authError = assertAccount(props);
         if (authError) return txt(authError);
         const store = requireStore(this.env);
         if (typeof store === 'string') return txt(store);
         const item = await getItem(store.kv, id);
         if (!item) return txt(`Asset not found: ${id}`);
+        if (!props.isAdmin && !isOwner(props, item)) return txt('Not authorized to delete this asset.');
+        if (!props.isAdmin && item.status === 'public') return txt('Published assets require admin removal.');
 
         await store.bucket.delete(item.objectKey);
         await deleteItem(store.kv, id);
         await removeFromIndex(store.kv, PUBLIC_INDEX, id);
         await removeFromIndex(store.kv, PENDING_INDEX, id);
+        if (item.ownerAccountId) await removeFromIndex(store.kv, accountIndexKey(item.ownerAccountId), id);
         return jsonText({ ok: true, deleted: id });
       },
     );
@@ -490,7 +599,14 @@ async function authenticateRequest(request: Request, env: Env): Promise<McpProps
   if (!auth.startsWith('Bearer ')) return {};
   const token = auth.slice(7).trim();
   const adminToken = env.MCP_ADMIN_TOKEN || env.STOCK_ADMIN_TOKEN;
-  return { isAdmin: Boolean(adminToken && token === adminToken) };
+  if (adminToken && token === adminToken) {
+    return { isAdmin: true, accountId: 'admin', accountName: 'FreeDesignStore Admin' };
+  }
+  const creator = parseCreatorAccounts(env).find((account) => account.token === token);
+  if (creator) {
+    return { isAdmin: false, accountId: safeAccountId(creator.accountId), accountName: creator.name };
+  }
+  return {};
 }
 
 export default {
@@ -503,10 +619,11 @@ export default {
         '',
         'Connect: npx mcp-remote https://freedesignstore-mcp.serge-the-dev.workers.dev/mcp',
         '',
-        'Read:     asset_policy, catalog_status, list_assets, get_asset',
-        'Write:    create_svg_asset, create_asset_from_url, moderate_asset, delete_asset',
+        'Read:     asset_policy, catalog_status, whoami, list_assets, my_assets, get_asset',
+        'Create:   create_svg_asset, create_asset_from_url (creator/admin token)',
+        'Admin:    moderate_asset, delete_asset',
         '',
-        'Write auth: Authorization: Bearer <STOCK_ADMIN_TOKEN or MCP_ADMIN_TOKEN>',
+        'Auth: Authorization: Bearer <creator token, STOCK_ADMIN_TOKEN, or MCP_ADMIN_TOKEN>',
         'Unsplash: link off for download; do not mirror into FDS.',
       ].join('\n'), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
     }
@@ -516,7 +633,7 @@ export default {
       return Response.json({
         ok: typeof store !== 'string',
         storage: typeof store === 'string' ? 'missing' : 'configured',
-        tools: 8,
+        tools: 10,
       });
     }
 
