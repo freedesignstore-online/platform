@@ -40,7 +40,6 @@ export async function onRequestGet({ request, env }) {
       author: photo.user?.name || "Unsplash photographer",
       license: "Unsplash License",
       url: photo.urls?.small,
-      download: photo.urls?.full || photo.urls?.raw,
       downloadLocation: photo.links?.download_location,
       creditUrl: `${photo.user?.links?.html || photo.links?.html}?utm_source=${APP}&utm_medium=referral`,
       photoUrl: `${photo.links?.html}?utm_source=${APP}&utm_medium=referral`,
