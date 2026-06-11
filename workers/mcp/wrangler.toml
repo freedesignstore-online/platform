@@ -1,0 +1,32 @@
+name = "freedesignstore-mcp"
+main = "src/index.ts"
+compatibility_date = "2026-03-17"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+[vars]
+PUBLIC_BASE_URL = "https://freedesignstore.pages.dev"
+
+# Secrets:
+#   STOCK_ADMIN_TOKEN - same value used by the Pages Functions upload backend.
+#   MCP_ADMIN_TOKEN   - optional separate write token for MCP clients.
+#
+# Before deploy, replace the KV id with the namespace bound to the Pages project
+# as FDS_STOCK_KV. The R2 bucket name must match the Pages FDS_STOCK_BUCKET bucket.
+
+[[kv_namespaces]]
+binding = "FDS_STOCK_KV"
+id = "00000000000000000000000000000000"
+
+[[r2_buckets]]
+binding = "FDS_STOCK_BUCKET"
+bucket_name = "fds-stock-assets"
+
+[durable_objects]
+bindings = [
+  { name = "MCP_OBJECT", class_name = "FdsCatalogMcp" }
+]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["FdsCatalogMcp"]
