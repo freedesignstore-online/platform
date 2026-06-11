@@ -377,8 +377,8 @@ function signedInPage(config: OAuthConfig, userId: string): Response {
 </html>`);
 }
 
-function redirectWithAuthError(url: URL, returnPath: string, reason: string, cookies: string[] = []): Response {
-  const dest = new URL(returnPath, url.origin);
+function redirectWithAuthError(origin: string, returnPath: string, reason: string, cookies: string[] = []): Response {
+  const dest = new URL(returnPath, origin);
   dest.hash = `auth_error=${encodeURIComponent(reason)}`;
   return redirect(dest.toString(), 303, cookies);
 }
@@ -387,8 +387,9 @@ async function authStart(request: Request, config: OAuthConfig): Promise<Respons
   if (request.method !== 'GET') return methodNotAllowed('GET');
   const session = await currentSession(request, config);
   const url = new URL(request.url);
-  const returnPath = sameOriginPath(url, url.searchParams.get('return_to') || '/console/');
-  if (session) return redirect(new URL(returnPath, url.origin).toString(), 303);
+  const issuerUrl = new URL(config.issuer);
+  const returnPath = sameOriginPath(issuerUrl, url.searchParams.get('return_to') || '/console/');
+  if (session) return redirect(new URL(returnPath, config.issuer).toString(), 303);
   const nonce = crypto.randomUUID();
   return signInPage({ config, nonce, returnPath });
 }
@@ -398,13 +399,13 @@ async function authLogin(request: Request, config: OAuthConfig): Promise<Respons
   const url = new URL(request.url);
   const form = await request.formData();
   const nonce = String(form.get('nonce') || '');
-  const returnPath = sameOriginPath(url, String(form.get('return_to') || '/console/'));
+  const returnPath = sameOriginPath(new URL(config.issuer), String(form.get('return_to') || '/console/'));
   const authNonce = String(form.get('auth_nonce') || '');
 
   if (!nonceMatches(request, nonce)) {
     return authNonce
       ? new Response('Invalid or expired sign-in state. Restart authorization from your MCP client.', { status: 400 })
-      : redirectWithAuthError(url, returnPath, 'invalid_state', [clearNonceCookie()]);
+      : redirectWithAuthError(config.issuer, returnPath, 'invalid_state', [clearNonceCookie()]);
   }
 
   const creator = findCreator(config, String(form.get('account_id') || ''), String(form.get('creator_code') || ''));
@@ -430,7 +431,7 @@ async function authLogin(request: Request, config: OAuthConfig): Promise<Respons
     for (const cookie of cookies) headers.append('Set-Cookie', cookie);
     return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
   }
-  return redirect(new URL(returnPath, url.origin).toString(), 303, cookies);
+  return redirect(new URL(returnPath, config.issuer).toString(), 303, cookies);
 }
 
 async function authApprove(request: Request, config: OAuthConfig): Promise<Response> {
