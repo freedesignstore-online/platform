@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Creator Console - FreeDesignStore</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f6f7f9;color:#17202a}button,input,select,textarea{font:inherit}button{cursor:pointer}.app{min-height:100vh;display:grid;grid-template-columns:260px 1fr}.side{background:#111827;color:#fff;padding:18px;display:flex;flex-direction:column;gap:18px}.brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}.mark{width:34px;height:34px;border-radius:8px;background:#ec4899;display:grid;place-items:center}.nav{display:grid;gap:6px}.nav button{border:0;background:transparent;color:#cbd5e1;text-align:left;padding:10px 11px;border-radius:7px}.nav button.active,.nav button:hover{background:rgba(255,255,255,.1);color:#fff}.side small{color:#94a3b8;line-height:1.45;margin-top:auto}.main{min-width:0}.top{height:64px;background:#fff;border-bottom:1px solid #dfe4ec;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 24px}.top h1{font-size:18px;margin:0}.user{display:flex;align-items:center;gap:10px;color:#4b5563;font-size:13px}.dot{width:9px;height:9px;border-radius:99px;background:#ef4444}.dot.ok{background:#10b981}.content{padding:22px;display:grid;gap:18px}.panel{background:#fff;border:1px solid #dfe4ec;border-radius:8px;padding:18px}.panel h2{font-size:16px;margin:0 0 12px}.panel p{margin:0 0 12px;color:#5b6472;line-height:1.5}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.stat{background:#f8fafc;border:1px solid #e5eaf2;border-radius:8px;padding:14px}.stat span{font-size:12px;color:#667085}.stat strong{display:block;font-size:26px;margin-top:5px}.form{display:grid;gap:12px}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:grid;gap:6px}.field label{font-size:12px;font-weight:700;color:#364152}.field input,.field select,.field textarea{width:100%;border:1px solid #cfd6e3;border-radius:7px;padding:10px 11px;background:#fff;color:#17202a}.field textarea{min-height:110px;resize:vertical}.actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:1px solid #111827;background:#111827;color:#fff;border-radius:7px;padding:10px 13px;font-weight:800}.btn.secondary{background:#fff;color:#111827;border-color:#cfd6e3}.btn.danger{background:#fff;color:#b42318;border-color:#f3b8b1}.btn:disabled{opacity:.55;cursor:not-allowed}.notice{border:1px solid #f4d58d;background:#fff8e6;color:#7a4b00;border-radius:8px;padding:12px;font-size:13px;line-height:1.45}.assets{display:grid;gap:10px}.asset{display:grid;grid-template-columns:1fr auto;gap:12px;border:1px solid #e5eaf2;background:#fff;border-radius:8px;padding:14px}.asset h3{font-size:15px;margin:0 0 6px}.meta{display:flex;gap:8px;flex-wrap:wrap}.pill{font-size:12px;border:1px solid #d6dce6;border-radius:99px;padding:3px 8px;color:#4b5563;background:#f8fafc}.pill.pending{border-color:#f4d58d;background:#fff8e6;color:#7a4b00}.pill.public{border-color:#a6e7c4;background:#ecfdf3;color:#067647}.links{display:flex;gap:8px;align-items:start}.links a{font-size:12px;color:#111827;font-weight:800;text-decoration:none;border:1px solid #d6dce6;border-radius:7px;padding:7px 9px}.empty{color:#667085;text-align:center;padding:26px;border:1px dashed #cfd6e3;border-radius:8px}.hidden{display:none!important}.log{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#0f172a;color:#d1e7ff;border-radius:8px;padding:12px;white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto}.preview{border:1px solid #dfe4ec;border-radius:8px;background:#f8fafc;min-height:180px;display:grid;place-items:center;overflow:hidden}.preview svg{max-width:100%;height:auto}.small{font-size:12px;color:#667085}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.toolbar h2{margin:0}@media (max-width:900px){.app{grid-template-columns:1fr}.side{position:static}.grid,.row{grid-template-columns:1fr}.top{height:auto;align-items:flex-start;flex-direction:column;padding:16px}.asset{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <a class="brand" href="/"><span class="mark">FDS</span><span>Creator Console</span></a>
+    <div class="nav">
+      <button class="active" data-view="overview">Overview</button>
+      <button data-view="assets">My Assets</button>
+      <button data-view="create">Create SVG</button>
+      <button data-view="settings">Connection</button>
+    </div>
+    <small>FDS auth is not enabled yet. This console uses an explicit FDS MCP bearer token and talks only to the FDS MCP endpoint.</small>
+  </aside>
+  <main class="main">
+    <header class="top">
+      <h1 id="viewTitle">Overview</h1>
+      <div class="user"><span id="statusDot" class="dot"></span><span id="userLabel">Not connected</span></div>
+    </header>
+    <div class="content">
+      <section id="loginPanel" class="panel">
+        <h2>Connect Creator Account</h2>
+        <p>Paste an FDS creator or admin bearer token to manage your catalog submissions. The token is stored only in this browser session unless you choose to remember it.</p>
+        <div class="form">
+          <div class="field">
+            <label for="tokenInput">FDS MCP bearer token</label>
+            <input id="tokenInput" type="password" autocomplete="off" placeholder="Paste token">
+          </div>
+          <label class="small"><input id="rememberToken" type="checkbox"> Remember on this device</label>
+          <div class="actions">
+            <button id="connectBtn" class="btn">Connect</button>
+            <button id="clearBtn" class="btn secondary">Clear token</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="overview" class="panel view">
+        <div class="toolbar"><h2>Catalog Status</h2><button class="btn secondary" data-refresh>Refresh</button></div>
+        <div class="grid">
+          <div class="stat"><span>Public assets</span><strong id="publicCount">-</strong></div>
+          <div class="stat"><span>Pending assets</span><strong id="pendingCount">-</strong></div>
+          <div class="stat"><span>My assets</span><strong id="mineCount">-</strong></div>
+          <div class="stat"><span>Admin</span><strong id="adminFlag">-</strong></div>
+        </div>
+      </section>
+
+      <section id="assets" class="panel view hidden">
+        <div class="toolbar"><h2>My Assets</h2><button class="btn secondary" data-refresh>Refresh</button></div>
+        <div id="assetList" class="assets"><div class="empty">Connect to load your assets.</div></div>
+      </section>
+
+      <section id="create" class="panel view hidden">
+        <h2>Create SVG Asset</h2>
+        <div class="notice">Creator submissions are saved as pending for review. SVGs are sanitized by the MCP worker; scripts, event handlers, foreignObject, iframes, embeds, and unsafe URLs are rejected.</div>
+        <div class="row">
+          <div class="form">
+            <div class="field"><label for="assetTitle">Title</label><input id="assetTitle" value="Console Creator Illustration"></div>
+            <div class="row">
+              <div class="field"><label for="assetType">Type</label><select id="assetType"><option value="illustration">Illustration</option><option value="icon">Icon</option><option value="pattern">Pattern</option><option value="background">Background</option><option value="ui">UI</option></select></div>
+              <div class="field"><label for="assetCategory">Category</label><input id="assetCategory" value="Creator Tools"></div>
+            </div>
+            <div class="row">
+              <div class="field"><label for="assetAuthor">Author</label><input id="assetAuthor" value="Serge"></div>
+              <div class="field"><label for="assetLicense">License</label><input id="assetLicense" value="FreeDesignStore community free asset"></div>
+            </div>
+            <div class="field"><label for="assetTags">Tags</label><input id="assetTags" value="console, creator, illustration"></div>
+            <div class="field"><label for="assetPrompt">Design prompt</label><textarea id="assetPrompt">A clean designer console workspace with a monitor, color swatches, vector nodes, and an upload cloud.</textarea></div>
+            <div class="actions">
+              <button id="previewBtn" class="btn secondary">Preview SVG</button>
+              <button id="createBtn" class="btn">Submit Pending Asset</button>
+            </div>
+          </div>
+          <div class="preview" id="svgPreview"></div>
+        </div>
+      </section>
+
+      <section id="settings" class="panel view hidden">
+        <h2>Connection</h2>
+        <p>MCP endpoint: <strong>https://freedesignstore.pages.dev/mcp</strong></p>
+        <p>Browser sign-in will be enabled only after FDS has its own identity provider. This console does not use FAS or PAS auth.</p>
+        <div class="actions"><button id="disconnectBtn" class="btn danger">Disconnect</button></div>
+      </section>
+
+      <section class="panel">
+        <h2>Activity</h2>
+        <div id="log" class="log">Ready.</div>
+      </section>
+    </div>
+  </main>
+</div>
+<script>
+const MCP_ENDPOINT='/mcp';
+const PROTOCOL_VERSION='2025-06-18';
+const $=id=>document.getElementById(id);
+const state={token:sessionStorage.getItem('fds_mcp_token')||localStorage.getItem('fds_mcp_token')||'',sessionId:'',nextId:1,user:null,status:null,assets:[]};
+
+function log(message){$('log').textContent=`${new Date().toLocaleTimeString()}  ${message}\n`+$('log').textContent;}
+function setConnected(on){$('statusDot').classList.toggle('ok',on);$('userLabel').textContent=on&&state.user?`${state.user.accountName||state.user.accountId}${state.user.isAdmin?' (admin)':''}`:'Not connected';$('loginPanel').classList.toggle('hidden',on);}
+function tokenHeaders(){return {'content-type':'application/json','accept':'application/json, text/event-stream','authorization':`Bearer ${state.token}`,...(state.sessionId?{'mcp-session-id':state.sessionId}:{})};}
+function parseSse(text){const line=text.split('\n').find(row=>row.startsWith('data: '));if(!line) return null;return JSON.parse(line.slice(6));}
+async function mcpPost(payload){if(!state.token) throw new Error('Connect with an FDS MCP bearer token first.');const res=await fetch(MCP_ENDPOINT,{method:'POST',headers:tokenHeaders(),body:JSON.stringify(payload)});const session=res.headers.get('mcp-session-id');if(session) state.sessionId=session;if(res.status===202) return null;const text=await res.text();if(!res.ok) throw new Error(text||`MCP HTTP ${res.status}`);const msg=(res.headers.get('content-type')||'').includes('text/event-stream')?parseSse(text):JSON.parse(text);if(msg?.error) throw new Error(msg.error.message||JSON.stringify(msg.error));return msg?.result??msg;}
+async function initialize(){state.sessionId='';await mcpPost({jsonrpc:'2.0',id:state.nextId++,method:'initialize',params:{protocolVersion:PROTOCOL_VERSION,capabilities:{},clientInfo:{name:'fds-creator-console',version:'1.0.0'}}});await mcpPost({jsonrpc:'2.0',method:'notifications/initialized'});}
+async function callTool(name,args={}){const result=await mcpPost({jsonrpc:'2.0',id:state.nextId++,method:'tools/call',params:{name,arguments:args}});const text=result?.content?.find(item=>item.type==='text')?.text||'';try{return JSON.parse(text);}catch{return text;}}
+async function refreshAll(){await initialize();state.user=await callTool('whoami');state.status=await callTool('catalog_status');state.assets=await callTool('my_assets');render();log(`Loaded ${state.assets.length} asset(s).`);}
+function render(){setConnected(Boolean(state.user?.authenticated));$('publicCount').textContent=state.status?.publicCount??'-';$('pendingCount').textContent=state.status?.pendingCount??'-';$('mineCount').textContent=state.assets?.length??'-';$('adminFlag').textContent=state.user?.isAdmin?'Yes':'No';$('assetList').innerHTML=state.assets.length?state.assets.map(assetCard).join(''):'<div class="empty">No assets yet.</div>';}
+function assetCard(a){const status=String(a.status||'pending');return `<div class="asset"><div><h3>${escapeHtml(a.title)}</h3><div class="meta"><span class="pill ${status}">${escapeHtml(status)}</span><span class="pill">${escapeHtml(a.assetType||'asset')}</span><span class="pill">${escapeHtml(a.filename||'')}</span><span class="pill">${escapeHtml(a.contentType||'')}</span></div><p class="small">${escapeHtml(a.category||'')} · ${escapeHtml((a.tags||[]).join(', '))}</p></div><div class="links">${a.url?`<a href="${escapeAttr(a.url)}" target="_blank" rel="noopener">Open</a>`:''}${a.download?`<a href="${escapeAttr(a.download)}" target="_blank" rel="noopener">Download</a>`:''}</div></div>`;}
+function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+function escapeAttr(value){return escapeHtml(value).replace(/`/g,'&#96;');}
+function slug(value){return String(value||'asset').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)||'asset';}
+function makeSvg(){const title=escapeHtml($('assetTitle').value||'FDS Console Asset');const prompt=escapeHtml($('assetPrompt').value||'Creator workspace');const seed=slug(title);return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc"><title id="title">${title}</title><desc id="desc">${prompt}</desc><defs><linearGradient id="bg-${seed}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f8fafc"/><stop offset="1" stop-color="#dbeafe"/></linearGradient><linearGradient id="accent-${seed}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ec4899"/><stop offset="1" stop-color="#3b82f6"/></linearGradient></defs><rect width="1200" height="800" fill="url(#bg-${seed})"/><rect x="135" y="570" width="930" height="52" rx="18" fill="#1f2937"/><rect x="280" y="150" width="500" height="330" rx="28" fill="#111827"/><rect x="310" y="180" width="440" height="250" rx="16" fill="#f8fafc"/><path d="M350 370 C430 285 505 410 580 315 S700 330 725 240" fill="none" stroke="url(#accent-${seed})" stroke-width="14" stroke-linecap="round"/><g fill="#fff" stroke="#111827" stroke-width="8"><circle cx="350" cy="370" r="22"/><circle cx="505" cy="410" r="22"/><circle cx="580" cy="315" r="22"/><circle cx="725" cy="240" r="22"/></g><rect x="470" y="480" width="120" height="90" rx="12" fill="#374151"/><rect x="410" y="560" width="240" height="25" rx="12" fill="#111827"/><g transform="translate(810 210)"><rect width="210" height="250" rx="24" fill="#fff" stroke="#d1d5db" stroke-width="8"/><rect x="28" y="35" width="58" height="58" rx="12" fill="#ec4899"/><rect x="102" y="35" width="58" height="58" rx="12" fill="#3b82f6"/><rect x="28" y="112" width="58" height="58" rx="12" fill="#10b981"/><rect x="102" y="112" width="58" height="58" rx="12" fill="#f59e0b"/><path d="M65 215h80" stroke="#111827" stroke-width="12" stroke-linecap="round"/></g><g transform="translate(145 250)"><path d="M95 120c-39 0-70-27-70-61 0-31 25-56 58-60 17-32 55-52 96-45 48 8 83 45 83 89 37 8 64 37 64 71 0 41-39 74-87 74H95z" fill="#fff" stroke="#bfdbfe" stroke-width="10"/><path d="M177 143V64m0 0-38 38m38-38 38 38" fill="none" stroke="#2563eb" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/></g><g fill="#111827"><circle cx="224" cy="648" r="16"/><circle cx="976" cy="648" r="16"/></g><text x="600" y="705" text-anchor="middle" fill="#475467" font-family="Inter,Arial,sans-serif" font-size="28" font-weight="700">${title}</text></svg>`;}
+function previewSvg(){const svg=makeSvg();$('svgPreview').innerHTML=svg;return svg;}
+
+document.querySelectorAll('.nav button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));$(btn.dataset.view).classList.remove('hidden');$('viewTitle').textContent=btn.textContent;}));
+document.querySelectorAll('[data-refresh]').forEach(btn=>btn.addEventListener('click',()=>refreshAll().catch(err=>log(`Refresh failed: ${err.message}`))));
+$('connectBtn').addEventListener('click',async()=>{state.token=$('tokenInput').value.trim();if(!state.token) return log('Token is required.');($('rememberToken').checked?localStorage:sessionStorage).setItem('fds_mcp_token',state.token);if(!$('rememberToken').checked)localStorage.removeItem('fds_mcp_token');try{await refreshAll();log('Connected.');}catch(err){setConnected(false);log(`Connect failed: ${err.message}`);}});
+$('clearBtn').addEventListener('click',()=>{localStorage.removeItem('fds_mcp_token');sessionStorage.removeItem('fds_mcp_token');state.token='';state.user=null;state.assets=[];state.status=null;setConnected(false);render();$('tokenInput').value='';log('Token cleared.');});
+$('disconnectBtn').addEventListener('click',()=>$('clearBtn').click());
+$('previewBtn').addEventListener('click',()=>{previewSvg();log('Preview updated.');});
+$('createBtn').addEventListener('click',async()=>{try{const svg=previewSvg();const result=await callTool('create_svg_asset',{title:$('assetTitle').value.trim()||'Console SVG Asset',svg,asset_type:$('assetType').value,category:$('assetCategory').value.trim(),author:$('assetAuthor').value.trim(),license:$('assetLicense').value.trim(),tags:$('assetTags').value.split(',').map(t=>t.trim()).filter(Boolean),publish:false});log(`Created pending asset: ${result?.item?.id||result?.id||'created'}`);await refreshAll();}catch(err){log(`Create failed: ${err.message}`);}});
+if(state.token){$('tokenInput').value=state.token;refreshAll().catch(err=>log(`Saved token failed: ${err.message}`));}
+previewSvg();
+</script>
+</body>
+</html>

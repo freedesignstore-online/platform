@@ -73,3 +73,18 @@ test('docs mention the complete FDS public MCP surface', async () => {
     assert.match(docs, new RegExp(route.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
 });
+
+test('creator console exposes the FDS MCP catalog workflow', async () => {
+  const consoleHtml = await readRepo('store/console/index.html');
+  const homeHtml = await readRepo('store/index.html');
+
+  assert.match(homeHtml, /href="\/console\/"/);
+  assert.match(consoleHtml, /Creator Console - FreeDesignStore/);
+  assert.match(consoleHtml, /const MCP_ENDPOINT='\/mcp'/);
+  assert.match(consoleHtml, /authorization.*Bearer/);
+  assert.match(consoleHtml, /tools\/call/);
+  assert.match(consoleHtml, /create_svg_asset/);
+  assert.match(consoleHtml, /my_assets/);
+  assert.match(consoleHtml, /sessionStorage/);
+  assert.doesNotMatch(consoleHtml, /freeappstore\.online|api\.freeappstore|fds-mcp\.freeappstore/i);
+});
