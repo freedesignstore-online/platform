@@ -4,6 +4,10 @@
 export interface SessionPayload {
   uid: string;
   name?: string;
+  provider?: string;
+  login?: string;
+  avatarUrl?: string;
+  email?: string;
   roles?: string[];
   appRoles?: Record<string, string[]>;
   iat: number;
@@ -11,7 +15,7 @@ export interface SessionPayload {
 }
 
 export async function signSession(
-  payload: Pick<SessionPayload, 'uid' | 'name' | 'roles' | 'appRoles'>,
+  payload: Pick<SessionPayload, 'uid' | 'name' | 'provider' | 'login' | 'avatarUrl' | 'email' | 'roles' | 'appRoles'>,
   signingKey: string,
   ttlSeconds: number,
 ): Promise<string> {

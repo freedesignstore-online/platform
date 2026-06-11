@@ -45,7 +45,11 @@ test('worker supports FDS OAuth without FAS auth routing', async () => {
   assert.match(source, /trusted-publisher creator permission/);
   assert.match(oauth, /authorization_endpoint: `\$\{config\.issuer\}\/authorize`/);
   assert.match(oauth, /token_endpoint: `\$\{config\.issuer\}\/token`/);
-  assert.match(oauth, /Creator sign-in code/);
+  assert.match(oauth, /Continue with \$\{providerLabel\(provider\)\}/);
+  assert.match(oauth, /github\/callback/);
+  assert.match(oauth, /google\/callback/);
+  assert.match(oauth, /avatarUrl/);
+  assert.doesNotMatch(oauth, /Provider OAuth is not configured yet, so this deployment is using/);
   assert.match(session, /FDS session token signing and verification/);
   assert.doesNotMatch(`${source}\n${oauth}\n${session}`, /freeappstore|api\.freeappstore|fds-mcp\.freeappstore|AUTH_START|fas_session|fasSession|FAS-compatible/i);
 });
@@ -102,6 +106,8 @@ test('creator console exposes the FDS MCP catalog workflow', async () => {
   assert.match(consoleHtml, /id="avatar"/);
   assert.match(consoleHtml, /id="topSignInBtn"/);
   assert.match(consoleHtml, /id="topSignOutBtn"/);
+  assert.match(consoleHtml, /avatarUrl/);
+  assert.match(consoleHtml, /hasImage/);
   assert.match(consoleHtml, /function initials/);
   assert.match(consoleHtml, /Trusted publisher/);
   assert.match(consoleHtml, /tools\/call/);

@@ -14,6 +14,10 @@ interface Env {
   API_BASE?: string;
   OAUTH_KV?: KVNamespace;
   SESSION_SIGNING_KEY?: string;
+  GITHUB_CLIENT_ID?: string;
+  GITHUB_CLIENT_SECRET?: string;
+  GOOGLE_CLIENT_ID?: string;
+  GOOGLE_CLIENT_SECRET?: string;
   PUBLIC_BASE_URL?: string;
   PUBLIC_MCP_BASE_URL?: string;
   MCP_OBJECT: DurableObjectNamespace;
@@ -24,6 +28,10 @@ interface McpProps extends Record<string, unknown> {
   canPublish?: boolean;
   accountId?: string;
   accountName?: string;
+  provider?: string;
+  login?: string;
+  avatarUrl?: string;
+  email?: string;
 }
 
 interface CatalogItem {
@@ -637,6 +645,10 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
           authenticated: Boolean(props.accountId),
           accountId: props.accountId || null,
           accountName: props.accountName || null,
+          provider: props.provider || null,
+          login: props.login || null,
+          avatarUrl: props.avatarUrl || null,
+          email: props.email || null,
           isAdmin: Boolean(props.isAdmin),
           canPublish: Boolean(props.canPublish || props.isAdmin),
         });
@@ -891,6 +903,10 @@ async function authenticateRequest(request: Request, env: Env, options: { allowS
         canPublish: roles.includes('publisher'),
         accountId: safeAccountId(session.uid),
         accountName: session.name || session.uid,
+        provider: session.provider,
+        login: session.login,
+        avatarUrl: session.avatarUrl,
+        email: session.email,
       };
     }
   }
@@ -902,14 +918,19 @@ export default {
     const url = new URL(request.url);
     const issuer = publicMcpBase(env, url);
     const creatorAccounts = parseCreatorAccounts(env);
-    const browserAuthEnabled = Boolean(env.OAUTH_KV && env.SESSION_SIGNING_KEY && creatorAccounts.length);
+    const providerAuthEnabled = Boolean((env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) || (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET));
+    const browserAuthEnabled = Boolean(env.OAUTH_KV && env.SESSION_SIGNING_KEY && (providerAuthEnabled || creatorAccounts.length));
 
-    if (env.OAUTH_KV && env.SESSION_SIGNING_KEY && creatorAccounts.length) {
+    if (env.OAUTH_KV && env.SESSION_SIGNING_KEY && (providerAuthEnabled || creatorAccounts.length)) {
       const oauthRes = await handleOAuthRoute(request, {
         issuer,
         kv: env.OAUTH_KV,
         sessionSigningKey: env.SESSION_SIGNING_KEY,
         creatorAccounts,
+        githubClientId: env.GITHUB_CLIENT_ID,
+        githubClientSecret: env.GITHUB_CLIENT_SECRET,
+        googleClientId: env.GOOGLE_CLIENT_ID,
+        googleClientSecret: env.GOOGLE_CLIENT_SECRET,
       });
       if (oauthRes) return oauthRes;
     }

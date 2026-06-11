@@ -19,6 +19,10 @@ interface OAuthConfig {
   kv: KVNamespace;
   sessionSigningKey: string;
   creatorAccounts: CreatorAccount[];
+  githubClientId?: string;
+  githubClientSecret?: string;
+  googleClientId?: string;
+  googleClientSecret?: string;
 }
 
 interface ClientRegistration {
@@ -32,6 +36,24 @@ interface AuthRequest {
   redirectUri: string;
   codeChallenge: string;
   state: string | null;
+}
+
+type ProviderId = 'github' | 'google';
+
+interface ProviderState {
+  p: ProviderId;
+  r?: string;
+  a?: string;
+  n: string;
+}
+
+interface ProviderProfile {
+  provider: ProviderId;
+  accountId: string;
+  name: string;
+  login?: string;
+  avatarUrl?: string;
+  email?: string;
 }
 
 export function createAuthChallenge(config: Pick<OAuthConfig, 'issuer'>, error?: 'invalid_token'): Response {
@@ -70,6 +92,10 @@ export async function handleOAuthRoute(request: Request, config: OAuthConfig): P
   }
 
   if (path === AUTH_PREFIX || path === `${AUTH_PREFIX}/start`) return authStart(request, config);
+  if (path === `${AUTH_PREFIX}/github/start`) return providerStart(request, config, 'github');
+  if (path === `${AUTH_PREFIX}/github/callback`) return providerCallback(request, config, 'github');
+  if (path === `${AUTH_PREFIX}/google/start`) return providerStart(request, config, 'google');
+  if (path === `${AUTH_PREFIX}/google/callback`) return providerCallback(request, config, 'google');
   if (path === `${AUTH_PREFIX}/login`) return authLogin(request, config);
   if (path === `${AUTH_PREFIX}/approve`) return authApprove(request, config);
   if (path === `${AUTH_PREFIX}/me`) return authMe(request, config);
@@ -217,6 +243,17 @@ function escapeHtml(value: string): string {
   })[ch]!);
 }
 
+function b64urlString(value: string): string {
+  let bin = '';
+  for (const b of new TextEncoder().encode(value)) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function b64urlDecode(value: string): string {
+  const padded = value.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((value.length + 3) % 4);
+  return atob(padded);
+}
+
 function timingSafeEqual(a: string, b: string): boolean {
   const maxLen = Math.max(a.length, b.length);
   let diff = a.length ^ b.length;
@@ -245,6 +282,41 @@ async function sessionForCreator(config: OAuthConfig, creator: CreatorAccount): 
   );
 }
 
+function configuredProviders(config: OAuthConfig): ProviderId[] {
+  const providers: ProviderId[] = [];
+  if (config.githubClientId && config.githubClientSecret) providers.push('github');
+  if (config.googleClientId && config.googleClientSecret) providers.push('google');
+  return providers;
+}
+
+function providerLabel(provider: ProviderId): string {
+  return provider === 'github' ? 'GitHub' : 'Google';
+}
+
+function providerIcon(provider: ProviderId): string {
+  return provider === 'github'
+    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>'
+    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06L5.84 9.9C6.71 7.31 9.14 5.38 12 5.38z"/></svg>';
+}
+
+function providerConfigured(config: OAuthConfig, provider: ProviderId): boolean {
+  return provider === 'github'
+    ? Boolean(config.githubClientId && config.githubClientSecret)
+    : Boolean(config.googleClientId && config.googleClientSecret);
+}
+
+function encodeProviderState(state: ProviderState): string {
+  return b64urlString(JSON.stringify(state));
+}
+
+function decodeProviderState(value: string): ProviderState | null {
+  try {
+    const parsed = JSON.parse(b64urlDecode(value)) as Partial<ProviderState>;
+    if ((parsed.p === 'github' || parsed.p === 'google') && typeof parsed.n === 'string') return parsed as ProviderState;
+  } catch {}
+  return null;
+}
+
 async function currentSession(request: Request, config: OAuthConfig) {
   const token = readMcpSessionCookie(request);
   if (!token) return null;
@@ -261,12 +333,19 @@ function signInPage(params: {
   clientName?: string | null;
   error?: string;
 }): Response {
-  const action = new URL(`${AUTH_PREFIX}/login`, params.config.issuer);
+  const providers = configuredProviders(params.config);
   const name = params.clientName ? escapeHtml(params.clientName) : 'FreeDesignStore';
   const heading = params.authNonce ? 'Connect FreeDesignStore MCP' : 'Sign in to FreeDesignStore';
   const intro = params.authNonce
     ? `${name} wants to create and manage catalog assets as your FDS creator account.`
     : 'Sign in to manage your creator catalog and MCP submissions.';
+  const providerLinks = providers.map((provider) => {
+    const href = new URL(`${AUTH_PREFIX}/${provider}/start`, params.config.issuer);
+    if (params.returnPath) href.searchParams.set('return_to', params.returnPath);
+    if (params.authNonce) href.searchParams.set('auth_nonce', params.authNonce);
+    return `<a class="provider ${provider}" href="${escapeHtml(href.toString())}">${providerIcon(provider)}<span>Continue with ${providerLabel(provider)}</span></a>`;
+  }).join('');
+  const fallbackForm = '<div class="error">GitHub/Google sign-in is not configured on this deployment yet. Add the FDS OAuth app secrets to enable creator login.</div>';
   const response = html(`<!doctype html>
 <html lang="en">
 <head>
@@ -279,6 +358,10 @@ function signInPage(params: {
     main{width:min(100%,460px);background:#fff;border:1px solid #d9dee7;border-radius:10px;box-shadow:0 18px 50px rgba(25,36,55,.12);padding:30px}
     h1{font-size:24px;line-height:1.2;margin:0 0 12px}
     p{line-height:1.55;color:#4b5563;margin:0 0 20px}
+    .providers{display:grid;gap:10px}
+    .provider{display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid #cfd6e3;border-radius:8px;background:#fff;color:#17202a;text-decoration:none;padding:12px 16px;font-weight:850}
+    .provider:hover{border-color:#111827}
+    .provider svg{width:20px;height:20px;flex:0 0 auto}
     form{display:grid;gap:12px}
     label{display:grid;gap:6px;font-size:12px;font-weight:750;color:#364152}
     input{width:100%;border:1px solid #cfd6e3;border-radius:8px;padding:11px;font:inherit}
@@ -292,14 +375,7 @@ function signInPage(params: {
     <h1>${heading}</h1>
     <p>${intro}</p>
     ${params.error ? `<div class="error">${escapeHtml(params.error)}</div>` : ''}
-    <form method="post" action="${escapeHtml(action.toString())}">
-      <input type="hidden" name="nonce" value="${escapeHtml(params.nonce)}">
-      ${params.returnPath ? `<input type="hidden" name="return_to" value="${escapeHtml(params.returnPath)}">` : ''}
-      ${params.authNonce ? `<input type="hidden" name="auth_nonce" value="${escapeHtml(params.authNonce)}">` : ''}
-      <label>Creator ID<input name="account_id" autocomplete="username" required autofocus></label>
-      <label>Creator sign-in code<input name="creator_code" type="password" autocomplete="current-password" required></label>
-      <button type="submit">${params.authNonce ? 'Connect MCP Client' : 'Sign In'}</button>
-    </form>
+    ${providerLinks ? `<div class="providers">${providerLinks}</div>` : fallbackForm}
     <small>FDS sets a secure httpOnly session cookie. MCP clients receive OAuth access tokens; users never paste bearer tokens into the console.</small>
   </main>
 </body>
@@ -434,6 +510,147 @@ async function authLogin(request: Request, config: OAuthConfig): Promise<Respons
   return redirect(new URL(returnPath, config.issuer).toString(), 303, cookies);
 }
 
+async function providerStart(request: Request, config: OAuthConfig, provider: ProviderId): Promise<Response> {
+  if (request.method !== 'GET') return methodNotAllowed('GET');
+  if (!providerConfigured(config, provider)) return new Response(`${providerLabel(provider)} sign-in is not configured for this FDS deployment.`, { status: 503 });
+  const session = await currentSession(request, config);
+  const url = new URL(request.url);
+  const issuerUrl = new URL(config.issuer);
+  const returnPath = sameOriginPath(issuerUrl, url.searchParams.get('return_to') || '/console/');
+  if (session && !url.searchParams.get('auth_nonce')) return redirect(new URL(returnPath, config.issuer).toString(), 303);
+  const state = encodeProviderState({
+    p: provider,
+    r: returnPath,
+    a: url.searchParams.get('auth_nonce') || undefined,
+    n: crypto.randomUUID(),
+  });
+  const callbackUrl = new URL(`${AUTH_PREFIX}/${provider}/callback`, config.issuer);
+  const authUrl = provider === 'github'
+    ? new URL('https://github.com/login/oauth/authorize')
+    : new URL('https://accounts.google.com/o/oauth2/v2/auth');
+  authUrl.searchParams.set('client_id', provider === 'github' ? config.githubClientId! : config.googleClientId!);
+  authUrl.searchParams.set('redirect_uri', callbackUrl.toString());
+  authUrl.searchParams.set('response_type', 'code');
+  authUrl.searchParams.set('state', state);
+  if (provider === 'github') {
+    authUrl.searchParams.set('scope', 'read:user user:email');
+    authUrl.searchParams.set('allow_signup', 'true');
+  } else {
+    authUrl.searchParams.set('scope', 'openid profile email');
+    authUrl.searchParams.set('prompt', 'select_account');
+  }
+  return redirect(authUrl.toString(), 302, [nonceCookie(state)]);
+}
+
+async function providerCallback(request: Request, config: OAuthConfig, provider: ProviderId): Promise<Response> {
+  if (request.method !== 'GET') return methodNotAllowed('GET');
+  const url = new URL(request.url);
+  const rawState = url.searchParams.get('state') || '';
+  const state = decodeProviderState(rawState);
+  const returnPath = sameOriginPath(new URL(config.issuer), state?.r || '/console/');
+  if (url.searchParams.get('error')) {
+    return redirectWithAuthError(config.issuer, returnPath, url.searchParams.get('error') || 'oauth_denied', [clearNonceCookie()]);
+  }
+  if (!state || state.p !== provider || !nonceMatches(request, rawState)) {
+    return redirectWithAuthError(config.issuer, returnPath, 'invalid_state', [clearNonceCookie()]);
+  }
+  const code = url.searchParams.get('code');
+  if (!code) return redirectWithAuthError(config.issuer, returnPath, 'missing_code', [clearNonceCookie()]);
+
+  let profile: ProviderProfile;
+  try {
+    profile = provider === 'github'
+      ? await githubProfile(config, code)
+      : await googleProfile(config, code);
+  } catch {
+    return redirectWithAuthError(config.issuer, returnPath, 'profile_fetch_failed', [clearNonceCookie()]);
+  }
+
+  const sessionToken = await sessionForProvider(config, profile);
+  const cookies = [sessionCookie(sessionToken), clearNonceCookie()];
+  if (state.a) return issueAuthorizationCode(config, state.a, sessionToken, cookies);
+  return redirect(new URL(returnPath, config.issuer).toString(), 303, cookies);
+}
+
+async function sessionForProvider(config: OAuthConfig, profile: ProviderProfile): Promise<string> {
+  const roles = ['creator'];
+  return signSession(
+    {
+      uid: profile.accountId,
+      name: profile.name,
+      provider: profile.provider,
+      login: profile.login,
+      avatarUrl: profile.avatarUrl,
+      email: profile.email,
+      roles,
+      appRoles: { fds: roles },
+    },
+    config.sessionSigningKey,
+    SESSION_TTL_SECONDS,
+  );
+}
+
+async function githubProfile(config: OAuthConfig, code: string): Promise<ProviderProfile> {
+  const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({
+      client_id: config.githubClientId,
+      client_secret: config.githubClientSecret,
+      code,
+      redirect_uri: new URL(`${AUTH_PREFIX}/github/callback`, config.issuer).toString(),
+    }),
+  });
+  const tokenData = await tokenRes.json<{ access_token?: string; error?: string }>();
+  if (!tokenRes.ok || !tokenData.access_token) throw new Error(tokenData.error || 'GitHub token exchange failed');
+  const userRes = await fetch('https://api.github.com/user', {
+    headers: {
+      Authorization: `Bearer ${tokenData.access_token}`,
+      Accept: 'application/vnd.github+json',
+      'User-Agent': 'FreeDesignStore',
+    },
+  });
+  const user = await userRes.json<{ id?: number; login?: string; name?: string | null; avatar_url?: string; email?: string | null }>();
+  if (!userRes.ok || !user.id || !user.login) throw new Error('GitHub profile fetch failed');
+  return {
+    provider: 'github',
+    accountId: `github:${user.id}`,
+    name: user.name || user.login,
+    login: user.login,
+    avatarUrl: user.avatar_url,
+    email: user.email || undefined,
+  };
+}
+
+async function googleProfile(config: OAuthConfig, code: string): Promise<ProviderProfile> {
+  const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
+    body: new URLSearchParams({
+      client_id: config.googleClientId || '',
+      client_secret: config.googleClientSecret || '',
+      code,
+      redirect_uri: new URL(`${AUTH_PREFIX}/google/callback`, config.issuer).toString(),
+      grant_type: 'authorization_code',
+    }),
+  });
+  const tokenData = await tokenRes.json<{ access_token?: string; error?: string }>();
+  if (!tokenRes.ok || !tokenData.access_token) throw new Error(tokenData.error || 'Google token exchange failed');
+  const userRes = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
+    headers: { Authorization: `Bearer ${tokenData.access_token}`, Accept: 'application/json' },
+  });
+  const user = await userRes.json<{ sub?: string; name?: string; email?: string; picture?: string }>();
+  if (!userRes.ok || !user.sub) throw new Error('Google profile fetch failed');
+  return {
+    provider: 'google',
+    accountId: `google:${user.sub}`,
+    name: user.name || user.email || `google:${user.sub}`,
+    login: user.email,
+    avatarUrl: user.picture,
+    email: user.email,
+  };
+}
+
 async function authApprove(request: Request, config: OAuthConfig): Promise<Response> {
   if (request.method !== 'POST') return methodNotAllowed('POST');
   const form = await request.formData();
@@ -459,6 +676,10 @@ async function authMe(request: Request, config: OAuthConfig): Promise<Response> 
     authenticated: true,
     accountId: payload.uid,
     accountName: payload.name || payload.uid,
+    provider: payload.provider || null,
+    login: payload.login || null,
+    avatarUrl: payload.avatarUrl || null,
+    email: payload.email || null,
     isAdmin: roles.includes('admin'),
     canPublish: roles.includes('publisher'),
   }));

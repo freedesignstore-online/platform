@@ -20,7 +20,7 @@ It follows the FAS/FAGS/PAGS pattern: a dedicated Cloudflare Worker using `agent
 - `moderate_asset` - publishes or rejects pending assets.
 - `delete_asset` - deletes catalog metadata and the R2 object.
 
-Creator writes use the FDS MCP endpoint at `https://freedesignstore.pages.dev/mcp`. Claude and other remote MCP clients should use FDS OAuth/PKCE browser sign-in. Static creator tokens remain supported for automation. Admin actions require `Authorization: Bearer <STOCK_ADMIN_TOKEN>` or `MCP_ADMIN_TOKEN`.
+Creator writes use the FDS MCP endpoint at `https://freedesignstore.pages.dev/mcp`. Claude and other remote MCP clients should use FDS OAuth/PKCE browser sign-in. Human creators sign in with the FDS GitHub/Google OAuth app and receive a secure httpOnly FDS session cookie. Static creator tokens remain supported for automation only. Admin actions require `Authorization: Bearer <STOCK_ADMIN_TOKEN>` or `MCP_ADMIN_TOKEN`.
 
 ## Published Skills
 
@@ -47,12 +47,29 @@ Before deploying in a new environment, wire it to the same production storage us
 1. Create or identify the R2 bucket bound to Pages as `FDS_STOCK_BUCKET`.
 2. Create or identify the KV namespace bound to Pages as `FDS_STOCK_KV`.
 3. Confirm `workers/mcp/wrangler.toml` uses the real namespace id. If your R2 bucket is not named `fds-stock-assets`, replace that too.
-4. Set the admin write token, FDS session signing key, and creator account map:
+4. Set the admin write token, FDS session signing key, and provider OAuth app credentials:
 
 ```sh
 cd workers/mcp
 npx wrangler secret put STOCK_ADMIN_TOKEN
 npx wrangler secret put SESSION_SIGNING_KEY
+npx wrangler secret put GITHUB_CLIENT_ID
+npx wrangler secret put GITHUB_CLIENT_SECRET
+npx wrangler secret put GOOGLE_CLIENT_ID
+npx wrangler secret put GOOGLE_CLIENT_SECRET
+```
+
+OAuth callback URLs:
+
+- GitHub: `https://freedesignstore.pages.dev/.fds/auth/github/callback`
+- Google: `https://freedesignstore.pages.dev/.fds/auth/google/callback`
+
+Google OAuth is optional. GitHub should be configured before exposing the creator console.
+
+Static automation tokens can also be configured:
+
+```sh
+cd workers/mcp
 npx wrangler secret put FDS_CREATOR_TOKENS
 ```
 
@@ -72,7 +89,7 @@ or:
 }
 ```
 
-Set `canPublish: true` only for trusted creators whose generated/uploaded assets may go public immediately. Other creator submissions stay pending for review.
+Set `canPublish: true` only for trusted automation accounts whose generated/uploaded assets may go public immediately. Human provider sign-ins submit pending assets unless later promoted by a role system.
 
 Then deploy:
 
@@ -101,7 +118,7 @@ Claude-style remote MCP clients should connect directly to:
 https://freedesignstore.pages.dev/mcp
 ```
 
-The client discovers the OAuth metadata, opens the FDS authorization page on `freedesignstore.pages.dev`, and exchanges the authorization code for an access token. The user signs in with an FDS creator account; no FAS/PAS auth route is used.
+The client discovers the OAuth metadata, opens the FDS authorization page on `freedesignstore.pages.dev`, and exchanges the authorization code for an access token. The user signs in with GitHub or Google through the FDS OAuth app; no FAS/PAS auth route is used.
 
 For automation, bearer tokens are still accepted, but they are not the human creator UX.
 
