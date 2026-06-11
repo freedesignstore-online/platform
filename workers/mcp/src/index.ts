@@ -248,6 +248,22 @@ function isBlockedMirrorHost(url: URL): boolean {
   return host === 'unsplash.com' || host.endsWith('.unsplash.com');
 }
 
+function isBlockedFetchHost(url: URL): boolean {
+  const host = url.hostname.toLowerCase().replace(/^\[|\]$/g, '');
+  if (host === 'localhost' || host === 'metadata.google.internal' || host.endsWith('.local')) return true;
+  if (/^(0|10|127|169\.254|192\.168)\./.test(host)) return true;
+  const parts = host.split('.').map((part) => Number(part));
+  if (parts.length === 4 && parts.every((part) => Number.isInteger(part) && part >= 0 && part <= 255)) {
+    if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
+    if (parts[0] === 100 && parts[1] >= 64 && parts[1] <= 127) return true;
+    if (parts[0] === 192 && parts[1] === 0 && parts[2] === 2) return true;
+    if (parts[0] === 198 && parts[1] === 18) return true;
+    if (parts[0] === 203 && parts[1] === 0 && parts[2] === 113) return true;
+  }
+  if (host === '::1' || host.startsWith('fc') || host.startsWith('fd') || host.startsWith('fe80:')) return true;
+  return false;
+}
+
 async function createAsset(params: {
   env: Env;
   bucket: R2Bucket;
@@ -509,6 +525,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
 
         const parsed = new URL(url);
         if (parsed.protocol !== 'https:') return txt('Only HTTPS image URLs are accepted.');
+        if (isBlockedFetchHost(parsed)) return txt('Private, local, and metadata network URLs are not accepted.');
         if (isBlockedMirrorHost(parsed)) {
           return txt('Unsplash assets must not be mirrored into FDS. Link users to Unsplash for download instead.');
         }

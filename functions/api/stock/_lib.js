@@ -112,6 +112,8 @@ export function publicItem(item) {
     tags: item.tags || [],
     url: `/api/stock/image/${item.id}`,
     download: `/api/stock/image/${item.id}?download=1`,
+    filename: item.filename,
+    contentType: item.contentType,
     createdAt: item.createdAt,
     status: item.status,
   };

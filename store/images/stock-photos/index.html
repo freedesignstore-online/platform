@@ -369,8 +369,21 @@ async function downloadPhoto(id){
   if(!photo) return;
   const a=document.createElement('a');
   a.href=photo.download||photo.url;
-  a.download=`${photo.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'stock-photo'}.jpg`;
+  const ext=downloadExtension(photo);
+  a.download=photo.filename||`${photo.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'visual-asset'}${ext}`;
   a.click();
+}
+
+function downloadExtension(photo){
+  const type=String(photo.contentType||'').toLowerCase();
+  if(type.includes('svg')) return '.svg';
+  if(type.includes('png')) return '.png';
+  if(type.includes('webp')) return '.webp';
+  if(type.includes('avif')) return '.avif';
+  const path=String(photo.download||photo.url||'').split('?')[0].toLowerCase();
+  const match=path.match(/\.(svg|png|webp|avif|jpe?g)$/);
+  if(match) return match[0].replace('.jpeg','.jpg');
+  return photo.assetType&&photo.assetType!=='photo'?'.svg':'.jpg';
 }
 
 function openUnsplash(id){
