@@ -56,6 +56,10 @@
           "description": "Publish or reject a pending asset"
         },
         {
+          "name": "unpublish_asset",
+          "description": "Move a public owned asset back to pending before deletion"
+        },
+        {
           "name": "delete_asset",
           "description": "Delete catalog metadata and the R2 object"
         }

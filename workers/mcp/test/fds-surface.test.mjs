@@ -20,8 +20,8 @@ test('public MCP discovery advertises the dedicated FDS MCP endpoint', async () 
   const discovery = JSON.parse(await readRepo('store/.well-known/mcp.json'));
   assert.equal(discovery.servers[0].endpoint, 'https://mcp.freedesignstore.online/mcp');
   assert.equal(discovery.servers[0].transport, 'streamable-http');
-  assert.equal(discovery.servers[0].tools.length, 13);
-  for (const tool of ['list_design_skills', 'get_design_skill', 'apply_design_skill']) {
+  assert.equal(discovery.servers[0].tools.length, 14);
+  for (const tool of ['list_design_skills', 'get_design_skill', 'apply_design_skill', 'unpublish_asset', 'delete_asset']) {
     assert.ok(discovery.servers[0].tools.some((item) => item.name === tool), `missing ${tool}`);
   }
   assert.doesNotMatch(JSON.stringify(discovery), /freeappstore|fds-mcp/i);
@@ -90,7 +90,7 @@ test('docs mention the complete FDS public MCP surface', async () => {
   for (const route of ['/mcp', '/register', '/authorize', '/token', '/.well-known/oauth-*', '/.fds/auth/*']) {
     assert.match(docs, new RegExp(route.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
-  for (const tool of ['list_design_skills', 'get_design_skill', 'apply_design_skill']) {
+  for (const tool of ['list_design_skills', 'get_design_skill', 'apply_design_skill', 'my_assets', 'get_asset', 'unpublish_asset', 'delete_asset']) {
     assert.match(docs, new RegExp(tool));
   }
 });
@@ -116,6 +116,10 @@ test('creator console exposes the FDS MCP catalog workflow', async () => {
   assert.match(consoleHtml, /tools\/call/);
   assert.match(consoleHtml, /create_svg_asset/);
   assert.match(consoleHtml, /my_assets/);
+  assert.match(consoleHtml, /unpublish_asset/);
+  assert.match(consoleHtml, /delete_asset/);
+  assert.match(consoleHtml, /data-unpublish/);
+  assert.match(consoleHtml, /data-delete/);
   assert.doesNotMatch(consoleHtml, /bearer token|sessionStorage|localStorage|freeappstore\.online|api\.freeappstore|fds-mcp\.freeappstore/i);
 });
 

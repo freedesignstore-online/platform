@@ -18,7 +18,8 @@ It follows the FAS/FAGS/PAGS pattern: a dedicated Cloudflare Worker using `agent
 - `create_svg_asset` - stores a generated SVG illustration/icon/pattern/background under the authenticated account.
 - `create_asset_from_url` - fetches a public HTTPS non-Unsplash image and stores it in R2 under the authenticated account.
 - `moderate_asset` - publishes or rejects pending assets.
-- `delete_asset` - deletes catalog metadata and the R2 object.
+- `unpublish_asset` - lets a creator move their own public asset back to pending before deletion.
+- `delete_asset` - deletes catalog metadata and the R2 object. Creators can delete their own unpublished assets.
 
 Creator writes use the FDS MCP endpoint at `https://mcp.freedesignstore.online/mcp`. Claude and other remote MCP clients should use FDS OAuth/PKCE browser sign-in. Human creators sign in with the FDS GitHub/Google OAuth app and receive a secure httpOnly FDS session cookie. Static creator tokens remain supported for automation only. Admin actions require `Authorization: Bearer <STOCK_ADMIN_TOKEN>` or `MCP_ADMIN_TOKEN`.
 
@@ -90,6 +91,7 @@ or:
 ```
 
 Any authenticated creator can publish assets immediately when they explicitly set `publish: true`. Clients can still submit drafts or review queues by setting `publish: false`.
+Creators can view their full asset list with `my_assets`, inspect private/pending items with `get_asset`, unpublish their own public assets with `unpublish_asset`, and then delete those unpublished assets with `delete_asset`.
 
 Then deploy:
 
