@@ -1,6 +1,6 @@
 # FreeDesignStore
 
-**[freedesignstore.pages.dev](https://freedesignstore.pages.dev)** — Free design tools that run in your browser. Logos, palettes, brand kits, templates, icons. No signup, no watermarks.
+**[freedesignstore.online](https://freedesignstore.online)** — Free design tools that run in your browser. Logos, palettes, brand kits, templates, icons. No signup, no watermarks.
 
 ## What is this?
 

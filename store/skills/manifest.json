@@ -1,7 +1,7 @@
 {
   "version": "2026-06-11",
   "description": "Canonical FreeDesignStore design asset playbooks. MCP exposes these through list_design_skills, get_design_skill, and apply_design_skill.",
-  "mcp": "https://freedesignstore.pages.dev/mcp",
+  "mcp": "https://freedesignstore.online/mcp",
   "skills": [
     {
       "id": "asset-brief-builder",

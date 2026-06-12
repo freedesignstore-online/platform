@@ -50,7 +50,7 @@ jobs:
       - name: Verify production MCP surface
         run: |
           node <<'NODE'
-          const base = 'https://freedesignstore.pages.dev';
+          const base = 'https://freedesignstore.online';
           const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
           async function retry(name, fn) {

@@ -4,7 +4,7 @@
   "id": "ofo.design.image-convert",
   "name": "Image Format Converter",
   "description": "Convert SVG and browser-decodable images to PNG, JPEG, or WebP locally.",
-  "url": "https://freedesignstore.pages.dev/images/format-converter/",
+  "url": "https://freedesignstore.online/images/format-converter/",
   "privacy": "local-only",
   "deterministic": true,
   "inputSchema": {

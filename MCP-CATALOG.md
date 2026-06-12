@@ -20,14 +20,14 @@ It follows the FAS/FAGS/PAGS pattern: a dedicated Cloudflare Worker using `agent
 - `moderate_asset` - publishes or rejects pending assets.
 - `delete_asset` - deletes catalog metadata and the R2 object.
 
-Creator writes use the FDS MCP endpoint at `https://freedesignstore.pages.dev/mcp`. Claude and other remote MCP clients should use FDS OAuth/PKCE browser sign-in. Human creators sign in with the FDS GitHub/Google OAuth app and receive a secure httpOnly FDS session cookie. Static creator tokens remain supported for automation only. Admin actions require `Authorization: Bearer <STOCK_ADMIN_TOKEN>` or `MCP_ADMIN_TOKEN`.
+Creator writes use the FDS MCP endpoint at `https://freedesignstore.online/mcp`. Claude and other remote MCP clients should use FDS OAuth/PKCE browser sign-in. Human creators sign in with the FDS GitHub/Google OAuth app and receive a secure httpOnly FDS session cookie. Static creator tokens remain supported for automation only. Admin actions require `Authorization: Bearer <STOCK_ADMIN_TOKEN>` or `MCP_ADMIN_TOKEN`.
 
 ## Published Skills
 
 FDS publishes canonical design asset playbooks the same way FreeIdeaStore publishes idea skills: public Markdown files plus a manifest at `/skills/`, and matching MCP tools for agents.
 
-- Public index: `https://freedesignstore.pages.dev/skills/`
-- Manifest: `https://freedesignstore.pages.dev/skills/manifest.json`
+- Public index: `https://freedesignstore.online/skills/`
+- Manifest: `https://freedesignstore.online/skills/manifest.json`
 - MCP tools: `list_design_skills`, `get_design_skill`, `apply_design_skill`
 
 Use these skills before briefing, creating, uploading, reviewing, or publishing assets. They keep agents aligned on legal hosting rules, SVG safety, Unsplash link-off behavior, metadata quality, and trusted-publisher moderation.
@@ -61,8 +61,8 @@ npx wrangler secret put GOOGLE_CLIENT_SECRET
 
 OAuth callback URLs:
 
-- GitHub: `https://freedesignstore.pages.dev/.fds/auth/github/callback`
-- Google: `https://freedesignstore.pages.dev/.fds/auth/google/callback`
+- GitHub: `https://freedesignstore.online/.fds/auth/github/callback`
+- Google: `https://freedesignstore.online/.fds/auth/google/callback`
 
 Google OAuth is optional. GitHub should be configured before exposing the creator console. Google stays hidden unless `GOOGLE_OAUTH_ENABLED=true` is set after the Google OAuth client has the FDS callback URL authorized.
 
@@ -106,7 +106,7 @@ Connect from an MCP client:
   "mcpServers": {
     "freedesignstore": {
       "command": "npx",
-      "args": ["mcp-remote", "https://freedesignstore.pages.dev/mcp"]
+      "args": ["mcp-remote", "https://freedesignstore.online/mcp"]
     }
   }
 }
@@ -115,10 +115,10 @@ Connect from an MCP client:
 Claude-style remote MCP clients should connect directly to:
 
 ```text
-https://freedesignstore.pages.dev/mcp
+https://freedesignstore.online/mcp
 ```
 
-The client discovers the OAuth metadata, opens the FDS authorization page on `freedesignstore.pages.dev`, and exchanges the authorization code for an access token. The user signs in with GitHub or Google through the FDS OAuth app; no FAS/PAS auth route is used.
+The client discovers the OAuth metadata, opens the FDS authorization page on `freedesignstore.online`, and exchanges the authorization code for an access token. The user signs in with GitHub or Google through the FDS OAuth app; no FAS/PAS auth route is used.
 
 For automation, bearer tokens are still accepted, but they are not the human creator UX.
 

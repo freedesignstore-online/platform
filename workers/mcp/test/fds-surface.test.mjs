@@ -18,7 +18,7 @@ async function importRepoModule(path) {
 
 test('public MCP discovery advertises the FDS Pages endpoint only', async () => {
   const discovery = JSON.parse(await readRepo('store/.well-known/mcp.json'));
-  assert.equal(discovery.servers[0].endpoint, 'https://freedesignstore.pages.dev/mcp');
+  assert.equal(discovery.servers[0].endpoint, 'https://freedesignstore.online/mcp');
   assert.equal(discovery.servers[0].transport, 'streamable-http');
   assert.equal(discovery.servers[0].tools.length, 13);
   for (const tool of ['list_design_skills', 'get_design_skill', 'apply_design_skill']) {
@@ -29,7 +29,7 @@ test('public MCP discovery advertises the FDS Pages endpoint only', async () => 
 
 test('worker config has no FAS public route or FAS auth start', async () => {
   const wrangler = await readRepo('workers/mcp/wrangler.toml');
-  assert.match(wrangler, /PUBLIC_MCP_BASE_URL = "https:\/\/freedesignstore\.pages\.dev"/);
+  assert.match(wrangler, /PUBLIC_MCP_BASE_URL = "https:\/\/freedesignstore\.online"/);
   assert.doesNotMatch(wrangler, /freeappstore\.online|api\.freeappstore|AUTH_START\s*=/);
   assert.doesNotMatch(wrangler, /\[\[routes\]\]/);
 });
@@ -38,8 +38,8 @@ test('worker supports FDS OAuth without FAS auth routing', async () => {
   const source = await readRepo('workers/mcp/src/index.ts');
   const oauth = await readRepo('workers/mcp/src/oauth-provider.ts');
   const session = await readRepo('workers/mcp/src/session.ts');
-  assert.match(source, /https:\/\/freedesignstore\.pages\.dev\/mcp/);
-  assert.match(source, /Browser sign-in: https:\/\/freedesignstore\.pages\.dev\/\.fds\/auth\/start/);
+  assert.match(source, /https:\/\/freedesignstore\.online\/mcp/);
+  assert.match(source, /Browser sign-in: https:\/\/freedesignstore\.online\/\.fds\/auth\/start/);
   assert.match(source, /Auth: FDS OAuth 2\.1 browser sign-in/);
   assert.match(source, /GOOGLE_OAUTH_ENABLED === 'true'/);
   assert.match(source, /canPublish/);
@@ -65,7 +65,7 @@ test('Pages proxy maps any public MCP surface path to the backend worker', async
   };
   try {
     const response = await proxyMcpRequest({
-      request: new Request('https://freedesignstore.pages.dev/.well-known/oauth-protected-resource/mcp?x=1', {
+      request: new Request('https://freedesignstore.online/.well-known/oauth-protected-resource/mcp?x=1', {
         headers: { authorization: 'Bearer sample' },
       }),
       env: {},
@@ -76,7 +76,7 @@ test('Pages proxy maps any public MCP surface path to the backend worker', async
     const proxied = seen[0];
     assert.equal(proxied.url, 'https://freedesignstore-mcp.serge-the-dev.workers.dev/.well-known/oauth-protected-resource/mcp?x=1');
     assert.equal(proxied.headers.get('authorization'), 'Bearer sample');
-    assert.equal(proxied.headers.get('x-fds-forwarded-host'), 'freedesignstore.pages.dev');
+    assert.equal(proxied.headers.get('x-fds-forwarded-host'), 'freedesignstore.online');
     assert.equal(proxied.headers.get('x-fds-forwarded-proto'), 'https');
   } finally {
     globalThis.fetch = originalFetch;
@@ -124,13 +124,13 @@ test('published design skills mirror FIS/PAGS skill publishing pattern', async (
   const homeHtml = await readRepo('store/index.html');
   const sitemap = await readRepo('store/sitemap.xml');
 
-  assert.equal(manifest.mcp, 'https://freedesignstore.pages.dev/mcp');
+  assert.equal(manifest.mcp, 'https://freedesignstore.online/mcp');
   assert.ok(Array.isArray(manifest.skills));
   assert.equal(manifest.skills.length, 6);
   assert.match(homeHtml, /href="\/skills\/"/);
   assert.match(skillsPage, /list_design_skills/);
   assert.match(skillsPage, /apply_design_skill/);
-  assert.match(sitemap, /https:\/\/freedesignstore\.pages\.dev\/skills\//);
+  assert.match(sitemap, /https:\/\/freedesignstore\.online\/skills\//);
 
   const ids = new Set();
   for (const skill of manifest.skills) {

@@ -74,8 +74,8 @@ const ITEM_PREFIX = 'stock:item:';
 const MAX_ITEMS = 500;
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 const MAX_SVG_SIZE = 1024 * 1024;
-const PUBLIC_BASE_FALLBACK = 'https://freedesignstore.pages.dev';
-const PUBLIC_MCP_BASE_FALLBACK = 'https://freedesignstore.pages.dev';
+const PUBLIC_BASE_FALLBACK = 'https://freedesignstore.online';
+const PUBLIC_MCP_BASE_FALLBACK = 'https://freedesignstore.online';
 
 const assetTypes = ['photo', 'illustration', 'icon', 'pattern', 'texture', 'background', 'ui'] as const;
 const allowedTypes = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/svg+xml']);
@@ -941,9 +941,9 @@ export default {
       return new Response([
         'FreeDesignStore Catalog MCP Server v0.1.0',
         '',
-        'Connect: npx mcp-remote https://freedesignstore.pages.dev/mcp',
+        'Connect: npx mcp-remote https://freedesignstore.online/mcp',
         browserAuthEnabled
-          ? 'Browser sign-in: https://freedesignstore.pages.dev/.fds/auth/start'
+          ? 'Browser sign-in: https://freedesignstore.online/.fds/auth/start'
           : 'Browser sign-in: not enabled until FDS auth is configured.',
         '',
         'Skills:   list_design_skills, get_design_skill, apply_design_skill',
