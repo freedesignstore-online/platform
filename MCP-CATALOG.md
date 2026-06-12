@@ -61,8 +61,8 @@ npx wrangler secret put GOOGLE_CLIENT_SECRET
 
 OAuth callback URLs:
 
-- GitHub: `https://mcp.freedesignstore.online/.fds/auth/github/callback`
-- Google: `https://mcp.freedesignstore.online/.fds/auth/google/callback`
+- GitHub: `https://freedesignstore.online/.fds/auth/github/callback`
+- Google: `https://freedesignstore.online/.fds/auth/google/callback`
 
 Google OAuth is optional. GitHub should be configured before exposing the creator console. Google stays hidden unless `GOOGLE_OAUTH_ENABLED=true` is set after the Google OAuth client has the FDS callback URL authorized.
 

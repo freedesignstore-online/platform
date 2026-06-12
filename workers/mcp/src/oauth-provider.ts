@@ -16,6 +16,7 @@ export interface CreatorAccount {
 
 interface OAuthConfig {
   issuer: string;
+  authBase?: string;
   kv: KVNamespace;
   sessionSigningKey: string;
   creatorAccounts: CreatorAccount[];
@@ -305,6 +306,14 @@ function providerConfigured(config: OAuthConfig, provider: ProviderId): boolean 
     : Boolean(config.googleClientId && config.googleClientSecret);
 }
 
+function authBase(config: OAuthConfig): string {
+  return (config.authBase || config.issuer).replace(/\/$/, '');
+}
+
+function providerCallbackUrl(config: OAuthConfig, provider: ProviderId): string {
+  return new URL(`${AUTH_PREFIX}/${provider}/callback`, authBase(config)).toString();
+}
+
 function encodeProviderState(state: ProviderState): string {
   return b64urlString(JSON.stringify(state));
 }
@@ -340,7 +349,7 @@ function signInPage(params: {
     ? `${name} wants to create and manage catalog assets as your FDS creator account.`
     : 'Sign in to manage your creator catalog and MCP submissions.';
   const providerLinks = providers.map((provider) => {
-    const href = new URL(`${AUTH_PREFIX}/${provider}/start`, params.config.issuer);
+    const href = new URL(`${AUTH_PREFIX}/${provider}/start`, authBase(params.config));
     if (params.returnPath) href.searchParams.set('return_to', params.returnPath);
     if (params.authNonce) href.searchParams.set('auth_nonce', params.authNonce);
     return `<a class="provider ${provider}" href="${escapeHtml(href.toString())}">${providerIcon(provider)}<span>Continue with ${providerLabel(provider)}</span></a>`;
@@ -425,8 +434,8 @@ function consentPage(config: OAuthConfig, nonce: string, clientName: string | nu
 }
 
 function signedInPage(config: OAuthConfig, userId: string): Response {
-  const consoleUrl = new URL('/console/', config.issuer);
-  const meUrl = new URL(`${AUTH_PREFIX}/me`, config.issuer);
+  const consoleUrl = new URL('/console/', authBase(config));
+  const meUrl = new URL(`${AUTH_PREFIX}/me`, authBase(config));
   return html(`<!doctype html>
 <html lang="en">
 <head>
@@ -463,9 +472,8 @@ async function authStart(request: Request, config: OAuthConfig): Promise<Respons
   if (request.method !== 'GET') return methodNotAllowed('GET');
   const session = await currentSession(request, config);
   const url = new URL(request.url);
-  const issuerUrl = new URL(config.issuer);
-  const returnPath = sameOriginPath(issuerUrl, url.searchParams.get('return_to') || '/console/');
-  if (session) return redirect(new URL(returnPath, config.issuer).toString(), 303);
+  const returnPath = sameOriginPath(new URL(authBase(config)), url.searchParams.get('return_to') || '/console/');
+  if (session) return redirect(new URL(returnPath, authBase(config)).toString(), 303);
   const nonce = crypto.randomUUID();
   return signInPage({ config, nonce, returnPath });
 }
@@ -475,13 +483,13 @@ async function authLogin(request: Request, config: OAuthConfig): Promise<Respons
   const url = new URL(request.url);
   const form = await request.formData();
   const nonce = String(form.get('nonce') || '');
-  const returnPath = sameOriginPath(new URL(config.issuer), String(form.get('return_to') || '/console/'));
+  const returnPath = sameOriginPath(new URL(authBase(config)), String(form.get('return_to') || '/console/'));
   const authNonce = String(form.get('auth_nonce') || '');
 
   if (!nonceMatches(request, nonce)) {
     return authNonce
       ? new Response('Invalid or expired sign-in state. Restart authorization from your MCP client.', { status: 400 })
-      : redirectWithAuthError(config.issuer, returnPath, 'invalid_state', [clearNonceCookie()]);
+      : redirectWithAuthError(authBase(config), returnPath, 'invalid_state', [clearNonceCookie()]);
   }
 
   const creator = findCreator(config, String(form.get('account_id') || ''), String(form.get('creator_code') || ''));
@@ -507,7 +515,7 @@ async function authLogin(request: Request, config: OAuthConfig): Promise<Respons
     for (const cookie of cookies) headers.append('Set-Cookie', cookie);
     return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
   }
-  return redirect(new URL(returnPath, config.issuer).toString(), 303, cookies);
+  return redirect(new URL(returnPath, authBase(config)).toString(), 303, cookies);
 }
 
 async function providerStart(request: Request, config: OAuthConfig, provider: ProviderId): Promise<Response> {
@@ -515,21 +523,21 @@ async function providerStart(request: Request, config: OAuthConfig, provider: Pr
   if (!providerConfigured(config, provider)) return new Response(`${providerLabel(provider)} sign-in is not configured for this FDS deployment.`, { status: 503 });
   const session = await currentSession(request, config);
   const url = new URL(request.url);
-  const issuerUrl = new URL(config.issuer);
-  const returnPath = sameOriginPath(issuerUrl, url.searchParams.get('return_to') || '/console/');
-  if (session && !url.searchParams.get('auth_nonce')) return redirect(new URL(returnPath, config.issuer).toString(), 303);
+  const returnPath = sameOriginPath(new URL(authBase(config)), url.searchParams.get('return_to') || '/console/');
+  const authNonce = url.searchParams.get('auth_nonce') || '';
+  if (session && authNonce) return issueAuthorizationCode(config, authNonce, session.token, [clearInFlightCookie()]);
+  if (session) return redirect(new URL(returnPath, authBase(config)).toString(), 303);
   const state = encodeProviderState({
     p: provider,
     r: returnPath,
-    a: url.searchParams.get('auth_nonce') || undefined,
+    a: authNonce || undefined,
     n: crypto.randomUUID(),
   });
-  const callbackUrl = new URL(`${AUTH_PREFIX}/${provider}/callback`, config.issuer);
   const authUrl = provider === 'github'
     ? new URL('https://github.com/login/oauth/authorize')
     : new URL('https://accounts.google.com/o/oauth2/v2/auth');
   authUrl.searchParams.set('client_id', provider === 'github' ? config.githubClientId! : config.googleClientId!);
-  authUrl.searchParams.set('redirect_uri', callbackUrl.toString());
+  authUrl.searchParams.set('redirect_uri', providerCallbackUrl(config, provider));
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('state', state);
   if (provider === 'github') {
@@ -547,15 +555,15 @@ async function providerCallback(request: Request, config: OAuthConfig, provider:
   const url = new URL(request.url);
   const rawState = url.searchParams.get('state') || '';
   const state = decodeProviderState(rawState);
-  const returnPath = sameOriginPath(new URL(config.issuer), state?.r || '/console/');
+  const returnPath = sameOriginPath(new URL(authBase(config)), state?.r || '/console/');
   if (url.searchParams.get('error')) {
-    return redirectWithAuthError(config.issuer, returnPath, url.searchParams.get('error') || 'oauth_denied', [clearNonceCookie()]);
+    return redirectWithAuthError(authBase(config), returnPath, url.searchParams.get('error') || 'oauth_denied', [clearNonceCookie()]);
   }
   if (!state || state.p !== provider || !nonceMatches(request, rawState)) {
-    return redirectWithAuthError(config.issuer, returnPath, 'invalid_state', [clearNonceCookie()]);
+    return redirectWithAuthError(authBase(config), returnPath, 'invalid_state', [clearNonceCookie()]);
   }
   const code = url.searchParams.get('code');
-  if (!code) return redirectWithAuthError(config.issuer, returnPath, 'missing_code', [clearNonceCookie()]);
+  if (!code) return redirectWithAuthError(authBase(config), returnPath, 'missing_code', [clearNonceCookie()]);
 
   let profile: ProviderProfile;
   try {
@@ -563,13 +571,13 @@ async function providerCallback(request: Request, config: OAuthConfig, provider:
       ? await githubProfile(config, code)
       : await googleProfile(config, code);
   } catch {
-    return redirectWithAuthError(config.issuer, returnPath, 'profile_fetch_failed', [clearNonceCookie()]);
+    return redirectWithAuthError(authBase(config), returnPath, 'profile_fetch_failed', [clearNonceCookie()]);
   }
 
   const sessionToken = await sessionForProvider(config, profile);
   const cookies = [sessionCookie(sessionToken), clearNonceCookie()];
   if (state.a) return issueAuthorizationCode(config, state.a, sessionToken, cookies);
-  return redirect(new URL(returnPath, config.issuer).toString(), 303, cookies);
+  return redirect(new URL(returnPath, authBase(config)).toString(), 303, cookies);
 }
 
 async function sessionForProvider(config: OAuthConfig, profile: ProviderProfile): Promise<string> {
@@ -598,7 +606,7 @@ async function githubProfile(config: OAuthConfig, code: string): Promise<Provide
       client_id: config.githubClientId,
       client_secret: config.githubClientSecret,
       code,
-      redirect_uri: new URL(`${AUTH_PREFIX}/github/callback`, config.issuer).toString(),
+      redirect_uri: providerCallbackUrl(config, 'github'),
     }),
   });
   const tokenData = await tokenRes.json<{ access_token?: string; error?: string }>();
@@ -630,7 +638,7 @@ async function googleProfile(config: OAuthConfig, code: string): Promise<Provide
       client_id: config.googleClientId || '',
       client_secret: config.googleClientSecret || '',
       code,
-      redirect_uri: new URL(`${AUTH_PREFIX}/google/callback`, config.issuer).toString(),
+      redirect_uri: providerCallbackUrl(config, 'google'),
       grant_type: 'authorization_code',
     }),
   });

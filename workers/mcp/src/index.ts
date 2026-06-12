@@ -968,6 +968,7 @@ export default {
     if (env.OAUTH_KV && env.SESSION_SIGNING_KEY && (providerAuthEnabled || creatorAccounts.length)) {
       const oauthRes = await handleOAuthRoute(request, {
         issuer,
+        authBase: publicBase(env),
         kv: env.OAUTH_KV,
         sessionSigningKey: env.SESSION_SIGNING_KEY,
         creatorAccounts,
