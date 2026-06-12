@@ -6,7 +6,11 @@ workers_dev = true
 
 [vars]
 PUBLIC_BASE_URL = "https://freedesignstore.online"
-PUBLIC_MCP_BASE_URL = "https://freedesignstore.online"
+PUBLIC_MCP_BASE_URL = "https://mcp.freedesignstore.online"
+
+[[routes]]
+pattern = "mcp.freedesignstore.online/*"
+zone_name = "freedesignstore.online"
 
 # Secrets:
 #   STOCK_ADMIN_TOKEN - same value used by the Pages Functions upload backend.

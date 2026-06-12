@@ -42,6 +42,49 @@ jobs:
       - name: Install deploy dependencies
         working-directory: workers/mcp
         run: npm ci
+      - name: Ensure MCP DNS record
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node <<'NODE'
+          const token = process.env.CLOUDFLARE_API_TOKEN;
+          const zoneName = 'freedesignstore.online';
+          const recordName = 'mcp.freedesignstore.online';
+          const content = 'freedesignstore-mcp.serge-the-dev.workers.dev';
+          const headers = {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          };
+          async function cf(path, init = {}) {
+            const res = await fetch(`https://api.cloudflare.com/client/v4${path}`, {
+              ...init,
+              headers: { ...headers, ...(init.headers || {}) },
+            });
+            const body = await res.json();
+            if (!res.ok || !body.success) {
+              throw new Error(JSON.stringify(body.errors || body));
+            }
+            return body.result;
+          }
+          const zones = await cf(`/zones?name=${encodeURIComponent(zoneName)}`);
+          const zone = zones[0];
+          if (!zone) throw new Error(`Zone not found: ${zoneName}`);
+          const existing = await cf(`/zones/${zone.id}/dns_records?type=CNAME&name=${encodeURIComponent(recordName)}`);
+          const payload = JSON.stringify({ type: 'CNAME', name: recordName, content, ttl: 1, proxied: true });
+          if (existing[0]) {
+            await cf(`/zones/${zone.id}/dns_records/${existing[0].id}`, { method: 'PUT', body: payload });
+            console.log(`Updated ${recordName}`);
+          } else {
+            await cf(`/zones/${zone.id}/dns_records`, { method: 'POST', body: payload });
+            console.log(`Created ${recordName}`);
+          }
+          NODE
+      - name: Deploy MCP Worker
+        working-directory: workers/mcp
+        run: ./node_modules/.bin/wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - name: Deploy Cloudflare Pages
         run: ./workers/mcp/node_modules/.bin/wrangler pages deploy store --project-name freedesignstore
         env:
@@ -50,7 +93,7 @@ jobs:
       - name: Verify production MCP surface
         run: |
           node <<'NODE'
-          const base = 'https://freedesignstore.online';
+          const base = 'https://mcp.freedesignstore.online';
           const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
           async function retry(name, fn) {

@@ -945,9 +945,9 @@ export default {
       return new Response([
         'FreeDesignStore Catalog MCP Server v0.1.0',
         '',
-        'Connect: npx mcp-remote https://freedesignstore.online/mcp',
+        'Connect: npx mcp-remote https://mcp.freedesignstore.online/mcp',
         browserAuthEnabled
-          ? 'Browser sign-in: https://freedesignstore.online/.fds/auth/start'
+          ? 'Browser sign-in: https://mcp.freedesignstore.online/.fds/auth/start'
           : 'Browser sign-in: not enabled until FDS auth is configured.',
         '',
         'Skills:   list_design_skills, get_design_skill, apply_design_skill',
