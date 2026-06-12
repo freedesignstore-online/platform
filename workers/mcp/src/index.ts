@@ -81,6 +81,21 @@ const PUBLIC_MCP_BASE_FALLBACK = 'https://freedesignstore.online';
 
 const assetTypes = ['photo', 'illustration', 'icon', 'pattern', 'texture', 'background', 'ui'] as const;
 const allowedTypes = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/svg+xml']);
+const mcpDiscoveryTools = [
+  { name: 'asset_policy', description: 'Read catalog hosting rules, including Unsplash link-off policy' },
+  { name: 'list_design_skills', description: 'List published FDS design asset playbooks' },
+  { name: 'get_design_skill', description: 'Get one published FDS design asset playbook' },
+  { name: 'apply_design_skill', description: 'Apply a design asset playbook as questions, a checklist, or a tool plan' },
+  { name: 'catalog_status', description: 'Check storage readiness and asset counts' },
+  { name: 'whoami', description: 'Show the authenticated creator/admin account' },
+  { name: 'list_assets', description: 'List public or admin-visible pending catalog assets' },
+  { name: 'my_assets', description: 'List assets owned by the authenticated creator account' },
+  { name: 'get_asset', description: "Get one asset's metadata and download URL" },
+  { name: 'create_svg_asset', description: 'Create a hosted generated SVG asset under the authenticated account' },
+  { name: 'create_asset_from_url', description: 'Ingest a public non-Unsplash HTTPS image URL under the authenticated account' },
+  { name: 'moderate_asset', description: 'Publish or reject a pending asset' },
+  { name: 'delete_asset', description: 'Delete catalog metadata and the R2 object' },
+];
 const unsafeSvg = [
   /<script[\s>]/i,
   /<foreignObject[\s>]/i,
@@ -286,6 +301,20 @@ function publicBase(env: Env): string {
 
 function publicMcpBase(env: Env, requestUrl: URL): string {
   return (env.PUBLIC_MCP_BASE_URL || (requestUrl.host ? `${requestUrl.protocol}//${requestUrl.host}` : PUBLIC_MCP_BASE_FALLBACK)).replace(/\/$/, '');
+}
+
+function mcpDiscovery(env: Env, requestUrl: URL) {
+  const endpoint = `${publicMcpBase(env, requestUrl)}/mcp`;
+  return {
+    version: '1.0',
+    servers: [{
+      name: 'FreeDesignStore Catalog',
+      description: 'Tools for reading and populating the FreeDesignStore community visual asset catalog. Supports FDS-hosted/community photos, generated SVG illustrations, icons, patterns, textures, and moderation. Unsplash assets are linked with attribution and are not mirrored into FDS.',
+      endpoint,
+      transport: 'streamable-http',
+      tools: mcpDiscoveryTools,
+    }],
+  };
 }
 
 function publicItem(env: Env, item: CatalogItem) {
@@ -926,6 +955,15 @@ export default {
     const githubClientSecret = env.FDS_GITHUB_CLIENT_SECRET || env.GITHUB_CLIENT_SECRET;
     const providerAuthEnabled = Boolean((githubClientId && githubClientSecret) || (googleOAuthEnabled && env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET));
     const browserAuthEnabled = Boolean(env.OAUTH_KV && env.SESSION_SIGNING_KEY && (providerAuthEnabled || creatorAccounts.length));
+
+    if (url.pathname === '/.well-known/mcp.json') {
+      return Response.json(mcpDiscovery(env, url), {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'no-store',
+        },
+      });
+    }
 
     if (env.OAUTH_KV && env.SESSION_SIGNING_KEY && (providerAuthEnabled || creatorAccounts.length)) {
       const oauthRes = await handleOAuthRoute(request, {
