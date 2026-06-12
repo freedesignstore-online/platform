@@ -30,7 +30,7 @@ FDS publishes canonical design asset playbooks the same way FreeIdeaStore publis
 - Manifest: `https://freedesignstore.online/skills/manifest.json`
 - MCP tools: `list_design_skills`, `get_design_skill`, `apply_design_skill`
 
-Use these skills before briefing, creating, uploading, reviewing, or publishing assets. They keep agents aligned on legal hosting rules, SVG safety, Unsplash link-off behavior, metadata quality, and trusted-publisher moderation.
+Use these skills before briefing, creating, uploading, reviewing, or publishing assets. They keep agents aligned on legal hosting rules, SVG safety, Unsplash link-off behavior, metadata quality, and creator publishing.
 
 ## Legal Guardrails
 
@@ -77,7 +77,7 @@ npx wrangler secret put FDS_CREATOR_TOKENS
 
 ```json
 [
-  { "accountId": "creator-id", "name": "Creator Name", "token": "secret-token", "canPublish": false }
+  { "accountId": "creator-id", "name": "Creator Name", "token": "secret-token" }
 ]
 ```
 
@@ -85,11 +85,11 @@ or:
 
 ```json
 {
-  "creator-id": { "name": "Creator Name", "token": "secret-token", "canPublish": false }
+  "creator-id": { "name": "Creator Name", "token": "secret-token" }
 }
 ```
 
-Set `canPublish: true` only for trusted automation accounts whose generated/uploaded assets may go public immediately. Human provider sign-ins submit pending assets unless later promoted by a role system.
+Any authenticated creator can publish assets immediately when they explicitly set `publish: true`. Clients can still submit drafts or review queues by setting `publish: false`.
 
 Then deploy:
 

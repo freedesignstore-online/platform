@@ -762,7 +762,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         author: z.string().optional().describe('Author or contributor credit'),
         license: z.string().optional().describe('License label shown to users'),
         tags: z.array(z.string()).optional().describe('Search tags'),
-        publish: z.boolean().optional().describe('Publish immediately instead of leaving pending. Requires admin or trusted-publisher creator permission.'),
+        publish: z.boolean().optional().describe('Publish immediately instead of leaving pending. Requires an authenticated creator or admin account.'),
       },
       async ({ title, svg, asset_type = 'illustration', category, author, license, tags, publish = false }) => {
         const props = currentProps(this.props);
@@ -784,7 +784,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
           author: author || props.accountName,
           license,
           tags,
-          publish: Boolean((props.isAdmin || props.canPublish) && publish),
+          publish: Boolean(publish),
           ownerAccountId: props.accountId,
           ownerName: props.accountName,
         });
@@ -803,7 +803,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         author: z.string().optional().describe('Author or contributor credit'),
         license: z.string().optional().describe('License label shown to users'),
         tags: z.array(z.string()).optional().describe('Search tags'),
-        publish: z.boolean().optional().describe('Publish immediately instead of leaving pending. Requires admin or trusted-publisher creator permission.'),
+        publish: z.boolean().optional().describe('Publish immediately instead of leaving pending. Requires an authenticated creator or admin account.'),
       },
       async ({ url, title, asset_type = 'photo', category, author, license, tags, publish = false }) => {
         const props = currentProps(this.props);
@@ -845,7 +845,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
           author: author || props.accountName,
           license,
           tags,
-          publish: Boolean((props.isAdmin || props.canPublish) && publish),
+          publish: Boolean(publish),
           sourceUrl: parsed.toString(),
           ownerAccountId: props.accountId,
           ownerName: props.accountName,
@@ -917,7 +917,7 @@ async function authenticateRequest(request: Request, env: Env, options: { allowS
     }
     const creator = parseCreatorAccounts(env).find((account) => account.token === token);
     if (creator) {
-      return { isAdmin: false, canPublish: Boolean(creator.canPublish), accountId: safeAccountId(creator.accountId), accountName: creator.name };
+      return { isAdmin: false, canPublish: true, accountId: safeAccountId(creator.accountId), accountName: creator.name };
     }
     sessionToken = token;
     if (env.OAUTH_KV) {

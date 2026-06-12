@@ -270,7 +270,7 @@ function findCreator(config: OAuthConfig, accountId: string, token: string): Cre
 }
 
 async function sessionForCreator(config: OAuthConfig, creator: CreatorAccount): Promise<string> {
-  const roles = creator.canPublish ? ['creator', 'publisher'] : ['creator'];
+  const roles = ['creator', 'publisher'];
   return signSession(
     {
       uid: creator.accountId,
@@ -581,7 +581,7 @@ async function providerCallback(request: Request, config: OAuthConfig, provider:
 }
 
 async function sessionForProvider(config: OAuthConfig, profile: ProviderProfile): Promise<string> {
-  const roles = ['creator'];
+  const roles = ['creator', 'publisher'];
   return signSession(
     {
       uid: profile.accountId,

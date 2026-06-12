@@ -44,7 +44,8 @@ test('worker supports FDS OAuth without FAS auth routing', async () => {
   assert.match(source, /Auth: FDS OAuth 2\.1 browser sign-in/);
   assert.match(source, /GOOGLE_OAUTH_ENABLED === 'true'/);
   assert.match(source, /canPublish/);
-  assert.match(source, /trusted-publisher creator permission/);
+  assert.match(source, /Requires an authenticated creator or admin account/);
+  assert.match(oauth, /const roles = \['creator', 'publisher'\]/);
   assert.match(oauth, /authorization_endpoint: `\$\{config\.issuer\}\/authorize`/);
   assert.match(oauth, /token_endpoint: `\$\{config\.issuer\}\/token`/);
   assert.match(oauth, /Continue with \$\{providerLabel\(provider\)\}/);
@@ -111,7 +112,7 @@ test('creator console exposes the FDS MCP catalog workflow', async () => {
   assert.match(consoleHtml, /avatarUrl/);
   assert.match(consoleHtml, /hasImage/);
   assert.match(consoleHtml, /function initials/);
-  assert.match(consoleHtml, /Trusted publisher/);
+  assert.match(consoleHtml, /Publishing enabled/);
   assert.match(consoleHtml, /tools\/call/);
   assert.match(consoleHtml, /create_svg_asset/);
   assert.match(consoleHtml, /my_assets/);
