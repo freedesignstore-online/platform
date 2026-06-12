@@ -53,8 +53,8 @@ Before deploying in a new environment, wire it to the same production storage us
 cd workers/mcp
 npx wrangler secret put STOCK_ADMIN_TOKEN
 npx wrangler secret put SESSION_SIGNING_KEY
-npx wrangler secret put GITHUB_CLIENT_ID
-npx wrangler secret put GITHUB_CLIENT_SECRET
+npx wrangler secret put FDS_GITHUB_CLIENT_ID
+npx wrangler secret put FDS_GITHUB_CLIENT_SECRET
 npx wrangler secret put GOOGLE_CLIENT_ID
 npx wrangler secret put GOOGLE_CLIENT_SECRET
 ```

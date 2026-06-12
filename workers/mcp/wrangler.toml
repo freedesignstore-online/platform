@@ -13,7 +13,7 @@ PUBLIC_MCP_BASE_URL = "https://freedesignstore.online"
 #   MCP_ADMIN_TOKEN   - optional separate write token for MCP clients.
 #   SESSION_SIGNING_KEY - signs/verifies FDS creator sessions and MCP OAuth tokens.
 #   FDS_CREATOR_TOKENS - optional static creator-token map.
-#   GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET - GitHub OAuth app for creator sign-in.
+#   FDS_GITHUB_CLIENT_ID / FDS_GITHUB_CLIENT_SECRET - GitHub OAuth app for creator sign-in.
 #   GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET - optional Google OAuth app for creator sign-in.
 #   GOOGLE_OAUTH_ENABLED=true - enable Google only after its callback URL is authorized.
 #

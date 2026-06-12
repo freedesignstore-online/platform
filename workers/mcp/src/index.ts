@@ -14,6 +14,8 @@ interface Env {
   API_BASE?: string;
   OAUTH_KV?: KVNamespace;
   SESSION_SIGNING_KEY?: string;
+  FDS_GITHUB_CLIENT_ID?: string;
+  FDS_GITHUB_CLIENT_SECRET?: string;
   GITHUB_CLIENT_ID?: string;
   GITHUB_CLIENT_SECRET?: string;
   GOOGLE_CLIENT_ID?: string;
@@ -920,7 +922,9 @@ export default {
     const issuer = publicMcpBase(env, url);
     const creatorAccounts = parseCreatorAccounts(env);
     const googleOAuthEnabled = env.GOOGLE_OAUTH_ENABLED === 'true';
-    const providerAuthEnabled = Boolean((env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) || (googleOAuthEnabled && env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET));
+    const githubClientId = env.FDS_GITHUB_CLIENT_ID || env.GITHUB_CLIENT_ID;
+    const githubClientSecret = env.FDS_GITHUB_CLIENT_SECRET || env.GITHUB_CLIENT_SECRET;
+    const providerAuthEnabled = Boolean((githubClientId && githubClientSecret) || (googleOAuthEnabled && env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET));
     const browserAuthEnabled = Boolean(env.OAUTH_KV && env.SESSION_SIGNING_KEY && (providerAuthEnabled || creatorAccounts.length));
 
     if (env.OAUTH_KV && env.SESSION_SIGNING_KEY && (providerAuthEnabled || creatorAccounts.length)) {
@@ -929,8 +933,8 @@ export default {
         kv: env.OAUTH_KV,
         sessionSigningKey: env.SESSION_SIGNING_KEY,
         creatorAccounts,
-        githubClientId: env.GITHUB_CLIENT_ID,
-        githubClientSecret: env.GITHUB_CLIENT_SECRET,
+        githubClientId,
+        githubClientSecret,
         googleClientId: googleOAuthEnabled ? env.GOOGLE_CLIENT_ID : undefined,
         googleClientSecret: googleOAuthEnabled ? env.GOOGLE_CLIENT_SECRET : undefined,
       });
