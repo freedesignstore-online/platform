@@ -94,6 +94,7 @@ const mcpDiscoveryTools = [
   { name: 'create_svg_asset', description: 'Create a hosted generated SVG asset under the authenticated account' },
   { name: 'create_asset_from_url', description: 'Ingest a public non-Unsplash HTTPS image URL under the authenticated account' },
   { name: 'moderate_asset', description: 'Publish or reject a pending asset' },
+  { name: 'publish_asset', description: 'Publish a pending owned asset' },
   { name: 'unpublish_asset', description: 'Move a public owned asset back to pending before deletion' },
   { name: 'delete_asset', description: 'Delete catalog metadata and the R2 object' },
 ];
@@ -882,6 +883,32 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
     );
 
     this.server.tool(
+      'publish_asset',
+      'Publish a pending catalog asset. Admins can publish any pending asset; creators can publish their own pending assets.',
+      { id: z.string().describe('Catalog asset id') },
+      async ({ id }) => {
+        const props = currentProps(this.props);
+        const authError = assertAccount(props);
+        if (authError) return txt(authError);
+        const store = requireStore(this.env);
+        if (typeof store === 'string') return txt(store);
+        const item = await getItem(store.kv, id);
+        if (!item) return txt(`Asset not found: ${id}`);
+        if (!props.isAdmin && !isOwner(props, item)) return txt('Not authorized to publish this asset.');
+        if (item.status === 'public') return jsonText({ ok: true, item: itemForAccount(this.env, item) });
+        if (item.status !== 'pending') return txt(`Only pending assets can be published. Current status: ${item.status}.`);
+
+        item.status = 'public';
+        item.updatedAt = new Date().toISOString();
+        await putItem(store.kv, item);
+        await removeFromIndex(store.kv, PENDING_INDEX, id);
+        await addToIndex(store.kv, PUBLIC_INDEX, id);
+
+        return jsonText({ ok: true, item: itemForAccount(this.env, item) });
+      },
+    );
+
+    this.server.tool(
       'unpublish_asset',
       'Unpublish a public catalog asset. Admins can unpublish any asset; creators can unpublish their own public assets before deletion.',
       { id: z.string().describe('Catalog asset id') },
@@ -1018,7 +1045,7 @@ export default {
         'Skills:   list_design_skills, get_design_skill, apply_design_skill',
         'Read:     asset_policy, catalog_status, whoami, list_assets, my_assets, get_asset',
         'Create:   create_svg_asset, create_asset_from_url (authenticated creator/admin)',
-        'Manage:   unpublish_asset, delete_asset',
+        'Manage:   publish_asset, unpublish_asset, delete_asset',
         'Admin:    moderate_asset',
         '',
         browserAuthEnabled

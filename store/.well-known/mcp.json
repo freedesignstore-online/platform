@@ -56,6 +56,10 @@
           "description": "Publish or reject a pending asset"
         },
         {
+          "name": "publish_asset",
+          "description": "Publish a pending owned asset"
+        },
+        {
           "name": "unpublish_asset",
           "description": "Move a public owned asset back to pending before deletion"
         },

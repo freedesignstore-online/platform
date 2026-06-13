@@ -1,6 +1,7 @@
 const PUBLIC_INDEX = "stock:index:public";
 const PENDING_INDEX = "stock:index:pending";
 const ITEM_PREFIX = "stock:item:";
+const DEFAULT_MCP_BACKEND = "https://freedesignstore-mcp.serge-the-dev.workers.dev";
 const MAX_ITEMS = 500;
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 const MAX_SVG_SIZE = 1024 * 1024;
@@ -61,6 +62,37 @@ export function isAdmin(request, env) {
   if (!token) return false;
   const auth = request.headers.get("authorization") || "";
   return auth === `Bearer ${token}`;
+}
+
+export async function authenticatedAccount(request, env) {
+  const cookie = request.headers.get("cookie");
+  if (!cookie) return null;
+
+  const source = new URL(request.url);
+  const target = new URL(env.FDS_MCP_BACKEND_URL || DEFAULT_MCP_BACKEND);
+  target.pathname = "/.fds/auth/me";
+  target.search = "";
+
+  const headers = new Headers();
+  headers.set("cookie", cookie);
+  headers.set("x-fds-forwarded-host", source.host);
+  headers.set("x-fds-forwarded-proto", source.protocol.replace(":", ""));
+
+  try {
+    const res = await fetch(target.toString(), { headers });
+    if (!res.ok) return null;
+    const body = await res.json();
+    return body?.authenticated ? body : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function canViewItem(request, env, item) {
+  if (item.status === "public" || isAdmin(request, env)) return true;
+  const account = await authenticatedAccount(request, env);
+  if (account?.isAdmin) return true;
+  return Boolean(account?.accountId && item.ownerAccountId === account.accountId);
 }
 
 export async function readIndex(kv, key) {

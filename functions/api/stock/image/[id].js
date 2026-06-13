@@ -1,4 +1,4 @@
-import { error, getItem, isAdmin, requireStore } from "../_lib.js";
+import { canViewItem, error, getItem, requireStore } from "../_lib.js";
 
 export async function onRequestGet({ params, request, env }) {
   const store = requireStore(env);
@@ -7,7 +7,7 @@ export async function onRequestGet({ params, request, env }) {
   const id = params.id;
   const item = await getItem(store.kv, id);
   if (!item) return error("Asset not found.", 404);
-  if (item.status !== "public" && !isAdmin(request, env)) {
+  if (!(await canViewItem(request, env, item))) {
     return error("Asset is not public.", 404);
   }
 

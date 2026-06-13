@@ -119,8 +119,8 @@ jobs:
             if (body?.servers?.[0]?.endpoint !== `${base}/mcp`) {
               throw new Error(`unexpected endpoint ${body?.servers?.[0]?.endpoint}`);
             }
-            if ((body?.servers?.[0]?.tools || []).length !== 14) {
-              throw new Error('expected 14 MCP tools in discovery');
+            if ((body?.servers?.[0]?.tools || []).length !== 15) {
+              throw new Error('expected 15 MCP tools in discovery');
             }
           });
 
@@ -128,7 +128,7 @@ jobs:
             const res = await fetch(`${base}/health`, { cache: 'no-store' });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const body = await res.json();
-            if (!body.ok || body.tools !== 14) throw new Error(`bad health ${JSON.stringify(body)}`);
+            if (!body.ok || body.tools !== 15) throw new Error(`bad health ${JSON.stringify(body)}`);
           });
 
           await retry('MCP OAuth challenge', async () => {
