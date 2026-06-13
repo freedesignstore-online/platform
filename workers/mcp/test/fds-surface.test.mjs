@@ -135,6 +135,7 @@ test('home and public library make assets a first-class FDS surface', async () =
   assert.match(homeHtml, /href="\/images\/stock-photos\/">Assets/);
   assert.match(homeHtml, /id="assetRail"/);
   assert.match(homeHtml, /const hostedAssets=/);
+  assert.match(homeHtml, /Lifestyle Hiking Trail/);
   assert.match(homeHtml, /Designer Desk Flatlay/);
   assert.match(homeHtml, /Packaging Mockup/);
   assert.match(homeHtml, /fetch\('\/api\/stock\/list'/);
@@ -151,10 +152,11 @@ test('home and public library make assets a first-class FDS surface', async () =
   for (const type of ['Images / Photos', 'Illustrations', 'Icons', 'Patterns', 'Textures', 'Backgrounds', 'UI Assets']) {
     assert.match(libraryHtml, new RegExp(type.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
-  for (const photo of ['Designer Desk Flatlay', 'Packaging Mockup', 'Social Planning Workspace', 'Interior Light Shadows', 'Material Swatch Moodboard', 'UX Wireframe Desk']) {
+  for (const photo of ['Designer Desk Flatlay', 'Packaging Mockup', 'Social Planning Workspace', 'Interior Light Shadows', 'Material Swatch Moodboard', 'UX Wireframe Desk', 'Lifestyle Hiking Trail', 'Lifestyle Coffee Cup', 'Lifestyle Park Bench', 'Lifestyle Concert Stage']) {
     assert.match(libraryHtml, new RegExp(photo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
-  assert.equal((libraryHtml.match(/source:'hosted'/g) || []).length, 12);
+  assert.match(libraryHtml, /Lifestyle/);
+  assert.equal((libraryHtml.match(/source:'hosted'/g) || []).length, 16);
   assert.match(libraryHtml, /\[\.\.\.communityPhotos,\.\.\.HOSTED_PHOTOS,\.\.\.apiResults\]/);
 });
 
