@@ -119,10 +119,25 @@ test('creator console exposes the FDS MCP catalog workflow', async () => {
   assert.match(consoleHtml, /publish_asset/);
   assert.match(consoleHtml, /unpublish_asset/);
   assert.match(consoleHtml, /delete_asset/);
+  assert.match(consoleHtml, /class="assetPreview"/);
+  assert.match(consoleHtml, /<img src="\$\{escapeAttr\(a\.url\)\}"/);
   assert.match(consoleHtml, /data-publish/);
   assert.match(consoleHtml, /data-unpublish/);
   assert.match(consoleHtml, /data-delete/);
   assert.doesNotMatch(consoleHtml, /bearer token|sessionStorage|localStorage|freeappstore\.online|api\.freeappstore|fds-mcp\.freeappstore/i);
+});
+
+test('home and public library make assets a first-class FDS surface', async () => {
+  const homeHtml = await readRepo('store/index.html');
+  const libraryHtml = await readRepo('store/images/stock-photos/index.html');
+
+  assert.match(homeHtml, /Free Design Assets and Tools/);
+  assert.match(homeHtml, /href="\/images\/stock-photos\/">Assets/);
+  assert.match(homeHtml, /id="assetRail"/);
+  assert.match(homeHtml, /fetch\('\/api\/stock\/list'/);
+  assert.match(homeHtml, /Community-published FDS assets appear here first/);
+  assert.match(homeHtml, /id="tools"/);
+  assert.match(libraryHtml, /\[\.\.\.communityPhotos,\.\.\.HOSTED_PHOTOS,\.\.\.apiResults\]/);
 });
 
 test('stock image route allows signed-in owners to preview private assets', async () => {

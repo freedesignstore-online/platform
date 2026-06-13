@@ -256,7 +256,7 @@ async function loadCommunityPhotos(){
 }
 
 function allPhotos(){
-  return [...HOSTED_PHOTOS,...communityPhotos,...apiResults];
+  return [...communityPhotos,...HOSTED_PHOTOS,...apiResults];
 }
 
 function filteredPhotos(){

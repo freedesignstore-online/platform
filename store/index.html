@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>FreeDesignStore — 46 AI-Powered Design Tools</title>
-<meta name="description" content="40 free design tools. Logo maker, Tailwind themes, CSS animations, UI components. No signup.">
-<meta property="og:title" content="FreeDesignStore — 46 Free Design Tools">
+<title>FreeDesignStore - Free Design Assets and Tools</title>
+<meta name="description" content="Free community design assets plus browser-based design tools. Download illustrations, photos, icons, patterns, logos, palettes, mockups, and UI assets.">
+<meta property="og:title" content="FreeDesignStore - Free Design Assets and Tools">
 <link rel="canonical" href="https://freedesignstore.online/">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -29,16 +29,21 @@ nav a{color:var(--muted)}nav a:hover{color:var(--text);text-decoration:none}
 .stock-feature-head{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:.65rem}
 .stock-feature h2{font-family:'Fraunces',serif;font-size:1.2rem;line-height:1.1}
 .stock-feature p{color:var(--muted);font-size:.76rem;line-height:1.45;max-width:520px;margin-top:.2rem}
+.stock-actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;justify-content:flex-end}
 .stock-link{font-size:.72rem;font-weight:700;white-space:nowrap}
 .stock-grid{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;gap:.65rem}
 .stock-card{position:relative;height:142px;border-radius:10px;overflow:hidden;background:#111;color:white;text-decoration:none;border:1px solid var(--line)}
 .stock-card:hover{text-decoration:none;transform:translateY(-1px);box-shadow:0 8px 22px rgba(0,0,0,.12)}
-.stock-card img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.02)}
+.stock-card img{width:100%;height:100%;object-fit:contain;display:block;filter:saturate(1.02);background:#f8fafc}
+.stock-card.hosted img{object-fit:cover}
 .stock-card:first-child{grid-row:span 2;height:292px}
 .stock-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.64))}
 .stock-caption{position:absolute;left:.75rem;right:.75rem;bottom:.65rem;z-index:1;display:flex;align-items:end;justify-content:space-between;gap:.5rem}
 .stock-caption strong{font-size:.78rem;line-height:1.15}
 .stock-caption span{font-size:.62rem;color:rgba(255,255,255,.82);white-space:nowrap}
+.section-title{max-width:1100px;margin:.8rem auto .55rem;padding:0 1.5rem;display:flex;justify-content:space-between;gap:1rem;align-items:end}
+.section-title h2{font-family:'Fraunces',serif;font-size:1.15rem}
+.section-title p{color:var(--muted);font-size:.75rem;line-height:1.45;margin-top:.15rem}
 @media (max-width:800px){.stock-feature-head{align-items:flex-start;flex-direction:column}.stock-grid{grid-template-columns:1fr 1fr}.stock-card:first-child{grid-row:auto;grid-column:span 2;height:210px}}
 @media (max-width:520px){.stock-grid{grid-template-columns:1fr}.stock-card:first-child{grid-column:auto}.stock-card,.stock-card:first-child{height:190px}}
 .filters{max-width:1100px;margin:0 auto;padding:.6rem 1.5rem;display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center}
@@ -65,39 +70,42 @@ footer a{color:var(--accent)}
 <body>
 <header>
 <a href="/" class="brand"><span class="brand-emoji">🎨</span><span class="brand-name">FreeDesignStore</span></a>
-<nav><a href="/console/">Console</a><a href="/skills/">Skills</a><a href="https://openfrontier.pages.dev">Open Frontier</a><a href="/">All</a><a href="/brand/logo-maker/">Logo</a><a href="/brand/tailwind-theme/">Tailwind</a><a href="/brand/css-animation/">Animate</a></nav>
+<nav><a href="/images/stock-photos/">Assets</a><a href="/console/">Console</a><a href="/skills/">Skills</a><a href="https://openfrontier.pages.dev">Open Frontier</a><a href="#tools">Tools</a><a href="/brand/logo-maker/">Logo</a><a href="/brand/tailwind-theme/">Tailwind</a></nav>
 </header>
 <section class="hero">
 <h1>Free<span>Design</span>Store</h1>
-<p>46 professional design tools. Logos, palettes, Tailwind themes, CSS animations, UI components, image processing. Free, in your browser.</p>
-<span class="badge">46 Tools</span><span class="badge">No Signup</span><span class="badge">Free SVG/PNG</span><span class="badge ai">AI-Powered</span>
+<p>Free community design assets and practical browser tools for designers. Download illustrations, photos, icons, patterns, logos, palettes, mockups, and UI assets.</p>
+<span class="badge" id="assetBadge">Community Assets</span><span class="badge">46 Tools</span><span class="badge">Free SVG/PNG</span><span class="badge ai">MCP Publishing</span>
 </section>
 <section class="stock-feature" aria-labelledby="stock-feature-title">
 <div class="stock-feature-head">
 <div>
-<h2 id="stock-feature-title">Featured free stock images</h2>
-<p>FDS-hosted downloads plus Unsplash browsing for mockups, decks, social posts, and landing pages.</p>
+<h2 id="stock-feature-title">Latest free design assets</h2>
+<p>Community-published FDS assets appear here first. Static FDS samples are only fallback content when the live catalog is empty.</p>
 </div>
-<a class="stock-link" href="/images/stock-photos/">Open Assets -></a>
+<div class="stock-actions"><a class="stock-link" href="/images/stock-photos/">Browse Assets -></a><a class="stock-link" href="/console/">Publish Yours -></a></div>
 </div>
-<div class="stock-grid">
-<a class="stock-card" href="/images/stock-photos/" aria-label="Browse workspace assets">
+<div class="stock-grid" id="assetRail">
+<a class="stock-card hosted" href="/images/stock-photos/" aria-label="Browse workspace assets">
 <img src="/assets/stock/workspace-studio.jpg" alt="Bright creative workspace with glass walls" loading="lazy">
 <div class="stock-caption"><strong>Workspace</strong><span>FDS hosted</span></div>
 </a>
-<a class="stock-card" href="/images/stock-photos/" aria-label="Browse technology assets">
+<a class="stock-card hosted" href="/images/stock-photos/" aria-label="Browse technology assets">
 <img src="/assets/stock/product-tech.jpg" alt="Laptop screen on a desk for technology projects" loading="lazy">
 <div class="stock-caption"><strong>Technology</strong><span>FDS hosted</span></div>
 </a>
-<a class="stock-card" href="/images/stock-photos/" aria-label="Browse road trip assets">
+<a class="stock-card hosted" href="/images/stock-photos/" aria-label="Browse road trip assets">
 <img src="/assets/stock/desert-road.jpg" alt="Open road through a mountain landscape" loading="lazy">
 <div class="stock-caption"><strong>Road Trips</strong><span>FDS hosted</span></div>
 </a>
-<a class="stock-card" href="/images/stock-photos/" aria-label="Browse travel assets">
+<a class="stock-card hosted" href="/images/stock-photos/" aria-label="Browse travel assets">
 <img src="/assets/stock/mountain-layers.jpg" alt="Layered mountains at sunrise" loading="lazy">
 <div class="stock-caption"><strong>Travel</strong><span>FDS hosted</span></div>
 </a>
 </div>
+</section>
+<section class="section-title" id="tools">
+<div><h2>Design tools</h2><p>Use the tools below to create, edit, convert, and prepare assets.</p></div>
 </section>
 <div class="filters">
 <button class="filter-btn active" data-cat="all">All (46)</button>
@@ -168,6 +176,27 @@ footer a{color:var(--accent)}
 <footer>FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a> | <a href="https://openfrontier-docs.pages.dev">Docs</a></footer>
 <script>
 (function(){
+  const assetRail=document.getElementById('assetRail');
+  const assetBadge=document.getElementById('assetBadge');
+  function esc(value){
+    return String(value||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+  async function loadAssetRail(){
+    if(!assetRail) return;
+    try{
+      const res=await fetch('/api/stock/list',{cache:'no-store'});
+      if(!res.ok) throw new Error('catalog unavailable');
+      const data=await res.json();
+      const items=(data.items||[]).slice(0,4);
+      if(!items.length) return;
+      assetBadge.textContent=`${data.items.length} Public Assets`;
+      assetRail.innerHTML=items.map(item=>`<a class="stock-card" href="/images/stock-photos/" aria-label="Open ${esc(item.title)}">
+        <img src="${esc(item.url)}" alt="${esc(item.title)}" loading="lazy">
+        <div class="stock-caption"><strong>${esc(item.title)}</strong><span>${esc(item.assetType||'asset')}</span></div>
+      </a>`).join('');
+    }catch(err){}
+  }
+  loadAssetRail();
   const btns=document.querySelectorAll('.filter-btn');
   const cards=document.querySelectorAll('.card');
   btns.forEach(btn=>{
