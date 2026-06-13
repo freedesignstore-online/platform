@@ -143,6 +143,11 @@ test('home and public library make assets a first-class FDS surface', async () =
   assert.match(homeHtml, /Design Asset Library/);
   assert.match(libraryHtml, /Free Design Asset Library/);
   assert.match(libraryHtml, /const ASSET_TYPES=/);
+  assert.match(libraryHtml, /id="assetModal"/);
+  assert.match(libraryHtml, /function openAssetModal/);
+  assert.match(libraryHtml, /data-photo-id/);
+  assert.match(libraryHtml, /bindAssetCards/);
+  assert.match(libraryHtml, /aria-modal="true"/);
   for (const type of ['Images / Photos', 'Illustrations', 'Icons', 'Patterns', 'Textures', 'Backgrounds', 'UI Assets']) {
     assert.match(libraryHtml, new RegExp(type.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
