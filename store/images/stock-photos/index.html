@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Free Visual Asset Library - FreeDesignStore</title>
-<meta name="description" content="Download and share community photos, illustrations, icons, patterns, textures, and generated SVG assets.">
+<title>Free Design Asset Library - FreeDesignStore</title>
+<meta name="description" content="Download and share community images, illustrations, icons, patterns, textures, backgrounds, UI assets, and generated SVG assets.">
 <link rel="icon" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -29,8 +29,8 @@ h1{font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-botto
 .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-dark)}
 .btn-secondary{background:#fff;border-color:var(--line);color:var(--text)}.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
 .btn-small{padding:7px 9px;font-size:12px}
-.tabs,.filters{display:flex;gap:8px;flex-wrap:wrap}
-.tabs{margin-bottom:14px}.filters{margin-top:12px}
+.tabs,.asset-types,.filters{display:flex;gap:8px;flex-wrap:wrap}
+.tabs{margin-bottom:12px}.asset-types{margin-bottom:14px}.filters{margin-top:12px}
 .tab,.filter{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:7px 12px;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
 .tab.active,.filter.active{background:var(--accent);border-color:var(--accent);color:#fff}
 .api{display:flex;gap:8px;align-items:center;margin-top:12px}
@@ -39,7 +39,8 @@ h1{font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-botto
 .notice.warn{color:#78350f;background:#fffbeb;border-color:#fde68a}
 .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:14px}
 .photo-card{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05)}
-.photo-card img{width:100%;height:220px;object-fit:cover;display:block;background:#e5e7eb}
+.photo-card img{width:100%;height:220px;object-fit:contain;display:block;background:#f8fafc}
+.photo-card.photo img{object-fit:cover}
 .photo-body{padding:11px}
 .photo-title{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:6px}
 .photo-title strong{font-size:14px;line-height:1.25}.source{font-size:10px;font-weight:800;color:#fff;background:#111827;border-radius:999px;padding:3px 7px;white-space:nowrap}
@@ -77,13 +78,15 @@ h1{font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-botto
 
   <section class="hero">
     <div>
-      <h1>Free Visual Asset Library</h1>
-      <p class="subtitle">Download and share photos, illustrations, icons, patterns, textures, backgrounds, and generated SVG assets for other creators.</p>
+      <h1>Free Design Asset Library</h1>
+      <p class="subtitle">Download and share images, illustrations, icons, patterns, textures, backgrounds, UI assets, and generated SVGs for other creators.</p>
     </div>
     <div class="stats">
-      <span class="pill">Generate SVGs</span>
-      <span class="pill">Community assets</span>
-      <span class="pill">Unsplash API</span>
+      <span class="pill">Images</span>
+      <span class="pill">Illustrations</span>
+      <span class="pill">Icons</span>
+      <span class="pill">Patterns</span>
+      <span class="pill">Textures</span>
     </div>
   </section>
 
@@ -95,6 +98,7 @@ h1{font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-botto
       <button class="tab" data-source="unsplash">Unsplash</button>
       <button class="tab" data-source="submit">Generate / Submit</button>
     </div>
+    <div class="asset-types" id="assetTypes" aria-label="Asset types"></div>
     <div class="toolbar">
       <div class="search">
         <input id="searchInput" type="search" placeholder="Search assets, tags, or categories" autocomplete="off">
@@ -131,7 +135,9 @@ h1{font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-botto
             <option value="illustration">Illustration</option>
             <option value="icon">Icon</option>
             <option value="pattern">Pattern</option>
+            <option value="texture">Texture</option>
             <option value="background">Background</option>
+            <option value="ui">UI asset</option>
           </select>
           <input id="generatorPrompt" placeholder="Theme, e.g. calm productivity">
           <input id="generatorColor" type="color" value="#ec4899" aria-label="Accent color">
@@ -153,7 +159,7 @@ h1{font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-botto
           <option value="ui">UI asset</option>
         </select>
         <select id="uploadCategory">
-          <option>Community</option><option>Business</option><option>Technology</option><option>Travel</option><option>Nature</option><option>People</option><option>Workspace</option><option>Abstract</option><option>Icons</option><option>Illustrations</option><option>Patterns</option><option>Textures</option>
+          <option>Community</option><option>Business</option><option>Technology</option><option>Marketing</option><option>Social</option><option>Travel</option><option>Nature</option><option>People</option><option>Workspace</option><option>Abstract</option><option>Characters</option><option>Icons</option><option>Illustrations</option><option>Patterns</option><option>Textures</option><option>Backgrounds</option><option>UI</option>
         </select>
         <select id="uploadLicense">
           <option value="FreeDesignStore Free Release">FreeDesignStore Free Release</option>
@@ -173,7 +179,17 @@ h1{font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-botto
 </main>
 
 <script>
-const CATEGORIES=['Business','Technology','Travel','Nature','People','Workspace','Abstract','Community','Icons','Illustrations','Patterns','Textures','Unsplash'];
+const ASSET_TYPES=[
+  {id:'all',label:'All Assets'},
+  {id:'photo',label:'Images / Photos'},
+  {id:'illustration',label:'Illustrations'},
+  {id:'icon',label:'Icons'},
+  {id:'pattern',label:'Patterns'},
+  {id:'texture',label:'Textures'},
+  {id:'background',label:'Backgrounds'},
+  {id:'ui',label:'UI Assets'}
+];
+const CATEGORIES=['Business','Technology','Marketing','Social','Travel','Nature','People','Workspace','Abstract','Community','Characters','Icons','Illustrations','Patterns','Textures','Backgrounds','UI','Unsplash'];
 const HOSTED_PHOTOS=[
   {id:'fds-workspace-studio',source:'hosted',assetType:'photo',title:'Workspace Studio',category:'Workspace',author:'FreeDesignStore',license:'FreeDesignStore hosted collection',url:'/assets/stock/workspace-studio.jpg',download:'/assets/stock/workspace-studio.jpg',tags:['office','startup','interior']},
   {id:'fds-product-tech',source:'hosted',assetType:'photo',title:'Product Review',category:'Technology',author:'FreeDesignStore',license:'FreeDesignStore hosted collection',url:'/assets/stock/product-tech.jpg',download:'/assets/stock/product-tech.jpg',tags:['laptop','product','screen']},
@@ -183,6 +199,7 @@ const HOSTED_PHOTOS=[
   {id:'fds-team-workshop',source:'hosted',assetType:'photo',title:'Team Workshop',category:'People',author:'FreeDesignStore',license:'FreeDesignStore hosted collection',url:'/assets/stock/team-workshop.jpg',download:'/assets/stock/team-workshop.jpg',tags:['team','meeting','collaboration']}
 ];
 let activeSource='all';
+let activeAssetType='all';
 let activeCategory='All';
 let apiKey=localStorage.getItem('unsplash_key')||'';
 let apiResults=[];
@@ -203,6 +220,7 @@ async function init(){
     $('apiStatus').classList.add('active');
   }
   bindEvents();
+  renderAssetTypes();
   renderFilters();
   await loadCommunityPhotos();
   render();
@@ -219,7 +237,7 @@ function bindEvents(){
     });
   });
   $('searchBtn').onclick=search;
-  $('resetBtn').onclick=()=>{$('searchInput').value='';activeCategory='All';apiResults=[];renderFilters();render()};
+  $('resetBtn').onclick=()=>{$('searchInput').value='';activeAssetType='all';activeCategory='All';apiResults=[];renderAssetTypes();renderFilters();render()};
   $('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
   $('connectBtn').onclick=connectUnsplash;
   $('submitBtn').onclick=submitPhotos;
@@ -235,6 +253,13 @@ function bindEvents(){
   zone.ondrop=e=>{e.preventDefault();zone.classList.remove('dragover');handleFiles(e.dataTransfer.files)};
   $('fileInput').onchange=e=>handleFiles(e.target.files);
   renderGeneratedAsset();
+}
+
+function renderAssetTypes(){
+  $('assetTypes').innerHTML=ASSET_TYPES.map(type=>`<button class="filter ${type.id===activeAssetType?'active':''}" data-type="${type.id}">${type.label}</button>`).join('');
+  document.querySelectorAll('[data-type]').forEach(btn=>{
+    btn.onclick=()=>{activeAssetType=btn.dataset.type;renderAssetTypes();render()};
+  });
 }
 
 function renderFilters(){
@@ -266,7 +291,8 @@ function filteredPhotos(){
   if(activeSource==='community') photos=photos.filter(p=>p.source==='community');
   if(activeSource==='unsplash') photos=photos.filter(p=>p.source==='unsplash');
   if(activeSource==='all') photos=photos.filter(p=>p.source!=='unsplash' || apiResults.length);
-  if(activeCategory!=='All') photos=photos.filter(p=>p.category===activeCategory);
+  if(activeAssetType!=='all') photos=photos.filter(p=>p.assetType===activeAssetType);
+  if(activeCategory!=='All') photos=photos.filter(p=>String(p.category||'').toLowerCase()===activeCategory.toLowerCase());
   if(q) photos=photos.filter(p=>[p.title,p.author,p.category,p.license,...(p.tags||[])].join(' ').toLowerCase().includes(q));
   return photos;
 }
@@ -287,7 +313,7 @@ function photoCard(photo){
   const credit=photo.source==='unsplash' && photo.creditUrl
     ? `<a href="${escapeHtml(photo.creditUrl)}" target="_blank" rel="noopener">${escapeHtml(photo.author)}</a> on <a href="https://unsplash.com/?utm_source=FreeDesignStore&utm_medium=referral" target="_blank" rel="noopener">Unsplash</a>`
     : `${escapeHtml(photo.author)} - ${escapeHtml(photo.license)}`;
-  return `<article class="photo-card">
+  return `<article class="photo-card ${photo.assetType==='photo'?'photo':''}">
     <img src="${escapeHtml(photo.url)}" alt="${escapeHtml(photo.title)}" loading="lazy">
     <div class="photo-body">
       <div class="photo-title"><strong>${escapeHtml(photo.title)}</strong><span class="source ${sourceClass}">${sourceLabel}</span></div>
@@ -426,8 +452,12 @@ function renderGeneratedAsset(){
     generatedSvg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#111827"/><circle cx="256" cy="256" r="142" fill="#${alt}"/><path d="M180 276l52 52 112-144" fill="none" stroke="#fff" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   }else if(kind==='pattern'){
     generatedSvg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600"><rect width="900" height="600" fill="#f8fafc"/><defs><pattern id="p" width="90" height="90" patternUnits="userSpaceOnUse"><circle cx="18" cy="18" r="${10+(seed%18)}" fill="${color}" opacity=".75"/><path d="M52 12h26v26H52z" fill="#111827" opacity=".12"/><path d="M0 90L90 0" stroke="${color}" stroke-width="4" opacity=".25"/></pattern></defs><rect width="900" height="600" fill="url(#p)"/></svg>`;
+  }else if(kind==='texture'){
+    generatedSvg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600"><rect width="900" height="600" fill="#f8fafc"/><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="4" seed="${seed%97}"/><feColorMatrix type="saturate" values=".25"/><feComponentTransfer><feFuncA type="table" tableValues="0 .32"/></feComponentTransfer></filter><rect width="900" height="600" fill="${color}" opacity=".24"/><rect width="900" height="600" filter="url(#noise)"/><g stroke="#111827" stroke-width="1" opacity=".08">${Array.from({length:16}).map((_,i)=>`<path d="M0 ${i*42}c160 ${30+(i%5)*8} 280 -${20+(i%3)*7} 450 0s310 35 450 0"/>`).join('')}</g></svg>`;
   }else if(kind==='background'){
     generatedSvg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${color}"/><stop offset=".55" stop-color="#111827"/><stop offset="1" stop-color="#38bdf8"/></linearGradient></defs><rect width="1200" height="700" fill="url(#g)"/><circle cx="240" cy="180" r="180" fill="#fff" opacity=".12"/><circle cx="980" cy="520" r="220" fill="#fff" opacity=".1"/><path d="M0 480c160-80 270 40 430-20s270-210 460-100 210 20 310 0v340H0z" fill="#fff" opacity=".18"/></svg>`;
+  }else if(kind==='ui'){
+    generatedSvg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700"><rect width="1000" height="700" rx="36" fill="#f8fafc"/><rect x="92" y="86" width="816" height="528" rx="28" fill="#fff" stroke="#d1d5db" stroke-width="8"/><rect x="92" y="86" width="816" height="76" rx="28" fill="#111827"/><circle cx="138" cy="124" r="12" fill="#ef4444"/><circle cx="176" cy="124" r="12" fill="#f59e0b"/><circle cx="214" cy="124" r="12" fill="#10b981"/><rect x="146" y="220" width="230" height="310" rx="20" fill="${color}" opacity=".14"/><rect x="426" y="220" width="330" height="44" rx="12" fill="#111827"/><rect x="426" y="294" width="430" height="22" rx="11" fill="#d1d5db"/><rect x="426" y="342" width="370" height="22" rx="11" fill="#d1d5db"/><rect x="426" y="430" width="170" height="54" rx="16" fill="${color}"/><rect x="620" y="430" width="170" height="54" rx="16" fill="#111827"/></svg>`;
   }else{
     generatedSvg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700"><rect width="900" height="700" rx="40" fill="#f8fafc"/><circle cx="680" cy="170" r="96" fill="${color}" opacity=".28"/><rect x="120" y="140" width="360" height="360" rx="70" fill="${color}"/><path d="M170 440c110-170 220-170 320 0z" fill="#111827" opacity=".86"/><circle cx="310" cy="260" r="72" fill="#fff"/><path d="M560 430c80-130 160-130 230 0z" fill="#38bdf8"/><text x="120" y="610" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#111827">${escapeHtml(prompt).slice(0,24)}</text></svg>`;
   }
@@ -442,7 +472,7 @@ function useGeneratedAsset(){
   const file=new File([generatedSvg],name,{type:'image/svg+xml'});
   pendingFiles=[file];
   $('uploadAssetType').value=kind;
-  $('uploadCategory').value=kind==='icon'?'Icons':kind==='pattern'?'Patterns':kind==='illustration'?'Illustrations':'Abstract';
+  $('uploadCategory').value=kind==='icon'?'Icons':kind==='pattern'?'Patterns':kind==='texture'?'Textures':kind==='background'?'Backgrounds':kind==='ui'?'UI':kind==='illustration'?'Illustrations':'Abstract';
   $('uploadTitle').value=prompt;
   $('uploadTags').value=[kind,'generated',prompt].filter(Boolean).join(', ');
   $('pendingUploads').innerHTML=`<div class="upload-preview"><img src="${URL.createObjectURL(file)}" alt="${escapeHtml(name)}"><p><strong>${escapeHtml(name)}</strong><br>Generated SVG ready to submit.</p></div>`;

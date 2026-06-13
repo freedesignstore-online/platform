@@ -200,9 +200,9 @@
     },
     {
       "id": "stock-photos",
-      "name": "Visual Asset Library",
-      "description": "Generate, upload, and download community photos, illustrations, icons, patterns, textures, and Unsplash photos.",
-      "icon": "📷",
+      "name": "Design Asset Library",
+      "description": "Browse, generate, upload, and download images, illustrations, icons, patterns, textures, backgrounds, and UI assets.",
+      "icon": "📦",
       "iconBg": "#06b6d4",
       "category": "images",
       "section": "images"

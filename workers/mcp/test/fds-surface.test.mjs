@@ -137,7 +137,25 @@ test('home and public library make assets a first-class FDS surface', async () =
   assert.match(homeHtml, /fetch\('\/api\/stock\/list'/);
   assert.match(homeHtml, /Community-published FDS assets appear here first/);
   assert.match(homeHtml, /id="tools"/);
+  assert.match(homeHtml, /Design Asset Library/);
+  assert.match(libraryHtml, /Free Design Asset Library/);
+  assert.match(libraryHtml, /const ASSET_TYPES=/);
+  for (const type of ['Images / Photos', 'Illustrations', 'Icons', 'Patterns', 'Textures', 'Backgrounds', 'UI Assets']) {
+    assert.match(libraryHtml, new RegExp(type.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
   assert.match(libraryHtml, /\[\.\.\.communityPhotos,\.\.\.HOSTED_PHOTOS,\.\.\.apiResults\]/);
+});
+
+test('public stock list API supports asset type, category, and search filters', async () => {
+  const listSource = await readRepo('functions/api/stock/list.js');
+  const libSource = await readRepo('functions/api/stock/_lib.js');
+  assert.match(libSource, /export const ASSET_TYPES = new Set/);
+  assert.match(libSource, /export function isAssetType/);
+  assert.match(listSource, /asset_type/);
+  assert.match(listSource, /Unsupported asset_type/);
+  assert.match(listSource, /category/);
+  assert.match(listSource, /url\.searchParams\.get\("q"\)/);
+  assert.match(listSource, /item\.assetType === assetType/);
 });
 
 test('stock image route allows signed-in owners to preview private assets', async () => {

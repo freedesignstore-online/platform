@@ -12,7 +12,7 @@ const ALLOWED_TYPES = new Set([
   "image/avif",
   "image/svg+xml",
 ]);
-const ASSET_TYPES = new Set([
+export const ASSET_TYPES = new Set([
   "photo",
   "illustration",
   "icon",
@@ -202,6 +202,10 @@ export function validateFile(file) {
 export function cleanAssetType(value) {
   const type = String(value || "photo").toLowerCase();
   return ASSET_TYPES.has(type) ? type : "photo";
+}
+
+export function isAssetType(value) {
+  return ASSET_TYPES.has(String(value || "").toLowerCase());
 }
 
 export async function fileBytes(file) {
