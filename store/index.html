@@ -178,8 +178,23 @@ footer a{color:var(--accent)}
 (function(){
   const assetRail=document.getElementById('assetRail');
   const assetBadge=document.getElementById('assetBadge');
+  const hostedAssets=[
+    {title:'Designer Desk Flatlay',assetType:'photo',url:'/assets/stock/designer-desk-flatlay.jpg',source:'FDS'},
+    {title:'Packaging Mockup',assetType:'photo',url:'/assets/stock/packaging-mockup.jpg',source:'FDS'},
+    {title:'Social Planning Workspace',assetType:'photo',url:'/assets/stock/social-planning-workspace.jpg',source:'FDS'},
+    {title:'Interior Light Shadows',assetType:'photo',url:'/assets/stock/interior-light-shadows.jpg',source:'FDS'},
+    {title:'Material Swatch Moodboard',assetType:'photo',url:'/assets/stock/material-swatch-moodboard.jpg',source:'FDS'},
+    {title:'UX Wireframe Desk',assetType:'photo',url:'/assets/stock/ux-wireframe-desk.jpg',source:'FDS'}
+  ];
   function esc(value){
     return String(value||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+  function renderAssets(items,total){
+    assetBadge.textContent=`${total} Public Assets`;
+    assetRail.innerHTML=items.map(item=>`<a class="stock-card ${item.source==='FDS'?'hosted':''}" href="/images/stock-photos/" aria-label="Open ${esc(item.title)}">
+      <img src="${esc(item.url)}" alt="${esc(item.title)}" loading="lazy">
+      <div class="stock-caption"><strong>${esc(item.title)}</strong><span>${esc(item.source==='FDS'?'hosted':item.assetType||'asset')}</span></div>
+    </a>`).join('');
   }
   async function loadAssetRail(){
     if(!assetRail) return;
@@ -187,14 +202,13 @@ footer a{color:var(--accent)}
       const res=await fetch('/api/stock/list',{cache:'no-store'});
       if(!res.ok) throw new Error('catalog unavailable');
       const data=await res.json();
-      const items=(data.items||[]).slice(0,4);
+      const community=data.items||[];
+      const items=[...hostedAssets.slice(0,2),...community,...hostedAssets.slice(2)].slice(0,4);
       if(!items.length) return;
-      assetBadge.textContent=`${data.items.length} Public Assets`;
-      assetRail.innerHTML=items.map(item=>`<a class="stock-card" href="/images/stock-photos/" aria-label="Open ${esc(item.title)}">
-        <img src="${esc(item.url)}" alt="${esc(item.title)}" loading="lazy">
-        <div class="stock-caption"><strong>${esc(item.title)}</strong><span>${esc(item.assetType||'asset')}</span></div>
-      </a>`).join('');
-    }catch(err){}
+      renderAssets(items,community.length+hostedAssets.length);
+    }catch(err){
+      renderAssets(hostedAssets.slice(0,4),hostedAssets.length);
+    }
   }
   loadAssetRail();
   const btns=document.querySelectorAll('.filter-btn');
