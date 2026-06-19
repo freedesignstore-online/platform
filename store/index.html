@@ -179,6 +179,18 @@ footer a{color:var(--accent)}
   const assetRail=document.getElementById('assetRail');
   const assetBadge=document.getElementById('assetBadge');
   const hostedAssets=[
+    {title:'Australia Surf Beach',assetType:'photo',url:'/assets/stock/lifestyle-australia-surf-beach.jpg',source:'FDS'},
+    {title:'Australia Cafe Table',assetType:'photo',url:'/assets/stock/lifestyle-australia-cafe-table.jpg',source:'FDS'},
+    {title:'Australia Bicycle Trail',assetType:'photo',url:'/assets/stock/lifestyle-australia-bicycle-trail.jpg',source:'FDS'},
+    {title:'Australia Rock Climbing',assetType:'photo',url:'/assets/stock/lifestyle-australia-rock-climbing.jpg',source:'FDS'},
+    {title:'Australia Beach Picnic',assetType:'photo',url:'/assets/stock/lifestyle-australia-beach-picnic.jpg',source:'FDS'},
+    {title:'Australia Coastal Walk',assetType:'photo',url:'/assets/stock/lifestyle-australia-coastal-walk.jpg',source:'FDS'},
+    {title:'Australia Farmers Market',assetType:'photo',url:'/assets/stock/lifestyle-australia-farmers-market.jpg',source:'FDS'},
+    {title:'Australia Bush Camping',assetType:'photo',url:'/assets/stock/lifestyle-australia-bush-camping.jpg',source:'FDS'},
+    {title:'Australia Park Yoga',assetType:'photo',url:'/assets/stock/lifestyle-australia-park-yoga.jpg',source:'FDS'},
+    {title:'Australia Ferry Commute',assetType:'photo',url:'/assets/stock/lifestyle-australia-ferry-commute.jpg',source:'FDS'},
+    {title:'Australia Park Cricket',assetType:'photo',url:'/assets/stock/lifestyle-australia-park-cricket.jpg',source:'FDS'},
+    {title:'Australia Reef Snorkelling',assetType:'photo',url:'/assets/stock/lifestyle-australia-reef-snorkelling.jpg',source:'FDS'},
     {title:'Lifestyle Hiking Trail',assetType:'photo',url:'/assets/stock/lifestyle-hiking-trail.jpg',source:'FDS'},
     {title:'Lifestyle Coffee Cup',assetType:'photo',url:'/assets/stock/lifestyle-coffee-cup.jpg',source:'FDS'},
     {title:'Lifestyle Park Bench',assetType:'photo',url:'/assets/stock/lifestyle-park-bench.jpg',source:'FDS'},
@@ -203,7 +215,7 @@ footer a{color:var(--accent)}
   async function loadAssetRail(){
     if(!assetRail) return;
     try{
-      const res=await fetch('/api/stock/list',{cache:'no-store'});
+      const res=await fetch('/api/stock/list?source=community',{cache:'no-store'});
       if(!res.ok) throw new Error('catalog unavailable');
       const data=await res.json();
       const community=data.items||[];

@@ -27,6 +27,7 @@ export function json(data, status = 200) {
     status,
     headers: {
       "content-type": "application/json; charset=utf-8",
+      "access-control-allow-origin": "*",
       "cache-control": "no-store",
     },
   });
@@ -132,7 +133,10 @@ export async function removeFromIndex(kv, key, id) {
   await writeIndex(kv, key, ids.filter((itemId) => itemId !== id));
 }
 
-export function publicItem(item) {
+export function publicItem(item, origin = "") {
+  const imagePath = `/api/stock/image/${item.id}`;
+  const imageUrl = origin ? new URL(imagePath, origin).toString() : imagePath;
+  const downloadUrl = origin ? new URL(`${imagePath}?download=1`, origin).toString() : `${imagePath}?download=1`;
   return {
     id: item.id,
     source: "community",
@@ -140,12 +144,18 @@ export function publicItem(item) {
     category: item.category,
     assetType: item.assetType || "photo",
     author: item.author,
+    attribution: item.author,
     license: item.license,
     tags: item.tags || [],
-    url: `/api/stock/image/${item.id}`,
-    download: `/api/stock/image/${item.id}?download=1`,
+    url: imageUrl,
+    download: downloadUrl,
     filename: item.filename,
     contentType: item.contentType,
+    width: item.width,
+    height: item.height,
+    orientation: item.height > item.width ? "portrait" : item.width > item.height ? "landscape" : undefined,
+    safe: item.safe !== false,
+    purpose: item.purpose || [],
     createdAt: item.createdAt,
     status: item.status,
   };

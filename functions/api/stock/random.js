@@ -1,0 +1,72 @@
+import { error, isAssetType } from "./_lib.js";
+import { HOSTED_STOCK, filterHostedStock, hostedStockItem } from "./hosted.js";
+
+const MAX_COUNT = 20;
+const CACHE_SECONDS = 60;
+
+export async function onRequestGet({ request }) {
+  const url = new URL(request.url);
+  const assetType = String(url.searchParams.get("assetType") || url.searchParams.get("asset_type") || "photo").toLowerCase();
+  const category = String(url.searchParams.get("category") || "").trim().toLowerCase();
+  const orientation = String(url.searchParams.get("orientation") || "").trim().toLowerCase();
+  const purpose = String(url.searchParams.get("purpose") || "").trim().toLowerCase();
+  const query = String(url.searchParams.get("q") || "").trim().toLowerCase();
+  const safe = String(url.searchParams.get("safe") || "true").trim().toLowerCase() !== "false";
+  const count = clampCount(url.searchParams.get("count"));
+
+  if (assetType && !isAssetType(assetType)) {
+    return error("Unsupported assetType.", 400);
+  }
+  if (orientation && !["landscape", "portrait", "square"].includes(orientation)) {
+    return error("Unsupported orientation.", 400);
+  }
+
+  const matches = filterHostedStock(HOSTED_STOCK, {
+    assetType,
+    category,
+    orientation,
+    purpose,
+    safe,
+    q: query,
+  });
+  const items = shuffle(matches).slice(0, count).map((item) => hostedStockItem(item, url.origin));
+
+  return new Response(
+    JSON.stringify({
+      ok: true,
+      source: "hosted",
+      count: items.length,
+      filters: {
+        assetType,
+        category: category || "all",
+        orientation: orientation || "all",
+        purpose: purpose || "all",
+        safe,
+        q: query,
+      },
+      items,
+    }),
+    {
+      headers: {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "*",
+        "cache-control": `public, max-age=${CACHE_SECONDS}, s-maxage=${CACHE_SECONDS * 5}`,
+      },
+    }
+  );
+}
+
+function clampCount(value) {
+  const count = Number(value || 1);
+  if (!Number.isFinite(count)) return 1;
+  return Math.max(1, Math.min(MAX_COUNT, Math.floor(count)));
+}
+
+function shuffle(items) {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}

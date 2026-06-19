@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { test } from 'node:test';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -14,6 +14,10 @@ async function readRepo(path) {
 async function importRepoModule(path) {
   const source = await readRepo(path);
   return import(`data:text/javascript,${encodeURIComponent(source)}`);
+}
+
+async function importRepoFile(path) {
+  return import(pathToFileURL(resolve(repoRoot, path)).href);
 }
 
 test('public MCP discovery advertises the dedicated FDS MCP endpoint', async () => {
@@ -138,7 +142,7 @@ test('home and public library make assets a first-class FDS surface', async () =
   assert.match(homeHtml, /Lifestyle Hiking Trail/);
   assert.match(homeHtml, /Designer Desk Flatlay/);
   assert.match(homeHtml, /Packaging Mockup/);
-  assert.match(homeHtml, /fetch\('\/api\/stock\/list'/);
+  assert.match(homeHtml, /fetch\('\/api\/stock\/list\?source=community'/);
   assert.match(homeHtml, /Community-published FDS assets appear here first/);
   assert.match(homeHtml, /id="tools"/);
   assert.match(homeHtml, /Design Asset Library/);
@@ -152,24 +156,73 @@ test('home and public library make assets a first-class FDS surface', async () =
   for (const type of ['Images / Photos', 'Illustrations', 'Icons', 'Patterns', 'Textures', 'Backgrounds', 'UI Assets']) {
     assert.match(libraryHtml, new RegExp(type.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
-  for (const photo of ['Designer Desk Flatlay', 'Packaging Mockup', 'Social Planning Workspace', 'Interior Light Shadows', 'Material Swatch Moodboard', 'UX Wireframe Desk', 'Lifestyle Hiking Trail', 'Lifestyle Coffee Cup', 'Lifestyle Park Bench', 'Lifestyle Concert Stage']) {
+  for (const photo of ['Designer Desk Flatlay', 'Packaging Mockup', 'Social Planning Workspace', 'Interior Light Shadows', 'Material Swatch Moodboard', 'UX Wireframe Desk', 'Lifestyle Hiking Trail', 'Lifestyle Coffee Cup', 'Lifestyle Park Bench', 'Lifestyle Concert Stage', 'Australia Surf Beach', 'Australia Bicycle Trail', 'Australia Rock Climbing', 'Australia Reef Snorkelling']) {
     assert.match(libraryHtml, new RegExp(photo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
   assert.match(libraryHtml, /Lifestyle/);
-  assert.equal((libraryHtml.match(/source:'hosted'/g) || []).length, 16);
+  assert.equal((libraryHtml.match(/source:'hosted'/g) || []).length, 28);
   assert.match(libraryHtml, /\[\.\.\.communityPhotos,\.\.\.HOSTED_PHOTOS,\.\.\.apiResults\]/);
 });
 
 test('public stock list API supports asset type, category, and search filters', async () => {
   const listSource = await readRepo('functions/api/stock/list.js');
   const libSource = await readRepo('functions/api/stock/_lib.js');
+  const { onRequestGet } = await importRepoFile('functions/api/stock/list.js');
+
   assert.match(libSource, /export const ASSET_TYPES = new Set/);
   assert.match(libSource, /export function isAssetType/);
   assert.match(listSource, /asset_type/);
+  assert.match(listSource, /assetType/);
+  assert.match(listSource, /source/);
+  assert.match(listSource, /HOSTED_STOCK/);
   assert.match(listSource, /Unsupported asset_type/);
   assert.match(listSource, /category/);
   assert.match(listSource, /url\.searchParams\.get\("q"\)/);
   assert.match(listSource, /item\.assetType === assetType/);
+
+  const response = await onRequestGet({
+    request: new Request('https://freedesignstore.online/api/stock/list?assetType=photo&category=lifestyle&source=hosted'),
+    env: {},
+  });
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.equal(body.ok, true);
+  assert.equal(body.source, 'hosted');
+  assert.equal(body.assetType, 'photo');
+  assert.equal(body.category, 'lifestyle');
+  assert.equal(body.items.length, 16);
+  assert.ok(body.items.every((item) => item.source === 'hosted'));
+  assert.ok(body.items.every((item) => item.category === 'Lifestyle'));
+  assert.ok(body.items.every((item) => item.url.startsWith('https://freedesignstore.online/assets/stock/')));
+});
+
+test('random stock API serves static hosted assets for app integrations', async () => {
+  const { onRequestGet } = await importRepoFile('functions/api/stock/random.js');
+  const response = await onRequestGet({
+    request: new Request('https://freedesignstore.online/api/stock/random?assetType=photo&category=lifestyle&orientation=landscape&safe=true&purpose=profile_background&count=3'),
+  });
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('access-control-allow-origin'), '*');
+  assert.match(response.headers.get('cache-control'), /public/);
+
+  const body = await response.json();
+  assert.equal(body.ok, true);
+  assert.equal(body.source, 'hosted');
+  assert.equal(body.count, 3);
+  assert.equal(body.items.length, 3);
+  for (const item of body.items) {
+    assert.equal(item.source, 'hosted');
+    assert.equal(item.assetType, 'photo');
+    assert.equal(item.category, 'Lifestyle');
+    assert.equal(item.orientation, 'landscape');
+    assert.equal(item.safe, true);
+    assert.ok(item.purpose.includes('profile_background'));
+    assert.ok(item.url.startsWith('https://freedesignstore.online/assets/stock/'));
+    assert.ok(item.download.startsWith('https://freedesignstore.online/assets/stock/'));
+    assert.ok(item.width > item.height);
+    assert.equal(item.contentType, 'image/jpeg');
+    assert.equal(item.license, 'FreeDesignStore Community License');
+  }
 });
 
 test('stock image route allows signed-in owners to preview private assets', async () => {
