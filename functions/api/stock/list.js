@@ -30,6 +30,9 @@ export async function onRequestGet({ request, env }) {
   if (assetType && !isAssetType(assetType)) {
     return error("Unsupported asset_type.", 400);
   }
+  if (orientation && !["landscape", "portrait", "square"].includes(orientation)) {
+    return error("Unsupported orientation.", 400);
+  }
 
   const origin = new URL(request.url).origin;
   const includeHosted = status === "public" && (source === "all" || source === "hosted");

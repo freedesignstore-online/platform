@@ -195,6 +195,13 @@ test('public stock list API supports asset type, category, and search filters', 
   assert.ok(body.items.every((item) => item.category === 'Lifestyle'));
   assert.ok(body.items.every((item) => item.url.startsWith('https://freedesignstore.online/assets/stock/')));
 
+  const badOrientation = await onRequestGet({
+    request: new Request('https://freedesignstore.online/api/stock/list?source=hosted&orientation=diagonal'),
+    env: {},
+  });
+  assert.equal(badOrientation.status, 400);
+  assert.match((await badOrientation.json()).error, /Unsupported orientation/);
+
   const head = onRequestHead();
   assert.equal(head.status, 200);
   assert.equal(head.headers.get('access-control-allow-origin'), '*');
