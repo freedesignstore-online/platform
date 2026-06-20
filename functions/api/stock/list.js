@@ -81,6 +81,26 @@ export async function onRequestGet({ request, env }) {
   });
 }
 
+export function onRequestHead() {
+  return new Response(null, {
+    headers: {
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+    },
+  });
+}
+
+export function onRequestOptions() {
+  return new Response(null, {
+    headers: {
+      "access-control-allow-origin": "*",
+      "access-control-allow-methods": "GET, HEAD, OPTIONS",
+      "access-control-allow-headers": "content-type, authorization",
+      "access-control-max-age": "86400",
+    },
+  });
+}
+
 function orientationOf(item) {
   if (!item.width || !item.height) return "";
   return item.height > item.width ? "portrait" : item.width > item.height ? "landscape" : "square";

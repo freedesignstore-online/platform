@@ -47,19 +47,40 @@ export async function onRequestGet({ request }) {
       items,
     }),
     {
-      headers: {
-        "content-type": "application/json; charset=utf-8",
-        "access-control-allow-origin": "*",
-        "cache-control": `public, max-age=${CACHE_SECONDS}, s-maxage=${CACHE_SECONDS * 5}`,
-      },
+      headers: responseHeaders(),
     }
   );
+}
+
+export function onRequestHead() {
+  return new Response(null, {
+    headers: responseHeaders(),
+  });
+}
+
+export function onRequestOptions() {
+  return new Response(null, {
+    headers: {
+      "access-control-allow-origin": "*",
+      "access-control-allow-methods": "GET, HEAD, OPTIONS",
+      "access-control-allow-headers": "content-type",
+      "access-control-max-age": "86400",
+    },
+  });
 }
 
 function clampCount(value) {
   const count = Number(value || 1);
   if (!Number.isFinite(count)) return 1;
   return Math.max(1, Math.min(MAX_COUNT, Math.floor(count)));
+}
+
+function responseHeaders() {
+  return {
+    "content-type": "application/json; charset=utf-8",
+    "access-control-allow-origin": "*",
+    "cache-control": `public, max-age=${CACHE_SECONDS}, s-maxage=${CACHE_SECONDS * 5}`,
+  };
 }
 
 function shuffle(items) {

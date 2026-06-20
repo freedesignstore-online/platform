@@ -167,7 +167,7 @@ test('home and public library make assets a first-class FDS surface', async () =
 test('public stock list API supports asset type, category, and search filters', async () => {
   const listSource = await readRepo('functions/api/stock/list.js');
   const libSource = await readRepo('functions/api/stock/_lib.js');
-  const { onRequestGet } = await importRepoFile('functions/api/stock/list.js');
+  const { onRequestGet, onRequestHead, onRequestOptions } = await importRepoFile('functions/api/stock/list.js');
 
   assert.match(libSource, /export const ASSET_TYPES = new Set/);
   assert.match(libSource, /export function isAssetType/);
@@ -194,10 +194,17 @@ test('public stock list API supports asset type, category, and search filters', 
   assert.ok(body.items.every((item) => item.source === 'hosted'));
   assert.ok(body.items.every((item) => item.category === 'Lifestyle'));
   assert.ok(body.items.every((item) => item.url.startsWith('https://freedesignstore.online/assets/stock/')));
+
+  const head = onRequestHead();
+  assert.equal(head.status, 200);
+  assert.equal(head.headers.get('access-control-allow-origin'), '*');
+  const options = onRequestOptions();
+  assert.equal(options.status, 200);
+  assert.match(options.headers.get('access-control-allow-methods'), /HEAD/);
 });
 
 test('random stock API serves static hosted assets for app integrations', async () => {
-  const { onRequestGet } = await importRepoFile('functions/api/stock/random.js');
+  const { onRequestGet, onRequestHead, onRequestOptions } = await importRepoFile('functions/api/stock/random.js');
   const response = await onRequestGet({
     request: new Request('https://freedesignstore.online/api/stock/random?assetType=photo&category=lifestyle&orientation=landscape&safe=true&purpose=profile_background&count=3'),
   });
@@ -223,6 +230,14 @@ test('random stock API serves static hosted assets for app integrations', async 
     assert.equal(item.contentType, 'image/jpeg');
     assert.equal(item.license, 'FreeDesignStore Community License');
   }
+
+  const head = onRequestHead();
+  assert.equal(head.status, 200);
+  assert.equal(head.headers.get('access-control-allow-origin'), '*');
+  assert.match(head.headers.get('cache-control'), /public/);
+  const options = onRequestOptions();
+  assert.equal(options.status, 200);
+  assert.match(options.headers.get('access-control-allow-methods'), /HEAD/);
 });
 
 test('stock image route allows signed-in owners to preview private assets', async () => {
