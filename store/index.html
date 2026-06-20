@@ -38,6 +38,20 @@ nav a{color:var(--muted)}nav a:hover{color:var(--text);text-decoration:none}
 .stock-card.hosted img{object-fit:cover}
 .stock-card:first-child{grid-row:span 2;height:292px}
 .stock-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.64))}
+.stock-overflow{display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem;margin-top:.65rem}
+.stock-overflow .stock-card{height:180px}
+.stock-overflow .stock-card:first-child{grid-row:auto;height:180px}
+.load-more{text-align:center;margin:.8rem 0 0}
+.load-more-btn{display:inline-flex;align-items:center;gap:6px;padding:.55rem 1.6rem;border-radius:99px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font:inherit;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .15s}
+.load-more-btn:hover{border-color:var(--accent);color:var(--accent)}
+.load-more-btn.hidden{display:none}
+.share-overlay{position:absolute;top:.5rem;right:.5rem;z-index:2;width:28px;height:28px;border-radius:6px;border:none;background:rgba(0,0,0,.55);color:#fff;font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;backdrop-filter:blur(4px)}
+.stock-card:hover .share-overlay{opacity:1}
+.share-overlay:hover{background:var(--accent)}
+.share-toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:.5rem 1.2rem;border-radius:8px;font-size:.78rem;font-weight:700;z-index:99;opacity:0;transition:opacity .2s;pointer-events:none}
+.share-toast.visible{opacity:1}
+@media (max-width:800px){.stock-overflow{grid-template-columns:1fr 1fr}.stock-overflow .stock-card{height:160px}}
+@media (max-width:520px){.stock-overflow{grid-template-columns:1fr}.stock-overflow .stock-card{height:190px}}
 .stock-caption{position:absolute;left:.75rem;right:.75rem;bottom:.65rem;z-index:1;display:flex;align-items:end;justify-content:space-between;gap:.5rem}
 .stock-caption strong{font-size:.78rem;line-height:1.15}
 .stock-caption span{font-size:.62rem;color:rgba(255,255,255,.82);white-space:nowrap}
@@ -86,23 +100,29 @@ footer a{color:var(--accent)}
 <div class="stock-actions"><a class="stock-link" href="/images/stock-photos/">Browse Assets -></a><a class="stock-link" href="/console/">Publish Yours -></a></div>
 </div>
 <div class="stock-grid" id="assetRail">
-<a class="stock-card hosted" href="/images/stock-photos/" aria-label="Browse workspace assets">
+<a class="stock-card hosted" href="/photo/fds-workspace-studio" aria-label="Browse workspace assets">
 <img src="/assets/stock/workspace-studio.jpg" alt="Bright creative workspace with glass walls" loading="lazy">
 <div class="stock-caption"><strong>Workspace</strong><span>FDS hosted</span></div>
+<button class="share-overlay" onclick="event.preventDefault();event.stopPropagation();shareCard(this,'fds-workspace-studio','Workspace Studio')" aria-label="Share">&#8599;</button>
 </a>
-<a class="stock-card hosted" href="/images/stock-photos/" aria-label="Browse technology assets">
+<a class="stock-card hosted" href="/photo/fds-product-tech" aria-label="Browse technology assets">
 <img src="/assets/stock/product-tech.jpg" alt="Laptop screen on a desk for technology projects" loading="lazy">
 <div class="stock-caption"><strong>Technology</strong><span>FDS hosted</span></div>
+<button class="share-overlay" onclick="event.preventDefault();event.stopPropagation();shareCard(this,'fds-product-tech','Product Review')" aria-label="Share">&#8599;</button>
 </a>
-<a class="stock-card hosted" href="/images/stock-photos/" aria-label="Browse road trip assets">
+<a class="stock-card hosted" href="/photo/fds-desert-road" aria-label="Browse road trip assets">
 <img src="/assets/stock/desert-road.jpg" alt="Open road through a mountain landscape" loading="lazy">
 <div class="stock-caption"><strong>Road Trips</strong><span>FDS hosted</span></div>
+<button class="share-overlay" onclick="event.preventDefault();event.stopPropagation();shareCard(this,'fds-desert-road','Desert Road')" aria-label="Share">&#8599;</button>
 </a>
-<a class="stock-card hosted" href="/images/stock-photos/" aria-label="Browse travel assets">
+<a class="stock-card hosted" href="/photo/fds-mountain-layers" aria-label="Browse travel assets">
 <img src="/assets/stock/mountain-layers.jpg" alt="Layered mountains at sunrise" loading="lazy">
 <div class="stock-caption"><strong>Travel</strong><span>FDS hosted</span></div>
+<button class="share-overlay" onclick="event.preventDefault();event.stopPropagation();shareCard(this,'fds-mountain-layers','Mountain Layers')" aria-label="Share">&#8599;</button>
 </a>
 </div>
+<div class="stock-overflow" id="assetOverflow"></div>
+<div class="load-more"><button class="load-more-btn hidden" id="loadMoreBtn">Load more assets</button></div>
 </section>
 <section class="section-title" id="tools">
 <div><h2>Design tools</h2><p>Use the tools below to create, edit, convert, and prepare assets.</p></div>
@@ -174,56 +194,102 @@ footer a{color:var(--accent)}
 </div>
 </section>
 <footer>FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a> | <a href="https://openfrontier-docs.pages.dev">Docs</a></footer>
+<div class="share-toast" id="shareToast"></div>
 <script>
+function shareCard(btn,id,title){
+  const url=location.origin+'/photo/'+encodeURIComponent(id);
+  if(navigator.share){
+    navigator.share({title:title+' — FreeDesignStore',url:url}).catch(()=>{});
+  }else{
+    navigator.clipboard.writeText(url).then(()=>{
+      const toast=document.getElementById('shareToast');
+      toast.textContent='Link copied!';toast.classList.add('visible');
+      setTimeout(()=>toast.classList.remove('visible'),1800);
+    });
+  }
+}
 (function(){
   const assetRail=document.getElementById('assetRail');
   const assetBadge=document.getElementById('assetBadge');
   const hostedAssets=[
-    {title:'Australia Surf Beach',assetType:'photo',url:'/assets/stock/lifestyle-australia-surf-beach.jpg',source:'FDS'},
-    {title:'Australia Cafe Table',assetType:'photo',url:'/assets/stock/lifestyle-australia-cafe-table.jpg',source:'FDS'},
-    {title:'Australia Bicycle Trail',assetType:'photo',url:'/assets/stock/lifestyle-australia-bicycle-trail.jpg',source:'FDS'},
-    {title:'Australia Rock Climbing',assetType:'photo',url:'/assets/stock/lifestyle-australia-rock-climbing.jpg',source:'FDS'},
-    {title:'Australia Beach Picnic',assetType:'photo',url:'/assets/stock/lifestyle-australia-beach-picnic.jpg',source:'FDS'},
-    {title:'Australia Coastal Walk',assetType:'photo',url:'/assets/stock/lifestyle-australia-coastal-walk.jpg',source:'FDS'},
-    {title:'Australia Farmers Market',assetType:'photo',url:'/assets/stock/lifestyle-australia-farmers-market.jpg',source:'FDS'},
-    {title:'Australia Bush Camping',assetType:'photo',url:'/assets/stock/lifestyle-australia-bush-camping.jpg',source:'FDS'},
-    {title:'Australia Park Yoga',assetType:'photo',url:'/assets/stock/lifestyle-australia-park-yoga.jpg',source:'FDS'},
-    {title:'Australia Ferry Commute',assetType:'photo',url:'/assets/stock/lifestyle-australia-ferry-commute.jpg',source:'FDS'},
-    {title:'Australia Park Cricket',assetType:'photo',url:'/assets/stock/lifestyle-australia-park-cricket.jpg',source:'FDS'},
-    {title:'Australia Reef Snorkelling',assetType:'photo',url:'/assets/stock/lifestyle-australia-reef-snorkelling.jpg',source:'FDS'},
-    {title:'Lifestyle Hiking Trail',assetType:'photo',url:'/assets/stock/lifestyle-hiking-trail.jpg',source:'FDS'},
-    {title:'Lifestyle Coffee Cup',assetType:'photo',url:'/assets/stock/lifestyle-coffee-cup.jpg',source:'FDS'},
-    {title:'Lifestyle Park Bench',assetType:'photo',url:'/assets/stock/lifestyle-park-bench.jpg',source:'FDS'},
-    {title:'Lifestyle Concert Stage',assetType:'photo',url:'/assets/stock/lifestyle-concert-stage.jpg',source:'FDS'},
-    {title:'Designer Desk Flatlay',assetType:'photo',url:'/assets/stock/designer-desk-flatlay.jpg',source:'FDS'},
-    {title:'Packaging Mockup',assetType:'photo',url:'/assets/stock/packaging-mockup.jpg',source:'FDS'},
-    {title:'Social Planning Workspace',assetType:'photo',url:'/assets/stock/social-planning-workspace.jpg',source:'FDS'},
-    {title:'Interior Light Shadows',assetType:'photo',url:'/assets/stock/interior-light-shadows.jpg',source:'FDS'},
-    {title:'Material Swatch Moodboard',assetType:'photo',url:'/assets/stock/material-swatch-moodboard.jpg',source:'FDS'},
-    {title:'UX Wireframe Desk',assetType:'photo',url:'/assets/stock/ux-wireframe-desk.jpg',source:'FDS'}
+    {id:'fds-lifestyle-australia-surf-beach',title:'Australia Surf Beach',assetType:'photo',url:'/assets/stock/lifestyle-australia-surf-beach.jpg',source:'FDS'},
+    {id:'fds-lifestyle-australia-cafe-table',title:'Australia Cafe Table',assetType:'photo',url:'/assets/stock/lifestyle-australia-cafe-table.jpg',source:'FDS'},
+    {id:'fds-lifestyle-australia-bicycle-trail',title:'Australia Bicycle Trail',assetType:'photo',url:'/assets/stock/lifestyle-australia-bicycle-trail.jpg',source:'FDS'},
+    {id:'fds-lifestyle-australia-rock-climbing',title:'Australia Rock Climbing',assetType:'photo',url:'/assets/stock/lifestyle-australia-rock-climbing.jpg',source:'FDS'},
+    {id:'fds-lifestyle-australia-beach-picnic',title:'Australia Beach Picnic',assetType:'photo',url:'/assets/stock/lifestyle-australia-beach-picnic.jpg',source:'FDS'},
+    {id:'fds-lifestyle-australia-coastal-walk',title:'Australia Coastal Walk',assetType:'photo',url:'/assets/stock/lifestyle-australia-coastal-walk.jpg',source:'FDS'},
+    {id:'fds-lifestyle-australia-farmers-market',title:'Australia Farmers Market',assetType:'photo',url:'/assets/stock/lifestyle-australia-farmers-market.jpg',source:'FDS'},
+    {id:'fds-lifestyle-australia-bush-camping',title:'Australia Bush Camping',assetType:'photo',url:'/assets/stock/lifestyle-australia-bush-camping.jpg',source:'FDS'},
+    {id:'fds-lifestyle-australia-park-yoga',title:'Australia Park Yoga',assetType:'photo',url:'/assets/stock/lifestyle-australia-park-yoga.jpg',source:'FDS'},
+    {id:'fds-lifestyle-australia-ferry-commute',title:'Australia Ferry Commute',assetType:'photo',url:'/assets/stock/lifestyle-australia-ferry-commute.jpg',source:'FDS'},
+    {id:'fds-lifestyle-australia-park-cricket',title:'Australia Park Cricket',assetType:'photo',url:'/assets/stock/lifestyle-australia-park-cricket.jpg',source:'FDS'},
+    {id:'fds-lifestyle-australia-reef-snorkelling',title:'Australia Reef Snorkelling',assetType:'photo',url:'/assets/stock/lifestyle-australia-reef-snorkelling.jpg',source:'FDS'},
+    {id:'fds-lifestyle-hiking-trail',title:'Lifestyle Hiking Trail',assetType:'photo',url:'/assets/stock/lifestyle-hiking-trail.jpg',source:'FDS'},
+    {id:'fds-lifestyle-coffee-cup',title:'Lifestyle Coffee Cup',assetType:'photo',url:'/assets/stock/lifestyle-coffee-cup.jpg',source:'FDS'},
+    {id:'fds-lifestyle-park-bench',title:'Lifestyle Park Bench',assetType:'photo',url:'/assets/stock/lifestyle-park-bench.jpg',source:'FDS'},
+    {id:'fds-lifestyle-concert-stage',title:'Lifestyle Concert Stage',assetType:'photo',url:'/assets/stock/lifestyle-concert-stage.jpg',source:'FDS'},
+    {id:'fds-designer-desk-flatlay',title:'Designer Desk Flatlay',assetType:'photo',url:'/assets/stock/designer-desk-flatlay.jpg',source:'FDS'},
+    {id:'fds-packaging-mockup',title:'Packaging Mockup',assetType:'photo',url:'/assets/stock/packaging-mockup.jpg',source:'FDS'},
+    {id:'fds-social-planning-workspace',title:'Social Planning Workspace',assetType:'photo',url:'/assets/stock/social-planning-workspace.jpg',source:'FDS'},
+    {id:'fds-interior-light-shadows',title:'Interior Light Shadows',assetType:'photo',url:'/assets/stock/interior-light-shadows.jpg',source:'FDS'},
+    {id:'fds-material-swatch-moodboard',title:'Material Swatch Moodboard',assetType:'photo',url:'/assets/stock/material-swatch-moodboard.jpg',source:'FDS'},
+    {id:'fds-ux-wireframe-desk',title:'UX Wireframe Desk',assetType:'photo',url:'/assets/stock/ux-wireframe-desk.jpg',source:'FDS'},
+    {id:'fds-lifestyle-rooftop-sunset',title:'Rooftop Sunset',assetType:'photo',url:'/assets/stock/lifestyle-rooftop-sunset.jpg',source:'FDS'},
+    {id:'fds-lifestyle-morning-run',title:'Morning Run',assetType:'photo',url:'/assets/stock/lifestyle-morning-run.jpg',source:'FDS'},
+    {id:'fds-lifestyle-street-market',title:'Street Market',assetType:'photo',url:'/assets/stock/lifestyle-street-market.jpg',source:'FDS'},
+    {id:'fds-lifestyle-skateboard-park',title:'Skateboard Park',assetType:'photo',url:'/assets/stock/lifestyle-skateboard-park.jpg',source:'FDS'},
+    {id:'fds-lifestyle-dog-walk-beach',title:'Dog Walk Beach',assetType:'photo',url:'/assets/stock/lifestyle-dog-walk-beach.jpg',source:'FDS'},
+    {id:'fds-lifestyle-kayak-lake',title:'Kayak Lake',assetType:'photo',url:'/assets/stock/lifestyle-kayak-lake.jpg',source:'FDS'},
+    {id:'fds-lifestyle-outdoor-dining',title:'Outdoor Dining',assetType:'photo',url:'/assets/stock/lifestyle-outdoor-dining.jpg',source:'FDS'},
+    {id:'fds-lifestyle-mountain-bike',title:'Mountain Bike Trail',assetType:'photo',url:'/assets/stock/lifestyle-mountain-bike.jpg',source:'FDS'},
+    {id:'fds-lifestyle-flower-market',title:'Flower Market',assetType:'photo',url:'/assets/stock/lifestyle-flower-market.jpg',source:'FDS'},
+    {id:'fds-lifestyle-hammock-lake',title:'Hammock Lake',assetType:'photo',url:'/assets/stock/lifestyle-hammock-lake.jpg',source:'FDS'},
+    {id:'fds-lifestyle-pottery-studio',title:'Pottery Studio',assetType:'photo',url:'/assets/stock/lifestyle-pottery-studio.jpg',source:'FDS'},
+    {id:'fds-lifestyle-garden-reading',title:'Garden Reading',assetType:'photo',url:'/assets/stock/lifestyle-garden-reading.jpg',source:'FDS'}
   ];
   function esc(value){
     return String(value||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   }
-  function renderAssets(items,total){
-    assetBadge.textContent=`${total} Public Assets`;
-    assetRail.innerHTML=items.map(item=>`<a class="stock-card ${item.source==='FDS'?'hosted':''}" href="/images/stock-photos/" aria-label="Open ${esc(item.title)}">
+  const assetOverflow=document.getElementById('assetOverflow');
+  const loadMoreBtn=document.getElementById('loadMoreBtn');
+  const BATCH=8;
+  let allItems=[];
+  let shown=0;
+  function cardHtml(item){
+    const href=item.id?`/photo/${esc(item.id)}`:'/images/stock-photos/';
+    return `<a class="stock-card ${item.source==='FDS'?'hosted':''}" href="${href}" aria-label="Open ${esc(item.title)}">
       <img src="${esc(item.url)}" alt="${esc(item.title)}" loading="lazy">
       <div class="stock-caption"><strong>${esc(item.title)}</strong><span>${esc(item.source==='FDS'?'hosted':item.assetType||'asset')}</span></div>
-    </a>`).join('');
+      ${item.id?`<button class="share-overlay" onclick="event.preventDefault();event.stopPropagation();shareCard(this,'${esc(item.id)}','${esc(item.title)}')" aria-label="Share">&#8599;</button>`:''}
+    </a>`;
+  }
+  function renderHero(items,total){
+    assetBadge.textContent=`${total} Public Assets`;
+    assetRail.innerHTML=items.slice(0,4).map(cardHtml).join('');
+  }
+  function loadMore(){
+    const next=allItems.slice(shown,shown+BATCH);
+    if(!next.length) return;
+    assetOverflow.insertAdjacentHTML('beforeend',next.map(cardHtml).join(''));
+    shown+=next.length;
+    loadMoreBtn.classList.toggle('hidden',shown>=allItems.length);
   }
   async function loadAssetRail(){
     if(!assetRail) return;
+    let community=[];
     try{
       const res=await fetch('/api/stock/list?source=community',{cache:'no-store'});
-      if(!res.ok) throw new Error('catalog unavailable');
-      const data=await res.json();
-      const community=data.items||[];
-      const items=[...hostedAssets.slice(0,2),...community,...hostedAssets.slice(2)].slice(0,4);
-      if(!items.length) return;
-      renderAssets(items,community.length+hostedAssets.length);
-    }catch(err){
-      renderAssets(hostedAssets.slice(0,4),hostedAssets.length);
+      if(res.ok){const data=await res.json();community=data.items||[];}
+    }catch(err){}
+    allItems=[...hostedAssets.slice(0,2),...community,...hostedAssets.slice(2)];
+    renderHero(allItems,allItems.length);
+    shown=4;
+    loadMoreBtn.classList.toggle('hidden',shown>=allItems.length);
+    loadMoreBtn.addEventListener('click',loadMore);
+    if('IntersectionObserver' in window){
+      new IntersectionObserver((entries,obs)=>{
+        if(entries[0].isIntersecting&&shown<allItems.length){loadMore();}
+      },{rootMargin:'200px'}).observe(loadMoreBtn);
     }
   }
   loadAssetRail();

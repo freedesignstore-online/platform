@@ -253,7 +253,19 @@ const HOSTED_PHOTOS=[
   {id:'fds-lifestyle-australia-park-yoga',source:'hosted',assetType:'photo',title:'Australia Park Yoga',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-australia-park-yoga.jpg',download:'/assets/stock/lifestyle-australia-park-yoga.jpg',tags:['australia','yoga','park','wellness']},
   {id:'fds-lifestyle-australia-ferry-commute',source:'hosted',assetType:'photo',title:'Australia Ferry Commute',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-australia-ferry-commute.jpg',download:'/assets/stock/lifestyle-australia-ferry-commute.jpg',tags:['australia','ferry','commute','harbour']},
   {id:'fds-lifestyle-australia-park-cricket',source:'hosted',assetType:'photo',title:'Australia Park Cricket',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-australia-park-cricket.jpg',download:'/assets/stock/lifestyle-australia-park-cricket.jpg',tags:['australia','cricket','park','sport']},
-  {id:'fds-lifestyle-australia-reef-snorkelling',source:'hosted',assetType:'photo',title:'Australia Reef Snorkelling',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-australia-reef-snorkelling.jpg',download:'/assets/stock/lifestyle-australia-reef-snorkelling.jpg',tags:['australia','reef','snorkelling','water']}
+  {id:'fds-lifestyle-australia-reef-snorkelling',source:'hosted',assetType:'photo',title:'Australia Reef Snorkelling',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-australia-reef-snorkelling.jpg',download:'/assets/stock/lifestyle-australia-reef-snorkelling.jpg',tags:['australia','reef','snorkelling','water']},
+  {id:'fds-lifestyle-rooftop-sunset',source:'hosted',assetType:'photo',title:'Rooftop Sunset',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-rooftop-sunset.jpg',download:'/assets/stock/lifestyle-rooftop-sunset.jpg',tags:['rooftop','sunset','city','terrace']},
+  {id:'fds-lifestyle-morning-run',source:'hosted',assetType:'photo',title:'Morning Run',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-morning-run.jpg',download:'/assets/stock/lifestyle-morning-run.jpg',tags:['running','fitness','morning','river']},
+  {id:'fds-lifestyle-street-market',source:'hosted',assetType:'photo',title:'Street Market',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-street-market.jpg',download:'/assets/stock/lifestyle-street-market.jpg',tags:['market','food','street','evening']},
+  {id:'fds-lifestyle-skateboard-park',source:'hosted',assetType:'photo',title:'Skateboard Park',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-skateboard-park.jpg',download:'/assets/stock/lifestyle-skateboard-park.jpg',tags:['skateboard','urban','sport','concrete']},
+  {id:'fds-lifestyle-dog-walk-beach',source:'hosted',assetType:'photo',title:'Dog Walk Beach',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-dog-walk-beach.jpg',download:'/assets/stock/lifestyle-dog-walk-beach.jpg',tags:['dog','beach','walking','sunset']},
+  {id:'fds-lifestyle-kayak-lake',source:'hosted',assetType:'photo',title:'Kayak Lake',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-kayak-lake.jpg',download:'/assets/stock/lifestyle-kayak-lake.jpg',tags:['kayak','lake','mountains','sunrise']},
+  {id:'fds-lifestyle-outdoor-dining',source:'hosted',assetType:'photo',title:'Outdoor Dining',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-outdoor-dining.jpg',download:'/assets/stock/lifestyle-outdoor-dining.jpg',tags:['dining','garden','evening','candles']},
+  {id:'fds-lifestyle-mountain-bike',source:'hosted',assetType:'photo',title:'Mountain Bike Trail',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-mountain-bike.jpg',download:'/assets/stock/lifestyle-mountain-bike.jpg',tags:['cycling','forest','trail','adventure']},
+  {id:'fds-lifestyle-flower-market',source:'hosted',assetType:'photo',title:'Flower Market',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-flower-market.jpg',download:'/assets/stock/lifestyle-flower-market.jpg',tags:['flowers','market','tulips','morning']},
+  {id:'fds-lifestyle-hammock-lake',source:'hosted',assetType:'photo',title:'Hammock Lake',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-hammock-lake.jpg',download:'/assets/stock/lifestyle-hammock-lake.jpg',tags:['hammock','lake','birch','relaxation']},
+  {id:'fds-lifestyle-pottery-studio',source:'hosted',assetType:'photo',title:'Pottery Studio',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-pottery-studio.jpg',download:'/assets/stock/lifestyle-pottery-studio.jpg',tags:['pottery','craft','clay','workshop']},
+  {id:'fds-lifestyle-garden-reading',source:'hosted',assetType:'photo',title:'Garden Reading',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-garden-reading.jpg',download:'/assets/stock/lifestyle-garden-reading.jpg',tags:['reading','garden','flowers','peaceful']}
 ];
 let activeSource='all';
 let activeAssetType='all';
@@ -371,13 +383,15 @@ function render(){
 function photoCard(photo){
   const sourceClass=photo.source==='unsplash'?'unsplash':photo.source==='community'?'community':'';
   const sourceLabel=photo.source==='hosted'?'FDS':photo.source==='community'?'Community':'Unsplash';
+  const isHosted=photo.source==='hosted'||photo.source==='community';
+  const detailHref=isHosted?`/photo/${escapeHtml(photo.id)}`:'';
   const primaryAction=photo.source==='unsplash'
     ? `<button class="btn btn-primary btn-small" onclick="openUnsplash('${escapeHtml(photo.id)}')">Open on Unsplash</button>`
     : `<button class="btn btn-primary btn-small" onclick="downloadPhoto('${escapeHtml(photo.id)}')">Download</button>`;
   const credit=photo.source==='unsplash' && photo.creditUrl
     ? `<a href="${escapeHtml(photo.creditUrl)}" target="_blank" rel="noopener">${escapeHtml(photo.author)}</a> on <a href="https://unsplash.com/?utm_source=FreeDesignStore&utm_medium=referral" target="_blank" rel="noopener">Unsplash</a>`
     : `${escapeHtml(photo.author)} - ${escapeHtml(photo.license)}`;
-  return `<article class="photo-card ${photo.assetType==='photo'?'photo':''}" data-photo-id="${escapeHtml(photo.id)}" role="button" tabindex="0" aria-label="Open ${escapeHtml(photo.title)} details">
+  return `<article class="photo-card ${photo.assetType==='photo'?'photo':''}" data-photo-id="${escapeHtml(photo.id)}" ${detailHref?`data-href="${detailHref}"`:''}role="button" tabindex="0" aria-label="Open ${escapeHtml(photo.title)} details">
     <img src="${escapeHtml(photo.url)}" alt="${escapeHtml(photo.title)}" loading="lazy">
     <div class="photo-body">
       <div class="photo-title"><strong>${escapeHtml(photo.title)}</strong><span class="source ${sourceClass}">${sourceLabel}</span></div>
@@ -393,11 +407,14 @@ function photoCard(photo){
 
 function bindAssetCards(){
   document.querySelectorAll('.photo-card[data-photo-id]').forEach(card=>{
-    card.onclick=()=>openAssetModal(card.dataset.photoId);
+    const href=card.dataset.href;
+    card.onclick=()=>{
+      if(href) { location.href=href; } else { openAssetModal(card.dataset.photoId); }
+    };
     card.onkeydown=e=>{
       if(e.key==='Enter'||e.key===' '){
         e.preventDefault();
-        openAssetModal(card.dataset.photoId);
+        if(href) { location.href=href; } else { openAssetModal(card.dataset.photoId); }
       }
     };
   });
@@ -429,15 +446,35 @@ function openAssetModal(id){
   const primaryAction=photo.source==='unsplash'
     ? `<button class="btn btn-primary wide" type="button" onclick="openUnsplash('${escapeHtml(photo.id)}')">Open on Unsplash</button>`
     : `<button class="btn btn-primary wide" type="button" onclick="downloadPhoto('${escapeHtml(photo.id)}')">Download Asset</button>`;
+  const photoPageUrl=photo.source==='hosted'?location.origin+'/photo/'+encodeURIComponent(photo.id):'';
+  const shareRow=photoPageUrl?`<div class="wide" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+    <button class="btn btn-secondary btn-small" type="button" onclick="shareAsset('${escapeHtml(photo.id)}','${escapeHtml(photo.title)}')">Share link</button>
+    <a class="btn btn-secondary btn-small" href="https://x.com/intent/tweet?text=${encodeURIComponent(photo.title+' — free on FreeDesignStore')}&url=${encodeURIComponent(photoPageUrl)}" target="_blank" rel="noopener">X</a>
+    <a class="btn btn-secondary btn-small" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(photoPageUrl)}" target="_blank" rel="noopener">Facebook</a>
+    <a class="btn btn-secondary btn-small" href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(photoPageUrl)}" target="_blank" rel="noopener">LinkedIn</a>
+    <a class="btn btn-secondary btn-small" href="https://pinterest.com/pin/create/button/?url=${encodeURIComponent(photoPageUrl)}&media=${encodeURIComponent(photo.url)}&description=${encodeURIComponent(photo.title)}" target="_blank" rel="noopener">Pinterest</a>
+    </div>`:'';
   $('modalActions').innerHTML=`${primaryAction}
     <button class="btn btn-secondary" type="button" onclick="copyCredit('${escapeHtml(photo.id)}')">Copy Credit</button>
-    <a class="btn btn-secondary" href="${escapeHtml(photo.url)}" target="_blank" rel="noopener">Open Image</a>`;
+    <a class="btn btn-secondary" href="${escapeHtml(photo.url)}" target="_blank" rel="noopener">Open Image</a>
+    ${shareRow}`;
+  if(photo.source==='hosted') history.replaceState(null,'','/images/stock-photos/#'+photo.id);
   $('assetModal').hidden=false;
   document.body.classList.add('modal-open');
   $('modalClose').focus();
 }
 
+function shareAsset(id,title){
+  const url=location.origin+'/photo/'+encodeURIComponent(id);
+  if(navigator.share){
+    navigator.share({title:title+' — FreeDesignStore',url:url}).catch(()=>{});
+  }else{
+    navigator.clipboard.writeText(url).then(()=>{alert('Link copied!')});
+  }
+}
+
 function closeAssetModal(){
+  if(location.hash) history.replaceState(null,'',location.pathname);
   $('assetModal').hidden=true;
   document.body.classList.remove('modal-open');
   $('modalImage').removeAttribute('src');
@@ -650,7 +687,10 @@ async function submitPhotos(){
   }
 }
 
-init();
+init().then(()=>{
+  const hash=location.hash.slice(1);
+  if(hash&&findPhoto(hash)) openAssetModal(hash);
+});
 </script>
 <script src="/related.js"></script>
 </body>

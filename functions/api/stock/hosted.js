@@ -27,6 +27,18 @@ export const HOSTED_STOCK = [
   item("fds-lifestyle-australia-ferry-commute", "Australia Ferry Commute", "Lifestyle", "lifestyle-australia-ferry-commute.jpg", 1672, 941, ["australia", "ferry", "commute", "harbour"], ["profile_background"]),
   item("fds-lifestyle-australia-park-cricket", "Australia Park Cricket", "Lifestyle", "lifestyle-australia-park-cricket.jpg", 1672, 941, ["australia", "cricket", "park", "sport"], ["profile_background"]),
   item("fds-lifestyle-australia-reef-snorkelling", "Australia Reef Snorkelling", "Lifestyle", "lifestyle-australia-reef-snorkelling.jpg", 1672, 941, ["australia", "reef", "snorkelling", "water"], ["profile_background"]),
+  item("fds-lifestyle-rooftop-sunset", "Rooftop Sunset", "Lifestyle", "lifestyle-rooftop-sunset.jpg", 1672, 941, ["rooftop", "sunset", "city", "terrace"], ["profile_background"]),
+  item("fds-lifestyle-morning-run", "Morning Run", "Lifestyle", "lifestyle-morning-run.jpg", 1672, 941, ["running", "fitness", "morning", "river"], ["profile_background"]),
+  item("fds-lifestyle-street-market", "Street Market", "Lifestyle", "lifestyle-street-market.jpg", 1672, 941, ["market", "food", "street", "evening"], ["profile_background"]),
+  item("fds-lifestyle-skateboard-park", "Skateboard Park", "Lifestyle", "lifestyle-skateboard-park.jpg", 1672, 941, ["skateboard", "urban", "sport", "concrete"], ["profile_background"]),
+  item("fds-lifestyle-dog-walk-beach", "Dog Walk Beach", "Lifestyle", "lifestyle-dog-walk-beach.jpg", 1672, 941, ["dog", "beach", "walking", "sunset"], ["profile_background"]),
+  item("fds-lifestyle-kayak-lake", "Kayak Lake", "Lifestyle", "lifestyle-kayak-lake.jpg", 1672, 941, ["kayak", "lake", "mountains", "sunrise"], ["profile_background"]),
+  item("fds-lifestyle-outdoor-dining", "Outdoor Dining", "Lifestyle", "lifestyle-outdoor-dining.jpg", 1672, 941, ["dining", "garden", "evening", "candles"], ["profile_background"]),
+  item("fds-lifestyle-mountain-bike", "Mountain Bike Trail", "Lifestyle", "lifestyle-mountain-bike.jpg", 1672, 941, ["cycling", "forest", "trail", "adventure"], ["profile_background"]),
+  item("fds-lifestyle-flower-market", "Flower Market", "Lifestyle", "lifestyle-flower-market.jpg", 1672, 941, ["flowers", "market", "tulips", "morning"], ["profile_background"]),
+  item("fds-lifestyle-hammock-lake", "Hammock Lake", "Lifestyle", "lifestyle-hammock-lake.jpg", 1672, 941, ["hammock", "lake", "birch", "relaxation"], ["profile_background"]),
+  item("fds-lifestyle-pottery-studio", "Pottery Studio", "Lifestyle", "lifestyle-pottery-studio.jpg", 1672, 941, ["pottery", "craft", "clay", "workshop"], ["profile_background"]),
+  item("fds-lifestyle-garden-reading", "Garden Reading", "Lifestyle", "lifestyle-garden-reading.jpg", 1672, 941, ["reading", "garden", "flowers", "peaceful"], ["profile_background"]),
 ];
 
 function item(id, title, category, filename, width, height, tags, purposes) {
