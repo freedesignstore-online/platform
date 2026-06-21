@@ -87,7 +87,7 @@ footer{border-top:1px solid var(--line);padding:1rem;text-align:center;font-size
 <body>
 <header>
 <a href="/" class="brand"><span style="font-size:1.4rem">🎨</span><span class="brand-name">FreeDesignStore</span></a>
-<nav><a href="/images/stock-photos/">Assets</a><a href="/">Tools</a></nav>
+<nav><a href="/tools/">Tools</a><a href="/images/stock-photos/">Assets</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
 </header>
 <div class="photo-wrap">
 <img class="photo-img" src="${esc(item.url)}" alt="${esc(item.title)}">

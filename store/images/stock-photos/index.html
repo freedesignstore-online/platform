@@ -6,7 +6,7 @@
 <title>Free Design Asset Library - FreeDesignStore</title>
 <meta name="description" content="Download and share community images, illustrations, icons, patterns, textures, backgrounds, UI assets, and generated SVG assets.">
 <link rel="icon" href="/favicon.svg">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--accent:#ec4899;--accent-dark:#db2777;--bg:#f8fafc;--text:#111827;--muted:#6b7280;--panel:#fff;--line:#e5e7eb;--soft:#fdf2f8;--ok:#059669;--warn:#b45309}
@@ -14,12 +14,12 @@ body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(-
 body.modal-open{overflow:hidden}
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 .site-header{position:sticky;top:0;z-index:40;border-bottom:1px solid var(--line);padding:.6rem 1.5rem;display:flex;align-items:center;gap:1rem;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:.5rem;text-decoration:none;color:var(--text)}.brand-emoji{font-size:1.4rem}.brand-name{font-size:1.05rem;font-weight:700}
+.brand{display:flex;align-items:center;gap:.5rem;text-decoration:none;color:var(--text)}.brand-emoji{font-size:1.4rem}.brand-name{font-family:'Fraunces',serif;font-size:1.05rem;font-weight:700}
 .site-nav{display:flex;gap:.85rem;font-size:.82rem;font-weight:600;margin-left:auto}.site-nav a{color:var(--muted);text-decoration:none}.site-nav a:hover{color:var(--text)}
 .shell{max-width:1220px;margin:0 auto;padding:22px}
 .back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--muted);font-weight:700}.back:hover{color:var(--accent);text-decoration:none}
 .hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:end;margin-bottom:18px}
-h1{font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-bottom:8px}
+h1{font-family:'Fraunces',serif;font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-bottom:8px}
 .subtitle{color:var(--muted);font-size:15px;line-height:1.55;max-width:760px}
 .stats{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .pill{display:inline-flex;align-items:center;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 10px;color:var(--muted);font-size:12px;font-weight:800;white-space:nowrap}
@@ -94,7 +94,7 @@ h1{font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-botto
 <body>
 <header class="site-header">
 <a href="/" class="brand"><span class="brand-emoji">🎨</span><span class="brand-name">FreeDesignStore</span></a>
-<nav class="site-nav"><a href="/">Tools</a><a href="/console/">Console</a><a href="/skills/">Skills</a></nav>
+<nav class="site-nav"><a href="/tools/">Tools</a><a href="/images/stock-photos/">Assets</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
 </header>
 <main class="shell">
 
@@ -708,5 +708,6 @@ init().then(()=>{
 });
 </script>
 <script src="/related.js"></script>
+<footer style="border-top:1px solid var(--line);padding:1rem;text-align:center;font-size:.7rem;color:var(--muted);background:var(--panel)">FreeDesignStore — part of <a href="https://openfrontier.pages.dev" style="color:var(--accent)">Open Frontier</a> | <a href="https://openfrontier-docs.pages.dev" style="color:var(--accent)">Docs</a></footer>
 </body>
 </html>
