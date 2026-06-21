@@ -391,7 +391,7 @@ function photoCard(photo){
   const credit=photo.source==='unsplash' && photo.creditUrl
     ? `<a href="${escapeHtml(photo.creditUrl)}" target="_blank" rel="noopener">${escapeHtml(photo.author)}</a> on <a href="https://unsplash.com/?utm_source=FreeDesignStore&utm_medium=referral" target="_blank" rel="noopener">Unsplash</a>`
     : `${escapeHtml(photo.author)} - ${escapeHtml(photo.license)}`;
-  return `<article class="photo-card ${photo.assetType==='photo'?'photo':''}" data-photo-id="${escapeHtml(photo.id)}" ${detailHref?`data-href="${detailHref}"`:''}role="button" tabindex="0" aria-label="Open ${escapeHtml(photo.title)} details">
+  return `<article class="photo-card ${photo.assetType==='photo'?'photo':''}" data-photo-id="${escapeHtml(photo.id)}"${detailHref?` data-href="${detailHref}"`:''} role="button" tabindex="0" aria-label="Open ${escapeHtml(photo.title)} details">
     <img src="${escapeHtml(photo.url)}" alt="${escapeHtml(photo.title)}" loading="lazy">
     <div class="photo-body">
       <div class="photo-title"><strong>${escapeHtml(photo.title)}</strong><span class="source ${sourceClass}">${sourceLabel}</span></div>
