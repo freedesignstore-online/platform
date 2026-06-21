@@ -90,7 +90,7 @@ footer{border-top:1px solid var(--line);padding:1rem;text-align:center;font-size
 <nav><a href="/images/stock-photos/">Assets</a><a href="/">Tools</a></nav>
 </header>
 <div class="photo-wrap">
-<img class="photo-img" src="${esc(item.url)}" alt="${esc(item.title)}" width="${raw ? raw.width : ''}" height="${raw ? raw.height : ''}">
+<img class="photo-img" src="${esc(item.url)}" alt="${esc(item.title)}">
 </div>
 <div class="meta">
 <div class="info">
