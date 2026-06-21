@@ -151,6 +151,7 @@ test('home and public library make assets a first-class FDS surface', async () =
   assert.match(libraryHtml, /id="assetModal"/);
   assert.match(libraryHtml, /function openAssetModal/);
   assert.match(libraryHtml, /data-photo-id/);
+  assert.doesNotMatch(libraryHtml, /\}role=/);
   assert.match(libraryHtml, /bindAssetCards/);
   assert.match(libraryHtml, /aria-modal="true"/);
   for (const type of ['Images / Photos', 'Illustrations', 'Icons', 'Patterns', 'Textures', 'Backgrounds', 'UI Assets']) {
