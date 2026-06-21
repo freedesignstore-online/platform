@@ -39,7 +39,7 @@
   }
 
   const currentId = getCurrentId();
-  if (!currentId) return;
+  if (!currentId || currentId === 'stock-photos') return;
 
   fetch('/registry.json')
     .then(r => r.json())

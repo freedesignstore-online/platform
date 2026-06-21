@@ -13,8 +13,10 @@
 body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 body.modal-open{overflow:hidden}
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.site-header{position:sticky;top:0;z-index:40;border-bottom:1px solid var(--line);padding:.6rem 1.5rem;display:flex;align-items:center;gap:1rem;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.5rem;text-decoration:none;color:var(--text)}.brand-emoji{font-size:1.4rem}.brand-name{font-size:1.05rem;font-weight:700}
+.site-nav{display:flex;gap:.85rem;font-size:.82rem;font-weight:600;margin-left:auto}.site-nav a{color:var(--muted);text-decoration:none}.site-nav a:hover{color:var(--text)}
 .shell{max-width:1220px;margin:0 auto;padding:22px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
 .back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--muted);font-weight:700}.back:hover{color:var(--accent);text-decoration:none}
 .hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:end;margin-bottom:18px}
 h1{font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-bottom:8px}
@@ -90,10 +92,11 @@ h1{font-size:32px;line-height:1.05;font-weight:800;letter-spacing:0;margin-botto
 </style>
 </head>
 <body>
+<header class="site-header">
+<a href="/" class="brand"><span class="brand-emoji">🎨</span><span class="brand-name">FreeDesignStore</span></a>
+<nav class="site-nav"><a href="/">Tools</a><a href="/console/">Console</a><a href="/skills/">Skills</a></nav>
+</header>
 <main class="shell">
-  <div class="top">
-    <a href="/" class="back">&lt;- Back to FreeDesignStore</a>
-  </div>
 
   <section class="hero">
     <div>
