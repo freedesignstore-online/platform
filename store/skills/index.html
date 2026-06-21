@@ -29,9 +29,23 @@
     <article class="skill"><span class="tag">moderation</span><h2>Publish Ready Asset Reviewer</h2><p>Decides whether a pending design asset is ready to publish, needs revision, or should be rejected.</p><ul><li>Review usefulness and metadata.</li><li>Check preview quality.</li><li>Publish only legal, clear assets.</li></ul><a class="skill-link" href="/skills/publish-ready-asset-reviewer.md">Open Markdown</a></article>
   </section>
   <section class="footer-panel">
-    <h2>MCP use</h2>
-    <p>Claude, Codex, and other MCP clients can fetch these playbooks before using creation or publishing tools.</p>
-    <code class="code">npx -y mcp-remote https://mcp.freedesignstore.online/mcp</code>
+    <h2>Connect via MCP</h2>
+    <p>Claude Code, Codex, and any MCP client can connect in one command:</p>
+    <code class="code">claude mcp add freedesignstore https://mcp.freedesignstore.online/mcp</code>
+    <code class="code">codex mcp add freedesignstore --url https://mcp.freedesignstore.online/mcp</code>
+    <code class="code">npx mcp-remote https://mcp.freedesignstore.online/mcp</code>
+    <p style="margin-top:.7rem;color:var(--muted);font-size:.84rem">Or add to your project's <code>.mcp.json</code>:</p>
+    <code class="code">{ "mcpServers": { "freedesignstore": { "command": "npx", "args": ["mcp-remote", "https://mcp.freedesignstore.online/mcp"] } } }</code>
+  </section>
+  <section class="footer-panel" style="margin-top:.85rem">
+    <h2>MCP capabilities</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-top:.6rem;font-size:.84rem;color:var(--muted)">
+      <div><strong style="color:var(--ink);display:block;margin-bottom:.3rem">Read (no auth)</strong>asset_policy<br>list_design_skills<br>get_design_skill<br>apply_design_skill<br>catalog_status<br>list_assets<br>get_asset</div>
+      <div><strong style="color:var(--ink);display:block;margin-bottom:.3rem">Write (auth required)</strong>create_svg_asset<br>create_asset_from_url<br>publish_asset<br>unpublish_asset<br>delete_asset<br>whoami<br>my_assets</div>
+      <div><strong style="color:var(--ink);display:block;margin-bottom:.3rem">Not supported</strong>Billing changes<br>User deletion<br>Permission changes<br>Direct REST/API calls<br>Unsplash mirroring<br>Shell execution</div>
+    </div>
+    <p style="margin-top:.7rem;font-size:.78rem;color:var(--muted)">Limits: 8 MB raster, 1 MB SVG, 500 catalog items. SVGs validated for unsafe markup. Unsplash link-off only.</p>
+    <p style="margin-top:.3rem"><a class="skill-link" href="/llms.txt">llms.txt</a> &middot; <a class="skill-link" href="/.well-known/mcp.json">MCP discovery</a> &middot; <a class="skill-link" href="/skills/manifest.json">Skill manifest</a></p>
   </section>
 </main>
 </body>

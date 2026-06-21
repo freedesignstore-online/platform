@@ -1,0 +1,71 @@
+# FreeDesignStore — AI Agent Guide
+
+> Free community design assets and browser-based design tools.
+> MCP-first platform: connect via MCP, not REST.
+
+## MCP Endpoint
+
+Remote: https://mcp.freedesignstore.online/mcp
+Transport: streamable-http
+Auth: OAuth 2.1 (GitHub/Google sign-in) or bearer token
+
+## Quick Setup
+
+Claude Code:
+  claude mcp add freedesignstore https://mcp.freedesignstore.online/mcp
+
+Codex:
+  codex mcp add freedesignstore --url https://mcp.freedesignstore.online/mcp
+
+Any MCP client:
+  npx mcp-remote https://mcp.freedesignstore.online/mcp
+
+## MCP Tools (15)
+
+### Skills (no auth required)
+- asset_policy: Read catalog hosting rules and Unsplash link-off policy
+- list_design_skills: List published design asset playbooks
+- get_design_skill: Get one playbook by ID
+- apply_design_skill: Apply a playbook as questions, checklist, or tool plan
+
+### Read
+- catalog_status: Check storage readiness and asset counts
+- whoami: Show the authenticated creator/admin account
+- list_assets: List public assets (admin: also pending)
+- my_assets: List assets owned by the authenticated creator
+- get_asset: Get one asset's metadata and download URL
+
+### Create (requires auth)
+- create_svg_asset: Upload a generated SVG asset
+- create_asset_from_url: Ingest a public non-Unsplash image URL
+
+### Manage (requires auth, owner or admin)
+- publish_asset: Publish a pending owned asset
+- unpublish_asset: Move a public asset back to pending
+- delete_asset: Delete catalog metadata and the R2 object
+
+### Admin only
+- moderate_asset: Publish or reject a pending asset
+
+## Workflow Pattern
+
+1. Call list_design_skills to see available playbooks
+2. Call apply_design_skill to get a creation checklist
+3. Call create_svg_asset or create_asset_from_url to add the asset
+4. Call publish_asset to make it public
+
+## Constraints
+
+- Max file size: 8 MB (raster), 1 MB (SVG)
+- Allowed types: JPEG, PNG, WebP, AVIF, SVG
+- SVG safety: no <script>, event handlers, javascript: URIs, <iframe>/<object>/<embed>
+- Unsplash images: link-off only, never mirror to R2
+- Max catalog size: 500 items
+
+## Links
+
+- Store: https://freedesignstore.online
+- Asset library: https://freedesignstore.online/images/stock-photos/
+- Skills manifest: https://freedesignstore.online/skills/manifest.json
+- MCP discovery: https://freedesignstore.online/.well-known/mcp.json
+- MCP docs: https://freedesignstore.online/skills/
