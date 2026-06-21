@@ -39,6 +39,18 @@ export const HOSTED_STOCK = [
   item("fds-lifestyle-hammock-lake", "Hammock Lake", "Lifestyle", "lifestyle-hammock-lake.jpg", 1672, 941, ["hammock", "lake", "birch", "relaxation"], ["profile_background"]),
   item("fds-lifestyle-pottery-studio", "Pottery Studio", "Lifestyle", "lifestyle-pottery-studio.jpg", 1672, 941, ["pottery", "craft", "clay", "workshop"], ["profile_background"]),
   item("fds-lifestyle-garden-reading", "Garden Reading", "Lifestyle", "lifestyle-garden-reading.jpg", 1672, 941, ["reading", "garden", "flowers", "peaceful"], ["profile_background"]),
+  item("fds-lifestyle-sunrise-yoga", "Sunrise Yoga", "Lifestyle", "lifestyle-sunrise-yoga.jpg", 1672, 941, ["yoga", "sunrise", "mountains", "wellness"], ["profile_background"]),
+  item("fds-lifestyle-vinyl-records", "Vinyl Records", "Lifestyle", "lifestyle-vinyl-records.jpg", 1672, 941, ["vinyl", "records", "music", "vintage"], ["profile_background"]),
+  item("fds-lifestyle-farmers-breakfast", "Farmers Breakfast", "Lifestyle", "lifestyle-farmers-breakfast.jpg", 1672, 941, ["breakfast", "farmhouse", "food", "morning"], ["profile_background"]),
+  item("fds-lifestyle-rock-pool", "Rock Pool", "Lifestyle", "lifestyle-rock-pool.jpg", 1672, 941, ["rock pool", "swimming", "nature", "summer"], ["profile_background"]),
+  item("fds-lifestyle-bookshop-cafe", "Bookshop Cafe", "Lifestyle", "lifestyle-bookshop-cafe.jpg", 1672, 941, ["bookshop", "cafe", "reading", "cozy"], ["profile_background"]),
+  item("fds-lifestyle-night-cycling", "Night Cycling", "Lifestyle", "lifestyle-night-cycling.jpg", 1672, 941, ["cycling", "night", "neon", "urban"], ["profile_background"]),
+  item("fds-lifestyle-beach-bonfire", "Beach Bonfire", "Lifestyle", "lifestyle-beach-bonfire.jpg", 1672, 941, ["bonfire", "beach", "friends", "dusk"], ["profile_background"]),
+  item("fds-lifestyle-art-gallery", "Art Gallery", "Lifestyle", "lifestyle-art-gallery.jpg", 1672, 941, ["gallery", "art", "minimalist", "culture"], ["profile_background"]),
+  item("fds-lifestyle-rain-window", "Rain Window", "Lifestyle", "lifestyle-rain-window.jpg", 1672, 941, ["rain", "window", "tea", "cozy"], ["profile_background"]),
+  item("fds-lifestyle-campfire-cooking", "Campfire Cooking", "Lifestyle", "lifestyle-campfire-cooking.jpg", 1672, 941, ["campfire", "cooking", "outdoors", "woods"], ["profile_background"]),
+  item("fds-lifestyle-surfing-wave", "Surfing Wave", "Lifestyle", "lifestyle-surfing-wave.jpg", 1672, 941, ["surfing", "wave", "ocean", "action"], ["profile_background"]),
+  item("fds-lifestyle-rooftop-garden", "Rooftop Garden", "Lifestyle", "lifestyle-rooftop-garden.jpg", 1672, 941, ["garden", "rooftop", "herbs", "urban"], ["profile_background"]),
 ];
 
 function item(id, title, category, filename, width, height, tags, purposes) {
