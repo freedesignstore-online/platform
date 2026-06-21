@@ -123,6 +123,7 @@ footer a{color:var(--accent)}
 </div>
 <div class="stock-overflow" id="assetOverflow"></div>
 <div class="load-more"><button class="load-more-btn hidden" id="loadMoreBtn">Load more assets</button></div>
+<div id="scrollSentinel" style="height:1px"></div>
 </section>
 <section class="section-title" id="tools">
 <div><h2>Design tools</h2><p>Use the tools below to create, edit, convert, and prepare assets.</p></div>
@@ -298,10 +299,14 @@ function shareCard(btn,id,title){
     shown=4;
     loadMoreBtn.classList.toggle('hidden',shown>=allItems.length);
     loadMoreBtn.addEventListener('click',loadMore);
-    if('IntersectionObserver' in window){
-      new IntersectionObserver((entries,obs)=>{
-        if(entries[0].isIntersecting&&shown<allItems.length){loadMore();}
-      },{rootMargin:'200px'}).observe(loadMoreBtn);
+    var sentinel=document.getElementById('scrollSentinel');
+    if('IntersectionObserver' in window && sentinel){
+      new IntersectionObserver(function(entries){
+        if(entries[0].isIntersecting&&shown<allItems.length){
+          loadMore();
+          if(shown>=allItems.length) sentinel.style.display='none';
+        }
+      },{rootMargin:'400px'}).observe(sentinel);
     }
   }
   loadAssetRail();
