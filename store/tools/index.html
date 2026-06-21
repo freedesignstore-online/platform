@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Design Tools - FreeDesignStore</title>
+<meta name="description" content="46 free browser-based design tools. Logo maker, color palette, typography pairing, image editor, vector editor, CSS animation, UI kit, and more.">
+<meta property="og:title" content="Design Tools - FreeDesignStore">
+<meta property="og:description" content="46 free browser-based design tools for creators. No signup, no install.">
+<link rel="canonical" href="https://freedesignstore.online/tools/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--accent:#ec4899;--bg:#fafafa;--text:#1a1a1a;--muted:#6b7280;--panel:#ffffff;--line:#e5e7eb}
+body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+header{position:sticky;top:0;z-index:40;border-bottom:1px solid var(--line);padding:.6rem 1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;background:rgba(255,255,255,.94);backdrop-filter:blur(14px)}
+.brand{display:flex;align-items:center;gap:.5rem;text-decoration:none;color:var(--text)}
+.brand-emoji{font-size:1.4rem}.brand-name{font-family:'Fraunces',serif;font-size:1.05rem;font-weight:700}
+nav{display:flex;gap:.85rem;font-size:.82rem;font-weight:600;margin-left:auto}
+nav a{color:var(--muted)}nav a:hover{color:var(--text);text-decoration:none}
+.shell{max-width:1100px;margin:0 auto;padding:1.5rem}
+.hero{margin-bottom:1.2rem}
+.hero h1{font-family:'Fraunces',serif;font-size:2rem;font-weight:700;margin-bottom:.3rem}
+.hero p{color:var(--muted);font-size:.88rem;line-height:1.5;max-width:640px}
+.stats{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem}
+.badge{display:inline-block;padding:.2rem .6rem;border-radius:99px;font-size:.72rem;font-weight:600;background:var(--panel);border:1px solid var(--line);color:var(--muted)}
+.toolbar{display:flex;gap:.5rem;align-items:center;margin-bottom:.8rem;flex-wrap:wrap}
+.search-input{flex:1;min-width:200px;padding:.5rem .75rem;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:.82rem;background:#fff}
+.search-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(236,72,153,.1)}
+.filters{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.8rem}
+.filter-btn{background:var(--panel);border:1px solid var(--line);color:var(--muted);padding:.3rem .7rem;border-radius:99px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.filter-btn:hover{border-color:var(--accent);color:var(--text)}
+.filter-btn.active{background:var(--accent);border-color:var(--accent);color:white}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.7rem;padding-bottom:2rem}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.85rem;display:flex;gap:.7rem;align-items:flex-start;transition:all .2s;text-decoration:none;color:inherit;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.card:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.06);text-decoration:none}
+.card.hidden{display:none}
+.card-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;color:white}
+.card-body{flex:1;min-width:0}.card-name{font-size:.84rem;font-weight:700;margin-bottom:.1rem}
+.card-desc{font-size:.68rem;color:var(--muted);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-cta{font-size:.68rem;font-weight:600;color:var(--accent);white-space:nowrap;align-self:center}
+.empty{text-align:center;color:var(--muted);padding:2rem;font-size:.88rem;display:none}
+.count{font-size:.78rem;color:var(--muted);margin-bottom:.5rem}
+footer{border-top:1px solid var(--line);padding:1rem;text-align:center;font-size:.7rem;color:var(--muted);background:var(--panel)}
+footer a{color:var(--accent)}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.hero h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<header>
+<a href="/" class="brand"><span class="brand-emoji">🎨</span><span class="brand-name">FreeDesignStore</span></a>
+<nav><a href="/images/stock-photos/">Assets</a><a href="/console/">Console</a><a href="/skills/">Skills</a><a href="/tools/">Tools</a></nav>
+</header>
+<main class="shell">
+<section class="hero">
+<h1>Design Tools</h1>
+<p>46 free browser-based tools for designers. Create, edit, convert, and prepare assets. No signup, no install — everything runs in your browser.</p>
+<div class="stats">
+<span class="badge">Brand (16)</span>
+<span class="badge">Images (15)</span>
+<span class="badge">Templates (6)</span>
+<span class="badge">UI/UX (9)</span>
+</div>
+</section>
+<div class="toolbar">
+<input type="search" class="search-input" id="search" placeholder="Search tools..." autocomplete="off">
+</div>
+<div class="filters" id="filters">
+<button class="filter-btn active" data-cat="all">All (46)</button>
+<button class="filter-btn" data-cat="brand">Brand (16)</button>
+<button class="filter-btn" data-cat="images">Images (15)</button>
+<button class="filter-btn" data-cat="templates">Templates (6)</button>
+<button class="filter-btn" data-cat="uiux">UI/UX (9)</button>
+</div>
+<div class="count" id="count">Showing 46 tools</div>
+<div class="grid" id="grid">
+<a href="/brand/logo-maker/" class="card" data-cat="brand" data-search="logo maker type brand name font style svg"><div class="card-icon" style="background:#ec4899">✏️</div><div class="card-body"><div class="card-name">Logo Maker</div><div class="card-desc">Type your brand name, pick a font and style, download SVG instantly. No signup.</div></div><span class="card-cta">Open →</span></a>
+<a href="/brand/color-palette/" class="card" data-cat="brand" data-search="color palette generator harmonious complementary analogous triadic image a11y contrast"><div class="card-icon" style="background:#8b5cf6">🎨</div><div class="card-body"><div class="card-name">Color Palette Generator</div><div class="card-desc">Generate harmonious palettes. Complementary, analogous, triadic. Extract from image. A11y contrast check.</div></div><span class="card-cta">Open →</span></a>
+<a href="/brand/typography-pairing/" class="card" data-cat="brand" data-search="typography font pairing combinations preview css import"><div class="card-icon" style="background:#3b82f6">Aa</div><div class="card-body"><div class="card-name">Typography Pairing</div><div class="card-desc">Find perfect font combinations. Preview in context, adjust sizing, export CSS with @import.</div></div><span class="card-cta">Open →</span></a>
+<a href="/brand/brand-kit/" class="card" data-cat="brand" data-search="brand kit guide logo colors fonts usage rules html"><div class="card-icon" style="background:#10b981">📋</div><div class="card-body"><div class="card-name">Brand Kit Builder</div><div class="card-desc">Assemble a complete brand guide: logo + colors + fonts + usage rules. Download as HTML.</div></div><span class="card-cta">Open →</span></a>
+<a href="/brand/business-card/" class="card" data-cat="brand" data-search="business card designer template print svg"><div class="card-icon" style="background:#f59e0b">💼</div><div class="card-body"><div class="card-name">Business Card Designer</div><div class="card-desc">Pick a template, enter your details, apply brand colors. Download print-ready SVG.</div></div><span class="card-cta">Open →</span></a>
+<a href="/brand/favicon-generator/" class="card" data-cat="brand" data-search="favicon generator letter emoji ico png svg sizes"><div class="card-icon" style="background:#06b6d4">⭐</div><div class="card-body"><div class="card-name">Favicon Generator</div><div class="card-desc">Letters or emoji to favicon. Multiple sizes (16-512px), SVG/PNG/ICO download, copy HTML tags.</div></div><span class="card-cta">Open →</span></a>
+<a href="/brand/ai-color-from-text/" class="card" data-cat="brand" data-search="ai smart color from text description mood scene palette"><div class="card-icon" style="background:#a855f7">🧠</div><div class="card-body"><div class="card-name">Smart Color from Description</div><div class="card-desc">Type a mood or scene — get a matching 5-color palette. "Sunset ocean" → warm pinks, deep blues.</div></div><span class="card-cta">Open →</span></a>
+<a href="/brand/ai-logo-concepts/" class="card" data-cat="brand" data-search="ai smart logo concepts procedural geometric monogram spirograph fractal"><div class="card-icon" style="background:#ec4899">💡</div><div class="card-body"><div class="card-name">Smart Logo Concepts</div><div class="card-desc">Enter brand name + industry. Get 6 unique procedural logos: geometric, monogram, spirograph, fractal.</div></div><span class="card-cta">Open →</span></a>
+<a href="/brand/design-tokens/" class="card" data-cat="brand" data-search="design token generator css vars tailwind scss json swift kotlin"><div class="card-icon" style="background:#6366f1">🎯</div><div class="card-body"><div class="card-name">Design Token Generator</div><div class="card-desc">Pick colors + fonts → export as CSS vars, Tailwind, SCSS, JSON, Swift, Kotlin. Live component preview.</div></div><span class="card-cta">Open →</span></a>
+<a href="/brand/qr-code-designer/" class="card" data-cat="brand" data-search="qr code designer colors corner styles logo overlay png svg"><div class="card-icon" style="background:#1a1a1a">📷</div><div class="card-body"><div class="card-name">QR Code Designer</div><div class="card-desc">Generate QR codes with custom colors, corner styles, logo overlay. Download PNG or SVG.</div></div><span class="card-cta">Open →</span></a>
+<a href="/brand/contrast-checker/" class="card" data-cat="brand" data-search="contrast checker wcag ratio aa aaa accessible alternatives palette"><div class="card-icon" style="background:#10b981">👁️</div><div class="card-body"><div class="card-name">Contrast Checker</div><div class="card-desc">WCAG contrast ratio calculator. AA/AAA pass/fail, accessible alternatives, batch palette check.</div></div><span class="card-cta">Open →</span></a>
+<a href="/brand/tailwind-theme/" class="card" data-cat="brand" data-search="tailwind theme builder config colors typography spacing shadows breakpoints"><div class="card-icon" style="background:#06b6d4">🎨</div><div class="card-body"><div class="card-name">Tailwind Theme Builder</div><div class="card-desc">Visual editor for tailwind.config.js. Colors with 50-950 scales, typography, spacing, shadows, breakpoints. Live preview.</div></div><span class="card-cta">Open →</span></a>
+<a href="/brand/css-animation/" class="card" data-cat="brand" data-search="css animation studio keyframe editor timeline cubic bezier presets"><div class="card-icon" style="background:#8b5cf6">🎬</div><div class="card-body"><div class="card-name">CSS Animation Studio</div><div class="card-desc">Visual keyframe editor. Timeline, cubic-bezier curves, 20 presets. Preview + export @keyframes CSS.</div></div><span class="card-cta">Open →</span></a>
+<a href="/brand/css-effects/" class="card" data-cat="brand" data-search="css effects glassmorphism neumorphism shadow gradient"><div class="card-icon" style="background:#8b5cf6">✨</div><div class="card-body"><div class="card-name">CSS Effects Generator</div><div class="card-desc">Glassmorphism, neumorphism, multi-layer shadows, and gradient builder. Presets, live preview, copy CSS.</div></div><span class="card-cta">Open →</span></a>
+<a href="/brand/micro-animations/" class="card" data-cat="brand" data-search="micro interaction animation library hover spinners transitions buttons text effects"><div class="card-icon" style="background:#ec4899">🎬</div><div class="card-body"><div class="card-name">Micro-Interaction Library</div><div class="card-desc">100+ CSS animations: hover effects, spinners, transitions, attention seekers, buttons, text effects. Copy-paste.</div></div><span class="card-cta">Open →</span></a>
+<a href="/brand/color-blindness/" class="card" data-cat="brand" data-search="color blindness simulator upload image types palette accessible alternatives"><div class="card-icon" style="background:#10b981">👁️</div><div class="card-body"><div class="card-name">Color Blindness Simulator</div><div class="card-desc">Upload image → see through 8 types of color blindness. Palette checker, accessible alternatives.</div></div><span class="card-cta">Open →</span></a>
+<a href="/images/image-resizer/" class="card" data-cat="images" data-search="image resizer cropper instagram x linkedin youtube dimensions crop quality"><div class="card-icon" style="background:#f97316">📐</div><div class="card-body"><div class="card-name">Image Resizer &amp; Cropper</div><div class="card-desc">Resize to Instagram, X, LinkedIn, YouTube dimensions. Custom crop, quality control, drag &amp; drop.</div></div><span class="card-cta">Open →</span></a>
+<a href="/images/icon-library/" class="card" data-cat="images" data-search="svg icon library 200 searchable customize color size copy download"><div class="card-icon" style="background:#6366f1">🔷</div><div class="card-body"><div class="card-name">SVG Icon Library</div><div class="card-desc">200+ icons searchable by name. Customize color and size. Copy SVG or download.</div></div><span class="card-cta">Open →</span></a>
+<a href="/images/gradient-maker/" class="card" data-cat="images" data-search="gradient background maker linear radial conic mesh presets css png"><div class="card-icon" style="background:#a855f7">🌈</div><div class="card-body"><div class="card-name">Gradient &amp; Background Maker</div><div class="card-desc">Linear, radial, conic gradients. Mesh backgrounds. Drag color stops, 24 presets, copy CSS, download PNG.</div></div><span class="card-cta">Open →</span></a>
+<a href="/images/ai-background-remover/" class="card" data-cat="images" data-search="ai background remover upload photo remove edge detection transparent png"><div class="card-icon" style="background:#10b981">✂️</div><div class="card-body"><div class="card-name">Background Remover</div><div class="card-desc">Upload photo, remove background instantly. Edge detection + flood fill. Download transparent PNG.</div></div><span class="card-cta">Open →</span></a>
+<a href="/images/pattern-maker/" class="card" data-cat="images" data-search="pattern generator seamless dots lines waves hexagons layers presets svg png css"><div class="card-icon" style="background:#8b5cf6">🔲</div><div class="card-body"><div class="card-name">Pattern Generator</div><div class="card-desc">Seamless patterns: dots, lines, waves, hexagons. Layers, 20 presets. Download SVG/PNG/CSS.</div></div><span class="card-cta">Open →</span></a>
+<a href="/images/stock-photos/" class="card" data-cat="images" data-search="design asset library browse generate upload download images illustrations icons patterns textures backgrounds"><div class="card-icon" style="background:#06b6d4">📦</div><div class="card-body"><div class="card-name">Design Asset Library</div><div class="card-desc">Browse, generate, upload, and download images, illustrations, icons, patterns, textures, backgrounds, and UI assets.</div></div><span class="card-cta">Open →</span></a>
+<a href="/images/free-logos/" class="card" data-cat="images" data-search="free logo templates customizable svg edit text colors icons favorites"><div class="card-icon" style="background:#f59e0b">✨</div><div class="card-body"><div class="card-name">Free Logo Templates</div><div class="card-desc">24+ customizable SVG logo templates. Edit text, colors, icons. Download instantly. Favorites saved locally.</div></div><span class="card-cta">Open →</span></a>
+<a href="/images/asset-manager/" class="card" data-cat="images" data-search="personal asset manager local library upload organize tag search export indexeddb"><div class="card-icon" style="background:#6366f1">📁</div><div class="card-body"><div class="card-name">Personal Asset Manager</div><div class="card-desc">Local-first design library. Upload, organize, tag, search, export. All stored on YOUR device (IndexedDB).</div></div><span class="card-cta">Open →</span></a>
+<a href="/images/format-converter/" class="card" data-cat="images" data-search="format converter png jpeg webp avif bmp ico base64 svg trace batch exif dpi"><div class="card-icon" style="background:#3b82f6">🔄</div><div class="card-body"><div class="card-name">Format Converter</div><div class="card-desc">Convert between PNG, JPEG, WebP, AVIF, BMP, ICO, Base64, SVG trace. Batch mode, EXIF strip, DPI control.</div></div><span class="card-cta">Open →</span></a>
+<a href="/images/noise-texture/" class="card" data-cat="images" data-search="noise texture generator perlin simplex film grain paper fabric concrete wood marble tileable"><div class="card-icon" style="background:#6366f1">🔲</div><div class="card-body"><div class="card-name">Noise &amp; Texture Generator</div><div class="card-desc">Perlin, simplex, film grain, paper, fabric, concrete, wood, marble. Tileable PNG, CSS, SVG filter export.</div></div><span class="card-cta">Open →</span></a>
+<a href="/images/svg-optimizer/" class="card" data-cat="images" data-search="svg optimizer editor clean minify remove cruft shorten ids change colors react data url"><div class="card-icon" style="background:#10b981">⚡</div><div class="card-body"><div class="card-name">SVG Optimizer &amp; Editor</div><div class="card-desc">Clean, minify, and edit SVGs. Remove cruft, shorten IDs, change colors. Export as SVG, data URL, or React.</div></div><span class="card-cta">Open →</span></a>
+<a href="/images/avatar-generator/" class="card" data-cat="images" data-search="avatar generator initials geometric gradient pixel art pattern rings blob deterministic batch"><div class="card-icon" style="background:#f59e0b">👤</div><div class="card-body"><div class="card-name">Avatar Generator</div><div class="card-desc">7 styles: initials, geometric, gradient, pixel art, pattern, rings, blob. Deterministic from name. Batch mode.</div></div><span class="card-cta">Open →</span></a>
+<a href="/images/photo-editor/" class="card" data-cat="images" data-search="photo editor photoshop tools layers adjustments clone stamp blur gradient undo redo"><div class="card-icon" style="background:#1a1a1a">🖼️</div><div class="card-body"><div class="card-name">Photo Editor</div><div class="card-desc">Mini-Photoshop. 15 tools, layers, adjustments, clone stamp, blur, gradient. Undo/redo, keyboard shortcuts.</div></div><span class="card-cta">Open →</span></a>
+<a href="/images/vector-editor/" class="card" data-cat="images" data-search="vector editor illustrator pen tool shapes bezier paths layers align distribute svg png"><div class="card-icon" style="background:#6366f1">✒️</div><div class="card-body"><div class="card-name">Vector Editor</div><div class="card-desc">Mini-Illustrator. Pen tool, shapes, bezier paths, layers, align/distribute. SVG-native. Export clean SVG/PNG.</div></div><span class="card-cta">Open →</span></a>
+<a href="/images/pixel-editor/" class="card" data-cat="images" data-search="pixel art editor sprite animation frames onion skin layers mirror png spritesheet gif"><div class="card-icon" style="background:#ef4444">👾</div><div class="card-body"><div class="card-name">Pixel Art Editor</div><div class="card-desc">Sprite editor with animation frames, onion skin, layers, mirror mode. Export PNG/spritesheet/GIF. 8-128px grids.</div></div><span class="card-cta">Open →</span></a>
+<a href="/templates/social-templates/" class="card" data-cat="templates" data-search="social media templates instagram x linkedin platform sized edit text colors png"><div class="card-icon" style="background:#ec4899">📱</div><div class="card-body"><div class="card-name">Social Media Templates</div><div class="card-desc">Platform-sized templates for Instagram, X, LinkedIn. Edit text, colors, download PNG.</div></div><span class="card-cta">Open →</span></a>
+<a href="/templates/og-image-maker/" class="card" data-cat="templates" data-search="og image maker open graph link previews blog product event 1200x630 png"><div class="card-icon" style="background:#8b5cf6">🖼️</div><div class="card-body"><div class="card-name">OG Image Maker</div><div class="card-desc">Generate Open Graph images for link previews. Blog, product, event templates. 1200x630 PNG.</div></div><span class="card-cta">Open →</span></a>
+<a href="/templates/presentation-maker/" class="card" data-cat="templates" data-search="slide deck builder presentations 6 types theme colors reorder export html slideshow"><div class="card-icon" style="background:#f59e0b">📊</div><div class="card-body"><div class="card-name">Slide Deck Builder</div><div class="card-desc">Build presentations with 6 slide types. Theme colors, reorder slides, export as self-contained HTML slideshow.</div></div><span class="card-cta">Open →</span></a>
+<a href="/templates/pitch-deck/" class="card" data-cat="templates" data-search="pitch deck generator startup sales investor 10 slides fullscreen present"><div class="card-icon" style="background:#f59e0b">📊</div><div class="card-body"><div class="card-name">Pitch Deck Generator</div><div class="card-desc">Choose deck type (Startup/Sales/Investor), fill a form, get 10 pro slides auto-generated. Fullscreen present mode.</div></div><span class="card-cta">Open →</span></a>
+<a href="/templates/mockup-generator/" class="card" data-cat="templates" data-search="device mockup generator screenshot iphone macbook ipad watch angle shadow png"><div class="card-icon" style="background:#06b6d4">📱</div><div class="card-body"><div class="card-name">Device Mockup Generator</div><div class="card-desc">Upload screenshot, choose device (iPhone, MacBook, iPad, Watch). Adjust angle, shadow. Download PNG.</div></div><span class="card-cta">Open →</span></a>
+<a href="/templates/wireframe-kit/" class="card" data-cat="templates" data-search="wireframe builder drag drop components snap grid resize page presets svg png"><div class="card-icon" style="background:#6b7280">📐</div><div class="card-body"><div class="card-name">Wireframe Builder</div><div class="card-desc">Drag-and-drop wireframe components. Snap to grid, resize, 3 page presets. Export SVG/PNG.</div></div><span class="card-cta">Open →</span></a>
+<a href="/components/ui-kit/" class="card" data-cat="uiux" data-search="ui component library 50 buttons cards forms tables modals html tailwind react jsx"><div class="card-icon" style="background:#6366f1">🧩</div><div class="card-body"><div class="card-name">UI Component Library</div><div class="card-desc">50+ copy-paste HTML/CSS components. Buttons, cards, forms, tables, modals. HTML, Tailwind, React JSX export.</div></div><span class="card-cta">Open →</span></a>
+<a href="/components/layout-builder/" class="card" data-cat="uiux" data-search="css layout builder visual grid flexbox editor drag cells fr px named areas tailwind html"><div class="card-icon" style="background:#3b82f6">📐</div><div class="card-body"><div class="card-name">CSS Layout Builder</div><div class="card-desc">Visual Grid + Flexbox editor. Drag cells, set fr/px/%, named areas. Export CSS, Tailwind, HTML.</div></div><span class="card-cta">Open →</span></a>
+<a href="/components/form-builder/" class="card" data-cat="uiux" data-search="form builder drag drop 16 field types multi-step wizards presets html tailwind react jsx"><div class="card-icon" style="background:#10b981">📝</div><div class="card-body"><div class="card-name">Form Builder</div><div class="card-desc">Drag &amp; drop form builder. 16 field types, multi-step wizards, 7 presets. Export HTML, Tailwind, React JSX.</div></div><span class="card-cta">Open →</span></a>
+<a href="/components/landing-builder/" class="card" data-cat="uiux" data-search="landing page builder 17 section types hero features pricing faq cta responsive preview html"><div class="card-icon" style="background:#f97316">🏗️</div><div class="card-body"><div class="card-name">Landing Page Builder</div><div class="card-desc">Stack 17 section types to build pages. Hero, features, pricing, FAQ, CTA. Responsive preview. Export HTML.</div></div><span class="card-cta">Open →</span></a>
+<a href="/components/dashboard-builder/" class="card" data-cat="uiux" data-search="dashboard builder admin templates sidebar charts tables widgets light dark theme html react"><div class="card-icon" style="background:#8b5cf6">📊</div><div class="card-body"><div class="card-name">Dashboard Builder</div><div class="card-desc">Admin dashboard templates. Sidebar, charts, tables, widgets. Light/dark theme. Export HTML + React.</div></div><span class="card-cta">Open →</span></a>
+<a href="/components/moodboard/" class="card" data-cat="uiux" data-search="moodboard builder freeform canvas visual inspiration drag images colors fonts shapes export png"><div class="card-icon" style="background:#ec4899">🎯</div><div class="card-body"><div class="card-name">Moodboard Builder</div><div class="card-desc">Freeform canvas for visual inspiration. Drag images, colors, fonts, shapes. Export PNG.</div></div><span class="card-cta">Open →</span></a>
+<a href="/components/user-flow/" class="card" data-cat="uiux" data-search="user flow builder draw screen flows node types bezier connections labels auto-layout minimap svg png"><div class="card-icon" style="background:#3b82f6">🔀</div><div class="card-body"><div class="card-name">User Flow Builder</div><div class="card-desc">Draw screen flows. 4 node types, bezier connections, labels, auto-layout, minimap. Export SVG/PNG.</div></div><span class="card-cta">Open →</span></a>
+<a href="/components/sitemap-builder/" class="card" data-cat="uiux" data-search="sitemap generator visual page hierarchy tree drag reparent import urls export xml seo"><div class="card-icon" style="background:#10b981">🗺️</div><div class="card-body"><div class="card-name">Sitemap Generator</div><div class="card-desc">Visual page hierarchy tree. Drag to reparent, import URLs, export XML sitemap for SEO.</div></div><span class="card-cta">Open →</span></a>
+<a href="/components/design-handoff/" class="card" data-cat="uiux" data-search="design handoff sheet upload mockup measurement pins extract colors redlines export html specs"><div class="card-icon" style="background:#f97316">📏</div><div class="card-body"><div class="card-name">Design Handoff Sheet</div><div class="card-desc">Upload mockup, add measurement pins, extract colors, redlines. Export HTML specs for developers.</div></div><span class="card-cta">Open →</span></a>
+</div>
+<p class="empty" id="empty">No matching tools.</p>
+</main>
+<footer>FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a> | <a href="https://openfrontier-docs.pages.dev">Docs</a></footer>
+<script>
+(function(){
+  var search=document.getElementById('search');
+  var grid=document.getElementById('grid');
+  var cards=grid.querySelectorAll('.card');
+  var btns=document.querySelectorAll('.filter-btn');
+  var countEl=document.getElementById('count');
+  var emptyEl=document.getElementById('empty');
+  var activeCat='all';
+
+  function update(){
+    var q=search.value.trim().toLowerCase();
+    var visible=0;
+    cards.forEach(function(card){
+      var catMatch=activeCat==='all'||card.dataset.cat===activeCat;
+      var searchData=(card.dataset.search||'')+' '+(card.querySelector('.card-name')||{}).textContent;
+      var qMatch=!q||searchData.toLowerCase().indexOf(q)!==-1;
+      var show=catMatch&&qMatch;
+      card.classList.toggle('hidden',!show);
+      if(show) visible++;
+    });
+    countEl.textContent='Showing '+visible+' tool'+(visible!==1?'s':'');
+    emptyEl.style.display=visible?'none':'block';
+  }
+
+  btns.forEach(function(btn){
+    btn.addEventListener('click',function(){
+      btns.forEach(function(b){b.classList.remove('active')});
+      btn.classList.add('active');
+      activeCat=btn.dataset.cat;
+      update();
+    });
+  });
+
+  search.addEventListener('input',update);
+})();
+</script>
+</body>
+</html>
