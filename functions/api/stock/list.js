@@ -77,7 +77,7 @@ export async function onRequestGet({ request, env }) {
     category: category || "all",
     orientation: orientation || "all",
     purpose: purpose || "all",
-    safe,
+    safe: safe ? true : "all",
     q: query,
     communityUnavailable,
     items: [...hostedItems, ...communityItems],
