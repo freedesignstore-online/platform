@@ -192,7 +192,7 @@ test('public stock list API supports asset type, category, and search filters', 
   assert.equal(body.assetType, 'photo');
   assert.equal(body.category, 'lifestyle');
   assert.equal(body.safe, 'all');
-  assert.equal(body.items.length, 40);
+  assert.equal(body.items.length, 25);
   assert.ok(body.items.every((item) => item.source === 'hosted'));
   assert.ok(body.items.every((item) => item.category === 'Lifestyle'));
   assert.ok(body.items.every((item) => item.url.startsWith('https://freedesignstore.online/assets/stock/')));

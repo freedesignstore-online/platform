@@ -140,6 +140,8 @@ h1{font-family:'Fraunces',serif;font-size:32px;line-height:1.05;font-weight:800;
   <section class="section active" id="librarySection">
     <div class="gallery" id="gallery"></div>
     <p class="empty" id="emptyState">No matching assets.</p>
+    <div style="text-align:center;margin:.8rem 0"><button class="btn btn-secondary" id="loadMorePhotos" style="display:none">Load more</button></div>
+    <div id="photoSentinel" style="height:1px"></div>
   </section>
 
   <section class="section" id="submitSection">
@@ -258,29 +260,29 @@ const HOSTED_PHOTOS=[
   {id:'fds-lifestyle-australia-park-cricket',source:'hosted',assetType:'photo',title:'Australia Park Cricket',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-australia-park-cricket.jpg',download:'/assets/stock/lifestyle-australia-park-cricket.jpg',tags:['australia','cricket','park','sport']},
   {id:'fds-lifestyle-australia-reef-snorkelling',source:'hosted',assetType:'photo',title:'Australia Reef Snorkelling',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-australia-reef-snorkelling.jpg',download:'/assets/stock/lifestyle-australia-reef-snorkelling.jpg',tags:['australia','reef','snorkelling','water']},
   {id:'fds-lifestyle-rooftop-sunset',source:'hosted',assetType:'photo',title:'Rooftop Sunset',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-rooftop-sunset.jpg',download:'/assets/stock/lifestyle-rooftop-sunset.jpg',tags:['rooftop','sunset','city','terrace']},
-  {id:'fds-lifestyle-morning-run',source:'hosted',assetType:'photo',title:'Morning Run',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-morning-run.jpg',download:'/assets/stock/lifestyle-morning-run.jpg',tags:['running','fitness','morning','river']},
-  {id:'fds-lifestyle-street-market',source:'hosted',assetType:'photo',title:'Street Market',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-street-market.jpg',download:'/assets/stock/lifestyle-street-market.jpg',tags:['market','food','street','evening']},
+  {id:'fds-lifestyle-morning-run',source:'hosted',assetType:'photo',title:'Morning Run',category:'People',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-morning-run.jpg',download:'/assets/stock/lifestyle-morning-run.jpg',tags:['running','fitness','morning','river']},
+  {id:'fds-lifestyle-street-market',source:'hosted',assetType:'photo',title:'Street Market',category:'Travel',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-street-market.jpg',download:'/assets/stock/lifestyle-street-market.jpg',tags:['market','food','street','evening']},
   {id:'fds-lifestyle-skateboard-park',source:'hosted',assetType:'photo',title:'Skateboard Park',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-skateboard-park.jpg',download:'/assets/stock/lifestyle-skateboard-park.jpg',tags:['skateboard','urban','sport','concrete']},
-  {id:'fds-lifestyle-dog-walk-beach',source:'hosted',assetType:'photo',title:'Dog Walk Beach',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-dog-walk-beach.jpg',download:'/assets/stock/lifestyle-dog-walk-beach.jpg',tags:['dog','beach','walking','sunset']},
-  {id:'fds-lifestyle-kayak-lake',source:'hosted',assetType:'photo',title:'Kayak Lake',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-kayak-lake.jpg',download:'/assets/stock/lifestyle-kayak-lake.jpg',tags:['kayak','lake','mountains','sunrise']},
+  {id:'fds-lifestyle-dog-walk-beach',source:'hosted',assetType:'photo',title:'Dog Walk Beach',category:'Nature',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-dog-walk-beach.jpg',download:'/assets/stock/lifestyle-dog-walk-beach.jpg',tags:['dog','beach','walking','sunset']},
+  {id:'fds-lifestyle-kayak-lake',source:'hosted',assetType:'photo',title:'Kayak Lake',category:'Nature',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-kayak-lake.jpg',download:'/assets/stock/lifestyle-kayak-lake.jpg',tags:['kayak','lake','mountains','sunrise']},
   {id:'fds-lifestyle-outdoor-dining',source:'hosted',assetType:'photo',title:'Outdoor Dining',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-outdoor-dining.jpg',download:'/assets/stock/lifestyle-outdoor-dining.jpg',tags:['dining','garden','evening','candles']},
-  {id:'fds-lifestyle-mountain-bike',source:'hosted',assetType:'photo',title:'Mountain Bike Trail',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-mountain-bike.jpg',download:'/assets/stock/lifestyle-mountain-bike.jpg',tags:['cycling','forest','trail','adventure']},
-  {id:'fds-lifestyle-flower-market',source:'hosted',assetType:'photo',title:'Flower Market',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-flower-market.jpg',download:'/assets/stock/lifestyle-flower-market.jpg',tags:['flowers','market','tulips','morning']},
-  {id:'fds-lifestyle-hammock-lake',source:'hosted',assetType:'photo',title:'Hammock Lake',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-hammock-lake.jpg',download:'/assets/stock/lifestyle-hammock-lake.jpg',tags:['hammock','lake','birch','relaxation']},
-  {id:'fds-lifestyle-pottery-studio',source:'hosted',assetType:'photo',title:'Pottery Studio',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-pottery-studio.jpg',download:'/assets/stock/lifestyle-pottery-studio.jpg',tags:['pottery','craft','clay','workshop']},
+  {id:'fds-lifestyle-mountain-bike',source:'hosted',assetType:'photo',title:'Mountain Bike Trail',category:'Nature',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-mountain-bike.jpg',download:'/assets/stock/lifestyle-mountain-bike.jpg',tags:['cycling','forest','trail','adventure']},
+  {id:'fds-lifestyle-flower-market',source:'hosted',assetType:'photo',title:'Flower Market',category:'Travel',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-flower-market.jpg',download:'/assets/stock/lifestyle-flower-market.jpg',tags:['flowers','market','tulips','morning']},
+  {id:'fds-lifestyle-hammock-lake',source:'hosted',assetType:'photo',title:'Hammock Lake',category:'Nature',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-hammock-lake.jpg',download:'/assets/stock/lifestyle-hammock-lake.jpg',tags:['hammock','lake','birch','relaxation']},
+  {id:'fds-lifestyle-pottery-studio',source:'hosted',assetType:'photo',title:'Pottery Studio',category:'People',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-pottery-studio.jpg',download:'/assets/stock/lifestyle-pottery-studio.jpg',tags:['pottery','craft','clay','workshop']},
   {id:'fds-lifestyle-garden-reading',source:'hosted',assetType:'photo',title:'Garden Reading',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-garden-reading.jpg',download:'/assets/stock/lifestyle-garden-reading.jpg',tags:['reading','garden','flowers','peaceful']},
-  {id:'fds-lifestyle-sunrise-yoga',source:'hosted',assetType:'photo',title:'Sunrise Yoga',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-sunrise-yoga.jpg',download:'/assets/stock/lifestyle-sunrise-yoga.jpg',tags:['yoga','sunrise','mountains','wellness']},
+  {id:'fds-lifestyle-sunrise-yoga',source:'hosted',assetType:'photo',title:'Sunrise Yoga',category:'People',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-sunrise-yoga.jpg',download:'/assets/stock/lifestyle-sunrise-yoga.jpg',tags:['yoga','sunrise','mountains','wellness']},
   {id:'fds-lifestyle-vinyl-records',source:'hosted',assetType:'photo',title:'Vinyl Records',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-vinyl-records.jpg',download:'/assets/stock/lifestyle-vinyl-records.jpg',tags:['vinyl','records','music','vintage']},
   {id:'fds-lifestyle-farmers-breakfast',source:'hosted',assetType:'photo',title:'Farmers Breakfast',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-farmers-breakfast.jpg',download:'/assets/stock/lifestyle-farmers-breakfast.jpg',tags:['breakfast','farmhouse','food','morning']},
-  {id:'fds-lifestyle-rock-pool',source:'hosted',assetType:'photo',title:'Rock Pool',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-rock-pool.jpg',download:'/assets/stock/lifestyle-rock-pool.jpg',tags:['rock pool','swimming','nature','summer']},
+  {id:'fds-lifestyle-rock-pool',source:'hosted',assetType:'photo',title:'Rock Pool',category:'Nature',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-rock-pool.jpg',download:'/assets/stock/lifestyle-rock-pool.jpg',tags:['rock pool','swimming','nature','summer']},
   {id:'fds-lifestyle-bookshop-cafe',source:'hosted',assetType:'photo',title:'Bookshop Cafe',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-bookshop-cafe.jpg',download:'/assets/stock/lifestyle-bookshop-cafe.jpg',tags:['bookshop','cafe','reading','cozy']},
   {id:'fds-lifestyle-night-cycling',source:'hosted',assetType:'photo',title:'Night Cycling',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-night-cycling.jpg',download:'/assets/stock/lifestyle-night-cycling.jpg',tags:['cycling','night','neon','urban']},
-  {id:'fds-lifestyle-beach-bonfire',source:'hosted',assetType:'photo',title:'Beach Bonfire',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-beach-bonfire.jpg',download:'/assets/stock/lifestyle-beach-bonfire.jpg',tags:['bonfire','beach','friends','dusk']},
+  {id:'fds-lifestyle-beach-bonfire',source:'hosted',assetType:'photo',title:'Beach Bonfire',category:'People',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-beach-bonfire.jpg',download:'/assets/stock/lifestyle-beach-bonfire.jpg',tags:['bonfire','beach','friends','dusk']},
   {id:'fds-lifestyle-art-gallery',source:'hosted',assetType:'photo',title:'Art Gallery',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-art-gallery.jpg',download:'/assets/stock/lifestyle-art-gallery.jpg',tags:['gallery','art','minimalist','culture']},
-  {id:'fds-lifestyle-rain-window',source:'hosted',assetType:'photo',title:'Rain Window',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-rain-window.jpg',download:'/assets/stock/lifestyle-rain-window.jpg',tags:['rain','window','tea','cozy']},
-  {id:'fds-lifestyle-campfire-cooking',source:'hosted',assetType:'photo',title:'Campfire Cooking',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-campfire-cooking.jpg',download:'/assets/stock/lifestyle-campfire-cooking.jpg',tags:['campfire','cooking','outdoors','woods']},
-  {id:'fds-lifestyle-surfing-wave',source:'hosted',assetType:'photo',title:'Surfing Wave',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-surfing-wave.jpg',download:'/assets/stock/lifestyle-surfing-wave.jpg',tags:['surfing','wave','ocean','action']},
-  {id:'fds-lifestyle-rooftop-garden',source:'hosted',assetType:'photo',title:'Rooftop Garden',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-rooftop-garden.jpg',download:'/assets/stock/lifestyle-rooftop-garden.jpg',tags:['garden','rooftop','herbs','urban']}
+  {id:'fds-lifestyle-rain-window',source:'hosted',assetType:'photo',title:'Rain Window',category:'Backgrounds',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-rain-window.jpg',download:'/assets/stock/lifestyle-rain-window.jpg',tags:['rain','window','tea','cozy']},
+  {id:'fds-lifestyle-campfire-cooking',source:'hosted',assetType:'photo',title:'Campfire Cooking',category:'Nature',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-campfire-cooking.jpg',download:'/assets/stock/lifestyle-campfire-cooking.jpg',tags:['campfire','cooking','outdoors','woods']},
+  {id:'fds-lifestyle-surfing-wave',source:'hosted',assetType:'photo',title:'Surfing Wave',category:'Nature',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-surfing-wave.jpg',download:'/assets/stock/lifestyle-surfing-wave.jpg',tags:['surfing','wave','ocean','action']},
+  {id:'fds-lifestyle-rooftop-garden',source:'hosted',assetType:'photo',title:'Rooftop Garden',category:'Nature',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-rooftop-garden.jpg',download:'/assets/stock/lifestyle-rooftop-garden.jpg',tags:['garden','rooftop','herbs','urban']}
 ];
 let activeSource='all';
 let activeAssetType='all';
@@ -309,6 +311,13 @@ async function init(){
   renderFilters();
   await loadCommunityPhotos();
   render();
+  $('loadMorePhotos').addEventListener('click',loadMorePhotos);
+  var sentinel=$('photoSentinel');
+  if('IntersectionObserver' in window && sentinel){
+    new IntersectionObserver(function(entries){
+      if(entries[0].isIntersecting&&photosShown<allFiltered.length) loadMorePhotos();
+    },{rootMargin:'400px'}).observe(sentinel);
+  }
 }
 
 function bindEvents(){
@@ -387,12 +396,34 @@ function filteredPhotos(){
   return photos;
 }
 
+var PHOTO_BATCH=12;
+var allFiltered=[];
+var photosShown=0;
+
 function render(){
   if(activeSource==='submit') return;
-  const photos=filteredPhotos();
-  $('gallery').innerHTML=photos.map(photoCard).join('');
+  allFiltered=filteredPhotos();
+  photosShown=0;
+  $('gallery').innerHTML='';
+  loadMorePhotos();
+  $('emptyState').style.display=allFiltered.length?'none':'block';
+}
+
+function loadMorePhotos(){
+  var next=allFiltered.slice(photosShown,photosShown+PHOTO_BATCH);
+  if(!next.length) return;
+  $('gallery').insertAdjacentHTML('beforeend',next.map(photoCard).join(''));
+  photosShown+=next.length;
   bindAssetCards();
-  $('emptyState').style.display=photos.length?'none':'block';
+  var btn=$('loadMorePhotos');
+  var sentinel=$('photoSentinel');
+  if(photosShown>=allFiltered.length){
+    btn.style.display='none';
+    if(sentinel) sentinel.style.display='none';
+  }else{
+    btn.style.display='';
+    if(sentinel) sentinel.style.display='';
+  }
 }
 
 function photoCard(photo){

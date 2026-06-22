@@ -25,6 +25,10 @@ nav a{color:var(--muted)}nav a:hover{color:var(--text);text-decoration:none}
 .hero p{color:var(--muted);font-size:.9rem;max-width:600px;margin:0 auto .6rem;line-height:1.5}
 .badge{display:inline-block;padding:.2rem .6rem;border-radius:99px;font-size:.72rem;font-weight:600;background:var(--panel);border:1px solid var(--line);color:var(--muted);margin:.1rem}
 .badge.ai{background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.3);color:#8b5cf6}
+.hero-btn{display:inline-flex;padding:.5rem 1.1rem;border-radius:8px;font-size:.82rem;font-weight:700;text-decoration:none;transition:.15s;background:var(--accent);color:#fff;border:1px solid var(--accent)}
+.hero-btn:hover{background:#db2777;text-decoration:none}
+.hero-btn.secondary{background:var(--panel);color:var(--text);border-color:var(--line)}
+.hero-btn.secondary:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
 .stock-feature{max-width:1100px;margin:.8rem auto 1rem;padding:0 1.5rem}
 .stock-feature-head{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:.65rem}
 .stock-feature h2{font-family:'Fraunces',serif;font-size:1.2rem;line-height:1.1}
@@ -87,9 +91,13 @@ footer a{color:var(--accent)}
 <nav><a href="/tools/">Tools</a><a href="/images/stock-photos/">Assets</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
 </header>
 <section class="hero">
-<h1>Free<span>Design</span>Store</h1>
-<p>Free community design assets and practical browser tools for designers. Download illustrations, photos, icons, patterns, logos, palettes, mockups, and UI assets.</p>
-<span class="badge" id="assetBadge">Community Assets</span><span class="badge">46 Tools</span><span class="badge">Free SVG/PNG</span><span class="badge ai">MCP Publishing</span>
+<h1>Free design assets &amp; <span>tools</span></h1>
+<p>52 free stock images, 46 browser-based design tools, community asset publishing. No signup, no watermarks, no limits. Everything runs in your browser.</p>
+<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem">
+<a href="/tools/" class="hero-btn">Browse Tools</a>
+<a href="/images/stock-photos/" class="hero-btn secondary">Browse Assets</a>
+</div>
+<div style="margin-top:.5rem"><span class="badge" id="assetBadge">52 Stock Images</span><span class="badge">46 Tools</span><span class="badge">Free SVG/PNG</span><span class="badge ai">MCP Publishing</span></div>
 </section>
 <section class="stock-feature" aria-labelledby="stock-feature-title">
 <div class="stock-feature-head">
