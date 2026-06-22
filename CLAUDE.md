@@ -1,5 +1,7 @@
 # FreeDesignStore Platform
 
+52 hosted stock images, 46 browser tools, community asset publishing via MCP.
+
 ## MCP-first workflow
 
 Use FreeDesignStore only through the configured MCP server.
@@ -49,9 +51,36 @@ claude mcp add freedesignstore https://mcp.freedesignstore.online/mcp
 ## Project structure
 
 ```
-workers/mcp/        MCP server (Cloudflare Worker)
-functions/          Pages Functions (stock API, photo detail pages)
-store/              Static site (tools, assets, skills)
-store/skills/       Design playbooks (6 published)
-store/.well-known/  MCP discovery metadata
+store/                  Static site (Cloudflare Pages output)
+  tools/                Tools directory page with search + filters
+  brand/*/              16 brand tools (each a single index.html)
+  images/*/             15 image tools + stock-photos library
+  templates/*/          6 template tools
+  components/*/         9 UI/UX tools
+  skills/               MCP playbooks (6) + capability manifest
+  assets/stock/         52 hosted stock images (AI-generated, 1672x941)
+  console/              Creator portal (GitHub/Google OAuth sign-in)
+  .well-known/          MCP discovery metadata
+  llms.txt              AI-readable docs index
+  related.js            Related tools bottom bar (tool pages only)
+  registry.json         Tool registry for related.js
+  favicon.svg           Site icon
+functions/              Cloudflare Pages Functions
+  api/stock/            hosted.js (catalog), list.js, random.js, upload, moderate, unsplash
+  photo/[id].js         Photo detail page (OG tags, share buttons, download)
+workers/mcp/            MCP server (Cloudflare Worker, 15 tools)
+  src/index.ts          Main server (agents/mcp, McpServer, Zod)
+  src/oauth-provider.ts OAuth 2.1 (GitHub/Google)
+  src/session.ts        Session verification
+  test/                 Regression tests (11 tests)
 ```
+
+## Conventions
+
+- Every tool page is a single self-contained `index.html`
+- Back link: `<a class="back" href="/tools/">&larr; Tools</a>`
+- Accent: `#ec4899`, fonts: Fraunces (headings) + Manrope (body)
+- Nav order: Tools | Assets | Skills | Console
+- Sticky header: `position:sticky;top:0;backdrop-filter:blur(14px)`
+- Stock images: AI-generated via Pollinations API, upscaled to 1672x941 with sips
+- Image categories: Lifestyle, Nature, People, Travel, Workspace, Backgrounds, etc.

@@ -16,7 +16,7 @@ Default behavior is moderation-first: uploads are stored as `pending`.
 
 ## API
 
-- `GET /api/stock/list`: list public hosted static assets plus public community assets. No key required.
+- `GET /api/stock/list`: list public hosted static assets (52) plus public community assets. No key required.
 - `GET /api/stock/list?source=hosted`: list only FDS static hosted assets. This does not read R2/KV.
 - `GET /api/stock/list?source=community`: list public community assets from R2/KV.
 - `GET /api/stock/list?status=pending`: list pending assets with `Authorization: Bearer $STOCK_ADMIN_TOKEN`.

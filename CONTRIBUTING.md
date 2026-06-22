@@ -16,16 +16,17 @@ Self-contained browser design tools. Each tool is a single `index.html` file.
 | Panel shadow | `0 1px 3px rgba(0,0,0,.08)` |
 | Border radius | `12px` panels, `8px` inputs |
 | Font | Manrope via Google Fonts |
-| Back link | `<a class="back" href="/">Back to Store</a>` |
+| Back link | `<a class="back" href="/tools/">&larr; Tools</a>` |
 | Related | `<script src="/related.js"></script>` before `</body>` |
 
 ## Directory structure
 
 ```
 store/
-├── brand/your-tool/index.html      (brand identity tools)
-├── images/your-tool/index.html     (image utilities)
-└── templates/your-tool/index.html  (template editors)
+├── brand/your-tool/index.html        (brand identity tools)
+├── images/your-tool/index.html       (image utilities)
+├── templates/your-tool/index.html    (template editors)
+└── components/your-tool/index.html   (UI/UX tools)
 ```
 
 ## Registry entry
