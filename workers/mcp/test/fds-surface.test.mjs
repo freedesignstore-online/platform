@@ -24,7 +24,7 @@ test('public MCP discovery advertises the dedicated FDS MCP endpoint', async () 
   const discovery = JSON.parse(await readRepo('store/.well-known/mcp.json'));
   assert.equal(discovery.servers[0].endpoint, 'https://mcp.freedesignstore.online/mcp');
   assert.equal(discovery.servers[0].transport, 'streamable-http');
-  assert.equal(discovery.servers[0].tools.length, 16);
+  assert.equal(discovery.servers[0].tools.length, 18);
   for (const tool of ['list_design_skills', 'get_design_skill', 'apply_design_skill', 'publish_asset', 'unpublish_asset', 'delete_asset']) {
     assert.ok(discovery.servers[0].tools.some((item) => item.name === tool), `missing ${tool}`);
   }
@@ -472,4 +472,133 @@ test('photo page and gallery disclose origin', async () => {
   const mcpSource = await readRepo('workers/mcp/src/index.ts');
   assert.match(mcpSource, /'update_asset'/);
   assert.match(mcpSource, /origin_tool/);
+});
+
+// --- Creator profiles (PR 3) ---
+
+async function seedProfileAndAsset(kv) {
+  const profile = {
+    accountId: 'github-42',
+    handle: 'alice',
+    displayName: 'Alice Lane',
+    avatarUrl: 'https://example.com/a.png',
+    bio: 'Photographer and illustrator.',
+    website: 'https://alice.example',
+    social: { x: 'alice' },
+    createdAt: '2026-07-01T00:00:00Z',
+    updatedAt: '2026-07-01T00:00:00Z',
+  };
+  const item = {
+    id: 'asset-1',
+    title: 'Misty Coast',
+    category: 'nature',
+    assetType: 'photo',
+    author: 'Alice Lane',
+    license: 'CC0 / Public Domain',
+    licenseId: 'cc0',
+    origin: 'photograph',
+    tags: ['coast'],
+    status: 'public',
+    objectKey: 'community/asset-1/misty-coast.jpg',
+    filename: 'misty-coast.jpg',
+    contentType: 'image/jpeg',
+    size: 1000,
+    ownerAccountId: 'github:42',
+    ownerName: 'Alice Lane',
+    ownerHandle: 'alice',
+    createdAt: '2026-07-01T00:00:00Z',
+  };
+  await kv.put('profile:account:github-42', JSON.stringify(profile));
+  await kv.put('profile:handle:alice', JSON.stringify({ accountId: 'github-42' }));
+  await kv.put('stock:item:asset-1', JSON.stringify(item));
+  await kv.put('stock:index:public', JSON.stringify(['asset-1']));
+  await kv.put('stock:index:account:github-42', JSON.stringify(['asset-1']));
+}
+
+test('creator profile page renders hero, works grid, and ProfilePage JSON-LD', async () => {
+  const { onRequestGet } = await importRepoFile('functions/u/[handle].js');
+  const kv = memoryKV();
+  await seedProfileAndAsset(kv);
+  const env = { FDS_STOCK_KV: kv, FDS_STOCK_BUCKET: memoryBucket() };
+
+  const res = await onRequestGet({
+    params: { handle: 'alice' },
+    request: new Request('https://freedesignstore.online/u/alice'),
+    env,
+  });
+  assert.equal(res.status, 200);
+  const html = await res.text();
+  assert.match(html, /Alice Lane/);
+  assert.match(html, /@alice/);
+  assert.match(html, /Photographer and illustrator\./);
+  assert.match(html, /Misty Coast/);
+  assert.match(html, /"@type":"ProfilePage"/);
+  assert.match(html, /\/photo\/asset-1/);
+
+  const missing = await onRequestGet({
+    params: { handle: 'nobody' },
+    request: new Request('https://freedesignstore.online/u/nobody'),
+    env,
+  });
+  assert.equal(missing.status, 404);
+});
+
+test('creators directory lists contributors with counts', async () => {
+  const { onRequestGet } = await importRepoFile('functions/creators.js');
+  const kv = memoryKV();
+  await seedProfileAndAsset(kv);
+  const env = { FDS_STOCK_KV: kv, FDS_STOCK_BUCKET: memoryBucket() };
+
+  const res = await onRequestGet({
+    request: new Request('https://freedesignstore.online/creators'),
+    env,
+  });
+  assert.equal(res.status, 200);
+  const html = await res.text();
+  assert.match(html, /Alice Lane/);
+  assert.match(html, /1 asset/);
+  assert.match(html, /"@type":"CollectionPage"/);
+  assert.match(html, /\/u\/alice/);
+});
+
+test('profile API updates bio and enforces handle uniqueness', async () => {
+  const { onRequestPost } = await importRepoFile('functions/api/stock/profile.js');
+  const kv = memoryKV();
+  await seedProfileAndAsset(kv);
+  // second profile that will collide with 'alice'
+  await kv.put('profile:account:github-7', JSON.stringify({
+    accountId: 'github-7', handle: 'bob', displayName: 'Bob', social: {},
+    createdAt: '2026-07-01T00:00:00Z', updatedAt: '2026-07-01T00:00:00Z',
+  }));
+  await kv.put('profile:handle:bob', JSON.stringify({ accountId: 'github-7' }));
+  const env = { FDS_STOCK_KV: kv, FDS_STOCK_BUCKET: memoryBucket(), SESSION_SIGNING_KEY: 'test-signing-key' };
+  const token = signTestSession({ uid: 'github:7', name: 'Bob', login: 'bob', roles: ['creator'] }, 'test-signing-key');
+  const makeReq = (body) =>
+    new Request('https://freedesignstore.online/api/stock/profile', {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { cookie: `__Host-fds_mcp_session=${encodeURIComponent(token)}`, 'content-type': 'application/json' },
+    });
+
+  const updated = await onRequestPost({ request: makeReq({ bio: 'Making things.', website: 'https://bob.example' }), env });
+  assert.equal(updated.status, 200);
+  const body = await updated.json();
+  assert.equal(body.profile.bio, 'Making things.');
+
+  const collision = await onRequestPost({ request: makeReq({ handle: 'alice' }), env });
+  assert.equal(collision.status, 409);
+});
+
+test('public items carry owner handles for author links', async () => {
+  const lib = await readRepo('functions/api/stock/_lib.js');
+  assert.match(lib, /ownerHandle/);
+  assert.match(lib, /authorUrl/);
+  const photoPage = await readRepo('functions/photo/[id].js');
+  assert.match(photoPage, /\/u\/\$\{esc\(item\.ownerHandle\)\}/);
+  const mcpSource = await readRepo('workers/mcp/src/index.ts');
+  assert.match(mcpSource, /'get_my_profile'/);
+  assert.match(mcpSource, /'update_my_profile'/);
+  const consoleHtml = await readRepo('store/console/index.html');
+  assert.match(consoleHtml, /update_my_profile/);
+  assert.match(consoleHtml, /id="profHandle"/);
 });

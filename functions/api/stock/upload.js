@@ -62,6 +62,8 @@ export async function onRequestPost({ request, env }) {
     return error("AI-generated assets must disclose the tool used (originTool).");
   }
 
+  const profile = await ensureProfile(store.kv, account);
+
   const id = crypto.randomUUID();
   const filename = safeFilename(file.name, file.type);
   const objectKey = `community/${id}/${filename}`;
@@ -89,6 +91,7 @@ export async function onRequestPost({ request, env }) {
     source: "community",
     ownerAccountId: account.accountId,
     ownerName: cleanText(account.accountName, "Contributor", 80),
+    ownerHandle: profile?.handle,
     createdAt: now,
     updatedAt: now,
   };
@@ -129,7 +132,6 @@ export async function onRequestPost({ request, env }) {
   await putItem(store.kv, item);
   await addToIndex(store.kv, status === "public" ? PUBLIC_INDEX : PENDING_INDEX, id);
   await addToIndex(store.kv, accountIndexKey(account.accountId), id);
-  await ensureProfile(store.kv, account);
 
   return json({
     ok: true,

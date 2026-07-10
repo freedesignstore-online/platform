@@ -62,6 +62,7 @@ interface CatalogItem {
   sourceUrl?: string;
   ownerAccountId?: string;
   ownerName?: string;
+  ownerHandle?: string;
   createdAt: string;
   updatedAt?: string;
 }
@@ -133,6 +134,8 @@ const mcpDiscoveryTools = [
   { name: 'apply_design_skill', description: 'Apply a design asset playbook as questions, a checklist, or a tool plan' },
   { name: 'catalog_status', description: 'Check storage readiness and asset counts' },
   { name: 'whoami', description: 'Show the authenticated creator/admin account' },
+  { name: 'get_my_profile', description: 'Get the authenticated creator profile and public URL' },
+  { name: 'update_my_profile', description: 'Update creator handle, bio, website, and social links' },
   { name: 'list_assets', description: 'List public or admin-visible pending catalog assets' },
   { name: 'my_assets', description: 'List assets owned by the authenticated creator account' },
   { name: 'get_asset', description: "Get one asset's metadata and download URL" },
@@ -384,6 +387,8 @@ function publicItem(env: Env, item: CatalogItem) {
     width: item.width,
     height: item.height,
     duration: item.duration,
+    ownerHandle: item.ownerHandle,
+    authorUrl: item.ownerHandle ? `${base}/u/${item.ownerHandle}` : undefined,
     url: `${base}/api/stock/image/${item.id}`,
     download: `${base}/api/stock/image/${item.id}?download=1`,
     createdAt: item.createdAt,
@@ -408,6 +413,77 @@ function assertAccount(props: McpProps): string | null {
 
 function currentProps(props: McpProps | undefined): McpProps {
   return props || {};
+}
+
+// Vendored profile helpers — keep in sync with functions/api/stock/_lib.js.
+interface CreatorProfile {
+  accountId: string;
+  handle: string;
+  displayName: string;
+  avatarUrl?: string | null;
+  provider?: string | null;
+  login?: string | null;
+  bio?: string;
+  website?: string;
+  social?: Record<string, string>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const PROFILE_PREFIX = 'profile:account:';
+const HANDLE_PREFIX = 'profile:handle:';
+
+function safeHandle(value: string): string {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 30);
+}
+
+async function getProfileByAccount(kv: KVNamespace, accountId: string): Promise<CreatorProfile | null> {
+  return kv.get(`${PROFILE_PREFIX}${safeAccountId(accountId)}`, 'json');
+}
+
+async function getProfileByHandle(kv: KVNamespace, handle: string): Promise<CreatorProfile | null> {
+  const ref = await kv.get<{ accountId: string }>(`${HANDLE_PREFIX}${safeHandle(handle)}`, 'json');
+  if (!ref?.accountId) return null;
+  return getProfileByAccount(kv, ref.accountId);
+}
+
+async function putProfile(kv: KVNamespace, profile: CreatorProfile): Promise<void> {
+  await kv.put(`${PROFILE_PREFIX}${safeAccountId(profile.accountId)}`, JSON.stringify(profile));
+}
+
+async function ensureProfile(kv: KVNamespace, props: McpProps): Promise<CreatorProfile | null> {
+  if (!props.accountId) return null;
+  const existing = await getProfileByAccount(kv, props.accountId);
+  if (existing) return existing;
+
+  const base = safeHandle(String(props.login || props.accountName || '').split('@')[0]) || safeAccountId(props.accountId);
+  let handle = base.length >= 3 ? base : `${base}-fds`.slice(0, 30);
+  for (let n = 2; n < 50; n += 1) {
+    const taken = await kv.get<{ accountId: string }>(`${HANDLE_PREFIX}${handle}`, 'json');
+    if (!taken || taken.accountId === safeAccountId(props.accountId)) break;
+    handle = `${base}-${n}`.slice(0, 30);
+  }
+
+  const now = new Date().toISOString();
+  const profile: CreatorProfile = {
+    accountId: safeAccountId(props.accountId),
+    handle,
+    displayName: props.accountName || handle,
+    avatarUrl: props.avatarUrl || null,
+    login: props.login || null,
+    bio: '',
+    website: '',
+    social: {},
+    createdAt: now,
+    updatedAt: now,
+  };
+  await kv.put(`${HANDLE_PREFIX}${handle}`, JSON.stringify({ accountId: profile.accountId }));
+  await putProfile(kv, profile);
+  return profile;
 }
 
 function originDetailOf(tool?: string, model?: string, prompt?: string): { tool?: string; model?: string; prompt?: string } | undefined {
@@ -598,6 +674,7 @@ async function createAsset(params: {
   sourceUrl?: string;
   ownerAccountId?: string;
   ownerName?: string;
+  ownerHandle?: string;
 }) {
   const size = params.bytes.byteLength;
   if (!allowedTypes.has(params.contentType)) return { ok: false, error: 'Only JPG, PNG, WebP, AVIF, and SVG assets are accepted.' };
@@ -646,6 +723,7 @@ async function createAsset(params: {
     sourceUrl: params.sourceUrl,
     ownerAccountId: params.ownerAccountId ? safeAccountId(params.ownerAccountId) : undefined,
     ownerName: params.ownerName,
+    ownerHandle: params.ownerHandle,
     createdAt: now,
   };
 
@@ -657,7 +735,7 @@ async function createAsset(params: {
 }
 
 export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
-  server = new McpServer({ name: 'FreeDesignStore Catalog', version: '0.1.0' });
+  server = new McpServer({ name: 'FreeDesignStore Catalog', version: '0.2.0' });
 
   async setAuth(props: McpProps): Promise<void> {
     this.props = props;
@@ -750,6 +828,11 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
       {},
       async () => {
         const props = currentProps(this.props);
+        let handle: string | null = null;
+        if (props.accountId && this.env.FDS_STOCK_KV) {
+          const profile = await ensureProfile(this.env.FDS_STOCK_KV, props);
+          handle = profile?.handle || null;
+        }
         return jsonText({
           authenticated: Boolean(props.accountId),
           accountId: props.accountId || null,
@@ -760,7 +843,79 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
           email: props.email || null,
           isAdmin: Boolean(props.isAdmin),
           canPublish: Boolean(props.canPublish || props.isAdmin),
+          handle,
+          profileUrl: handle ? `${publicBase(this.env)}/u/${handle}` : null,
         });
+      },
+    );
+
+    this.server.tool(
+      'get_my_profile',
+      'Get the authenticated creator profile (handle, bio, website, social links).',
+      {},
+      async () => {
+        const props = currentProps(this.props);
+        const authError = assertAccount(props);
+        if (authError) return txt(authError);
+        const store = requireStore(this.env);
+        if (typeof store === 'string') return txt(store);
+        const profile = await ensureProfile(store.kv, props);
+        return jsonText({ profile, profileUrl: profile ? `${publicBase(this.env)}/u/${profile.handle}` : null });
+      },
+    );
+
+    this.server.tool(
+      'update_my_profile',
+      'Update the authenticated creator profile: handle (must be free), display name, bio, website, social handles.',
+      {
+        handle: z.string().min(3).max(30).optional().describe('Public handle for /u/{handle} (a-z, 0-9, hyphens)'),
+        display_name: z.string().max(80).optional().describe('Public display name'),
+        bio: z.string().max(400).optional().describe('Short public bio'),
+        website: z.string().max(200).optional().describe('Personal site (https URL)'),
+        x: z.string().max(60).optional().describe('X handle'),
+        github: z.string().max(60).optional().describe('GitHub username'),
+        instagram: z.string().max(60).optional().describe('Instagram handle'),
+        dribbble: z.string().max(60).optional().describe('Dribbble username'),
+        behance: z.string().max(60).optional().describe('Behance username'),
+      },
+      async ({ handle, display_name, bio, website, x, github, instagram, dribbble, behance }) => {
+        const props = currentProps(this.props);
+        const authError = assertAccount(props);
+        if (authError) return txt(authError);
+        const store = requireStore(this.env);
+        if (typeof store === 'string') return txt(store);
+        const profile = await ensureProfile(store.kv, props);
+        if (!profile) return txt('Could not load your profile.');
+
+        if (handle !== undefined) {
+          const next = safeHandle(handle);
+          if (next.length < 3) return txt('Handles need at least 3 characters (a-z, 0-9, hyphens).');
+          if (next !== profile.handle) {
+            const taken = await getProfileByHandle(store.kv, next);
+            if (taken && taken.accountId !== profile.accountId) return txt('That handle is already taken.');
+            await store.kv.delete(`${HANDLE_PREFIX}${profile.handle}`);
+            await store.kv.put(`${HANDLE_PREFIX}${next}`, JSON.stringify({ accountId: profile.accountId }));
+            profile.handle = next;
+          }
+        }
+        if (display_name !== undefined) profile.displayName = cleanText(display_name, profile.displayName, 80);
+        if (bio !== undefined) profile.bio = cleanText(bio, '', 400);
+        if (website !== undefined) {
+          const site = website.trim().slice(0, 200);
+          if (site && !site.startsWith('https://')) return txt('Website must be an https:// URL.');
+          profile.website = site;
+        }
+        const socialUpdates: Record<string, string | undefined> = { x, github, instagram, dribbble, behance };
+        for (const [key, value] of Object.entries(socialUpdates)) {
+          if (value === undefined) continue;
+          const cleaned = cleanText(value, '', 60).replace(/^@/, '');
+          profile.social = profile.social || {};
+          if (cleaned) profile.social[key] = cleaned;
+          else delete profile.social[key];
+        }
+        profile.updatedAt = new Date().toISOString();
+        await putProfile(store.kv, profile);
+        return jsonText({ profile, profileUrl: `${publicBase(this.env)}/u/${profile.handle}` });
       },
     );
 
@@ -860,6 +1015,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         if (origin === 'ai-generated' && !origin_tool) return txt('AI-generated assets must disclose the tool used (origin_tool).');
         const bytes = validateSvg(svg);
         if (typeof bytes === 'string') return txt(bytes);
+        const profile = await ensureProfile(store.kv, props);
         const result = await createAsset({
           env: this.env,
           bucket: store.bucket,
@@ -879,6 +1035,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
           publish: Boolean(publish),
           ownerAccountId: props.accountId,
           ownerName: props.accountName,
+          ownerHandle: profile?.handle,
         });
         return jsonText(result);
       },
@@ -932,6 +1089,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
           if (typeof checked === 'string') return txt(checked);
         }
 
+        const profile = await ensureProfile(store.kv, props);
         const result = await createAsset({
           env: this.env,
           bucket: store.bucket,
@@ -952,6 +1110,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
           sourceUrl: parsed.toString(),
           ownerAccountId: props.accountId,
           ownerName: props.accountName,
+          ownerHandle: profile?.handle,
         });
         return jsonText(result);
       },

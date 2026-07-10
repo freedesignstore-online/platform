@@ -28,6 +28,14 @@
           "description": "Check storage readiness and asset counts"
         },
         {
+          "name": "get_my_profile",
+          "description": "Get the authenticated creator profile and public URL"
+        },
+        {
+          "name": "update_my_profile",
+          "description": "Update creator handle, bio, website, and social links"
+        },
+        {
           "name": "whoami",
           "description": "Show the authenticated creator/admin account"
         },

@@ -17,6 +17,7 @@ export async function onRequestGet({ params, request, env }) {
         category: meta.category,
         assetType: meta.assetType || "photo",
         author: meta.ownerName || meta.author || "Community",
+        ownerHandle: meta.ownerHandle,
         license: meta.license || "FreeDesignStore Community License",
         licenseId: meta.licenseId,
         origin: meta.origin,
@@ -147,7 +148,7 @@ footer{border-top:1px solid var(--line);padding:1rem;text-align:center;font-size
 <body>
 <header>
 <a href="/" class="brand"><span style="font-size:1.4rem">🎨</span><span class="brand-name">FreeDesignStore</span></a>
-<nav><a href="/tools/">Tools</a><a href="/images/stock-photos/">Assets</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
+<nav><a href="/tools/">Tools</a><a href="/images/stock-photos/">Assets</a><a href="/creators">Creators</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
 </header>
 <div class="photo-wrap">
 <img class="photo-img" src="${esc(item.url)}" alt="${esc(item.title)}">
@@ -155,7 +156,7 @@ footer{border-top:1px solid var(--line);padding:1rem;text-align:center;font-size
 <div class="meta">
 <div class="info">
 <h1>${esc(item.title)}</h1>
-<p>By ${esc(item.author)} · ${esc(item.category)} · ${esc(item.license)}</p>
+<p>By ${item.ownerHandle ? `<a href="/u/${esc(item.ownerHandle)}">${esc(item.author)}</a>` : esc(item.author)} · ${esc(item.category)} · ${esc(item.license)}</p>
 <div class="tags">${(item.tags || []).map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</div>
 ${originBlock}
 </div>

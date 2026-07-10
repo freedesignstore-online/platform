@@ -149,6 +149,8 @@ export function publicItem(item, origin = "") {
     originDetail: item.originDetail,
     licenseId: item.licenseId,
     duration: item.duration,
+    ownerHandle: item.ownerHandle,
+    authorUrl: item.ownerHandle ? `/u/${item.ownerHandle}` : undefined,
     createdAt: item.createdAt,
     status: item.status,
   };
