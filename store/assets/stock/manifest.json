@@ -1,5 +1,5 @@
 {
-  "_note": "Generation record for hosted stock images. Images with a prompt were generated via the Pollinations API (model=flux) at native 16:9 and uniformly upscaled to 1672x941 with sips. Images without a prompt predate prompt tracking (Pollinations batches, June 2026). Update this file whenever images are added or regenerated.",
+  "_note": "Generation record for hosted stock images. Images with a prompt were generated via the Pollinations API (model=flux/sana). IMPORTANT: as of 2026-07-10 Pollinations only generates square-native (768x768 anonymous cap) and non-uniformly stretches any non-square request — always generate square, center-crop to 768x432 (16:9), then uniformly upscale to 1672x941 with sips. A framing suffix (subject centered, generous vertical margins) keeps subjects inside the crop. Images without a prompt predate prompt tracking (June 2026). Update this file whenever images are added or regenerated.",
   "images": {
     "desert-road.jpg": {
       "service": "pollinations",
@@ -24,10 +24,10 @@
     "lifestyle-art-gallery.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic minimalist art gallery interior with large abstract paintings, polished concrete floor, visitors viewing art, wide shot"
+      "prompt": "photorealistic minimalist art gallery interior with large abstract paintings, polished concrete floor, visitors viewing art, wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-australia-beach-picnic.jpg": {
       "service": "pollinations",
@@ -92,50 +92,50 @@
     "lifestyle-autumn-tram.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic vintage tram passing through a city street lined with golden autumn trees, falling leaves, warm morning light, wide shot"
+      "prompt": "photorealistic vintage tram passing through a city street lined with golden autumn trees, falling leaves, warm morning light, wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-beach-bonfire.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic friends gathered around a beach bonfire at dusk, sparks rising, purple-orange sky, ocean behind, warm wide shot"
+      "prompt": "photorealistic friends gathered around a beach bonfire at dusk, sparks rising, purple-orange sky, ocean behind, warm wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-bookshop-cafe.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic cozy bookshop cafe interior, floor-to-ceiling bookshelves, warm lamps, person reading with coffee, inviting wide shot"
+      "prompt": "photorealistic cozy bookshop cafe interior, floor-to-ceiling bookshelves, warm lamps, person reading with coffee, inviting wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-bouldering-gym.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic climber reaching on a colorful indoor bouldering wall, chalk dust in the air, modern climbing gym, dynamic wide shot"
+      "prompt": "photorealistic climber reaching on a colorful indoor bouldering wall, chalk dust in the air, modern climbing gym, dynamic wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-bread-baking.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic baker pulling fresh sourdough loaves from a rustic kitchen oven, flour dust, warm morning window light, cozy wide shot"
+      "prompt": "photorealistic baker pulling fresh sourdough loaves from a rustic kitchen oven, flour dust, warm morning window light, cozy wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-campfire-cooking.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic cast iron pot cooking over a campfire in the woods at dusk, glowing embers, forest camp scene, warm wide shot"
+      "prompt": "photorealistic cast iron pot cooking over a campfire in the woods at dusk, glowing embers, forest camp scene, warm wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-coffee-cup.jpg": {
       "service": "pollinations",
@@ -150,50 +150,50 @@
     "lifestyle-dog-walk-beach.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic person walking a golden retriever along a wide sandy beach at sunset, gentle waves, warm light, wide landscape shot"
+      "prompt": "photorealistic person walking a golden retriever along a wide sandy beach at sunset, gentle waves, warm light, wide landscape shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-farmers-breakfast.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic rustic farmhouse breakfast table with fresh bread eggs and coffee, morning light through window, homely wide shot"
+      "prompt": "photorealistic rustic farmhouse breakfast table with fresh bread eggs and coffee, morning light through window, homely wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-flower-market.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic colorful tulip flower market in the morning, buckets of fresh flowers, soft daylight, charming street scene, wide shot"
+      "prompt": "photorealistic colorful tulip flower market in the morning, buckets of fresh flowers, soft daylight, charming street scene, wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-garden-reading.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic person reading a book on a bench in a blooming cottage garden, soft afternoon light, peaceful atmosphere, wide shot"
+      "prompt": "photorealistic person reading a book on a bench in a blooming cottage garden, soft afternoon light, peaceful atmosphere, wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-greenhouse-plants.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic person tending lush plants inside a sunlit victorian glasshouse, hanging ferns, watering can, soft diffused light, wide shot"
+      "prompt": "photorealistic person tending lush plants inside a sunlit victorian glasshouse, hanging ferns, watering can, soft diffused light, wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-hammock-lake.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic hammock strung between birch trees beside a calm lake, dappled summer light, peaceful relaxation, wide landscape shot"
+      "prompt": "photorealistic hammock strung between birch trees beside a calm lake, dappled summer light, peaceful relaxation, wide landscape shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-hiking-trail.jpg": {
       "service": "pollinations",
@@ -203,74 +203,74 @@
     "lifestyle-hot-air-balloons.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic dozens of colorful hot air balloons rising over a misty valley at dawn, golden light, festival atmosphere, sweeping wide landscape"
+      "prompt": "photorealistic dozens of colorful hot air balloons rising over a misty valley at dawn, golden light, festival atmosphere, sweeping wide landscape, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-ice-skating.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic people ice skating on a frozen lake surrounded by snowy pine forest, soft winter afternoon light, red scarves, wide landscape shot"
+      "prompt": "photorealistic people ice skating on a frozen lake surrounded by snowy pine forest, soft winter afternoon light, red scarves, wide landscape shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-kayak-lake.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic red kayak gliding on a mirror-calm mountain lake at sunrise, pine forest shoreline, alpine peaks, misty wide landscape"
+      "prompt": "photorealistic red kayak gliding on a mirror-calm mountain lake at sunrise, pine forest shoreline, alpine peaks, misty wide landscape, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-lantern-festival.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic night lantern festival, hundreds of glowing paper lanterns floating into a deep blue evening sky above a crowd, magical wide shot"
+      "prompt": "photorealistic night lantern festival, hundreds of glowing paper lanterns floating into a deep blue evening sky above a crowd, magical wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-morning-run.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic runner jogging along a riverside path at sunrise, soft morning mist, city bridge in background, wide landscape shot"
+      "prompt": "photorealistic runner jogging along a riverside path at sunrise, soft morning mist, city bridge in background, wide landscape shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-mountain-bike.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic mountain biker riding a forest single trail, sunbeams through tall trees, dirt path, adventurous wide action shot"
+      "prompt": "photorealistic mountain biker riding a forest single trail, sunbeams through tall trees, dirt path, adventurous wide action shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-night-cycling.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic cyclist riding through a neon-lit city street at night, light trails, reflective wet asphalt, urban wide shot"
+      "prompt": "photorealistic cyclist riding through a neon-lit city street at night, light trails, reflective wet asphalt, urban wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-open-air-cinema.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic open-air cinema at night, people on blankets and deck chairs watching a glowing screen under the stars, summer warmth, wide shot"
+      "prompt": "photorealistic open-air cinema at night, people on blankets and deck chairs watching a glowing screen under the stars, summer warmth, wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-outdoor-dining.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic long garden dinner table with candles and fairy lights at dusk, rustic tableware, friends dining outdoors, warm wide shot"
+      "prompt": "photorealistic long garden dinner table with candles and fairy lights at dusk, rustic tableware, friends dining outdoors, warm wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-park-bench.jpg": {
       "service": "pollinations",
@@ -280,114 +280,114 @@
     "lifestyle-pottery-studio.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic hands shaping wet clay on a spinning pottery wheel in a sunlit craft workshop, shelves of ceramics, warm wide shot"
+      "prompt": "photorealistic hands shaping wet clay on a spinning pottery wheel in a sunlit craft workshop, shelves of ceramics, warm wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-rain-window.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic raindrops on a window pane with a steaming cup of tea on the sill, blurred city lights outside, cozy mood, wide shot"
+      "prompt": "photorealistic raindrops on a window pane with a steaming cup of tea on the sill, blurred city lights outside, cozy mood, wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-rock-pool.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic natural rock pool with clear turquoise water on a sunny summer day, people swimming, coastal rocks, wide landscape shot"
+      "prompt": "photorealistic natural rock pool with clear turquoise water on a sunny summer day, people swimming, coastal rocks, wide landscape shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-rooftop-garden.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic urban rooftop garden with raised herb beds and planters, city buildings behind, morning light, green oasis wide shot"
+      "prompt": "photorealistic urban rooftop garden with raised herb beds and planters, city buildings behind, morning light, green oasis wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-rooftop-sunset.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic rooftop terrace at golden sunset with string lights, city skyline in warm haze, people relaxing, cinematic wide shot"
+      "prompt": "photorealistic rooftop terrace at golden sunset with string lights, city skyline in warm haze, people relaxing, cinematic wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-sailing-golden-hour.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic sailboat heeling gently on sparkling open water at golden hour, white sails catching warm light, spray, wide ocean shot"
+      "prompt": "photorealistic sailboat heeling gently on sparkling open water at golden hour, white sails catching warm light, spray, wide ocean shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-skateboard-park.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic skateboarder mid-trick at a concrete urban skate park, late afternoon light, graffiti walls, dynamic wide shot"
+      "prompt": "photorealistic skateboarder mid-trick at a concrete urban skate park, late afternoon light, graffiti walls, dynamic wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-stargazing-camp.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic two people beside a tent gazing at a brilliant milky way over dark mountains, campfire glow, night landscape wide shot"
+      "prompt": "photorealistic two people beside a tent gazing at a brilliant milky way over dark mountains, campfire glow, night landscape wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-street-market.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic bustling evening street food market, warm lantern light, steam rising from stalls, vibrant colors, wide shot"
+      "prompt": "photorealistic bustling evening street food market, warm lantern light, steam rising from stalls, vibrant colors, wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-sunrise-yoga.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic woman in lotus pose doing yoga on a wooden deck overlooking misty mountain valley at sunrise, golden fog, serene wide landscape"
+      "prompt": "photorealistic woman in lotus pose doing yoga on a wooden deck overlooking misty mountain valley at sunrise, golden fog, serene wide landscape, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-surfing-wave.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic surfer carving a turquoise ocean wave, spray flying, bright sunlight, dynamic action wide shot"
+      "prompt": "photorealistic surfer carving a turquoise ocean wave, spray flying, bright sunlight, dynamic action wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-vinyl-records.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic vintage vinyl records and turntable in a cozy room, warm lamp light, record sleeves, nostalgic atmosphere, wide shot"
+      "prompt": "photorealistic vintage vinyl records and turntable in a cozy room, warm lamp light, record sleeves, nostalgic atmosphere, wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-waterfall-swim.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic person swimming in a clear turquoise lagoon beneath a tropical waterfall, lush green cliffs, sunbeams, wide shot"
+      "prompt": "photorealistic person swimming in a clear turquoise lagoon beneath a tropical waterfall, lush green cliffs, sunbeams, wide shot, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "lifestyle-wildflower-picnic.jpg": {
       "service": "pollinations",
       "model": "flux",
-      "native": "1024x576",
+      "native": "768x768 square, center-cropped to 768x432",
       "delivered": "1672x941",
       "generated": "2026-07-10",
-      "prompt": "photorealistic picnic blanket with basket and fresh bread in a wildflower meadow, poppies and daisies, soft summer light, wide landscape"
+      "prompt": "photorealistic picnic blanket with basket and fresh bread in a wildflower meadow, poppies and daisies, soft summer light, wide landscape, wide cinematic composition, main subject centered vertically with generous margins above and below"
     },
     "material-swatch-moodboard.jpg": {
       "service": "pollinations",
