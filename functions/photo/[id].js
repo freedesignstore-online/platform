@@ -78,9 +78,10 @@ export async function onRequestGet({ params, request, env }) {
       }</div>`
     : `<div class="made"><strong>How this was made</strong><p>Origin not disclosed.</p></div>`;
 
+  const isVideoAsset = String(item.contentType || "").startsWith("video/");
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "ImageObject",
+    "@type": isVideoAsset ? "VideoObject" : "ImageObject",
     name: item.title,
     contentUrl: item.url,
     url: pageUrl,
@@ -104,6 +105,7 @@ export async function onRequestGet({ params, request, env }) {
 <meta property="og:image:height" content="${raw ? raw.height : 941}">
 <meta property="og:url" content="${esc(pageUrl)}">
 <meta property="og:type" content="article">
+${String(item.contentType || "").startsWith("video/") ? `<meta property="og:video" content="${esc(item.url)}">\n<meta property="og:video:type" content="${esc(item.contentType)}">` : ""}
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(item.title)} — FreeDesignStore">
 <meta name="twitter:image" content="${esc(item.url)}">
@@ -151,7 +153,9 @@ footer{border-top:1px solid var(--line);padding:1rem;text-align:center;font-size
 <nav><a href="/tools/">Tools</a><a href="/images/stock-photos/">Assets</a><a href="/creators">Creators</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
 </header>
 <div class="photo-wrap">
-<img class="photo-img" src="${esc(item.url)}" alt="${esc(item.title)}">
+${String(item.contentType || "").startsWith("video/")
+    ? `<video class="photo-img" src="${esc(item.url)}" controls playsinline></video>`
+    : `<img class="photo-img" src="${esc(item.url)}" alt="${esc(item.title)}">`}
 </div>
 <div class="meta">
 <div class="info">

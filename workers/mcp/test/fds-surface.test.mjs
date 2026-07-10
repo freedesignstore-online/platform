@@ -602,3 +602,80 @@ test('public items carry owner handles for author links', async () => {
   assert.match(consoleHtml, /update_my_profile/);
   assert.match(consoleHtml, /id="profHandle"/);
 });
+
+// --- Video support (PR 4) ---
+
+test('image route serves byte ranges for video seeking', async () => {
+  const { onRequestGet } = await importRepoFile('functions/api/stock/image/[id].js');
+  const kv = memoryKV();
+  const payload = new Uint8Array(1000).fill(7);
+  const item = {
+    id: 'vid-1', title: 'Clip', category: 'community', assetType: 'video',
+    author: 'Alice', license: 'FDS Free', status: 'public',
+    objectKey: 'community/vid-1/clip.mp4', filename: 'clip.mp4',
+    contentType: 'video/mp4', size: payload.byteLength, tags: [],
+    createdAt: '2026-07-01T00:00:00Z',
+  };
+  await kv.put('stock:item:vid-1', JSON.stringify(item));
+  const captured = [];
+  const bucket = {
+    async head() { return { size: payload.byteLength }; },
+    async get(key, opts) {
+      captured.push(opts);
+      const range = opts?.range;
+      const body = range ? payload.slice(range.offset, range.offset + range.length) : payload;
+      return {
+        body,
+        httpEtag: '"abc"',
+        writeHttpMetadata(headers) { headers.set('content-type', 'video/mp4'); },
+      };
+    },
+  };
+  const env = { FDS_STOCK_KV: kv, FDS_STOCK_BUCKET: bucket };
+
+  const partial = await onRequestGet({
+    params: { id: 'vid-1' },
+    request: new Request('https://freedesignstore.online/api/stock/image/vid-1', { headers: { range: 'bytes=100-199' } }),
+    env,
+  });
+  assert.equal(partial.status, 206);
+  assert.equal(partial.headers.get('content-range'), 'bytes 100-199/1000');
+  assert.equal(partial.headers.get('accept-ranges'), 'bytes');
+  assert.deepEqual(captured[0], { range: { offset: 100, length: 100 } });
+
+  const full = await onRequestGet({
+    params: { id: 'vid-1' },
+    request: new Request('https://freedesignstore.online/api/stock/image/vid-1'),
+    env,
+  });
+  assert.equal(full.status, 200);
+
+  const unsatisfiable = await onRequestGet({
+    params: { id: 'vid-1' },
+    request: new Request('https://freedesignstore.online/api/stock/image/vid-1', { headers: { range: 'bytes=5000-' } }),
+    env,
+  });
+  assert.equal(unsatisfiable.status, 416);
+});
+
+test('validateFile accepts bounded videos and rejects oversized ones', async () => {
+  const { validateFile } = await importRepoFile('functions/api/stock/_lib.js');
+  const smallVideo = { type: 'video/mp4', size: 5 * 1024 * 1024, arrayBuffer: async () => new ArrayBuffer(0) };
+  assert.equal(validateFile(smallVideo), null);
+  const bigVideo = { type: 'video/mp4', size: 50 * 1024 * 1024, arrayBuffer: async () => new ArrayBuffer(0) };
+  assert.match(String(validateFile(bigVideo)), /40 MB/);
+  const badType = { type: 'video/quicktime', size: 1000, arrayBuffer: async () => new ArrayBuffer(0) };
+  assert.match(String(validateFile(badType)), /accepted/);
+});
+
+test('video rendering is wired across surfaces', async () => {
+  const gallery = await readRepo('store/images/stock-photos/index.html');
+  assert.match(gallery, /video\/mp4,video\/webm/);
+  assert.match(gallery, /id="modalVideo"/);
+  assert.match(gallery, /videoDimensions/);
+  const photoPage = await readRepo('functions/photo/[id].js');
+  assert.match(photoPage, /VideoObject/);
+  assert.match(photoPage, /og:video/);
+  const profilePage = await readRepo('functions/u/[handle].js');
+  assert.match(profilePage, /<video muted loop playsinline/);
+});

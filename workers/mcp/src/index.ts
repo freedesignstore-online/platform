@@ -126,7 +126,8 @@ const licenseLabels: Record<LicenseId, string> = {
   'fds-free': 'FreeDesignStore Free Release',
   attribution: 'Free with Attribution',
 };
-const allowedTypes = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/svg+xml']);
+const allowedTypes = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/svg+xml', 'video/mp4', 'video/webm']);
+const MAX_VIDEO_SIZE = 40 * 1024 * 1024;
 const mcpDiscoveryTools = [
   { name: 'asset_policy', description: 'Read catalog hosting rules, including Unsplash link-off policy' },
   { name: 'list_design_skills', description: 'List published FDS design asset playbooks' },
@@ -336,6 +337,8 @@ function safeFilename(name: string, contentType: string): string {
     'image/webp': 'webp',
     'image/avif': 'avif',
     'image/svg+xml': 'svg',
+    'video/mp4': 'mp4',
+    'video/webm': 'webm',
   }[contentType] || 'jpg';
   const base = name
     .replace(/\.[^.]+$/, '')
@@ -677,9 +680,13 @@ async function createAsset(params: {
   ownerHandle?: string;
 }) {
   const size = params.bytes.byteLength;
-  if (!allowedTypes.has(params.contentType)) return { ok: false, error: 'Only JPG, PNG, WebP, AVIF, and SVG assets are accepted.' };
+  if (!allowedTypes.has(params.contentType)) return { ok: false, error: 'Only JPG, PNG, WebP, AVIF, SVG, MP4, and WebM assets are accepted.' };
   if (params.contentType === 'image/svg+xml' && size > MAX_SVG_SIZE) return { ok: false, error: 'SVG assets must be under 1 MB.' };
-  if (!size || size > MAX_FILE_SIZE) return { ok: false, error: 'Image assets must be under 8 MB.' };
+  if (params.contentType.startsWith('video/')) {
+    if (!size || size > MAX_VIDEO_SIZE) return { ok: false, error: 'Video assets must be under 40 MB.' };
+  } else if (!size || size > MAX_FILE_SIZE) {
+    return { ok: false, error: 'Image assets must be under 8 MB.' };
+  }
 
   const now = new Date().toISOString();
   const id = crypto.randomUUID();

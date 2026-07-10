@@ -11,7 +11,29 @@ export async function onRequestGet({ params, request, env }) {
     return error("Asset is not public.", 404);
   }
 
-  const object = await store.bucket.get(item.objectKey);
+  // Range support so <video> elements can seek.
+  const rangeHeader = request.headers.get("range");
+  let range;
+  let totalSize;
+  if (rangeHeader) {
+    const match = /^bytes=(\d*)-(\d*)$/.exec(rangeHeader.trim());
+    if (match && (match[1] || match[2])) {
+      const head = await store.bucket.head(item.objectKey);
+      if (!head) return error("Asset file not found.", 404);
+      totalSize = head.size;
+      const start = match[1] ? Number(match[1]) : Math.max(0, totalSize - Number(match[2]));
+      const end = match[1] && match[2] ? Math.min(Number(match[2]), totalSize - 1) : totalSize - 1;
+      if (start >= totalSize || start > end) {
+        return new Response(null, {
+          status: 416,
+          headers: { "content-range": `bytes */${totalSize}` },
+        });
+      }
+      range = { offset: start, length: end - start + 1 };
+    }
+  }
+
+  const object = await store.bucket.get(item.objectKey, range ? { range } : undefined);
   if (!object) return error("Asset file not found.", 404);
 
   const url = new URL(request.url);
@@ -19,6 +41,7 @@ export async function onRequestGet({ params, request, env }) {
   const headers = new Headers();
   object.writeHttpMetadata(headers);
   headers.set("etag", object.httpEtag);
+  headers.set("accept-ranges", "bytes");
   headers.set("cache-control", item.status === "public" ? "public, max-age=86400" : "no-store");
   if (item.contentType === "image/svg+xml") {
     headers.set("content-security-policy", "default-src 'none'; img-src data:; style-src 'unsafe-inline'; sandbox");
@@ -30,6 +53,11 @@ export async function onRequestGet({ params, request, env }) {
       ? `attachment; filename="${filename}"`
       : `inline; filename="${filename}"`
   );
+  if (range) {
+    headers.set("content-range", `bytes ${range.offset}-${range.offset + range.length - 1}/${totalSize}`);
+    headers.set("content-length", String(range.length));
+    return new Response(object.body, { status: 206, headers });
+  }
   return new Response(object.body, { headers });
 }
 

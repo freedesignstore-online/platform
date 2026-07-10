@@ -46,6 +46,9 @@ h1{font-family:'Fraunces',serif;font-size:32px;line-height:1.05;font-weight:800;
 .photo-card[data-photo-id]:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(15,23,42,.1);border-color:#f9a8d4}
 .photo-card[data-photo-id]:focus{outline:none;box-shadow:0 0 0 3px rgba(236,72,153,.18),0 10px 24px rgba(15,23,42,.1);border-color:var(--accent)}
 .photo-card img{width:100%;height:220px;object-fit:contain;display:block;background:#f8fafc}
+.photo-card video{width:100%;height:220px;object-fit:cover;display:block;background:#0f172a}
+.photo-card{position:relative}
+.video-badge{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.65);color:#fff;font-size:10px;font-weight:700;border-radius:6px;padding:2px 6px;z-index:1}
 .photo-card.photo img{object-fit:cover}
 .photo-body{padding:11px}
 .photo-title{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:6px}
@@ -78,6 +81,7 @@ h1{font-family:'Fraunces',serif;font-size:32px;line-height:1.05;font-weight:800;
 .asset-modal{width:min(1080px,100%);max-height:min(820px,calc(100vh - 48px));display:grid;grid-template-columns:minmax(0,1.35fr) minmax(310px,.65fr);background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.32)}
 .modal-media{min-height:420px;background:#0f172a;display:flex;align-items:center;justify-content:center}
 .modal-media img{width:100%;height:100%;max-height:calc(100vh - 48px);object-fit:contain;background:#f8fafc}
+.modal-media video{width:100%;height:100%;max-height:calc(100vh - 48px);object-fit:contain;background:#0f172a}
 .modal-details{position:relative;padding:22px;overflow:auto}
 .modal-close{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:999px;border:1px solid var(--line);background:#fff;color:#111827;font-size:20px;font-weight:800;line-height:1;cursor:pointer}
 .modal-close:hover{border-color:var(--accent);color:var(--accent)}
@@ -160,9 +164,9 @@ h1{font-family:'Fraunces',serif;font-size:32px;line-height:1.05;font-weight:800;
         <span>Publishing as <strong id="identityName"></strong></span>
       </div>
       <div class="drop-zone" id="dropZone">
-        <strong>Drop photos, illustrations, icons, or textures here</strong>
-        <p style="font-size:12px;margin-top:6px;">JPG, PNG, WebP, AVIF, or SVG. 8 MB max for raster, 1 MB max for SVG.</p>
-        <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,image/webp,image/avif,image/svg+xml" hidden>
+        <strong>Drop photos, illustrations, renders, or videos here</strong>
+        <p style="font-size:12px;margin-top:6px;">JPG, PNG, WebP, AVIF, or SVG (8 MB max, 1 MB for SVG) · MP4 or WebM video (40 MB, 90s max).</p>
+        <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,image/webp,image/avif,image/svg+xml,video/mp4,video/webm" hidden>
       </div>
       <div id="pendingUploads"></div>
       <div class="generator">
@@ -232,6 +236,7 @@ h1{font-family:'Fraunces',serif;font-size:32px;line-height:1.05;font-weight:800;
   <article class="asset-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-media">
       <img id="modalImage" alt="">
+      <video id="modalVideo" controls playsinline hidden></video>
     </div>
     <div class="modal-details">
       <button class="modal-close" id="modalClose" type="button" aria-label="Close asset details">&times;</button>
@@ -540,8 +545,12 @@ function photoCard(photo){
   const credit=photo.source==='unsplash' && photo.creditUrl
     ? `<a href="${escapeHtml(photo.creditUrl)}" target="_blank" rel="noopener">${escapeHtml(photo.author)}</a> on <a href="https://unsplash.com/?utm_source=FreeDesignStore&utm_medium=referral" target="_blank" rel="noopener">Unsplash</a>`
     : `${escapeHtml(photo.author)} - ${escapeHtml(photo.license)}`;
+  const isVideo=String(photo.contentType||'').startsWith('video/');
+  const media=isVideo
+    ? `<video src="${escapeHtml(photo.url)}" muted loop playsinline preload="metadata"></video>${photo.duration?`<span class="video-badge">${Math.round(photo.duration)}s</span>`:'<span class="video-badge">video</span>'}`
+    : `<img src="${escapeHtml(photo.url)}" alt="${escapeHtml(photo.title)}" loading="lazy">`;
   return `<article class="photo-card ${photo.assetType==='photo'?'photo':''}" data-photo-id="${escapeHtml(photo.id)}"${detailHref?` data-href="${detailHref}"`:''} role="button" tabindex="0" aria-label="Open ${escapeHtml(photo.title)} details">
-    <img src="${escapeHtml(photo.url)}" alt="${escapeHtml(photo.title)}" loading="lazy">
+    ${media}
     <div class="photo-body">
       <div class="photo-title"><strong>${escapeHtml(photo.title)}</strong><span class="source ${sourceClass}">${sourceLabel}</span></div>
       <p class="meta">${credit}</p>
@@ -575,7 +584,17 @@ function openAssetModal(id){
   lastFocusedAsset=document.activeElement;
   const sourceClass=photo.source==='unsplash'?'unsplash':photo.source==='community'?'community':'';
   const sourceLabel=photo.source==='hosted'?'FDS Hosted':photo.source==='community'?'Community':'Unsplash';
-  $('modalImage').src=photo.url;
+  const modalIsVideo=String(photo.contentType||'').startsWith('video/');
+  $('modalImage').hidden=modalIsVideo;
+  $('modalVideo').hidden=!modalIsVideo;
+  if(modalIsVideo){
+    $('modalVideo').src=photo.url;
+    $('modalImage').removeAttribute('src');
+  }else{
+    $('modalImage').src=photo.url;
+    $('modalVideo').removeAttribute('src');
+    $('modalVideo').pause?.();
+  }
   $('modalImage').alt=photo.title;
   $('modalKicker').innerHTML=`<span class="source ${sourceClass}">${sourceLabel}</span><span class="pill">${escapeHtml(photo.assetType||'photo')}</span><span class="pill">${escapeHtml(photo.category||'Uncategorized')}</span>${photo.origin?`<span class="pill">${escapeHtml(ORIGIN_BADGES[photo.origin]||photo.origin)}</span>`:''}${photo.licenseId?`<span class="pill">${escapeHtml((LICENSE_FILTERS.find(l=>l.id===photo.licenseId)||{}).label||photo.licenseId)}</span>`:''}`;
   $('modalTitle').textContent=photo.title||'Untitled asset';
@@ -783,6 +802,20 @@ function useGeneratedAsset(){
   $('generatorStatus').textContent='Generated asset queued.';
 }
 
+function videoDimensions(file){
+  return new Promise(resolve=>{
+    const url=URL.createObjectURL(file);
+    const v=document.createElement('video');
+    v.preload='metadata';
+    v.onloadedmetadata=()=>{
+      resolve({width:v.videoWidth,height:v.videoHeight,duration:Math.round(v.duration||0)});
+      URL.revokeObjectURL(url);
+    };
+    v.onerror=()=>{resolve(null);URL.revokeObjectURL(url);};
+    v.src=url;
+  });
+}
+
 async function checkContributorAuth(){
   try{
     const res=await fetch('/.fds/auth/me',{credentials:'include'});
@@ -848,6 +881,13 @@ async function submitPhotos(){
         form.append('width',String(bmp.width));
         form.append('height',String(bmp.height));
         bmp.close();
+      }else if(file.type.startsWith('video/')){
+        const dims=await videoDimensions(file);
+        if(dims){
+          form.append('width',String(dims.width));
+          form.append('height',String(dims.height));
+          form.append('duration',String(dims.duration));
+        }
       }
     }catch{}
     const res=await fetch('/api/stock/upload',{method:'POST',body:form,credentials:'include'});

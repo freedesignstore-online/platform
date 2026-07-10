@@ -8,12 +8,17 @@ const HANDLE_PREFIX = "profile:handle:";
 const MAX_ITEMS = 500;
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 const MAX_SVG_SIZE = 1024 * 1024;
+// Multipart bodies buffer in Worker memory (128 MB isolate), so keep video
+// uploads well under that. Raising this needs a raw-body upload endpoint.
+const MAX_VIDEO_SIZE = 40 * 1024 * 1024;
 const ALLOWED_TYPES = new Set([
   "image/jpeg",
   "image/png",
   "image/webp",
   "image/avif",
   "image/svg+xml",
+  "video/mp4",
+  "video/webm",
 ]);
 export {
   ASSET_TYPES,
@@ -178,6 +183,8 @@ export function safeFilename(name, contentType) {
     "image/webp": "webp",
     "image/avif": "avif",
     "image/svg+xml": "svg",
+    "video/mp4": "mp4",
+    "video/webm": "webm",
   }[contentType] || "jpg";
   const base = String(name || "stock-photo")
     .replace(/\.[^.]+$/, "")
@@ -190,13 +197,19 @@ export function safeFilename(name, contentType) {
 
 export function validateFile(file) {
   if (!file || typeof file.arrayBuffer !== "function") {
-    return "Image file is required.";
+    return "Asset file is required.";
   }
   if (!ALLOWED_TYPES.has(file.type)) {
-    return "Only JPG, PNG, WebP, AVIF, and SVG assets are accepted.";
+    return "Only JPG, PNG, WebP, AVIF, SVG, MP4, and WebM assets are accepted.";
   }
   if (file.type === "image/svg+xml" && file.size > MAX_SVG_SIZE) {
     return "SVG assets must be under 1 MB.";
+  }
+  if (file.type.startsWith("video/")) {
+    if (!file.size || file.size > MAX_VIDEO_SIZE) {
+      return "Video assets must be under 40 MB.";
+    }
+    return null;
   }
   if (!file.size || file.size > MAX_FILE_SIZE) {
     return "Image assets must be under 8 MB.";

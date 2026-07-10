@@ -103,10 +103,21 @@ export async function onRequestPost({ request, env }) {
     return error(err.message);
   }
 
+  const isVideo = file.type.startsWith("video/");
+  if (isVideo && !["video", "animation"].includes(item.assetType)) {
+    item.assetType = "video";
+  }
+  if (!isVideo && ["video", "animation"].includes(item.assetType)) {
+    return error("The video and animation asset types require an MP4 or WebM file.");
+  }
+
   const sniffed = imageDimensions(body, file.type);
   const clientWidth = Number(form.get("width")) || undefined;
   const clientHeight = Number(form.get("height")) || undefined;
   const clientDuration = Number(form.get("duration")) || undefined;
+  if (isVideo && clientDuration && clientDuration > 90) {
+    return error("Videos must be 90 seconds or shorter.");
+  }
   if (sniffed?.width && sniffed?.height) {
     item.width = sniffed.width;
     item.height = sniffed.height;
