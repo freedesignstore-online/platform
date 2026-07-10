@@ -1,28 +1,26 @@
-import { HOSTED_STOCK, hostedStockItem } from "../api/stock/hosted.js";
-
 export async function onRequestGet({ params, request, env }) {
   const id = params.id;
   const origin = new URL(request.url).origin;
   let item;
 
-  const raw = HOSTED_STOCK.find((i) => i.id === id);
-  if (raw) {
-    item = hostedStockItem(raw, origin);
-  } else if (env.FDS_STOCK_KV) {
+  if (env.FDS_STOCK_KV) {
     const meta = await env.FDS_STOCK_KV.get(`stock:item:${id}`, "json");
     if (meta && meta.status === "public") {
+      const isHosted = meta.source === "hosted";
       item = {
         id: meta.id,
         title: meta.title,
         category: meta.category,
         assetType: meta.assetType || "photo",
-        author: meta.ownerName || meta.author || "Community",
-        ownerHandle: meta.ownerHandle,
+        author: isHosted ? meta.author : meta.ownerName || meta.author || "Community",
+        ownerHandle: isHosted ? undefined : meta.ownerHandle,
         license: meta.license || "FreeDesignStore Community License",
         licenseId: meta.licenseId,
         origin: meta.origin,
         originDetail: meta.originDetail,
         contentType: meta.contentType,
+        width: meta.width,
+        height: meta.height,
         tags: meta.tags || [],
         url: `${origin}/api/stock/image/${encodeURIComponent(meta.id)}`,
         download: `${origin}/api/stock/image/${encodeURIComponent(meta.id)}`,
@@ -38,20 +36,6 @@ export async function onRequestGet({ params, request, env }) {
   const pageUrl = `${origin}/photo/${encodeURIComponent(item.id)}`;
   const xText = encodeURIComponent(`${item.title} — free design asset on FreeDesignStore`);
   const xUrl = encodeURIComponent(pageUrl);
-
-  // Hosted AI images keep their full generation prompts in the curation manifest.
-  if (raw && item.origin === "ai-generated" && !item.originDetail?.prompt && env.ASSETS) {
-    try {
-      const res = await env.ASSETS.fetch(new Request(`${origin}/assets/stock/manifest.json`));
-      if (res.ok) {
-        const manifest = await res.json();
-        const record = manifest.images?.[item.filename];
-        if (record?.prompt) {
-          item.originDetail = { ...item.originDetail, prompt: record.prompt };
-        }
-      }
-    } catch {}
-  }
 
   const originLabels = {
     photograph: "Photograph",
@@ -101,8 +85,8 @@ export async function onRequestGet({ params, request, env }) {
 <meta property="og:title" content="${esc(item.title)} — FreeDesignStore">
 <meta property="og:description" content="Free ${esc(item.category)} design asset. Download for personal and commercial use.">
 <meta property="og:image" content="${esc(item.url)}">
-<meta property="og:image:width" content="${raw ? raw.width : 1672}">
-<meta property="og:image:height" content="${raw ? raw.height : 941}">
+<meta property="og:image:width" content="${item.width || 1672}">
+<meta property="og:image:height" content="${item.height || 941}">
 <meta property="og:url" content="${esc(pageUrl)}">
 <meta property="og:type" content="article">
 ${String(item.contentType || "").startsWith("video/") ? `<meta property="og:video" content="${esc(item.url)}">\n<meta property="og:video:type" content="${esc(item.contentType)}">` : ""}

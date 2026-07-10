@@ -11,12 +11,15 @@ It follows the FAS/FAGS/PAGS pattern: a dedicated Cloudflare Worker using `agent
 - `get_design_skill` - returns one published design asset playbook.
 - `apply_design_skill` - applies a playbook as questions, checklist, or tool plan.
 - `catalog_status` - checks storage bindings and counts public/pending assets.
-- `whoami` - shows the authenticated creator/admin account for the MCP session.
-- `list_assets` - lists public assets, or pending assets with admin auth.
+- `whoami` - shows the authenticated creator/admin account for the MCP session (including handle and profile URL).
+- `get_my_profile` - returns the authenticated creator profile (handle, bio, website, social links).
+- `update_my_profile` - updates creator handle (must be free), display name, bio, website, and social handles.
+- `list_assets` - lists public assets, or pending assets with admin auth. Filters: asset_type, origin, license, category, q.
 - `my_assets` - lists assets owned by the authenticated creator account.
 - `get_asset` - returns metadata and download URL for one asset.
 - `create_svg_asset` - stores a generated SVG illustration/icon/pattern/background under the authenticated account.
-- `create_asset_from_url` - fetches a public HTTPS non-Unsplash image and stores it in R2 under the authenticated account.
+- `create_asset_from_url` - fetches a public HTTPS non-Unsplash image (or MP4/WebM video) and stores it in R2 under the authenticated account. Requires an `origin` disclosure (ai-generated origins must name the tool).
+- `update_asset` - patches metadata on an owned asset (admin: any asset): title, category, tags, origin disclosure, license, purpose, safe flag.
 - `moderate_asset` - publishes or rejects pending assets.
 - `publish_asset` - lets a creator publish their own pending asset.
 - `unpublish_asset` - lets a creator move their own public asset back to pending before deletion.

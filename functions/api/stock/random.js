@@ -1,10 +1,10 @@
-import { error, isAssetType } from "./_lib.js";
-import { HOSTED_STOCK, filterHostedStock, hostedStockItem } from "./hosted.js";
+import { PUBLIC_INDEX, error, isAssetType, listItems, publicItem, requireStore } from "./_lib.js";
 
 const MAX_COUNT = 20;
 const CACHE_SECONDS = 60;
+const HOSTED_ACCOUNT = "fds-official";
 
-export async function onRequestGet({ request }) {
+export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const assetType = String(url.searchParams.get("assetType") || url.searchParams.get("asset_type") || "photo").toLowerCase();
   const category = String(url.searchParams.get("category") || "").trim().toLowerCase();
@@ -21,15 +21,24 @@ export async function onRequestGet({ request }) {
     return error("Unsupported orientation.", 400);
   }
 
-  const matches = filterHostedStock(HOSTED_STOCK, {
-    assetType,
-    category,
-    orientation,
-    purpose,
-    safe,
-    q: query,
-  });
-  const items = shuffle(matches).slice(0, count).map((item) => hostedStockItem(item, url.origin));
+  const store = requireStore(env);
+  if (store.missing) return store.response;
+
+  const matches = (await listItems(store.kv, PUBLIC_INDEX))
+    .filter((item) => item.ownerAccountId === HOSTED_ACCOUNT)
+    .filter((item) => !assetType || item.assetType === assetType)
+    .filter((item) => !category || String(item.category || "").toLowerCase() === category)
+    .filter((item) => !orientation || orientationOf(item) === orientation)
+    .filter((item) => !purpose || (item.purpose || []).some((value) => String(value || "").toLowerCase() === purpose))
+    .filter((item) => !safe || item.safe !== false)
+    .filter((item) => {
+      if (!query) return true;
+      return [item.title, item.author, item.category, item.license, item.assetType, orientationOf(item), ...(item.tags || []), ...(item.purpose || [])]
+        .join(" ")
+        .toLowerCase()
+        .includes(query);
+    });
+  const items = shuffle(matches).slice(0, count).map((item) => publicItem(item, url.origin));
 
   return new Response(
     JSON.stringify({
@@ -81,6 +90,11 @@ function responseHeaders() {
     "access-control-allow-origin": "*",
     "cache-control": `public, max-age=${CACHE_SECONDS}, s-maxage=${CACHE_SECONDS * 5}`,
   };
+}
+
+function orientationOf(item) {
+  if (!item.width || !item.height) return "";
+  return item.height > item.width ? "portrait" : item.width > item.height ? "landscape" : "square";
 }
 
 function shuffle(items) {

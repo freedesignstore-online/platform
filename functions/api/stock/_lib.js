@@ -133,13 +133,14 @@ export function publicItem(item, origin = "") {
   const downloadUrl = origin ? new URL(`${imagePath}?download=1`, origin).toString() : `${imagePath}?download=1`;
   return {
     id: item.id,
-    source: "community",
+    source: item.source === "hosted" ? "hosted" : "community",
     title: item.title,
     category: item.category,
     assetType: item.assetType || "photo",
     author: item.author,
-    attribution: item.author,
+    attribution: item.attribution || item.author,
     license: item.license,
+    licenseUrl: item.licenseUrl,
     tags: item.tags || [],
     url: imageUrl,
     download: downloadUrl,

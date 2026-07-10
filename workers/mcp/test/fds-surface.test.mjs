@@ -138,11 +138,8 @@ test('home and public library make assets a first-class FDS surface', async () =
   assert.match(homeHtml, /Free Design Assets and Tools/);
   assert.match(homeHtml, /href="\/images\/stock-photos\/">Assets/);
   assert.match(homeHtml, /id="assetRail"/);
-  assert.match(homeHtml, /const hostedAssets=/);
-  assert.match(homeHtml, /Lifestyle Hiking Trail/);
-  assert.match(homeHtml, /Designer Desk Flatlay/);
-  assert.match(homeHtml, /Packaging Mockup/);
-  assert.match(homeHtml, /fetch\('\/api\/stock\/list\?source=community'/);
+  assert.match(homeHtml, /fetch\('\/api\/stock\/list\?source=all'/);
+  assert.doesNotMatch(homeHtml, /const hostedAssets=/);
   assert.match(homeHtml, /Community-published FDS assets appear here first/);
   assert.match(homeHtml, /id="tools"/);
   assert.match(homeHtml, /Design Asset Library/);
@@ -157,15 +154,39 @@ test('home and public library make assets a first-class FDS surface', async () =
   for (const type of ['Images / Photos', 'Illustrations', 'Icons', 'Patterns', 'Textures', 'Backgrounds', 'UI Assets']) {
     assert.match(libraryHtml, new RegExp(type.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
-  for (const photo of ['Designer Desk Flatlay', 'Packaging Mockup', 'Social Planning Workspace', 'Interior Light Shadows', 'Material Swatch Moodboard', 'UX Wireframe Desk', 'Lifestyle Hiking Trail', 'Lifestyle Coffee Cup', 'Lifestyle Park Bench', 'Lifestyle Concert Stage', 'Australia Surf Beach', 'Australia Bicycle Trail', 'Australia Rock Climbing', 'Australia Reef Snorkelling']) {
-    assert.match(libraryHtml, new RegExp(photo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-  }
   assert.match(libraryHtml, /Lifestyle/);
-  assert.equal((libraryHtml.match(/source:'hosted'/g) || []).length, 80);
-  assert.match(libraryHtml, /\[\.\.\.communityPhotos,\.\.\.HOSTED_PHOTOS,\.\.\.apiResults\]/);
+  assert.match(libraryHtml, /fetch\('\/api\/stock\/list\?source=all'\)/);
+  assert.match(libraryHtml, /\[\.\.\.catalogPhotos,\.\.\.apiResults\]/);
+  assert.doesNotMatch(libraryHtml, /HOSTED_PHOTOS/);
 });
 
-test('public stock list API supports asset type, category, and search filters', async () => {
+function catalogItem(overrides) {
+  return {
+    id: 'x', title: 'Untitled', category: 'Lifestyle', assetType: 'photo',
+    author: 'FreeDesignStore', license: 'FreeDesignStore Free Release', licenseId: 'fds-free',
+    origin: 'ai-generated', originDetail: { tool: 'Pollinations', model: 'flux/sana' },
+    tags: [], status: 'public', objectKey: 'hosted/x.jpg', filename: 'x.jpg',
+    contentType: 'image/jpeg', size: 1000, width: 1672, height: 941,
+    purpose: ['profile_background'], safe: true, source: 'hosted',
+    ownerAccountId: 'fds-official', ownerName: 'FreeDesignStore', ownerHandle: 'freedesignstore',
+    createdAt: '2026-07-10T00:00:00Z',
+    ...overrides,
+  };
+}
+
+async function seedUnifiedCatalog(kv) {
+  const items = [
+    catalogItem({ id: 'h-ai', title: 'Sunrise Yoga', filename: 'sunrise-yoga.jpg', objectKey: 'hosted/sunrise-yoga.jpg' }),
+    catalogItem({ id: 'h-cc0', title: 'Mountain Lake', category: 'Nature', origin: 'photograph', originDetail: undefined, license: 'CC0 1.0 Public Domain', licenseId: 'cc0', author: 'Fabrizio Lunardi' }),
+    catalogItem({ id: 'h-nasa', title: 'Earth From Orbit', category: 'Backgrounds', origin: 'photograph', originDetail: undefined, license: 'Public Domain (NASA)', licenseId: 'cc0', author: 'NASA' }),
+    catalogItem({ id: 'c-1', title: 'Community Shot', category: 'Community', source: 'community', ownerAccountId: 'github:42', ownerName: 'Alice', ownerHandle: 'alice', author: 'Alice', origin: 'photograph', originDetail: undefined, licenseId: 'cc0', objectKey: 'community/c-1/shot.jpg' }),
+  ];
+  for (const item of items) await kv.put(`stock:item:${item.id}`, JSON.stringify(item));
+  await kv.put('stock:index:public', JSON.stringify(items.map((i) => i.id)));
+  return items;
+}
+
+test('public stock list API serves the unified KV catalog with filters', async () => {
   const listSource = await readRepo('functions/api/stock/list.js');
   const taxonomySource = await readRepo('functions/api/stock/_taxonomy.js');
   const { onRequestGet, onRequestHead, onRequestOptions } = await importRepoFile('functions/api/stock/list.js');
@@ -173,33 +194,39 @@ test('public stock list API supports asset type, category, and search filters', 
   assert.match(taxonomySource, /export const ASSET_TYPES = new Set/);
   assert.match(taxonomySource, /export function isAssetType/);
   assert.match(listSource, /asset_type/);
-  assert.match(listSource, /assetType/);
-  assert.match(listSource, /source/);
-  assert.match(listSource, /HOSTED_STOCK/);
   assert.match(listSource, /Unsupported asset_type/);
-  assert.match(listSource, /category/);
   assert.match(listSource, /url\.searchParams\.get\("q"\)/);
-  assert.match(listSource, /item\.assetType === assetType/);
+  assert.doesNotMatch(listSource, /HOSTED_STOCK/);
 
-  const response = await onRequestGet({
-    request: new Request('https://freedesignstore.online/api/stock/list?assetType=photo&category=lifestyle&source=hosted'),
-    env: {},
+  const kv = memoryKV();
+  await seedUnifiedCatalog(kv);
+  const env = { FDS_STOCK_KV: kv, FDS_STOCK_BUCKET: memoryBucket() };
+
+  const hosted = await onRequestGet({
+    request: new Request('https://freedesignstore.online/api/stock/list?source=hosted'),
+    env,
   });
-  assert.equal(response.status, 200);
-  const body = await response.json();
-  assert.equal(body.ok, true);
-  assert.equal(body.source, 'hosted');
-  assert.equal(body.assetType, 'photo');
-  assert.equal(body.category, 'lifestyle');
-  assert.equal(body.safe, 'all');
-  assert.equal(body.items.length, 28);
-  assert.ok(body.items.every((item) => item.source === 'hosted'));
-  assert.ok(body.items.every((item) => item.category === 'Lifestyle'));
-  assert.ok(body.items.every((item) => item.url.startsWith('https://freedesignstore.online/assets/stock/')));
+  assert.equal(hosted.status, 200);
+  const hostedBody = await hosted.json();
+  assert.equal(hostedBody.items.length, 3);
+  assert.ok(hostedBody.items.every((item) => item.source === 'hosted'));
+  assert.ok(hostedBody.items.every((item) => item.url.startsWith('https://freedesignstore.online/api/stock/image/')));
+
+  const community = await onRequestGet({
+    request: new Request('https://freedesignstore.online/api/stock/list?source=community'),
+    env,
+  });
+  assert.equal((await community.json()).items.length, 1);
+
+  const lifestyle = await onRequestGet({
+    request: new Request('https://freedesignstore.online/api/stock/list?assetType=photo&category=lifestyle&source=hosted'),
+    env,
+  });
+  assert.equal((await lifestyle.json()).items.length, 1);
 
   const badOrientation = await onRequestGet({
     request: new Request('https://freedesignstore.online/api/stock/list?source=hosted&orientation=diagonal'),
-    env: {},
+    env,
   });
   assert.equal(badOrientation.status, 400);
   assert.match((await badOrientation.json()).error, /Unsupported orientation/);
@@ -212,10 +239,14 @@ test('public stock list API supports asset type, category, and search filters', 
   assert.match(options.headers.get('access-control-allow-methods'), /HEAD/);
 });
 
-test('random stock API serves static hosted assets for app integrations', async () => {
+test('random stock API keeps the HeartFull integration shape from the KV catalog', async () => {
   const { onRequestGet, onRequestHead, onRequestOptions } = await importRepoFile('functions/api/stock/random.js');
+  const kv = memoryKV();
+  await seedUnifiedCatalog(kv);
+  const env = { FDS_STOCK_KV: kv, FDS_STOCK_BUCKET: memoryBucket() };
   const response = await onRequestGet({
-    request: new Request('https://freedesignstore.online/api/stock/random?assetType=photo&category=lifestyle&orientation=landscape&safe=true&purpose=profile_background&count=3'),
+    request: new Request('https://freedesignstore.online/api/stock/random?assetType=photo&orientation=landscape&safe=true&purpose=profile_background&count=3'),
+    env,
   });
   assert.equal(response.status, 200);
   assert.equal(response.headers.get('access-control-allow-origin'), '*');
@@ -229,15 +260,12 @@ test('random stock API serves static hosted assets for app integrations', async 
   for (const item of body.items) {
     assert.equal(item.source, 'hosted');
     assert.equal(item.assetType, 'photo');
-    assert.equal(item.category, 'Lifestyle');
     assert.equal(item.orientation, 'landscape');
     assert.equal(item.safe, true);
     assert.ok(item.purpose.includes('profile_background'));
-    assert.ok(item.url.startsWith('https://freedesignstore.online/assets/stock/'));
-    assert.ok(item.download.startsWith('https://freedesignstore.online/assets/stock/'));
+    assert.ok(item.url.startsWith('https://freedesignstore.online/api/stock/image/'));
     assert.ok(item.width > item.height);
     assert.equal(item.contentType, 'image/jpeg');
-    assert.equal(item.license, 'FreeDesignStore Community License');
   }
 
   const head = onRequestHead();
@@ -247,6 +275,44 @@ test('random stock API serves static hosted assets for app integrations', async 
   const options = onRequestOptions();
   assert.equal(options.status, 200);
   assert.match(options.headers.get('access-control-allow-methods'), /HEAD/);
+});
+
+test('legacy /assets/stock/ URLs are served from R2 for consumer compatibility', async () => {
+  const { onRequestGet } = await importRepoFile('functions/assets/stock/[file].js');
+  const bucket = memoryBucket();
+  await bucket.put('hosted/sunrise-yoga.jpg', new Uint8Array([1, 2, 3]), {});
+  bucket.get = async (key) =>
+    bucket.objects.has(key)
+      ? {
+          body: bucket.objects.get(key).body,
+          httpEtag: '"e"',
+          writeHttpMetadata(headers) { headers.set('content-type', 'image/jpeg'); },
+        }
+      : null;
+  const env = { FDS_STOCK_KV: memoryKV(), FDS_STOCK_BUCKET: bucket };
+
+  const hit = await onRequestGet({
+    params: { file: 'sunrise-yoga.jpg' },
+    request: new Request('https://freedesignstore.online/assets/stock/sunrise-yoga.jpg'),
+    env,
+  });
+  assert.equal(hit.status, 200);
+  assert.equal(hit.headers.get('content-type'), 'image/jpeg');
+  assert.match(hit.headers.get('cache-control'), /public/);
+
+  const miss = await onRequestGet({
+    params: { file: 'nope.jpg' },
+    request: new Request('https://freedesignstore.online/assets/stock/nope.jpg'),
+    env,
+  });
+  assert.equal(miss.status, 404);
+
+  const traversal = await onRequestGet({
+    params: { file: '../secrets.txt' },
+    request: new Request('https://freedesignstore.online/assets/stock/..%2Fsecrets.txt'),
+    env,
+  });
+  assert.equal(traversal.status, 404);
 });
 
 test('stock image route allows signed-in owners to preview private assets', async () => {
@@ -414,43 +480,38 @@ test('upload requires an authenticated session and records ownership', async () 
 
 // --- Taxonomy + origin disclosure (PR 2) ---
 
-test('hosted items all disclose origin and license id', async () => {
-  const { HOSTED_STOCK } = await importRepoFile('functions/api/stock/hosted.js');
-  const validOrigins = new Set(['photograph', 'ai-generated', '3d-render', 'digital-illustration', 'vector-art', 'scan', 'mixed']);
-  const validLicenses = new Set(['cc0', 'fds-free', 'attribution']);
-  for (const item of HOSTED_STOCK) {
-    assert.ok(validOrigins.has(item.origin), `${item.id} missing origin`);
-    assert.ok(validLicenses.has(item.licenseId), `${item.id} missing licenseId`);
-    if (item.origin === 'ai-generated') {
-      assert.ok(item.originDetail?.model, `${item.id} AI item missing model`);
-    }
-  }
-  const photos = HOSTED_STOCK.filter((item) => item.origin === 'photograph');
-  assert.equal(photos.length, 16);
-  assert.ok(photos.every((item) => item.licenseId === 'cc0'));
-});
-
 test('stock list API filters by origin and license', async () => {
   const { onRequestGet } = await importRepoFile('functions/api/stock/list.js');
+  const kv = memoryKV();
+  await seedUnifiedCatalog(kv);
+  const env = { FDS_STOCK_KV: kv, FDS_STOCK_BUCKET: memoryBucket() };
 
   const photographs = await onRequestGet({
     request: new Request('https://freedesignstore.online/api/stock/list?source=hosted&origin=photograph'),
-    env: {},
+    env,
   });
   const photoBody = await photographs.json();
-  assert.equal(photoBody.items.length, 16);
+  assert.equal(photoBody.items.length, 2);
   assert.ok(photoBody.items.every((item) => item.origin === 'photograph'));
 
   const cc0 = await onRequestGet({
     request: new Request('https://freedesignstore.online/api/stock/list?source=hosted&license=cc0'),
-    env: {},
+    env,
   });
   const cc0Body = await cc0.json();
-  assert.equal(cc0Body.items.length, 16);
+  assert.equal(cc0Body.items.length, 2);
+
+  const ai = await onRequestGet({
+    request: new Request('https://freedesignstore.online/api/stock/list?origin=ai-generated'),
+    env,
+  });
+  const aiBody = await ai.json();
+  assert.equal(aiBody.items.length, 1);
+  assert.equal(aiBody.items[0].originDetail.model, 'flux/sana');
 
   const bad = await onRequestGet({
     request: new Request('https://freedesignstore.online/api/stock/list?source=hosted&origin=magic'),
-    env: {},
+    env,
   });
   assert.equal(bad.status, 400);
 });
@@ -466,8 +527,7 @@ test('photo page and gallery disclose origin', async () => {
   assert.match(gallery, /ORIGIN_FILTERS/);
   assert.match(gallery, /LICENSE_FILTERS/);
   assert.match(gallery, /uploadOrigin/);
-  assert.equal((gallery.match(/origin:'ai-generated'/g) || []).length, 64);
-  assert.equal((gallery.match(/origin:'photograph'/g) || []).length, 16);
+  assert.doesNotMatch(gallery, /HOSTED_PHOTOS/);
 
   const mcpSource = await readRepo('workers/mcp/src/index.ts');
   assert.match(mcpSource, /'update_asset'/);

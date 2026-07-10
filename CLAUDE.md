@@ -1,6 +1,6 @@
 # FreeDesignStore Platform
 
-80 hosted stock images, 46 browser tools, community asset publishing via MCP.
+Unified R2 catalog (80 curated + community assets: photos, illustrations, renders, AI art, video), 46 browser tools, contributor identity with public profiles, publishing via MCP.
 
 ## MCP-first workflow
 
@@ -58,7 +58,7 @@ store/                  Static site (Cloudflare Pages output)
   templates/*/          6 template tools
   components/*/         9 UI/UX tools
   skills/               MCP playbooks (6) + capability manifest
-  assets/stock/         80 hosted stock images (AI-generated, 1672x941)
+  assets/stock/         manifest.json only — images live in R2 (served via functions/assets/stock/)
   console/              Creator portal (GitHub/Google OAuth sign-in)
   .well-known/          MCP discovery metadata
   llms.txt              AI-readable docs index
@@ -66,9 +66,9 @@ store/                  Static site (Cloudflare Pages output)
   registry.json         Tool registry for related.js
   favicon.svg           Site icon
 functions/              Cloudflare Pages Functions
-  api/stock/            hosted.js (catalog), list.js, random.js, upload, moderate, unsplash
+  api/stock/            list.js, random.js, upload, profile, creators, moderate, unsplash (unified KV catalog)
   photo/[id].js         Photo detail page (OG tags, share buttons, download)
-workers/mcp/            MCP server (Cloudflare Worker, 15 tools)
+workers/mcp/            MCP server (Cloudflare Worker, 18 tools)
   src/index.ts          Main server (agents/mcp, McpServer, Zod)
   src/oauth-provider.ts OAuth 2.1 (GitHub/Google)
   src/session.ts        Session verification
@@ -80,7 +80,16 @@ workers/mcp/            MCP server (Cloudflare Worker, 15 tools)
 - Every tool page is a single self-contained `index.html`
 - Back link: `<a class="back" href="/tools/">&larr; Tools</a>`
 - Accent: `#ec4899`, fonts: Fraunces (headings) + Manrope (body)
-- Nav order: Tools | Assets | Skills | Console
+- Nav order: Tools | Assets | Creators | Skills | Console
 - Sticky header: `position:sticky;top:0;backdrop-filter:blur(14px)`
-- Stock images: AI-generated via Pollinations API, upscaled to 1672x941 with sips
+- Curated AI images: Pollinations generates SQUARE-native only (768x768 anon cap) and stretches non-square requests — generate square, center-crop to 16:9, upscale to 1672x941 with sips. Record prompts in `store/assets/stock/manifest.json`.
 - Image categories: Lifestyle, Nature, People, Travel, Workspace, Backgrounds, etc.
+
+## Unified catalog & contributors
+
+- ALL asset binaries live in R2 (`fds-stock-assets`); metadata in KV (`FDS_STOCK_KV`). Nothing binary is committed to git.
+- KV keys: `stock:item:{id}`, `stock:index:{public,pending}`, `stock:index:account:{accountId}`, `profile:account:{accountId}`, `profile:handle:{handle}`.
+- Curated set: 80 items owned by `fds-official` (`source: "hosted"`), objects at `hosted/<filename>`; legacy `/assets/stock/<file>` URLs served by `functions/assets/stock/[file].js` (HeartFull stores them).
+- Uploads require sign-in (session cookie verified in Pages via `functions/api/_session.js`, needs SESSION_SIGNING_KEY on the Pages project; proxies to the MCP worker until set) and publish instantly; moderation is takedown-based.
+- Taxonomy axes on every asset: `assetType` (13 types incl. video/animation), `origin` (photograph | ai-generated | 3d-render | digital-illustration | vector-art | scan | mixed, with `originDetail` tool/model/prompt — AI must name the tool), `licenseId` (cc0 | fds-free | attribution), `purpose`, `safe`. Origin is disclosed on asset pages.
+- Contributor profiles: `/u/{handle}` + `/creators` directory; videos: MP4/WebM ≤40 MB ≤90 s, served with Range support.

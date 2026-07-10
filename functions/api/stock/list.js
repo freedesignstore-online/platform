@@ -11,7 +11,8 @@ import {
   publicItem,
   requireStore,
 } from "./_lib.js";
-import { HOSTED_STOCK, filterHostedStock, hostedStockItem } from "./hosted.js";
+
+const HOSTED_ACCOUNT = "fds-official";
 
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
@@ -44,43 +45,32 @@ export async function onRequestGet({ request, env }) {
     return error("Unsupported license.", 400);
   }
 
-  const origin = new URL(request.url).origin;
-  const includeHosted = status === "public" && (source === "all" || source === "hosted");
-  const includeCommunity = source === "all" || source === "community";
-  const hostedItems = includeHosted
-    ? filterHostedStock(HOSTED_STOCK, { assetType, category, orientation, purpose, safe, q: query })
-        .filter((item) => !originFilter || item.origin === originFilter)
-        .filter((item) => !licenseFilter || item.licenseId === licenseFilter)
-        .map((item) => hostedStockItem(item, origin))
-    : [];
+  const origin = url.origin;
+  const store = requireStore(env);
+  if (store.missing) return store.response;
 
-  let communityItems = [];
-  let communityUnavailable = false;
-  if (includeCommunity) {
-    const store = requireStore(env);
-    if (store.missing) {
-      if (source === "community" || status === "pending") return store.response;
-      communityUnavailable = true;
-    } else {
-      const key = status === "pending" ? PENDING_INDEX : PUBLIC_INDEX;
-      communityItems = (await listItems(store.kv, key))
-        .filter((item) => !assetType || item.assetType === assetType)
-        .filter((item) => !category || String(item.category || "").toLowerCase() === category)
-        .filter((item) => !orientation || orientationOf(item) === orientation)
-        .filter((item) => !purpose || (item.purpose || []).some((value) => String(value || "").toLowerCase() === purpose))
-        .filter((item) => !originFilter || item.origin === originFilter)
-        .filter((item) => !licenseFilter || item.licenseId === licenseFilter)
-        .filter((item) => !safe || item.safe !== false)
-        .filter((item) => {
-          if (!query) return true;
-          return [item.title, item.author, item.category, item.license, item.assetType, orientationOf(item), ...(item.tags || []), ...(item.purpose || [])]
-            .join(" ")
-            .toLowerCase()
-            .includes(query);
-        })
-        .map((item) => publicItem(item, origin));
-    }
-  }
+  const key = status === "pending" ? PENDING_INDEX : PUBLIC_INDEX;
+  const items = (await listItems(store.kv, key))
+    .filter((item) => {
+      if (source === "hosted") return item.ownerAccountId === HOSTED_ACCOUNT;
+      if (source === "community") return item.ownerAccountId !== HOSTED_ACCOUNT;
+      return true;
+    })
+    .filter((item) => !assetType || item.assetType === assetType)
+    .filter((item) => !category || String(item.category || "").toLowerCase() === category)
+    .filter((item) => !orientation || orientationOf(item) === orientation)
+    .filter((item) => !purpose || (item.purpose || []).some((value) => String(value || "").toLowerCase() === purpose))
+    .filter((item) => !originFilter || item.origin === originFilter)
+    .filter((item) => !licenseFilter || item.licenseId === licenseFilter)
+    .filter((item) => !safe || item.safe !== false)
+    .filter((item) => {
+      if (!query) return true;
+      return [item.title, item.author, item.category, item.license, item.assetType, orientationOf(item), ...(item.tags || []), ...(item.purpose || [])]
+        .join(" ")
+        .toLowerCase()
+        .includes(query);
+    })
+    .map((item) => publicItem(item, origin));
 
   return json({
     ok: true,
@@ -94,8 +84,8 @@ export async function onRequestGet({ request, env }) {
     license: licenseFilter || "all",
     safe: safe ? true : "all",
     q: query,
-    communityUnavailable,
-    items: [...hostedItems, ...communityItems],
+    communityUnavailable: false,
+    items,
   });
 }
 
