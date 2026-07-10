@@ -161,7 +161,7 @@ test('home and public library make assets a first-class FDS surface', async () =
     assert.match(libraryHtml, new RegExp(photo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
   assert.match(libraryHtml, /Lifestyle/);
-  assert.equal((libraryHtml.match(/source:'hosted'/g) || []).length, 64);
+  assert.equal((libraryHtml.match(/source:'hosted'/g) || []).length, 80);
   assert.match(libraryHtml, /\[\.\.\.communityPhotos,\.\.\.HOSTED_PHOTOS,\.\.\.apiResults\]/);
 });
 

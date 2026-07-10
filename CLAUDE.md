@@ -1,6 +1,6 @@
 # FreeDesignStore Platform
 
-64 hosted stock images, 46 browser tools, community asset publishing via MCP.
+80 hosted stock images, 46 browser tools, community asset publishing via MCP.
 
 ## MCP-first workflow
 
@@ -58,7 +58,7 @@ store/                  Static site (Cloudflare Pages output)
   templates/*/          6 template tools
   components/*/         9 UI/UX tools
   skills/               MCP playbooks (6) + capability manifest
-  assets/stock/         64 hosted stock images (AI-generated, 1672x941)
+  assets/stock/         80 hosted stock images (AI-generated, 1672x941)
   console/              Creator portal (GitHub/Google OAuth sign-in)
   .well-known/          MCP discovery metadata
   llms.txt              AI-readable docs index

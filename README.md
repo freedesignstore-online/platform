@@ -10,7 +10,7 @@ Part of [Open Frontier](https://openfrontier.pages.dev).
 |-----|------|
 | `/` | Homepage — hero, asset carousel with infinite scroll, tool grid |
 | `/tools/` | All 46 tools with search and category filters |
-| `/images/stock-photos/` | Asset library — 64 hosted images, community uploads, Unsplash search |
+| `/images/stock-photos/` | Asset library — 80 hosted images, community uploads, Unsplash search |
 | `/photo/<id>` | Individual asset detail page with OG tags + share buttons |
 | `/skills/` | MCP playbooks + capability manifest |
 | `/console/` | Creator portal — sign in, publish assets |
@@ -55,7 +55,7 @@ store/                  Static site (Cloudflare Pages)
   templates/*/          6 template tools
   components/*/         9 UI/UX tools
   skills/               MCP playbooks (6)
-  assets/stock/         64 hosted stock images
+  assets/stock/         80 hosted stock images
   console/              Creator portal
   .well-known/          MCP discovery
   llms.txt              AI docs index

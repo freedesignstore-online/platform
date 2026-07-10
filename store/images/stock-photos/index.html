@@ -135,6 +135,7 @@ h1{font-family:'Fraunces',serif;font-size:32px;line-height:1.05;font-weight:800;
       <span class="status" id="apiStatus">Unsplash server search will be used when configured</span>
     </div>
     <p class="notice">Unsplash photos are displayed from Unsplash URLs with photographer credit and links back to Unsplash. FDS/community assets are served and downloaded from this site.</p>
+    <p class="notice">More free photo sources (open externally): <a href="https://www.pexels.com/" id="pexelsLink" target="_blank" rel="noopener">Search Pexels &nearr;</a> &middot; <a href="https://pixabay.com/" id="pixabayLink" target="_blank" rel="noopener">Search Pixabay &nearr;</a> &mdash; their licenses allow free use but not rehosting, so we link off only.</p>
   </section>
 
   <section class="section active" id="librarySection">
@@ -294,7 +295,23 @@ const HOSTED_PHOTOS=[
   {id:'fds-lifestyle-stargazing-camp',source:'hosted',assetType:'photo',title:'Stargazing Camp',category:'Nature',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-stargazing-camp.jpg',download:'/assets/stock/lifestyle-stargazing-camp.jpg',tags:['stars','camping','night','milky way']},
   {id:'fds-lifestyle-waterfall-swim',source:'hosted',assetType:'photo',title:'Waterfall Swim',category:'Nature',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-waterfall-swim.jpg',download:'/assets/stock/lifestyle-waterfall-swim.jpg',tags:['waterfall','swimming','lagoon','tropical']},
   {id:'fds-lifestyle-autumn-tram',source:'hosted',assetType:'photo',title:'Autumn Tram',category:'Travel',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-autumn-tram.jpg',download:'/assets/stock/lifestyle-autumn-tram.jpg',tags:['tram','autumn','city','leaves']},
-  {id:'fds-lifestyle-bread-baking',source:'hosted',assetType:'photo',title:'Bread Baking',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-bread-baking.jpg',download:'/assets/stock/lifestyle-bread-baking.jpg',tags:['baking','bread','kitchen','rustic']}
+  {id:'fds-lifestyle-bread-baking',source:'hosted',assetType:'photo',title:'Bread Baking',category:'Lifestyle',author:'FreeDesignStore',license:'FreeDesignStore Community License',url:'/assets/stock/lifestyle-bread-baking.jpg',download:'/assets/stock/lifestyle-bread-baking.jpg',tags:['baking','bread','kitchen','rustic']},
+  {id:'fds-mountain-lake-reflection',source:'hosted',assetType:'photo',title:'Mountain Lake Reflection',category:'Nature',author:'Fabrizio Lunardi',license:'CC0 1.0 Public Domain',url:'/assets/stock/mountain-lake-reflection.jpg',download:'/assets/stock/mountain-lake-reflection.jpg',tags:['mountains','lake','reflection','alpine']},
+  {id:'fds-desert-dunes-sunset',source:'hosted',assetType:'photo',title:'Desert Dunes Sunset',category:'Nature',author:'Ethan Conley',license:'CC0 1.0 Public Domain',url:'/assets/stock/desert-dunes-sunset.jpg',download:'/assets/stock/desert-dunes-sunset.jpg',tags:['desert','dunes','sunset','sand']},
+  {id:'fds-snowy-mountain-peaks',source:'hosted',assetType:'photo',title:'Snowy Mountain Peaks',category:'Nature',author:'Safal Paudel',license:'CC0 1.0 Public Domain',url:'/assets/stock/snowy-mountain-peaks.jpg',download:'/assets/stock/snowy-mountain-peaks.jpg',tags:['mountains','snow','peaks','winter']},
+  {id:'fds-waterfall-long-exposure',source:'hosted',assetType:'photo',title:'Waterfall Lagoon',category:'Nature',author:'Artem Kavalerov',license:'CC0 1.0 Public Domain',url:'/assets/stock/waterfall-long-exposure.jpg',download:'/assets/stock/waterfall-long-exposure.jpg',tags:['waterfall','turquoise','nature','lagoon']},
+  {id:'fds-golden-wheat-field',source:'hosted',assetType:'photo',title:'Wheat Harvest',category:'Nature',author:'Mohammad Shoeb Ansari',license:'CC0 1.0 Public Domain',url:'/assets/stock/golden-wheat-field.jpg',download:'/assets/stock/golden-wheat-field.jpg',tags:['wheat','field','harvest','golden']},
+  {id:'fds-stone-bridge-river',source:'hosted',assetType:'photo',title:'Stone Bridge River',category:'Travel',author:'Havang(nl)',license:'CC0 1.0 Public Domain',url:'/assets/stock/stone-bridge-river.jpg',download:'/assets/stock/stone-bridge-river.jpg',tags:['bridge','river','stone','historic']},
+  {id:'fds-forest-mist',source:'hosted',assetType:'photo',title:'Forest Mist',category:'Nature',author:'Pixel.la Free Stock Photos',license:'CC0 1.0 Public Domain',url:'/assets/stock/forest-path-mist.jpg',download:'/assets/stock/forest-path-mist.jpg',tags:['forest','mist','fog','trees']},
+  {id:'fds-city-skyline-river',source:'hosted',assetType:'photo',title:'City Skyline River',category:'Travel',author:'Pimnl',license:'CC0 1.0 Public Domain',url:'/assets/stock/city-skyline-river.jpg',download:'/assets/stock/city-skyline-river.jpg',tags:['city','skyline','river','buildings']},
+  {id:'fds-autumn-forest-colors',source:'hosted',assetType:'photo',title:'Autumn Forest Colors',category:'Nature',author:'Gusolie',license:'CC0 1.0 Public Domain',url:'/assets/stock/autumn-forest-colors.jpg',download:'/assets/stock/autumn-forest-colors.jpg',tags:['autumn','foliage','trees','colorful']},
+  {id:'fds-lavender-blooms',source:'hosted',assetType:'photo',title:'Lavender Blooms',category:'Nature',author:'Noah Baslé',license:'CC0 1.0 Public Domain',url:'/assets/stock/lavender-field.jpg',download:'/assets/stock/lavender-field.jpg',tags:['lavender','purple','flowers','soft']},
+  {id:'fds-canyon-red-rocks',source:'hosted',assetType:'photo',title:'Canyon Red Rocks',category:'Travel',author:'Wilson44691',license:'CC0 1.0 Public Domain',url:'/assets/stock/canyon-red-rocks.jpg',download:'/assets/stock/canyon-red-rocks.jpg',tags:['canyon','desert','rocks','landscape']},
+  {id:'fds-coastal-cliff-road',source:'hosted',assetType:'photo',title:'Coastal Cliff Road',category:'Nature',author:'Benjamin Punzalan',license:'CC0 1.0 Public Domain',url:'/assets/stock/coastal-cliffs.jpg',download:'/assets/stock/coastal-cliffs.jpg',tags:['coast','cliffs','road','aerial']},
+  {id:'fds-earth-from-orbit',source:'hosted',assetType:'photo',title:'Earth From Orbit',category:'Backgrounds',author:'NASA',license:'Public Domain (NASA)',url:'/assets/stock/earth-from-orbit.jpg',download:'/assets/stock/earth-from-orbit.jpg',tags:['earth','space','horizon','atmosphere']},
+  {id:'fds-aurora-from-space',source:'hosted',assetType:'photo',title:'Aurora From Space',category:'Backgrounds',author:'NASA',license:'Public Domain (NASA)',url:'/assets/stock/aurora-from-space.jpg',download:'/assets/stock/aurora-from-space.jpg',tags:['aurora','space','earth','night']},
+  {id:'fds-lagoon-nebula',source:'hosted',assetType:'photo',title:'Lagoon Nebula',category:'Backgrounds',author:'NASA',license:'Public Domain (NASA)',url:'/assets/stock/nebula-deep-space.jpg',download:'/assets/stock/nebula-deep-space.jpg',tags:['nebula','space','stars','hubble']},
+  {id:'fds-apollo-lunar-module',source:'hosted',assetType:'photo',title:'Apollo Lunar Module',category:'Backgrounds',author:'NASA',license:'Public Domain (NASA)',url:'/assets/stock/apollo-lunar-module.jpg',download:'/assets/stock/apollo-lunar-module.jpg',tags:['apollo','moon','spacecraft','nasa']}
 ];
 let activeSource='all';
 let activeAssetType='all';
@@ -345,6 +362,11 @@ function bindEvents(){
   $('searchBtn').onclick=search;
   $('resetBtn').onclick=()=>{$('searchInput').value='';activeAssetType='all';activeCategory='All';apiResults=[];renderAssetTypes();renderFilters();render()};
   $('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
+  $('searchInput').addEventListener('input',()=>{
+    const q=$('searchInput').value.trim();
+    $('pexelsLink').href=q?`https://www.pexels.com/search/${encodeURIComponent(q)}/`:'https://www.pexels.com/';
+    $('pixabayLink').href=q?`https://pixabay.com/images/search/${encodeURIComponent(q)}/`:'https://pixabay.com/';
+  });
   $('connectBtn').onclick=connectUnsplash;
   $('submitBtn').onclick=submitPhotos;
   $('randomizeBtn').onclick=renderGeneratedAsset;

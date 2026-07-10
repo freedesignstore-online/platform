@@ -63,9 +63,44 @@ export const HOSTED_STOCK = [
   item("fds-lifestyle-waterfall-swim", "Waterfall Swim", "Nature", "lifestyle-waterfall-swim.jpg", 1672, 941, ["waterfall", "swimming", "lagoon", "tropical"], ["profile_background"]),
   item("fds-lifestyle-autumn-tram", "Autumn Tram", "Travel", "lifestyle-autumn-tram.jpg", 1672, 941, ["tram", "autumn", "city", "leaves"], ["profile_background"]),
   item("fds-lifestyle-bread-baking", "Bread Baking", "Lifestyle", "lifestyle-bread-baking.jpg", 1672, 941, ["baking", "bread", "kitchen", "rustic"], ["profile_background"]),
+  // Public-domain photographs — CC0 via Openverse (Wikimedia/WordPress) and NASA. Provenance in store/assets/stock/manifest.json.
+  item("fds-mountain-lake-reflection", "Mountain Lake Reflection", "Nature", "mountain-lake-reflection.jpg", 1672, 941, ["mountains", "lake", "reflection", "alpine"], ["profile_background"], cc0("Fabrizio Lunardi")),
+  item("fds-desert-dunes-sunset", "Desert Dunes Sunset", "Nature", "desert-dunes-sunset.jpg", 1672, 941, ["desert", "dunes", "sunset", "sand"], ["profile_background"], cc0("Ethan Conley")),
+  item("fds-snowy-mountain-peaks", "Snowy Mountain Peaks", "Nature", "snowy-mountain-peaks.jpg", 1672, 941, ["mountains", "snow", "peaks", "winter"], ["profile_background"], cc0("Safal Paudel")),
+  item("fds-waterfall-long-exposure", "Waterfall Lagoon", "Nature", "waterfall-long-exposure.jpg", 1672, 941, ["waterfall", "turquoise", "nature", "lagoon"], ["profile_background"], cc0("Artem Kavalerov")),
+  item("fds-golden-wheat-field", "Wheat Harvest", "Nature", "golden-wheat-field.jpg", 1672, 941, ["wheat", "field", "harvest", "golden"], ["profile_background"], cc0("Mohammad Shoeb Ansari")),
+  item("fds-stone-bridge-river", "Stone Bridge River", "Travel", "stone-bridge-river.jpg", 1672, 941, ["bridge", "river", "stone", "historic"], ["profile_background"], cc0("Havang(nl)")),
+  item("fds-forest-mist", "Forest Mist", "Nature", "forest-path-mist.jpg", 1672, 941, ["forest", "mist", "fog", "trees"], ["profile_background"], cc0("Pixel.la Free Stock Photos")),
+  item("fds-city-skyline-river", "City Skyline River", "Travel", "city-skyline-river.jpg", 1672, 941, ["city", "skyline", "river", "buildings"], ["profile_background"], cc0("Pimnl")),
+  item("fds-autumn-forest-colors", "Autumn Forest Colors", "Nature", "autumn-forest-colors.jpg", 1672, 941, ["autumn", "foliage", "trees", "colorful"], ["profile_background"], cc0("Gusolie")),
+  item("fds-lavender-blooms", "Lavender Blooms", "Nature", "lavender-field.jpg", 1672, 941, ["lavender", "purple", "flowers", "soft"], ["profile_background"], cc0("Noah Baslé")),
+  item("fds-canyon-red-rocks", "Canyon Red Rocks", "Travel", "canyon-red-rocks.jpg", 1672, 941, ["canyon", "desert", "rocks", "landscape"], ["profile_background"], cc0("Wilson44691")),
+  item("fds-coastal-cliff-road", "Coastal Cliff Road", "Nature", "coastal-cliffs.jpg", 1672, 941, ["coast", "cliffs", "road", "aerial"], ["profile_background"], cc0("Benjamin Punzalan")),
+  item("fds-earth-from-orbit", "Earth From Orbit", "Backgrounds", "earth-from-orbit.jpg", 1672, 941, ["earth", "space", "horizon", "atmosphere"], ["profile_background"], nasa()),
+  item("fds-aurora-from-space", "Aurora From Space", "Backgrounds", "aurora-from-space.jpg", 1672, 941, ["aurora", "space", "earth", "night"], ["profile_background"], nasa()),
+  item("fds-lagoon-nebula", "Lagoon Nebula", "Backgrounds", "nebula-deep-space.jpg", 1672, 941, ["nebula", "space", "stars", "hubble"], ["profile_background"], nasa()),
+  item("fds-apollo-lunar-module", "Apollo Lunar Module", "Backgrounds", "apollo-lunar-module.jpg", 1672, 941, ["apollo", "moon", "spacecraft", "nasa"], ["profile_background"], nasa()),
 ];
 
-function item(id, title, category, filename, width, height, tags, purposes) {
+function cc0(creator) {
+  return {
+    author: creator,
+    attribution: `${creator} (CC0, via Openverse)`,
+    license: "CC0 1.0 Public Domain",
+    licenseUrl: "https://creativecommons.org/publicdomain/zero/1.0/",
+  };
+}
+
+function nasa() {
+  return {
+    author: "NASA",
+    attribution: "NASA Image and Video Library (public domain)",
+    license: "Public Domain (NASA)",
+    licenseUrl: "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+  };
+}
+
+function item(id, title, category, filename, width, height, tags, purposes, extra) {
   return {
     id,
     source: "hosted",
@@ -85,6 +120,7 @@ function item(id, title, category, filename, width, height, tags, purposes) {
     tags,
     path: `/assets/stock/${filename}`,
     filename,
+    ...extra,
   };
 }
 
