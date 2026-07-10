@@ -51,6 +51,18 @@ export const HOSTED_STOCK = [
   item("fds-lifestyle-campfire-cooking", "Campfire Cooking", "Nature", "lifestyle-campfire-cooking.jpg", 1672, 941, ["campfire", "cooking", "outdoors", "woods"], ["profile_background"]),
   item("fds-lifestyle-surfing-wave", "Surfing Wave", "Nature", "lifestyle-surfing-wave.jpg", 1672, 941, ["surfing", "wave", "ocean", "action"], ["profile_background"]),
   item("fds-lifestyle-rooftop-garden", "Rooftop Garden", "Nature", "lifestyle-rooftop-garden.jpg", 1672, 941, ["garden", "rooftop", "herbs", "urban"], ["profile_background"]),
+  item("fds-lifestyle-hot-air-balloons", "Hot Air Balloons", "Travel", "lifestyle-hot-air-balloons.jpg", 1672, 941, ["balloons", "dawn", "festival", "sky"], ["profile_background"]),
+  item("fds-lifestyle-ice-skating", "Ice Skating Lake", "Nature", "lifestyle-ice-skating.jpg", 1672, 941, ["ice", "skating", "winter", "frozen"], ["profile_background"]),
+  item("fds-lifestyle-lantern-festival", "Lantern Festival", "Travel", "lifestyle-lantern-festival.jpg", 1672, 941, ["lanterns", "festival", "night", "glow"], ["profile_background"]),
+  item("fds-lifestyle-greenhouse-plants", "Greenhouse Plants", "Lifestyle", "lifestyle-greenhouse-plants.jpg", 1672, 941, ["greenhouse", "plants", "botanical", "green"], ["profile_background"]),
+  item("fds-lifestyle-bouldering-gym", "Bouldering Gym", "People", "lifestyle-bouldering-gym.jpg", 1672, 941, ["climbing", "gym", "fitness", "indoor"], ["profile_background"]),
+  item("fds-lifestyle-open-air-cinema", "Open Air Cinema", "Lifestyle", "lifestyle-open-air-cinema.jpg", 1672, 941, ["cinema", "night", "summer", "friends"], ["profile_background"]),
+  item("fds-lifestyle-sailing-golden-hour", "Sailing Golden Hour", "Nature", "lifestyle-sailing-golden-hour.jpg", 1672, 941, ["sailing", "ocean", "sunset", "boat"], ["profile_background"]),
+  item("fds-lifestyle-wildflower-picnic", "Wildflower Picnic", "Nature", "lifestyle-wildflower-picnic.jpg", 1672, 941, ["picnic", "meadow", "wildflowers", "summer"], ["profile_background"]),
+  item("fds-lifestyle-stargazing-camp", "Stargazing Camp", "Nature", "lifestyle-stargazing-camp.jpg", 1672, 941, ["stars", "camping", "night", "milky way"], ["profile_background"]),
+  item("fds-lifestyle-waterfall-swim", "Waterfall Swim", "Nature", "lifestyle-waterfall-swim.jpg", 1672, 941, ["waterfall", "swimming", "lagoon", "tropical"], ["profile_background"]),
+  item("fds-lifestyle-autumn-tram", "Autumn Tram", "Travel", "lifestyle-autumn-tram.jpg", 1672, 941, ["tram", "autumn", "city", "leaves"], ["profile_background"]),
+  item("fds-lifestyle-bread-baking", "Bread Baking", "Lifestyle", "lifestyle-bread-baking.jpg", 1672, 941, ["baking", "bread", "kitchen", "rustic"], ["profile_background"]),
 ];
 
 function item(id, title, category, filename, width, height, tags, purposes) {

@@ -161,7 +161,7 @@ test('home and public library make assets a first-class FDS surface', async () =
     assert.match(libraryHtml, new RegExp(photo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
   assert.match(libraryHtml, /Lifestyle/);
-  assert.equal((libraryHtml.match(/source:'hosted'/g) || []).length, 52);
+  assert.equal((libraryHtml.match(/source:'hosted'/g) || []).length, 64);
   assert.match(libraryHtml, /\[\.\.\.communityPhotos,\.\.\.HOSTED_PHOTOS,\.\.\.apiResults\]/);
 });
 
@@ -192,7 +192,7 @@ test('public stock list API supports asset type, category, and search filters', 
   assert.equal(body.assetType, 'photo');
   assert.equal(body.category, 'lifestyle');
   assert.equal(body.safe, 'all');
-  assert.equal(body.items.length, 25);
+  assert.equal(body.items.length, 28);
   assert.ok(body.items.every((item) => item.source === 'hosted'));
   assert.ok(body.items.every((item) => item.category === 'Lifestyle'));
   assert.ok(body.items.every((item) => item.url.startsWith('https://freedesignstore.online/assets/stock/')));
