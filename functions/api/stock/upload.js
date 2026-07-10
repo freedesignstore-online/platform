@@ -4,12 +4,18 @@ import {
   accountIndexKey,
   addToIndex,
   cleanAssetType,
+  cleanLicenseId,
+  cleanOrigin,
+  cleanOriginDetail,
+  cleanPurpose,
   cleanTags,
   cleanText,
   ensureProfile,
   error,
   fileBytes,
+  imageDimensions,
   json,
+  licenseLabel,
   putItem,
   requireStore,
   safeFilename,
@@ -43,6 +49,19 @@ export async function onRequestPost({ request, env }) {
     return error("Contributor rights and free release confirmations are required.");
   }
 
+  const origin = cleanOrigin(form.get("origin"));
+  if (!origin) {
+    return error("Origin is required: how was this asset made? (photograph, ai-generated, 3d-render, digital-illustration, vector-art, scan, mixed)");
+  }
+  const originDetail = cleanOriginDetail(
+    form.get("originTool"),
+    form.get("originModel"),
+    form.get("originPrompt")
+  );
+  if (origin === "ai-generated" && !originDetail?.tool) {
+    return error("AI-generated assets must disclose the tool used (originTool).");
+  }
+
   const id = crypto.randomUUID();
   const filename = safeFilename(file.name, file.type);
   const objectKey = `community/${id}/${filename}`;
@@ -58,8 +77,13 @@ export async function onRequestPost({ request, env }) {
     author: cleanText(account.accountName, "Contributor", 80),
     category: cleanText(form.get("category"), "Community", 40),
     assetType: cleanAssetType(form.get("assetType")),
-    license: cleanText(form.get("license"), "FreeDesignStore Free Release", 80),
+    license: licenseLabel(cleanLicenseId(form.get("license"))),
+    licenseId: cleanLicenseId(form.get("license")),
+    origin,
+    ...(originDetail ? { originDetail } : {}),
     tags: cleanTags(form.get("tags")),
+    purpose: cleanPurpose(form.get("purpose")),
+    safe: form.get("safe") !== "no",
     contentType: file.type,
     size: file.size,
     source: "community",
@@ -75,6 +99,19 @@ export async function onRequestPost({ request, env }) {
   } catch (err) {
     return error(err.message);
   }
+
+  const sniffed = imageDimensions(body, file.type);
+  const clientWidth = Number(form.get("width")) || undefined;
+  const clientHeight = Number(form.get("height")) || undefined;
+  const clientDuration = Number(form.get("duration")) || undefined;
+  if (sniffed?.width && sniffed?.height) {
+    item.width = sniffed.width;
+    item.height = sniffed.height;
+  } else if (clientWidth && clientHeight) {
+    item.width = Math.round(clientWidth);
+    item.height = Math.round(clientHeight);
+  }
+  if (clientDuration) item.duration = Math.round(clientDuration);
 
   await store.bucket.put(objectKey, body, {
     httpMetadata: {

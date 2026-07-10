@@ -52,6 +52,10 @@
           "description": "Ingest a public non-Unsplash HTTPS image URL under the authenticated account"
         },
         {
+          "name": "update_asset",
+          "description": "Update metadata, taxonomy, and origin disclosure on an owned asset"
+        },
+        {
           "name": "moderate_asset",
           "description": "Publish or reject a pending asset"
         },

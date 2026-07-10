@@ -1,4 +1,6 @@
 import {
+  LICENSES,
+  ORIGINS,
   PENDING_INDEX,
   PUBLIC_INDEX,
   error,
@@ -33,14 +35,23 @@ export async function onRequestGet({ request, env }) {
   if (orientation && !["landscape", "portrait", "square"].includes(orientation)) {
     return error("Unsupported orientation.", 400);
   }
+  const originFilter = String(url.searchParams.get("origin") || "").trim().toLowerCase();
+  const licenseFilter = String(url.searchParams.get("license") || "").trim().toLowerCase();
+  if (originFilter && !ORIGINS.has(originFilter)) {
+    return error("Unsupported origin.", 400);
+  }
+  if (licenseFilter && !LICENSES.has(licenseFilter)) {
+    return error("Unsupported license.", 400);
+  }
 
   const origin = new URL(request.url).origin;
   const includeHosted = status === "public" && (source === "all" || source === "hosted");
   const includeCommunity = source === "all" || source === "community";
   const hostedItems = includeHosted
-    ? filterHostedStock(HOSTED_STOCK, { assetType, category, orientation, purpose, safe, q: query }).map((item) =>
-        hostedStockItem(item, origin)
-      )
+    ? filterHostedStock(HOSTED_STOCK, { assetType, category, orientation, purpose, safe, q: query })
+        .filter((item) => !originFilter || item.origin === originFilter)
+        .filter((item) => !licenseFilter || item.licenseId === licenseFilter)
+        .map((item) => hostedStockItem(item, origin))
     : [];
 
   let communityItems = [];
@@ -57,6 +68,8 @@ export async function onRequestGet({ request, env }) {
         .filter((item) => !category || String(item.category || "").toLowerCase() === category)
         .filter((item) => !orientation || orientationOf(item) === orientation)
         .filter((item) => !purpose || (item.purpose || []).some((value) => String(value || "").toLowerCase() === purpose))
+        .filter((item) => !originFilter || item.origin === originFilter)
+        .filter((item) => !licenseFilter || item.licenseId === licenseFilter)
         .filter((item) => !safe || item.safe !== false)
         .filter((item) => {
           if (!query) return true;
@@ -77,6 +90,8 @@ export async function onRequestGet({ request, env }) {
     category: category || "all",
     orientation: orientation || "all",
     purpose: purpose || "all",
+    origin: originFilter || "all",
+    license: licenseFilter || "all",
     safe: safe ? true : "all",
     q: query,
     communityUnavailable,

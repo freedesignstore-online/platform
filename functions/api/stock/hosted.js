@@ -88,6 +88,9 @@ function cc0(creator) {
     attribution: `${creator} (CC0, via Openverse)`,
     license: "CC0 1.0 Public Domain",
     licenseUrl: "https://creativecommons.org/publicdomain/zero/1.0/",
+    licenseId: "cc0",
+    origin: "photograph",
+    originDetail: undefined,
   };
 }
 
@@ -97,6 +100,9 @@ function nasa() {
     attribution: "NASA Image and Video Library (public domain)",
     license: "Public Domain (NASA)",
     licenseUrl: "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+    licenseId: "cc0",
+    origin: "photograph",
+    originDetail: undefined,
   };
 }
 
@@ -111,6 +117,9 @@ function item(id, title, category, filename, width, height, tags, purposes, extr
     attribution: "FreeDesignStore",
     license: "FreeDesignStore Community License",
     licenseUrl: "https://freedesignstore.online/images/stock-photos/",
+    licenseId: "fds-free",
+    origin: "ai-generated",
+    originDetail: { tool: "Pollinations", model: "flux/sana" },
     contentType: "image/jpeg",
     width,
     height,
@@ -146,6 +155,9 @@ export function hostedStockItem(item, origin = "") {
     orientation: item.orientation,
     safe: item.safe,
     purpose: item.purpose,
+    origin: item.origin,
+    originDetail: item.originDetail,
+    licenseId: item.licenseId,
   };
 }
 

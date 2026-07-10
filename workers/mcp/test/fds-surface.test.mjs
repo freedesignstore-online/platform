@@ -24,7 +24,7 @@ test('public MCP discovery advertises the dedicated FDS MCP endpoint', async () 
   const discovery = JSON.parse(await readRepo('store/.well-known/mcp.json'));
   assert.equal(discovery.servers[0].endpoint, 'https://mcp.freedesignstore.online/mcp');
   assert.equal(discovery.servers[0].transport, 'streamable-http');
-  assert.equal(discovery.servers[0].tools.length, 15);
+  assert.equal(discovery.servers[0].tools.length, 16);
   for (const tool of ['list_design_skills', 'get_design_skill', 'apply_design_skill', 'publish_asset', 'unpublish_asset', 'delete_asset']) {
     assert.ok(discovery.servers[0].tools.some((item) => item.name === tool), `missing ${tool}`);
   }
@@ -167,11 +167,11 @@ test('home and public library make assets a first-class FDS surface', async () =
 
 test('public stock list API supports asset type, category, and search filters', async () => {
   const listSource = await readRepo('functions/api/stock/list.js');
-  const libSource = await readRepo('functions/api/stock/_lib.js');
+  const taxonomySource = await readRepo('functions/api/stock/_taxonomy.js');
   const { onRequestGet, onRequestHead, onRequestOptions } = await importRepoFile('functions/api/stock/list.js');
 
-  assert.match(libSource, /export const ASSET_TYPES = new Set/);
-  assert.match(libSource, /export function isAssetType/);
+  assert.match(taxonomySource, /export const ASSET_TYPES = new Set/);
+  assert.match(taxonomySource, /export function isAssetType/);
   assert.match(listSource, /asset_type/);
   assert.match(listSource, /assetType/);
   assert.match(listSource, /source/);
@@ -368,6 +368,8 @@ test('upload requires an authenticated session and records ownership', async () 
     form.append('file', new File([new Uint8Array(64).fill(255)], 'shot.jpg', { type: 'image/jpeg' }));
     form.append('title', 'Test Shot');
     form.append('assetType', 'photo');
+    form.append('origin', 'photograph');
+    form.append('license', 'cc0');
     form.append('rightsConsent', 'yes');
     form.append('releaseConsent', 'yes');
     return form;
@@ -408,4 +410,66 @@ test('upload requires an authenticated session and records ownership', async () 
   assert.equal(profile.displayName, 'Alice');
   const handleRef = JSON.parse(kv.data.get('profile:handle:alice'));
   assert.equal(handleRef.accountId, 'github-42');
+});
+
+// --- Taxonomy + origin disclosure (PR 2) ---
+
+test('hosted items all disclose origin and license id', async () => {
+  const { HOSTED_STOCK } = await importRepoFile('functions/api/stock/hosted.js');
+  const validOrigins = new Set(['photograph', 'ai-generated', '3d-render', 'digital-illustration', 'vector-art', 'scan', 'mixed']);
+  const validLicenses = new Set(['cc0', 'fds-free', 'attribution']);
+  for (const item of HOSTED_STOCK) {
+    assert.ok(validOrigins.has(item.origin), `${item.id} missing origin`);
+    assert.ok(validLicenses.has(item.licenseId), `${item.id} missing licenseId`);
+    if (item.origin === 'ai-generated') {
+      assert.ok(item.originDetail?.model, `${item.id} AI item missing model`);
+    }
+  }
+  const photos = HOSTED_STOCK.filter((item) => item.origin === 'photograph');
+  assert.equal(photos.length, 16);
+  assert.ok(photos.every((item) => item.licenseId === 'cc0'));
+});
+
+test('stock list API filters by origin and license', async () => {
+  const { onRequestGet } = await importRepoFile('functions/api/stock/list.js');
+
+  const photographs = await onRequestGet({
+    request: new Request('https://freedesignstore.online/api/stock/list?source=hosted&origin=photograph'),
+    env: {},
+  });
+  const photoBody = await photographs.json();
+  assert.equal(photoBody.items.length, 16);
+  assert.ok(photoBody.items.every((item) => item.origin === 'photograph'));
+
+  const cc0 = await onRequestGet({
+    request: new Request('https://freedesignstore.online/api/stock/list?source=hosted&license=cc0'),
+    env: {},
+  });
+  const cc0Body = await cc0.json();
+  assert.equal(cc0Body.items.length, 16);
+
+  const bad = await onRequestGet({
+    request: new Request('https://freedesignstore.online/api/stock/list?source=hosted&origin=magic'),
+    env: {},
+  });
+  assert.equal(bad.status, 400);
+});
+
+test('photo page and gallery disclose origin', async () => {
+  const photoPage = await readRepo('functions/photo/[id].js');
+  assert.match(photoPage, /How this was made/);
+  assert.match(photoPage, /Origin not disclosed/);
+  assert.match(photoPage, /Generation prompt/);
+  assert.match(photoPage, /ImageObject/);
+
+  const gallery = await readRepo('store/images/stock-photos/index.html');
+  assert.match(gallery, /ORIGIN_FILTERS/);
+  assert.match(gallery, /LICENSE_FILTERS/);
+  assert.match(gallery, /uploadOrigin/);
+  assert.equal((gallery.match(/origin:'ai-generated'/g) || []).length, 64);
+  assert.equal((gallery.match(/origin:'photograph'/g) || []).length, 16);
+
+  const mcpSource = await readRepo('workers/mcp/src/index.ts');
+  assert.match(mcpSource, /'update_asset'/);
+  assert.match(mcpSource, /origin_tool/);
 });

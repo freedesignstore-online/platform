@@ -18,6 +18,10 @@ export async function onRequestGet({ params, request, env }) {
         assetType: meta.assetType || "photo",
         author: meta.ownerName || meta.author || "Community",
         license: meta.license || "FreeDesignStore Community License",
+        licenseId: meta.licenseId,
+        origin: meta.origin,
+        originDetail: meta.originDetail,
+        contentType: meta.contentType,
         tags: meta.tags || [],
         url: `${origin}/api/stock/image/${encodeURIComponent(meta.id)}`,
         download: `${origin}/api/stock/image/${encodeURIComponent(meta.id)}`,
@@ -33,6 +37,57 @@ export async function onRequestGet({ params, request, env }) {
   const pageUrl = `${origin}/photo/${encodeURIComponent(item.id)}`;
   const xText = encodeURIComponent(`${item.title} — free design asset on FreeDesignStore`);
   const xUrl = encodeURIComponent(pageUrl);
+
+  // Hosted AI images keep their full generation prompts in the curation manifest.
+  if (raw && item.origin === "ai-generated" && !item.originDetail?.prompt && env.ASSETS) {
+    try {
+      const res = await env.ASSETS.fetch(new Request(`${origin}/assets/stock/manifest.json`));
+      if (res.ok) {
+        const manifest = await res.json();
+        const record = manifest.images?.[item.filename];
+        if (record?.prompt) {
+          item.originDetail = { ...item.originDetail, prompt: record.prompt };
+        }
+      }
+    } catch {}
+  }
+
+  const originLabels = {
+    photograph: "Photograph",
+    "ai-generated": "AI Generated",
+    "3d-render": "3D Render",
+    "digital-illustration": "Digital Illustration",
+    "vector-art": "Vector Art",
+    scan: "Scan",
+    mixed: "Mixed Media",
+  };
+  const licenseExplainers = {
+    cc0: "Dedicated to the public domain (CC0). Use for anything, no attribution required.",
+    "fds-free": "Free to use in personal and commercial projects. Attribution appreciated but not required. Do not resell or redistribute as a competing stock library.",
+    attribution: "Free to use in personal and commercial projects with credit to the creator. Do not resell or redistribute as a competing stock library.",
+  };
+  const licenseNote = licenseExplainers[item.licenseId] || licenseExplainers["fds-free"];
+  const originBlock = item.origin
+    ? `<div class="made"><strong>How this was made</strong><p>${esc(originLabels[item.origin] || item.origin)}${
+        item.originDetail?.tool ? ` · ${esc(item.originDetail.tool)}` : ""
+      }${item.originDetail?.model ? ` (${esc(item.originDetail.model)})` : ""}</p>${
+        item.originDetail?.prompt
+          ? `<details><summary>Generation prompt</summary><p class="prompt">${esc(item.originDetail.prompt)}</p></details>`
+          : ""
+      }</div>`
+    : `<div class="made"><strong>How this was made</strong><p>Origin not disclosed.</p></div>`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ImageObject",
+    name: item.title,
+    contentUrl: item.url,
+    url: pageUrl,
+    creator: { "@type": item.author === "NASA" || item.author === "FreeDesignStore" ? "Organization" : "Person", name: item.author },
+    license: item.licenseId === "cc0" ? "https://creativecommons.org/publicdomain/zero/1.0/" : `${origin}/images/stock-photos/`,
+    acquireLicensePage: pageUrl,
+    ...(item.origin ? { creditText: `${item.author} — ${originLabels[item.origin] || item.origin}` } : {}),
+  };
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -80,6 +135,11 @@ nav a{color:var(--muted)}nav a:hover{color:var(--text);text-decoration:none}
 .share-btn:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
 .share-btn.copied{border-color:#10b981;color:#10b981}
 .license{max-width:1200px;margin:0 auto;padding:0 1.5rem 2rem;font-size:.72rem;color:var(--muted);line-height:1.5}
+.made{margin-top:.9rem;padding:.7rem .9rem;border:1px solid var(--line);border-radius:10px;background:var(--panel);font-size:.75rem}
+.made strong{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.made p{margin-top:.25rem;color:var(--text)}
+.made details{margin-top:.4rem}.made summary{cursor:pointer;color:var(--accent);font-size:.72rem;font-weight:700}
+.made .prompt{color:var(--muted);font-size:.72rem;margin-top:.3rem;line-height:1.5}
 footer{border-top:1px solid var(--line);padding:1rem;text-align:center;font-size:.7rem;color:var(--muted);background:var(--panel)}
 @media(max-width:640px){.meta{grid-template-columns:1fr}.actions{align-items:flex-start;flex-direction:row;flex-wrap:wrap}}
 </style>
@@ -97,6 +157,7 @@ footer{border-top:1px solid var(--line);padding:1rem;text-align:center;font-size
 <h1>${esc(item.title)}</h1>
 <p>By ${esc(item.author)} · ${esc(item.category)} · ${esc(item.license)}</p>
 <div class="tags">${(item.tags || []).map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</div>
+${originBlock}
 </div>
 <div class="actions">
 <a class="btn btn-primary" href="${esc(item.download)}" download="${esc(item.filename)}">Download</a>
@@ -110,7 +171,8 @@ footer{border-top:1px solid var(--line);padding:1rem;text-align:center;font-size
 </div>
 </div>
 </div>
-<p class="license">Free to use in personal and commercial projects. Attribution appreciated but not required. Do not resell or redistribute as a competing stock library.</p>
+<p class="license">${esc(licenseNote)}</p>
+<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
 <footer>FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a></footer>
 <script>
 document.getElementById('copyBtn').addEventListener('click',function(){

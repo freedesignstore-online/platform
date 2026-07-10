@@ -15,15 +15,21 @@ const ALLOWED_TYPES = new Set([
   "image/avif",
   "image/svg+xml",
 ]);
-export const ASSET_TYPES = new Set([
-  "photo",
-  "illustration",
-  "icon",
-  "pattern",
-  "texture",
-  "background",
-  "ui",
-]);
+export {
+  ASSET_TYPES,
+  ASSET_TYPE_LIST,
+  ORIGINS,
+  ORIGIN_LIST,
+  LICENSES,
+  LICENSE_LIST,
+  cleanAssetType,
+  isAssetType,
+  cleanOrigin,
+  cleanOriginDetail,
+  cleanLicenseId,
+  licenseLabel,
+  cleanPurpose,
+} from "./_taxonomy.js";
 
 export function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -139,6 +145,10 @@ export function publicItem(item, origin = "") {
     orientation: item.height > item.width ? "portrait" : item.width > item.height ? "landscape" : undefined,
     safe: item.safe !== false,
     purpose: item.purpose || [],
+    origin: item.origin,
+    originDetail: item.originDetail,
+    licenseId: item.licenseId,
+    duration: item.duration,
     createdAt: item.createdAt,
     status: item.status,
   };
@@ -192,13 +202,38 @@ export function validateFile(file) {
   return null;
 }
 
-export function cleanAssetType(value) {
-  const type = String(value || "photo").toLowerCase();
-  return ASSET_TYPES.has(type) ? type : "photo";
-}
-
-export function isAssetType(value) {
-  return ASSET_TYPES.has(String(value || "").toLowerCase());
+// Best-effort dimension sniff for JPEG and PNG headers. Returns null for
+// other formats — callers fall back to client-supplied values.
+export function imageDimensions(bytes, contentType) {
+  const view = new DataView(bytes);
+  try {
+    if (contentType === "image/png") {
+      // PNG signature + IHDR: width/height at offsets 16/20.
+      if (view.byteLength < 24 || view.getUint32(0) !== 0x89504e47) return null;
+      return { width: view.getUint32(16), height: view.getUint32(20) };
+    }
+    if (contentType === "image/jpeg") {
+      if (view.byteLength < 4 || view.getUint16(0) !== 0xffd8) return null;
+      let offset = 2;
+      while (offset + 9 < view.byteLength) {
+        if (view.getUint8(offset) !== 0xff) {
+          offset += 1;
+          continue;
+        }
+        const marker = view.getUint8(offset + 1);
+        // SOF0-SOF15 except DHT/JPG/DAC carry dimensions.
+        if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker)) {
+          return { height: view.getUint16(offset + 5), width: view.getUint16(offset + 7) };
+        }
+        const length = view.getUint16(offset + 2);
+        if (!length) return null;
+        offset += 2 + length;
+      }
+    }
+  } catch {
+    return null;
+  }
+  return null;
 }
 
 export async function fileBytes(file) {

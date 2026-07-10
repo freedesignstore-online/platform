@@ -44,12 +44,20 @@ interface CatalogItem {
   assetType: AssetType;
   author: string;
   license: string;
+  licenseId?: LicenseId;
+  origin?: Origin;
+  originDetail?: { tool?: string; model?: string; prompt?: string };
   tags: string[];
   status: 'pending' | 'public' | 'rejected';
   objectKey: string;
   filename: string;
   contentType: string;
   size: number;
+  width?: number;
+  height?: number;
+  duration?: number;
+  purpose?: string[];
+  safe?: boolean;
   source?: 'community' | 'mcp';
   sourceUrl?: string;
   ownerAccountId?: string;
@@ -58,7 +66,22 @@ interface CatalogItem {
   updatedAt?: string;
 }
 
-type AssetType = 'photo' | 'illustration' | 'icon' | 'pattern' | 'texture' | 'background' | 'ui';
+type AssetType =
+  | 'photo'
+  | 'illustration'
+  | 'vector'
+  | 'icon'
+  | 'pattern'
+  | 'texture'
+  | 'background'
+  | 'ui'
+  | 'mockup'
+  | 'template'
+  | '3d-render'
+  | 'video'
+  | 'animation';
+type Origin = 'photograph' | 'ai-generated' | '3d-render' | 'digital-illustration' | 'vector-art' | 'scan' | 'mixed';
+type LicenseId = 'cc0' | 'fds-free' | 'attribution';
 const designSkillIds = [
   'asset-brief-builder',
   'svg-illustration-director',
@@ -79,7 +102,29 @@ const MAX_SVG_SIZE = 1024 * 1024;
 const PUBLIC_BASE_FALLBACK = 'https://freedesignstore.online';
 const PUBLIC_MCP_BASE_FALLBACK = 'https://freedesignstore.online';
 
-const assetTypes = ['photo', 'illustration', 'icon', 'pattern', 'texture', 'background', 'ui'] as const;
+// Vendored taxonomy — keep in sync with functions/api/stock/_taxonomy.js.
+const assetTypes = [
+  'photo',
+  'illustration',
+  'vector',
+  'icon',
+  'pattern',
+  'texture',
+  'background',
+  'ui',
+  'mockup',
+  'template',
+  '3d-render',
+  'video',
+  'animation',
+] as const;
+const origins = ['photograph', 'ai-generated', '3d-render', 'digital-illustration', 'vector-art', 'scan', 'mixed'] as const;
+const licenseIds = ['cc0', 'fds-free', 'attribution'] as const;
+const licenseLabels: Record<LicenseId, string> = {
+  cc0: 'CC0 / Public Domain',
+  'fds-free': 'FreeDesignStore Free Release',
+  attribution: 'Free with Attribution',
+};
 const allowedTypes = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/svg+xml']);
 const mcpDiscoveryTools = [
   { name: 'asset_policy', description: 'Read catalog hosting rules, including Unsplash link-off policy' },
@@ -93,6 +138,7 @@ const mcpDiscoveryTools = [
   { name: 'get_asset', description: "Get one asset's metadata and download URL" },
   { name: 'create_svg_asset', description: 'Create a hosted generated SVG asset under the authenticated account' },
   { name: 'create_asset_from_url', description: 'Ingest a public non-Unsplash HTTPS image URL under the authenticated account' },
+  { name: 'update_asset', description: 'Update metadata, taxonomy, and origin disclosure on an owned asset' },
   { name: 'moderate_asset', description: 'Publish or reject a pending asset' },
   { name: 'publish_asset', description: 'Publish a pending owned asset' },
   { name: 'unpublish_asset', description: 'Move a public owned asset back to pending before deletion' },
@@ -329,7 +375,15 @@ function publicItem(env: Env, item: CatalogItem) {
     assetType: item.assetType || 'photo',
     author: item.author,
     license: item.license,
+    licenseId: item.licenseId,
+    origin: item.origin,
+    originDetail: item.originDetail,
     tags: item.tags || [],
+    purpose: item.purpose || [],
+    safe: item.safe !== false,
+    width: item.width,
+    height: item.height,
+    duration: item.duration,
     url: `${base}/api/stock/image/${item.id}`,
     download: `${base}/api/stock/image/${item.id}?download=1`,
     createdAt: item.createdAt,
@@ -354,6 +408,17 @@ function assertAccount(props: McpProps): string | null {
 
 function currentProps(props: McpProps | undefined): McpProps {
   return props || {};
+}
+
+function originDetailOf(tool?: string, model?: string, prompt?: string): { tool?: string; model?: string; prompt?: string } | undefined {
+  const detail: { tool?: string; model?: string; prompt?: string } = {};
+  const t = cleanText(tool, '', 60);
+  const m = cleanText(model, '', 60);
+  const p = cleanText(prompt, '', 600);
+  if (t) detail.tool = t;
+  if (m) detail.model = m;
+  if (p) detail.prompt = p;
+  return Object.keys(detail).length ? detail : undefined;
 }
 
 function safeAccountId(value: string): string {
@@ -523,6 +588,11 @@ async function createAsset(params: {
   category?: string;
   author?: string;
   license?: string;
+  licenseId?: LicenseId;
+  origin?: Origin;
+  originDetail?: { tool?: string; model?: string; prompt?: string };
+  purpose?: string[];
+  safe?: boolean;
   tags?: string[] | string;
   publish?: boolean;
   sourceUrl?: string;
@@ -560,7 +630,12 @@ async function createAsset(params: {
     category: cleanText(params.category, params.assetType, 64).toLowerCase(),
     assetType: params.assetType,
     author: cleanText(params.author, 'FreeDesignStore contributor', 80),
-    license: cleanText(params.license, 'Free community license', 80),
+    license: params.licenseId ? licenseLabels[params.licenseId] : cleanText(params.license, 'Free community license', 80),
+    licenseId: params.licenseId || 'fds-free',
+    origin: params.origin,
+    originDetail: params.originDetail && Object.keys(params.originDetail).length ? params.originDetail : undefined,
+    purpose: params.purpose?.slice(0, 4),
+    safe: params.safe !== false,
     tags: cleanTags(params.tags),
     status,
     objectKey,
@@ -715,11 +790,13 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
       {
         status: z.enum(['public', 'pending']).optional().describe('Asset status to list'),
         asset_type: z.enum(assetTypes).optional().describe('Filter by asset type'),
+        origin: z.enum(origins).optional().describe('Filter by creation origin'),
+        license: z.enum(licenseIds).optional().describe('Filter by license id'),
         category: z.string().optional().describe('Filter by category'),
         q: z.string().optional().describe('Search title/tags/author'),
         limit: z.number().int().min(1).max(100).optional().describe('Maximum assets to return'),
       },
-      async ({ status = 'public', asset_type, category, q, limit = 50 }) => {
+      async ({ status = 'public', asset_type, origin, license, category, q, limit = 50 }) => {
         const store = requireStore(this.env);
         if (typeof store === 'string') return txt(store);
         const props = currentProps(this.props);
@@ -731,6 +808,8 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         const categoryFilter = cleanText(category, '', 64).toLowerCase();
         const filtered = items
           .filter((item) => !asset_type || item.assetType === asset_type)
+          .filter((item) => !origin || item.origin === origin)
+          .filter((item) => !license || item.licenseId === license)
           .filter((item) => !categoryFilter || item.category === categoryFilter)
           .filter((item) => !needle || [item.title, item.author, item.category, ...(item.tags || [])].join(' ').toLowerCase().includes(needle))
           .slice(0, limit);
@@ -762,16 +841,23 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         asset_type: z.enum(assetTypes).optional().describe('Catalog asset type'),
         category: z.string().optional().describe('Catalog category'),
         author: z.string().optional().describe('Author or contributor credit'),
-        license: z.string().optional().describe('License label shown to users'),
+        license: z.enum(licenseIds).optional().describe('License: cc0, fds-free, or attribution'),
+        origin: z.enum(origins).optional().describe('How the asset was made (defaults to digital-illustration for SVG)'),
+        origin_tool: z.string().max(60).optional().describe('Tool used (required when origin is ai-generated)'),
+        origin_model: z.string().max(60).optional().describe('AI model used, if any'),
+        origin_prompt: z.string().max(600).optional().describe('Generation prompt, if any'),
+        purpose: z.array(z.string()).optional().describe('Intended purposes, e.g. profile_background'),
+        safe: z.boolean().optional().describe('Safe-for-work flag (default true)'),
         tags: z.array(z.string()).optional().describe('Search tags'),
         publish: z.boolean().optional().describe('Publish immediately instead of leaving pending. Requires an authenticated creator or admin account.'),
       },
-      async ({ title, svg, asset_type = 'illustration', category, author, license, tags, publish = false }) => {
+      async ({ title, svg, asset_type = 'illustration', category, author, license, origin = 'digital-illustration', origin_tool, origin_model, origin_prompt, purpose, safe, tags, publish = false }) => {
         const props = currentProps(this.props);
         const authError = assertAccount(props);
         if (authError) return txt(authError);
         const store = requireStore(this.env);
         if (typeof store === 'string') return txt(store);
+        if (origin === 'ai-generated' && !origin_tool) return txt('AI-generated assets must disclose the tool used (origin_tool).');
         const bytes = validateSvg(svg);
         if (typeof bytes === 'string') return txt(bytes);
         const result = await createAsset({
@@ -784,7 +870,11 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
           assetType: asset_type,
           category,
           author: author || props.accountName,
-          license,
+          licenseId: license,
+          origin,
+          originDetail: originDetailOf(origin_tool, origin_model, origin_prompt),
+          purpose,
+          safe,
           tags,
           publish: Boolean(publish),
           ownerAccountId: props.accountId,
@@ -803,16 +893,23 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         asset_type: z.enum(assetTypes).optional().describe('Catalog asset type'),
         category: z.string().optional().describe('Catalog category'),
         author: z.string().optional().describe('Author or contributor credit'),
-        license: z.string().optional().describe('License label shown to users'),
+        license: z.enum(licenseIds).optional().describe('License: cc0, fds-free, or attribution'),
+        origin: z.enum(origins).describe('How the asset was made — required for ingested assets'),
+        origin_tool: z.string().max(60).optional().describe('Tool used (required when origin is ai-generated)'),
+        origin_model: z.string().max(60).optional().describe('AI model used, if any'),
+        origin_prompt: z.string().max(600).optional().describe('Generation prompt, if any'),
+        purpose: z.array(z.string()).optional().describe('Intended purposes, e.g. profile_background'),
+        safe: z.boolean().optional().describe('Safe-for-work flag (default true)'),
         tags: z.array(z.string()).optional().describe('Search tags'),
         publish: z.boolean().optional().describe('Publish immediately instead of leaving pending. Requires an authenticated creator or admin account.'),
       },
-      async ({ url, title, asset_type = 'photo', category, author, license, tags, publish = false }) => {
+      async ({ url, title, asset_type = 'photo', category, author, license, origin, origin_tool, origin_model, origin_prompt, purpose, safe, tags, publish = false }) => {
         const props = currentProps(this.props);
         const authError = assertAccount(props);
         if (authError) return txt(authError);
         const store = requireStore(this.env);
         if (typeof store === 'string') return txt(store);
+        if (origin === 'ai-generated' && !origin_tool) return txt('AI-generated assets must disclose the tool used (origin_tool).');
 
         const parsed = new URL(url);
         if (parsed.protocol !== 'https:') return txt('Only HTTPS image URLs are accepted.');
@@ -845,7 +942,11 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
           assetType: asset_type,
           category,
           author: author || props.accountName,
-          license,
+          licenseId: license,
+          origin,
+          originDetail: originDetailOf(origin_tool, origin_model, origin_prompt),
+          purpose,
+          safe,
           tags,
           publish: Boolean(publish),
           sourceUrl: parsed.toString(),
@@ -853,6 +954,52 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
           ownerName: props.accountName,
         });
         return jsonText(result);
+      },
+    );
+
+    this.server.tool(
+      'update_asset',
+      'Update metadata on an owned asset (admin may update any): title, category, tags, origin disclosure, license, purpose, safe flag.',
+      {
+        id: z.string().describe('Catalog asset id'),
+        title: z.string().optional().describe('New title'),
+        category: z.string().optional().describe('New category'),
+        tags: z.array(z.string()).optional().describe('New search tags'),
+        origin: z.enum(origins).optional().describe('How the asset was made'),
+        origin_tool: z.string().max(60).optional().describe('Tool used'),
+        origin_model: z.string().max(60).optional().describe('AI model used'),
+        origin_prompt: z.string().max(600).optional().describe('Generation prompt'),
+        license: z.enum(licenseIds).optional().describe('License: cc0, fds-free, or attribution'),
+        purpose: z.array(z.string()).optional().describe('Intended purposes'),
+        safe: z.boolean().optional().describe('Safe-for-work flag'),
+      },
+      async ({ id, title, category, tags, origin, origin_tool, origin_model, origin_prompt, license, purpose, safe }) => {
+        const props = currentProps(this.props);
+        const authError = assertAccount(props);
+        if (authError) return txt(authError);
+        const store = requireStore(this.env);
+        if (typeof store === 'string') return txt(store);
+        const item = await getItem(store.kv, id);
+        if (!item) return txt(`Asset not found: ${id}`);
+        if (!props.isAdmin && !isOwner(props, item)) return txt('Not authorized to update this asset.');
+        if (origin === 'ai-generated' && !origin_tool && !item.originDetail?.tool) {
+          return txt('AI-generated assets must disclose the tool used (origin_tool).');
+        }
+        if (title !== undefined) item.title = cleanText(title, item.title, 96);
+        if (category !== undefined) item.category = cleanText(category, item.category, 64).toLowerCase();
+        if (tags !== undefined) item.tags = cleanTags(tags);
+        if (origin !== undefined) item.origin = origin;
+        const detail = originDetailOf(origin_tool, origin_model, origin_prompt);
+        if (detail) item.originDetail = { ...item.originDetail, ...detail };
+        if (license !== undefined) {
+          item.licenseId = license;
+          item.license = licenseLabels[license];
+        }
+        if (purpose !== undefined) item.purpose = purpose.slice(0, 4);
+        if (safe !== undefined) item.safe = safe;
+        item.updatedAt = new Date().toISOString();
+        await putItem(store.kv, item);
+        return jsonText(itemForAccount(this.env, item));
       },
     );
 
