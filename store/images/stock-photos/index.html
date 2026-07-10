@@ -146,7 +146,16 @@ h1{font-family:'Fraunces',serif;font-size:32px;line-height:1.05;font-weight:800;
   </section>
 
   <section class="section" id="submitSection">
-    <div class="panel">
+    <div class="panel" id="signinPanel" style="display:none;">
+      <strong>Sign in to contribute</strong>
+      <p style="font-size:13px;margin:8px 0 12px;">Every asset on FreeDesignStore is credited to its contributor. Sign in with GitHub or Google to publish under your creator profile.</p>
+      <a class="btn btn-primary" id="signinBtn" href="/.fds/auth/start">Sign in to contribute</a>
+    </div>
+    <div class="panel" id="uploadPanel">
+      <div class="identity-chip" id="identityChip" style="display:none;align-items:center;gap:8px;margin-bottom:12px;font-size:13px;">
+        <img id="identityAvatar" alt="" style="width:26px;height:26px;border-radius:50%;background:#e5e7eb;" hidden>
+        <span>Publishing as <strong id="identityName"></strong></span>
+      </div>
       <div class="drop-zone" id="dropZone">
         <strong>Drop photos, illustrations, icons, or textures here</strong>
         <p style="font-size:12px;margin-top:6px;">JPG, PNG, WebP, AVIF, or SVG. 8 MB max for raster, 1 MB max for SVG.</p>
@@ -173,7 +182,6 @@ h1{font-family:'Fraunces',serif;font-size:32px;line-height:1.05;font-weight:800;
       </div>
       <div class="upload-form">
         <input class="wide" id="uploadTitle" placeholder="Asset title">
-        <input id="uploadAuthor" placeholder="Author or studio">
         <select id="uploadAssetType">
           <option value="photo">Photo</option>
           <option value="illustration">Illustration</option>
@@ -198,7 +206,7 @@ h1{font-family:'Fraunces',serif;font-size:32px;line-height:1.05;font-weight:800;
           <label><input type="checkbox" id="releaseConsent"> I agree to release this asset for free public use under the selected license.</label>
         </div>
       </div>
-      <p class="notice warn">Uploads are stored in Cloudflare R2 and metadata in KV. By default, new submissions are pending until approved unless AUTO_PUBLISH_STOCK_UPLOADS is enabled.</p>
+      <p class="notice warn">Uploads publish immediately under your creator identity and are stored in Cloudflare R2. The FreeDesignStore team may unpublish assets that violate the contribution rules.</p>
     </div>
   </section>
 </main>
@@ -356,6 +364,7 @@ function bindEvents(){
       document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b===btn));
       $('submitSection').classList.toggle('active',activeSource==='submit');
       $('librarySection').classList.toggle('active',activeSource!=='submit');
+      if(activeSource==='submit') checkContributorAuth();
       render();
     });
   });
@@ -714,6 +723,25 @@ function useGeneratedAsset(){
   $('generatorStatus').textContent='Generated asset queued.';
 }
 
+async function checkContributorAuth(){
+  try{
+    const res=await fetch('/.fds/auth/me',{credentials:'include'});
+    const me=res.ok?await res.json():{authenticated:false};
+    const authed=Boolean(me.authenticated);
+    $('signinPanel').style.display=authed?'none':'block';
+    $('uploadPanel').style.display=authed?'block':'none';
+    if(authed){
+      $('identityChip').style.display='flex';
+      $('identityName').textContent=me.accountName||me.login||'you';
+      if(me.avatarUrl){$('identityAvatar').src=me.avatarUrl;$('identityAvatar').hidden=false;}
+    }
+    $('signinBtn').href='/.fds/auth/start?return_to='+encodeURIComponent(location.pathname);
+  }catch{
+    $('signinPanel').style.display='block';
+    $('uploadPanel').style.display='none';
+  }
+}
+
 async function submitPhotos(){
   const status=$('submitStatus');
   status.className='submit-status';
@@ -734,14 +762,13 @@ async function submitPhotos(){
     const form=new FormData();
     form.append('file',file);
     form.append('title',$('uploadTitle').value.trim()||file.name.replace(/\.[^.]+$/,''));
-    form.append('author',$('uploadAuthor').value.trim()||'Anonymous contributor');
     form.append('assetType',$('uploadAssetType').value);
     form.append('category',$('uploadCategory').value);
     form.append('license',$('uploadLicense').value);
     form.append('tags',$('uploadTags').value);
     form.append('rightsConsent','yes');
     form.append('releaseConsent','yes');
-    const res=await fetch('/api/stock/upload',{method:'POST',body:form});
+    const res=await fetch('/api/stock/upload',{method:'POST',body:form,credentials:'include'});
     if(!res.ok){
       const data=await res.json().catch(()=>({error:'Upload failed'}));
       status.textContent=data.error||'Upload failed.';

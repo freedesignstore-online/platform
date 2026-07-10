@@ -1,7 +1,10 @@
+import { sessionAccount, safeAccountId, accountIndexKey } from "../_session.js";
+
 const PUBLIC_INDEX = "stock:index:public";
 const PENDING_INDEX = "stock:index:pending";
 const ITEM_PREFIX = "stock:item:";
-const DEFAULT_MCP_BACKEND = "https://freedesignstore-mcp.serge-the-dev.workers.dev";
+const PROFILE_PREFIX = "profile:account:";
+const HANDLE_PREFIX = "profile:handle:";
 const MAX_ITEMS = 500;
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 const MAX_SVG_SIZE = 1024 * 1024;
@@ -66,27 +69,7 @@ export function isAdmin(request, env) {
 }
 
 export async function authenticatedAccount(request, env) {
-  const cookie = request.headers.get("cookie");
-  if (!cookie) return null;
-
-  const source = new URL(request.url);
-  const target = new URL(env.FDS_MCP_BACKEND_URL || DEFAULT_MCP_BACKEND);
-  target.pathname = "/.fds/auth/me";
-  target.search = "";
-
-  const headers = new Headers();
-  headers.set("cookie", cookie);
-  headers.set("x-fds-forwarded-host", source.host);
-  headers.set("x-fds-forwarded-proto", source.protocol.replace(":", ""));
-
-  try {
-    const res = await fetch(target.toString(), { headers });
-    if (!res.ok) return null;
-    const body = await res.json();
-    return body?.authenticated ? body : null;
-  } catch {
-    return null;
-  }
+  return sessionAccount(request, env);
 }
 
 export async function canViewItem(request, env, item) {
@@ -240,4 +223,64 @@ export async function fileBytes(file) {
   return new TextEncoder().encode(text).buffer;
 }
 
-export { PUBLIC_INDEX, PENDING_INDEX };
+export function safeHandle(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 30);
+}
+
+export async function getProfile(kv, accountId) {
+  return kv.get(`${PROFILE_PREFIX}${safeAccountId(accountId)}`, "json");
+}
+
+export async function getProfileByHandle(kv, handle) {
+  const ref = await kv.get(`${HANDLE_PREFIX}${safeHandle(handle)}`, "json");
+  if (!ref?.accountId) return null;
+  return getProfile(kv, ref.accountId);
+}
+
+export async function putProfile(kv, profile) {
+  await kv.put(`${PROFILE_PREFIX}${safeAccountId(profile.accountId)}`, JSON.stringify(profile));
+}
+
+// Lazily creates a CreatorProfile from a session account on first contribution.
+// Default handle comes from the provider login (email local-part for Google),
+// with -2/-3 suffixes on collision.
+export async function ensureProfile(kv, account) {
+  if (!account?.accountId) return null;
+  const existing = await getProfile(kv, account.accountId);
+  if (existing) return existing;
+
+  const base =
+    safeHandle(String(account.login || "").split("@")[0]) ||
+    safeAccountId(account.accountId);
+  let handle = base.length >= 3 ? base : `${base}-fds`.slice(0, 30);
+  for (let n = 2; n < 50; n += 1) {
+    const taken = await kv.get(`${HANDLE_PREFIX}${handle}`, "json");
+    if (!taken) break;
+    if (taken.accountId === safeAccountId(account.accountId)) break;
+    handle = `${base}-${n}`.slice(0, 30);
+  }
+
+  const now = new Date().toISOString();
+  const profile = {
+    accountId: safeAccountId(account.accountId),
+    handle,
+    displayName: account.accountName || handle,
+    avatarUrl: account.avatarUrl || null,
+    provider: account.provider || null,
+    login: account.login || null,
+    bio: "",
+    website: "",
+    social: {},
+    createdAt: now,
+    updatedAt: now,
+  };
+  await kv.put(`${HANDLE_PREFIX}${handle}`, JSON.stringify({ accountId: profile.accountId }));
+  await putProfile(kv, profile);
+  return profile;
+}
+
+export { PUBLIC_INDEX, PENDING_INDEX, sessionAccount, safeAccountId, accountIndexKey };

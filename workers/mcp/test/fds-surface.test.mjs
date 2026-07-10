@@ -251,10 +251,12 @@ test('random stock API serves static hosted assets for app integrations', async 
 
 test('stock image route allows signed-in owners to preview private assets', async () => {
   const lib = await readRepo('functions/api/stock/_lib.js');
+  const session = await readRepo('functions/api/_session.js');
   const imageRoute = await readRepo('functions/api/stock/image/[id].js');
   assert.match(lib, /authenticatedAccount/);
   assert.match(lib, /ownerAccountId === account\.accountId/);
-  assert.match(lib, /\/\.fds\/auth\/me/);
+  assert.match(session, /\/\.fds\/auth\/me/);
+  assert.match(session, /SESSION_SIGNING_KEY/);
   assert.match(imageRoute, /canViewItem/);
   assert.doesNotMatch(imageRoute, /item\.status !== "public" && !isAdmin/);
 });
@@ -292,4 +294,118 @@ test('published design skills mirror FIS/PAGS skill publishing pattern', async (
   for (const tool of ['list_design_skills', 'get_design_skill', 'apply_design_skill']) {
     assert.match(mcpSource, new RegExp(`'${tool}'`));
   }
+});
+
+// --- Contributor identity (PR 1) ---
+
+import { createHmac } from 'node:crypto';
+
+function b64url(value) {
+  return Buffer.from(value).toString('base64url');
+}
+
+function signTestSession(payload, key, ttlSeconds = 3600) {
+  const now = Math.floor(Date.now() / 1000);
+  const body = b64url(JSON.stringify({ ...payload, iat: now, exp: now + ttlSeconds }));
+  const sig = createHmac('sha256', key).update(body).digest('base64url');
+  return `${body}.${sig}`;
+}
+
+function memoryKV() {
+  const data = new Map();
+  return {
+    data,
+    async get(key, type) {
+      const value = data.get(key);
+      if (value === undefined) return null;
+      return type === 'json' ? JSON.parse(value) : value;
+    },
+    async put(key, value) {
+      data.set(key, String(value));
+    },
+    async delete(key) {
+      data.delete(key);
+    },
+  };
+}
+
+function memoryBucket() {
+  const objects = new Map();
+  return {
+    objects,
+    async put(key, body, opts) {
+      objects.set(key, { body, opts });
+    },
+    async get(key) {
+      return objects.has(key) ? { body: objects.get(key).body } : null;
+    },
+  };
+}
+
+test('vendored session verify accepts worker-signed tokens and rejects bad ones', async () => {
+  const { verifySession } = await importRepoFile('functions/api/_session.js');
+  const key = 'test-signing-key';
+  const token = signTestSession({ uid: 'github:42', name: 'Alice', login: 'alice', roles: ['creator', 'publisher'] }, key);
+
+  const payload = await verifySession(token, key);
+  assert.equal(payload.uid, 'github:42');
+  assert.equal(payload.login, 'alice');
+
+  assert.equal(await verifySession(token, 'wrong-key'), null);
+  assert.equal(await verifySession(`${token}x`, key), null);
+  const expired = signTestSession({ uid: 'github:42' }, key, -10);
+  assert.equal(await verifySession(expired, key), null);
+});
+
+test('upload requires an authenticated session and records ownership', async () => {
+  const { onRequestPost } = await importRepoFile('functions/api/stock/upload.js');
+  const kv = memoryKV();
+  const bucket = memoryBucket();
+  const env = { FDS_STOCK_KV: kv, FDS_STOCK_BUCKET: bucket, SESSION_SIGNING_KEY: 'test-signing-key' };
+
+  const makeForm = () => {
+    const form = new FormData();
+    form.append('file', new File([new Uint8Array(64).fill(255)], 'shot.jpg', { type: 'image/jpeg' }));
+    form.append('title', 'Test Shot');
+    form.append('assetType', 'photo');
+    form.append('rightsConsent', 'yes');
+    form.append('releaseConsent', 'yes');
+    return form;
+  };
+
+  const anon = await onRequestPost({
+    request: new Request('https://freedesignstore.online/api/stock/upload', { method: 'POST', body: makeForm() }),
+    env,
+  });
+  assert.equal(anon.status, 401);
+
+  const token = signTestSession({ uid: 'github:42', name: 'Alice', login: 'alice', provider: 'github', roles: ['creator', 'publisher'] }, 'test-signing-key');
+  const authed = await onRequestPost({
+    request: new Request('https://freedesignstore.online/api/stock/upload', {
+      method: 'POST',
+      body: makeForm(),
+      headers: { cookie: `__Host-fds_mcp_session=${encodeURIComponent(token)}` },
+    }),
+    env,
+  });
+  assert.equal(authed.status, 200);
+  const result = await authed.json();
+  assert.equal(result.ok, true);
+  assert.equal(result.status, 'public');
+
+  const item = JSON.parse(kv.data.get(`stock:item:${result.id}`));
+  assert.equal(item.ownerAccountId, 'github:42');
+  assert.equal(item.author, 'Alice');
+  assert.equal(item.status, 'public');
+
+  const accountIndex = JSON.parse(kv.data.get('stock:index:account:github-42'));
+  assert.deepEqual(accountIndex, [result.id]);
+  const publicIndex = JSON.parse(kv.data.get('stock:index:public'));
+  assert.ok(publicIndex.includes(result.id));
+
+  const profile = JSON.parse(kv.data.get('profile:account:github-42'));
+  assert.equal(profile.handle, 'alice');
+  assert.equal(profile.displayName, 'Alice');
+  const handleRef = JSON.parse(kv.data.get('profile:handle:alice'));
+  assert.equal(handleRef.accountId, 'github-42');
 });
