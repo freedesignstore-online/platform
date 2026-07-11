@@ -214,17 +214,12 @@ h1{font-family:'Fraunces',serif;font-size:32px;line-height:1.05;font-weight:800;
         <input id="uploadOriginTool" placeholder="Tool (e.g. Midjourney, Blender)" style="display:none;">
         <input id="uploadOriginModel" placeholder="Model (optional)" style="display:none;">
         <input class="wide" id="uploadOriginPrompt" placeholder="Generation prompt (optional but appreciated)" style="display:none;">
-        <select id="uploadLicense">
-          <option value="fds-free">FreeDesignStore Free Release</option>
-          <option value="cc0">CC0 / Public Domain</option>
-          <option value="attribution">Free with Attribution</option>
-        </select>
         <input class="wide" id="uploadTags" placeholder="Tags, comma separated">
-        <button class="btn btn-primary" id="submitBtn">Submit Asset for Free Release</button>
+        <button class="btn btn-primary" id="submitBtn">Publish to the Public Domain (CC0)</button>
         <span class="submit-status" id="submitStatus"></span>
         <div class="checks">
           <label><input type="checkbox" id="rightsConsent"> I own this asset or have the rights to release it here. I am not uploading someone else's stock asset or an Unsplash photo.</label>
-          <label><input type="checkbox" id="releaseConsent"> I agree to release this asset for free public use under the selected license.</label>
+          <label><input type="checkbox" id="releaseConsent"> I irrevocably dedicate this asset to the public domain under <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0 1.0</a> — anyone may use it for anything, no attribution required. See the <a href="/terms/" target="_blank">Terms</a>.</label>
         </div>
       </div>
       <p class="notice warn">Uploads publish immediately under your creator identity and are stored in Cloudflare R2. The FreeDesignStore team may unpublish assets that violate the contribution rules.</p>
@@ -785,7 +780,7 @@ async function submitPhotos(){
     form.append('title',$('uploadTitle').value.trim()||file.name.replace(/\.[^.]+$/,''));
     form.append('assetType',$('uploadAssetType').value);
     form.append('category',$('uploadCategory').value);
-    form.append('license',$('uploadLicense').value);
+    form.append('license','cc0');
     form.append('origin',$('uploadOrigin').value);
     form.append('originTool',$('uploadOriginTool').value.trim());
     form.append('originModel',$('uploadOriginModel').value.trim());
@@ -840,6 +835,6 @@ init().then(()=>{
 });
 </script>
 <script src="/related.js"></script>
-<footer style="border-top:1px solid var(--line);padding:1rem;text-align:center;font-size:.7rem;color:var(--muted);background:var(--panel)">FreeDesignStore — part of <a href="https://openfrontier.pages.dev" style="color:var(--accent)">Open Frontier</a> | <a href="https://openfrontier-docs.pages.dev" style="color:var(--accent)">Docs</a></footer>
+<footer style="border-top:1px solid var(--line);padding:1rem;text-align:center;font-size:.7rem;color:var(--muted);background:var(--panel)">FreeDesignStore — part of <a href="https://openfrontier.pages.dev" style="color:var(--accent)">Open Frontier</a> | <a href="https://openfrontier-docs.pages.dev" style="color:var(--accent)">Docs</a> | <a href="/terms/" style="color:var(--accent)">Terms</a> | <a href="/privacy/" style="color:var(--accent)">Privacy</a></footer>
 </body>
 </html>

@@ -99,7 +99,7 @@ footer{border-top:1px solid var(--line);padding:1rem;text-align:center;font-size
 ${creators.length ? `<div class="grid">${cards}</div>` : `<div class="empty">Be the first contributor — <a href="/images/stock-photos/">sign in and upload your work</a>.</div>`}
 </div>
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
-<footer>FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a></footer>
+<footer>FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a> · <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></footer>
 </body>
 </html>`;
 

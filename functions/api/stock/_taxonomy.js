@@ -79,11 +79,11 @@ export function cleanLicenseId(value) {
   const label = String(value || "").toLowerCase();
   if (label.includes("cc0") || label.includes("public domain")) return "cc0";
   if (label.includes("attribution")) return "attribution";
-  return "fds-free";
+  return "cc0";
 }
 
 export function licenseLabel(id) {
-  return LICENSE_LIST.find((l) => l.id === id)?.label || LICENSE_LIST[1].label;
+  return LICENSE_LIST.find((l) => l.id === id)?.label || LICENSE_LIST[0].label;
 }
 
 export function cleanPurpose(value) {

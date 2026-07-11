@@ -435,7 +435,7 @@ test('upload requires an authenticated session and records ownership', async () 
     form.append('title', 'Test Shot');
     form.append('assetType', 'photo');
     form.append('origin', 'photograph');
-    form.append('license', 'cc0');
+    form.append('license', 'attribution');
     form.append('rightsConsent', 'yes');
     form.append('releaseConsent', 'yes');
     return form;
@@ -465,6 +465,8 @@ test('upload requires an authenticated session and records ownership', async () 
   assert.equal(item.ownerAccountId, 'github:42');
   assert.equal(item.author, 'Alice');
   assert.equal(item.status, 'public');
+  // All contributions are public-domain dedicated regardless of the form value.
+  assert.equal(item.licenseId, 'cc0');
 
   const accountIndex = JSON.parse(kv.data.get('stock:index:account:github-42'));
   assert.deepEqual(accountIndex, [result.id]);
@@ -532,6 +534,26 @@ test('photo page and gallery disclose origin', async () => {
   const mcpSource = await readRepo('workers/mcp/src/index.ts');
   assert.match(mcpSource, /'update_asset'/);
   assert.match(mcpSource, /origin_tool/);
+});
+
+test('terms and privacy pages state the CC0 dedication', async () => {
+  const terms = await readRepo('store/terms/index.html');
+  assert.match(terms, /CC0 1\.0 Universal/);
+  assert.match(terms, /No attribution/);
+  assert.match(terms, /public domain/i);
+  assert.match(terms, /creativecommons\.org\/publicdomain\/zero/);
+
+  const privacy = await readRepo('store/privacy/index.html');
+  assert.match(privacy, /Cloudflare Web Analytics/);
+  assert.match(privacy, /__Host-fds_mcp_session/);
+
+  const gallery = await readRepo('store/images/stock-photos/index.html');
+  assert.match(gallery, /Publish to the Public Domain \(CC0\)/);
+  assert.doesNotMatch(gallery, /uploadLicense/);
+
+  const sitemap = await readRepo('store/sitemap.xml');
+  assert.match(sitemap, /\/terms\//);
+  assert.match(sitemap, /\/privacy\//);
 });
 
 // --- Creator profiles (PR 3) ---

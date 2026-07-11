@@ -24,7 +24,7 @@ The MCP worker (`workers/mcp`) shares the same KV/R2 and sets `FDS_ADMIN_LOGINS`
 - **Uploads require sign-in** (GitHub/Google OAuth via the MCP worker). Ownership comes from the session; there is no free-text author.
 - **Publish instantly, moderate by takedown** — admins use the console Admin view or MCP `moderate_asset` / `unpublish_asset`.
 - **Every asset discloses its origin**: `origin` is required (`photograph | ai-generated | 3d-render | digital-illustration | vector-art | scan | mixed`); AI-generated assets must name the tool, prompts are encouraged and shown on asset pages.
-- **License election**: `cc0 | fds-free | attribution` (`licenseId`).
+- **License**: every contribution is irrevocably dedicated to the public domain (`licenseId: "cc0"` — the upload endpoint forces it; the release consent is a CC0 dedication). Legacy ids `fds-free | attribution` remain in the taxonomy only to render old data.
 - **Creator profiles**: lazily created on first contribution — `profile:account:{id}` / `profile:handle:{handle}` in KV, public at `/u/{handle}`, directory at `/creators`. Handles are unique; reserved names are blocked.
 
 ## Limits (soft, non-admin accounts)
@@ -45,11 +45,11 @@ The MCP worker (`workers/mcp`) shares the same KV/R2 and sets `FDS_ADMIN_LOGINS`
 - `POST /api/stock/moderate`: admin REST moderation (`{ "id": "...", "action": "publish" | "reject" }`) with admin bearer token.
 - `GET /sitemap-catalog.xml`: dynamic sitemap of asset + creator pages.
 
-The public use rule for FDS-hosted assets: free in personal and commercial
-projects per the asset's license (`cc0` needs no attribution; `attribution`
-requires credit); do not resell, mirror, or redistribute the files as a
-competing stock library. Unsplash results are link-off only — never copied
-into R2.
+The public use rule for FDS-hosted assets: everything in the catalog is
+dedicated to the public domain under CC0 1.0 — any use, commercial included,
+no attribution, no restrictions (see `store/terms/index.html`, live at
+`/terms/`). Unsplash results are link-off only — never copied into R2
+(Unsplash's own license applies to those).
 
 ## Curated set maintenance
 

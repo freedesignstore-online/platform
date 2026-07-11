@@ -47,11 +47,11 @@ export async function onRequestGet({ params, request, env }) {
     mixed: "Mixed Media",
   };
   const licenseExplainers = {
-    cc0: "Dedicated to the public domain (CC0). Use for anything, no attribution required.",
-    "fds-free": "Free to use in personal and commercial projects. Attribution appreciated but not required. Do not resell or redistribute as a competing stock library.",
-    attribution: "Free to use in personal and commercial projects with credit to the creator. Do not resell or redistribute as a competing stock library.",
+    cc0: "Dedicated to the public domain (CC0). Use for anything, personal or commercial — no attribution, no permission required.",
+    "fds-free": "Free to use in personal and commercial projects. Attribution appreciated but not required.",
+    attribution: "Free to use in personal and commercial projects with credit to the creator.",
   };
-  const licenseNote = licenseExplainers[item.licenseId] || licenseExplainers["fds-free"];
+  const licenseNote = licenseExplainers[item.licenseId] || licenseExplainers["cc0"];
   const originBlock = item.origin
     ? `<div class="made"><strong>How this was made</strong><p>${esc(originLabels[item.origin] || item.origin)}${
         item.originDetail?.tool ? ` · ${esc(item.originDetail.tool)}` : ""
@@ -160,9 +160,9 @@ ${originBlock}
 </div>
 </div>
 </div>
-<p class="license">${esc(licenseNote)} · <a href="https://github.com/freedesignstore-online/platform/issues/new?title=${encodeURIComponent(`Report asset ${item.id}`)}&body=${encodeURIComponent(`Asset: ${pageUrl}\n\nReason (copyright, inappropriate content, wrong attribution, other):\n`)}" target="_blank" rel="noopener">Report this asset</a></p>
+<p class="license">${esc(licenseNote)} · <a href="/terms/">Terms &amp; License</a> · <a href="https://github.com/freedesignstore-online/platform/issues/new?title=${encodeURIComponent(`Report asset ${item.id}`)}&body=${encodeURIComponent(`Asset: ${pageUrl}\n\nReason (copyright, inappropriate content, wrong attribution, other):\n`)}" target="_blank" rel="noopener">Report this asset</a></p>
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
-<footer>FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a></footer>
+<footer>FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a> · <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></footer>
 <script>
 document.getElementById('copyBtn').addEventListener('click',function(){
   navigator.clipboard.writeText(location.href).then(()=>{

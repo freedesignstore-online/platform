@@ -122,7 +122,7 @@ ${profile.bio ? `<p class="bio">${esc(profile.bio)}</p>` : ""}
 </div>
 ${items.length ? `<div class="grid">${cards}</div>` : `<p class="empty">No published assets yet.</p>`}
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
-<footer>FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a></footer>
+<footer>FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a> · <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></footer>
 </body>
 </html>`;
 
