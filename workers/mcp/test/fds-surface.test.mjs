@@ -544,6 +544,11 @@ test('console offers AI generation with origin disclosure', async () => {
   assert.match(console_, /origin_tool:'Pollinations'/);
   assert.match(console_, /origin:'ai-generated'/);
   assert.match(console_, /create_asset_from_url/);
+  // In-browser engine: SD-Turbo on WebGPU, published through the upload endpoint
+  assert.match(console_, /sd-turbo-ort-web/);
+  assert.match(console_, /shader-f16/);
+  assert.match(console_, /SD-Turbo \(in-browser\)/);
+  assert.match(console_, /\/api\/stock\/upload/);
 });
 
 test('terms and privacy pages state the CC0 dedication', async () => {
