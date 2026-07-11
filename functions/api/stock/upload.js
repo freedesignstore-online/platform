@@ -12,6 +12,7 @@ import {
   cleanText,
   ensureProfile,
   error,
+  uploadAllowance,
   fileBytes,
   imageDimensions,
   json,
@@ -30,6 +31,10 @@ export async function onRequestPost({ request, env }) {
   const account = await sessionAccount(request, env);
   if (!account?.authenticated) {
     return error("Sign in to contribute. Visit /.fds/auth/start to sign in with GitHub or Google.", 401);
+  }
+  if (!account.isAdmin) {
+    const denied = await uploadAllowance(store.kv, account.accountId);
+    if (denied) return error(denied, 429);
   }
 
   let form;

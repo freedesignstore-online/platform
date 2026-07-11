@@ -1,4 +1,5 @@
 import {
+  RESERVED_HANDLES,
   cleanText,
   ensureProfile,
   error,
@@ -39,6 +40,7 @@ export async function onRequestPost({ request, env }) {
   if (body.handle !== undefined) {
     const handle = safeHandle(body.handle);
     if (handle.length < 3) return error("Handles need at least 3 characters (a-z, 0-9, hyphens).");
+    if (RESERVED_HANDLES.has(handle)) return error("That handle is reserved.");
     if (handle !== profile.handle) {
       const taken = await getProfileByHandle(store.kv, handle);
       if (taken && taken.accountId !== profile.accountId) return error("That handle is already taken.", 409);

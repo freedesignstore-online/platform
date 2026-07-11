@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://freedesignstore.online/sitemap.xml
+Sitemap: https://freedesignstore.online/sitemap-catalog.xml

@@ -436,6 +436,35 @@ interface CreatorProfile {
 
 const PROFILE_PREFIX = 'profile:account:';
 const HANDLE_PREFIX = 'profile:handle:';
+const MAX_ACCOUNT_ASSETS = 100;
+const MAX_UPLOADS_PER_HOUR = 20;
+const RESERVED_HANDLES = new Set([
+  'admin', 'administrator', 'moderator', 'mod', 'staff', 'team', 'official',
+  'fds', 'freedesign', 'free-design-store', 'support', 'help', 'about', 'legal',
+  'api', 'assets', 'creators', 'creator', 'console', 'tools', 'skills',
+  'photo', 'photos', 'images', 'system', 'root',
+]);
+
+// Soft anti-abuse limits — keep in sync with functions/api/stock/_lib.js.
+async function uploadAllowance(kv: KVNamespace, accountId: string): Promise<string | null> {
+  const publicIds = await readIndex(kv, PUBLIC_INDEX);
+  const pendingIds = await readIndex(kv, PENDING_INDEX);
+  if (publicIds.length + pendingIds.length >= MAX_ITEMS) {
+    return 'The catalog is at capacity right now. Please try again later.';
+  }
+  const owned = await readIndex(kv, accountIndexKey(accountId));
+  if (owned.length >= MAX_ACCOUNT_ASSETS) {
+    return `Account asset limit reached (${MAX_ACCOUNT_ASSETS}). Delete older assets to publish more.`;
+  }
+  const hour = Math.floor(Date.now() / 3600000);
+  const rlKey = `rl:upload:${safeAccountId(accountId)}:${hour}`;
+  const count = Number((await kv.get(rlKey)) || 0);
+  if (count >= MAX_UPLOADS_PER_HOUR) {
+    return `Upload rate limit reached (${MAX_UPLOADS_PER_HOUR} per hour). Try again later.`;
+  }
+  await kv.put(rlKey, String(count + 1), { expirationTtl: 3600 });
+  return null;
+}
 
 function safeHandle(value: string): string {
   return String(value || '')
@@ -464,7 +493,8 @@ async function ensureProfile(kv: KVNamespace, props: McpProps): Promise<CreatorP
   const existing = await getProfileByAccount(kv, props.accountId);
   if (existing) return existing;
 
-  const base = safeHandle(String(props.login || props.accountName || '').split('@')[0]) || safeAccountId(props.accountId);
+  let base = safeHandle(String(props.login || props.accountName || '').split('@')[0]) || safeAccountId(props.accountId);
+  if (RESERVED_HANDLES.has(base)) base = `${base}-creator`.slice(0, 30);
   let handle = base.length >= 3 ? base : `${base}-fds`.slice(0, 30);
   for (let n = 2; n < 50; n += 1) {
     const taken = await kv.get<{ accountId: string }>(`${HANDLE_PREFIX}${handle}`, 'json');
@@ -898,6 +928,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         if (handle !== undefined) {
           const next = safeHandle(handle);
           if (next.length < 3) return txt('Handles need at least 3 characters (a-z, 0-9, hyphens).');
+          if (RESERVED_HANDLES.has(next)) return txt('That handle is reserved.');
           if (next !== profile.handle) {
             const taken = await getProfileByHandle(store.kv, next);
             if (taken && taken.accountId !== profile.accountId) return txt('That handle is already taken.');
@@ -1021,6 +1052,10 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         const store = requireStore(this.env);
         if (typeof store === 'string') return txt(store);
         if (origin === 'ai-generated' && !origin_tool) return txt('AI-generated assets must disclose the tool used (origin_tool).');
+        if (!props.isAdmin && props.accountId) {
+          const denied = await uploadAllowance(store.kv, props.accountId);
+          if (denied) return txt(denied);
+        }
         const bytes = validateSvg(svg);
         if (typeof bytes === 'string') return txt(bytes);
         const profile = await ensureProfile(store.kv, props);
@@ -1075,6 +1110,10 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         const store = requireStore(this.env);
         if (typeof store === 'string') return txt(store);
         if (origin === 'ai-generated' && !origin_tool) return txt('AI-generated assets must disclose the tool used (origin_tool).');
+        if (!props.isAdmin && props.accountId) {
+          const denied = await uploadAllowance(store.kv, props.accountId);
+          if (denied) return txt(denied);
+        }
 
         const parsed = new URL(url);
         if (parsed.protocol !== 'https:') return txt('Only HTTPS image URLs are accepted.');

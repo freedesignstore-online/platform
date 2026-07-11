@@ -757,3 +757,77 @@ test('console gates views behind sign-in and exposes admin moderation', async ()
   const wranglerToml = await readRepo('workers/mcp/wrangler.toml');
   assert.match(wranglerToml, /FDS_ADMIN_LOGINS = "serge-ivo"/);
 });
+
+// --- Maturity pass: abuse limits, reserved handles, catalog sitemap ---
+
+test('upload enforces account quotas and rate limits', async () => {
+  const { onRequestPost } = await importRepoFile('functions/api/stock/upload.js');
+  const kv = memoryKV();
+  const env = { FDS_STOCK_KV: kv, FDS_STOCK_BUCKET: memoryBucket(), SESSION_SIGNING_KEY: 'test-signing-key' };
+  const token = signTestSession({ uid: 'github:9', name: 'Cara', login: 'cara', roles: ['creator', 'publisher'] }, 'test-signing-key');
+  const makeReq = () => {
+    const form = new FormData();
+    form.append('file', new File([new Uint8Array(64)], 'x.jpg', { type: 'image/jpeg' }));
+    form.append('origin', 'photograph');
+    form.append('rightsConsent', 'yes');
+    form.append('releaseConsent', 'yes');
+    return new Request('https://freedesignstore.online/api/stock/upload', {
+      method: 'POST',
+      body: form,
+      headers: { cookie: `__Host-fds_mcp_session=${encodeURIComponent(token)}` },
+    });
+  };
+
+  // account at its 100-asset cap
+  await kv.put('stock:index:account:github-9', JSON.stringify(Array.from({ length: 100 }, (_, i) => `a${i}`)));
+  const quota = await onRequestPost({ request: makeReq(), env });
+  assert.equal(quota.status, 429);
+  assert.match((await quota.json()).error, /Account asset limit/);
+
+  // hourly rate limit
+  await kv.put('stock:index:account:github-9', JSON.stringify([]));
+  const hour = Math.floor(Date.now() / 3600000);
+  await kv.put(`rl:upload:github-9:${hour}`, '20');
+  const rate = await onRequestPost({ request: makeReq(), env });
+  assert.equal(rate.status, 429);
+  assert.match((await rate.json()).error, /rate limit/);
+
+  // full catalog
+  await kv.delete(`rl:upload:github-9:${hour}`);
+  await kv.put('stock:index:public', JSON.stringify(Array.from({ length: 500 }, (_, i) => `p${i}`)));
+  const full = await onRequestPost({ request: makeReq(), env });
+  assert.equal(full.status, 429);
+  assert.match((await full.json()).error, /capacity/);
+});
+
+test('reserved handles cannot be claimed', async () => {
+  const { onRequestPost } = await importRepoFile('functions/api/stock/profile.js');
+  const kv = memoryKV();
+  const env = { FDS_STOCK_KV: kv, FDS_STOCK_BUCKET: memoryBucket(), SESSION_SIGNING_KEY: 'test-signing-key' };
+  const token = signTestSession({ uid: 'github:9', name: 'Cara', login: 'cara', roles: ['creator'] }, 'test-signing-key');
+  const res = await onRequestPost({
+    request: new Request('https://freedesignstore.online/api/stock/profile', {
+      method: 'POST',
+      body: JSON.stringify({ handle: 'admin' }),
+      headers: { cookie: `__Host-fds_mcp_session=${encodeURIComponent(token)}` },
+    }),
+    env,
+  });
+  assert.equal(res.status, 400);
+  assert.match((await res.json()).error, /reserved/);
+});
+
+test('catalog sitemap lists photo and creator pages', async () => {
+  const { onRequestGet } = await importRepoFile('functions/sitemap-catalog.xml.js');
+  const kv = memoryKV();
+  await seedProfileAndAsset(kv);
+  const env = { FDS_STOCK_KV: kv, FDS_STOCK_BUCKET: memoryBucket() };
+  const res = await onRequestGet({ request: new Request('https://freedesignstore.online/sitemap-catalog.xml'), env });
+  assert.equal(res.status, 200);
+  const xml = await res.text();
+  assert.match(xml, /\/photo\/asset-1/);
+  assert.match(xml, /\/u\/alice/);
+  assert.match(xml, /\/creators/);
+  const robots = await readRepo('store/robots.txt');
+  assert.match(robots, /sitemap-catalog\.xml/);
+});

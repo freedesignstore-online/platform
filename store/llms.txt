@@ -20,7 +20,7 @@ Codex:
 Any MCP client:
   npx mcp-remote https://mcp.freedesignstore.online/mcp
 
-## MCP Tools (15)
+## MCP Tools (18)
 
 ### Skills (no auth required)
 - asset_policy: Read catalog hosting rules and Unsplash link-off policy
@@ -30,22 +30,31 @@ Any MCP client:
 
 ### Read
 - catalog_status: Check storage readiness and asset counts
-- whoami: Show the authenticated creator/admin account
-- list_assets: List public assets (admin: also pending)
+- whoami: Show the authenticated creator/admin account (incl. handle + profile URL)
+- get_my_profile: Get the authenticated creator profile
+- list_assets: List public assets (admin: also pending). Filters: asset_type, origin, license, category, q
 - my_assets: List assets owned by the authenticated creator
 - get_asset: Get one asset's metadata and download URL
 
 ### Create (requires auth)
-- create_svg_asset: Upload a generated SVG asset
-- create_asset_from_url: Ingest a public non-Unsplash image URL
+- create_svg_asset: Upload a generated SVG asset (origin disclosure required)
+- create_asset_from_url: Ingest a public non-Unsplash image or MP4/WebM video URL (origin required; AI must name the tool)
 
 ### Manage (requires auth, owner or admin)
+- update_asset: Patch metadata, taxonomy, origin disclosure, license
+- update_my_profile: Update handle, bio, website, social links
 - publish_asset: Publish a pending owned asset
 - unpublish_asset: Move a public asset back to pending
 - delete_asset: Delete catalog metadata and the R2 object
 
 ### Admin only
 - moderate_asset: Publish or reject a pending asset
+
+## Contributor Platform
+
+- Every asset is credited to a signed-in contributor with a public profile at /u/{handle}; directory at /creators.
+- Taxonomy on every asset: assetType (13 types incl. video), origin (photograph | ai-generated | 3d-render | digital-illustration | vector-art | scan | mixed), licenseId (cc0 | fds-free | attribution). Origin is disclosed on asset pages.
+- Uploads publish instantly; moderation is takedown-based. Limits: 20 uploads/hour, 100 assets/account, 8 MB images, 40 MB / 90 s videos.
 
 ## Workflow Pattern
 

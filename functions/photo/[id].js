@@ -160,7 +160,7 @@ ${originBlock}
 </div>
 </div>
 </div>
-<p class="license">${esc(licenseNote)}</p>
+<p class="license">${esc(licenseNote)} · <a href="https://github.com/freedesignstore-online/platform/issues/new?title=${encodeURIComponent(`Report asset ${item.id}`)}&body=${encodeURIComponent(`Asset: ${pageUrl}\n\nReason (copyright, inappropriate content, wrong attribution, other):\n`)}" target="_blank" rel="noopener">Report this asset</a></p>
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
 <footer>FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a></footer>
 <script>

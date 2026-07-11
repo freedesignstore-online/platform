@@ -6,6 +6,8 @@ const ITEM_PREFIX = "stock:item:";
 const PROFILE_PREFIX = "profile:account:";
 const HANDLE_PREFIX = "profile:handle:";
 const MAX_ITEMS = 500;
+const MAX_ACCOUNT_ASSETS = 100;
+const MAX_UPLOADS_PER_HOUR = 20;
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 const MAX_SVG_SIZE = 1024 * 1024;
 // Multipart bodies buffer in Worker memory (128 MB isolate), so keep video
@@ -274,6 +276,37 @@ export async function fileBytes(file) {
   return new TextEncoder().encode(text).buffer;
 }
 
+// Returns an error message when the account may not upload right now, else null.
+// Admins are expected to be exempted by callers. Note: KV counters are not
+// transactional; treat these as soft limits against casual abuse.
+export async function uploadAllowance(kv, accountId) {
+  const publicIds = await readIndex(kv, PUBLIC_INDEX);
+  const pendingIds = await readIndex(kv, PENDING_INDEX);
+  if (publicIds.length + pendingIds.length >= MAX_ITEMS) {
+    return "The catalog is at capacity right now. Please try again later.";
+  }
+  const owned = await readIndex(kv, accountIndexKey(accountId));
+  if (owned.length >= MAX_ACCOUNT_ASSETS) {
+    return `Account asset limit reached (${MAX_ACCOUNT_ASSETS}). Delete older assets to publish more.`;
+  }
+  const hour = Math.floor(Date.now() / 3600000);
+  const rlKey = `rl:upload:${safeAccountId(accountId)}:${hour}`;
+  const count = Number((await kv.get(rlKey)) || 0);
+  if (count >= MAX_UPLOADS_PER_HOUR) {
+    return `Upload rate limit reached (${MAX_UPLOADS_PER_HOUR} per hour). Try again later.`;
+  }
+  await kv.put(rlKey, String(count + 1), { expirationTtl: 3600 });
+  return null;
+}
+
+// Handles that would collide with site routes or impersonate the platform.
+export const RESERVED_HANDLES = new Set([
+  "admin", "administrator", "moderator", "mod", "staff", "team", "official",
+  "fds", "freedesign", "free-design-store", "support", "help", "about", "legal",
+  "api", "assets", "creators", "creator", "console", "tools", "skills",
+  "photo", "photos", "images", "system", "root",
+]);
+
 export function safeHandle(value) {
   return String(value || "")
     .toLowerCase()
@@ -304,9 +337,10 @@ export async function ensureProfile(kv, account) {
   const existing = await getProfile(kv, account.accountId);
   if (existing) return existing;
 
-  const base =
+  let base =
     safeHandle(String(account.login || "").split("@")[0]) ||
     safeAccountId(account.accountId);
+  if (RESERVED_HANDLES.has(base)) base = `${base}-creator`.slice(0, 30);
   let handle = base.length >= 3 ? base : `${base}-fds`.slice(0, 30);
   for (let n = 2; n < 50; n += 1) {
     const taken = await kv.get(`${HANDLE_PREFIX}${handle}`, "json");
