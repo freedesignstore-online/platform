@@ -1,3 +1,5 @@
 .wrangler/
 workers/mcp/node_modules/
 workers/mcp/dist/
+node_modules/
+.wrangler/
