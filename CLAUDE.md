@@ -1,6 +1,6 @@
 # FreeDesignStore Platform
 
-Unified R2 catalog (80 curated + community assets: photos, illustrations, renders, AI art, video), 46 browser tools, contributor identity with public profiles, publishing via MCP.
+Unified R2 catalog (107 curated + community assets: photos, illustrations, renders, AI art, video), 46 browser tools, contributor identity with public profiles, publishing via MCP.
 
 ## MCP-first workflow
 
@@ -89,7 +89,7 @@ workers/mcp/            MCP server (Cloudflare Worker, 18 tools)
 
 - ALL asset binaries live in R2 (`fds-stock-assets`); metadata in KV (`FDS_STOCK_KV`). Nothing binary is committed to git.
 - KV keys: `stock:item:{id}`, `stock:index:{public,pending}`, `stock:index:account:{accountId}`, `profile:account:{accountId}`, `profile:handle:{handle}`.
-- Curated set: 80 items owned by `fds-official` (`source: "hosted"`), objects at `hosted/<filename>`; legacy `/assets/stock/<file>` URLs served by `functions/assets/stock/[file].js` (HeartFull stores them).
+- Curated set: 107 items owned by `fds-official` (`source: "hosted"`), objects at `hosted/<filename>`; legacy `/assets/stock/<file>` URLs served by `functions/assets/stock/[file].js` (HeartFull stores them).
 - Uploads require sign-in (session cookie verified in Pages via `functions/api/_session.js`, needs SESSION_SIGNING_KEY on the Pages project; proxies to the MCP worker until set) and publish instantly; moderation is takedown-based.
 - Taxonomy axes on every asset: `assetType` (13 types incl. video/animation), `origin` (photograph | ai-generated | 3d-render | digital-illustration | vector-art | scan | mixed, with `originDetail` tool/model/prompt — AI must name the tool), `licenseId` (cc0 | fds-free | attribution), `purpose`, `safe`. Origin is disclosed on asset pages.
 - Contributor profiles: `/u/{handle}` + `/creators` directory; videos: MP4/WebM ≤40 MB ≤90 s, served with Range support.
