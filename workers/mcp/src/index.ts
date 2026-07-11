@@ -21,6 +21,7 @@ interface Env {
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
   GOOGLE_OAUTH_ENABLED?: string;
+  FDS_ADMIN_LOGINS?: string;
   PUBLIC_BASE_URL?: string;
   PUBLIC_MCP_BASE_URL?: string;
   MCP_OBJECT: DurableObjectNamespace;
@@ -1342,6 +1343,7 @@ export default {
         githubClientSecret,
         googleClientId: googleOAuthEnabled ? env.GOOGLE_CLIENT_ID : undefined,
         googleClientSecret: googleOAuthEnabled ? env.GOOGLE_CLIENT_SECRET : undefined,
+        adminLogins: String(env.FDS_ADMIN_LOGINS || '').split(',').map((login) => login.trim()).filter(Boolean),
       });
       if (oauthRes) return oauthRes;
     }

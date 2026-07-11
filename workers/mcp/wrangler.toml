@@ -7,6 +7,8 @@ workers_dev = true
 [vars]
 PUBLIC_BASE_URL = "https://freedesignstore.online"
 PUBLIC_MCP_BASE_URL = "https://mcp.freedesignstore.online"
+# GitHub logins / emails whose OAuth sessions get the admin role (comma-separated).
+FDS_ADMIN_LOGINS = "serge-ivo"
 
 [[routes]]
 pattern = "mcp.freedesignstore.online/*"

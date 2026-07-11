@@ -24,6 +24,7 @@ interface OAuthConfig {
   githubClientSecret?: string;
   googleClientId?: string;
   googleClientSecret?: string;
+  adminLogins?: string[];
 }
 
 interface ClientRegistration {
@@ -582,6 +583,10 @@ async function providerCallback(request: Request, config: OAuthConfig, provider:
 
 async function sessionForProvider(config: OAuthConfig, profile: ProviderProfile): Promise<string> {
   const roles = ['creator', 'publisher'];
+  // FAS-style admin allowlist: provider login or email listed in FDS_ADMIN_LOGINS.
+  const adminLogins = (config.adminLogins || []).map((login) => login.toLowerCase());
+  const candidates = [profile.login, profile.email].filter(Boolean).map((value) => String(value).toLowerCase());
+  if (candidates.some((value) => adminLogins.includes(value))) roles.push('admin');
   return signSession(
     {
       uid: profile.accountId,
