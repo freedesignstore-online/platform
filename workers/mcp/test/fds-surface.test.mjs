@@ -518,6 +518,16 @@ test('stock list API filters by origin and license', async () => {
   assert.equal(bad.status, 400);
 });
 
+test('full-size lightbox preview with zoom on all image surfaces', async () => {
+  for (const file of ['functions/photo/[id].js', 'store/images/stock-photos/index.html', 'store/console/index.html']) {
+    const src = await readRepo(file);
+    assert.match(src, /id="lightbox"/, `${file} lightbox`);
+    assert.match(src, /openLightbox/, `${file} openLightbox`);
+    assert.match(src, /zoomAt/, `${file} zoom`);
+    assert.match(src, /data-lb="close"/, `${file} controls`);
+  }
+});
+
 test('photo page and gallery disclose origin', async () => {
   const photoPage = await readRepo('functions/photo/[id].js');
   assert.match(photoPage, /How this was made/);

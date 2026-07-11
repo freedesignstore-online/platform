@@ -245,6 +245,11 @@ h1{font-family:'Fraunces',serif;font-size:32px;line-height:1.05;font-weight:800;
   </article>
 </div>
 
+<div id="lightbox" hidden style="position:fixed;inset:0;background:rgba(5,5,8,.97);z-index:1000;overflow:hidden;cursor:grab;touch-action:none">
+<img id="lbImg" alt="Full size preview" style="position:absolute;top:0;left:0;transform-origin:0 0;max-width:none;user-select:none;-webkit-user-drag:none">
+<div style="position:fixed;top:14px;right:14px;display:flex;gap:6px;align-items:center;z-index:1001"><button data-lb="out" aria-label="Zoom out" style="border:1px solid rgba(255,255,255,.25);background:rgba(20,20,24,.85);color:#fff;border-radius:8px;min-width:36px;height:36px;font:inherit;font-size:1rem;font-weight:700;cursor:pointer">&minus;</button><span id="lbZoom" style="color:#cbd5e1;font-size:.75rem;min-width:44px;text-align:center">100%</span><button data-lb="in" aria-label="Zoom in" style="border:1px solid rgba(255,255,255,.25);background:rgba(20,20,24,.85);color:#fff;border-radius:8px;min-width:36px;height:36px;font:inherit;font-size:1rem;font-weight:700;cursor:pointer">+</button><button data-lb="fit" style="border:1px solid rgba(255,255,255,.25);background:rgba(20,20,24,.85);color:#fff;border-radius:8px;min-width:36px;height:36px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer">Fit</button><button data-lb="close" aria-label="Close" style="border:1px solid rgba(255,255,255,.25);background:rgba(20,20,24,.85);color:#fff;border-radius:8px;min-width:36px;height:36px;font:inherit;font-size:1rem;font-weight:700;cursor:pointer">&times;</button></div>
+</div>
+
 <script>
 const ASSET_TYPES=[
   {id:'all',label:'All Assets'},
@@ -834,6 +839,31 @@ init().then(()=>{
   const hash=location.hash.slice(1);
   if(hash&&findPhoto(hash)) openAssetModal(hash);
 });
+
+// Full-size preview with zoom/pan (vendored lightbox — same as photo pages)
+(function(){
+const lb=document.getElementById('lightbox'),img=document.getElementById('lbImg'),zl=document.getElementById('lbZoom');
+let s=1,tx=0,ty=0,fitS=1,lastDist=0,moved=false;const ptrs=new Map();
+function apply(){img.style.transform='translate('+tx+'px,'+ty+'px) scale('+s+')';zl.textContent=Math.round(s*100)+'%';}
+function fit(){const w=img.naturalWidth||1,h=img.naturalHeight||1;fitS=Math.min(innerWidth/w,innerHeight/h,1);s=fitS;tx=(innerWidth-w*s)/2;ty=(innerHeight-h*s)/2;apply();}
+function zoomAt(f,cx,cy){const ns=Math.min(Math.max(s*f,Math.min(fitS,1)*0.25),8);tx=cx-(cx-tx)*ns/s;ty=cy-(cy-ty)*ns/s;s=ns;apply();}
+window.openLightbox=function(src){img.src=src;lb.hidden=false;document.body.style.overflow='hidden';if(img.complete&&img.naturalWidth)fit();else img.onload=fit;};
+function close(){lb.hidden=true;document.body.style.overflow='';}
+lb.addEventListener('click',e=>{if(e.target===lb&&!moved)close();});
+document.addEventListener('keydown',e=>{if(!lb.hidden&&e.key==='Escape')close();});
+lb.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.deltaY<0?1.25:0.8,e.clientX,e.clientY);},{passive:false});
+img.addEventListener('dblclick',e=>{if(Math.abs(s-1)<0.01)fit();else zoomAt(1/s,e.clientX,e.clientY);});
+lb.addEventListener('pointerdown',e=>{ptrs.set(e.pointerId,[e.clientX,e.clientY]);lb.setPointerCapture(e.pointerId);moved=false;});
+lb.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;const prev=ptrs.get(e.pointerId);ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+if(ptrs.size===1){tx+=e.clientX-prev[0];ty+=e.clientY-prev[1];if(Math.abs(e.clientX-prev[0])+Math.abs(e.clientY-prev[1])>2)moved=true;apply();}
+else if(ptrs.size===2){const p=[...ptrs.values()];const d=Math.hypot(p[0][0]-p[1][0],p[0][1]-p[1][1]);if(lastDist)zoomAt(d/lastDist,(p[0][0]+p[1][0])/2,(p[0][1]+p[1][1])/2);lastDist=d;moved=true;}});
+['pointerup','pointercancel'].forEach(ev=>lb.addEventListener(ev,e=>{ptrs.delete(e.pointerId);lastDist=0;}));
+document.querySelectorAll('[data-lb]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const a=b.dataset.lb;if(a==='in')zoomAt(1.25,innerWidth/2,innerHeight/2);else if(a==='out')zoomAt(0.8,innerWidth/2,innerHeight/2);else if(a==='fit')fit();else close();}));
+const modalImg=document.getElementById('modalImage');
+modalImg.style.cursor='zoom-in';
+modalImg.title='Click for full-size preview — scroll to zoom, drag to pan';
+modalImg.addEventListener('click',()=>{if(modalImg.src)openLightbox(modalImg.src);});
+})();
 </script>
 <script src="/related.js"></script>
 <footer style="border-top:1px solid var(--line);padding:1rem;text-align:center;font-size:.7rem;color:var(--muted);background:var(--panel)">FreeDesignStore — part of <a href="https://openfrontier.pages.dev" style="color:var(--accent)">Open Frontier</a> | <a href="https://openfrontier-docs.pages.dev" style="color:var(--accent)">Docs</a> | <a href="/terms/" style="color:var(--accent)">Terms</a> | <a href="/privacy/" style="color:var(--accent)">Privacy</a></footer>

@@ -128,6 +128,14 @@ nav a{color:var(--muted)}nav a:hover{color:var(--text);text-decoration:none}
 .made details{margin-top:.4rem}.made summary{cursor:pointer;color:var(--accent);font-size:.72rem;font-weight:700}
 .made .prompt{color:var(--muted);font-size:.72rem;margin-top:.3rem;line-height:1.5}
 footer{border-top:1px solid var(--line);padding:1rem;text-align:center;font-size:.7rem;color:var(--muted);background:var(--panel)}
+img.photo-img{cursor:zoom-in}
+.zoom-hint{max-width:1200px;margin:-1rem auto 0;padding:0 1.5rem 1rem;font-size:.7rem;color:var(--muted)}
+#lightbox{position:fixed;inset:0;background:rgba(5,5,8,.97);z-index:1000;overflow:hidden;cursor:grab;touch-action:none}
+#lightbox img{position:absolute;top:0;left:0;transform-origin:0 0;max-width:none;user-select:none;-webkit-user-drag:none}
+.lb-ui{position:fixed;top:14px;right:14px;display:flex;gap:6px;align-items:center;z-index:1001}
+.lb-ui button{border:1px solid rgba(255,255,255,.25);background:rgba(20,20,24,.85);color:#fff;border-radius:8px;min-width:36px;height:36px;font:inherit;font-size:1rem;font-weight:700;cursor:pointer}
+.lb-ui button:hover{border-color:var(--accent)}
+.lb-ui span{color:#cbd5e1;font-size:.75rem;min-width:44px;text-align:center}
 @media(max-width:640px){.meta{grid-template-columns:1fr}.actions{align-items:flex-start;flex-direction:row;flex-wrap:wrap}}
 </style>
 </head>
@@ -139,8 +147,9 @@ footer{border-top:1px solid var(--line);padding:1rem;text-align:center;font-size
 <div class="photo-wrap">
 ${String(item.contentType || "").startsWith("video/")
     ? `<video class="photo-img" src="${esc(item.url)}" controls playsinline></video>`
-    : `<img class="photo-img" src="${esc(item.url)}" alt="${esc(item.title)}">`}
+    : `<img class="photo-img" id="photoImg" src="${esc(item.url)}" alt="${esc(item.title)}">`}
 </div>
+${String(item.contentType || "").startsWith("video/") ? "" : `<p class="zoom-hint">Click the image for a full-size preview — scroll or pinch to zoom, drag to pan.</p>`}
 <div class="meta">
 <div class="info">
 <h1>${esc(item.title)}</h1>
@@ -163,6 +172,10 @@ ${originBlock}
 <p class="license">${esc(licenseNote)} · <a href="/terms/">Terms &amp; License</a> · <a href="https://github.com/freedesignstore-online/platform/issues/new?title=${encodeURIComponent(`Report asset ${item.id}`)}&body=${encodeURIComponent(`Asset: ${pageUrl}\n\nReason (copyright, inappropriate content, wrong attribution, other):\n`)}" target="_blank" rel="noopener">Report this asset</a></p>
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
 <footer>FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a> · <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></footer>
+<div id="lightbox" hidden>
+<img id="lbImg" alt="Full size preview">
+<div class="lb-ui"><button data-lb="out" aria-label="Zoom out">&minus;</button><span id="lbZoom">100%</span><button data-lb="in" aria-label="Zoom in">+</button><button data-lb="fit">Fit</button><button data-lb="close" aria-label="Close">&times;</button></div>
+</div>
 <script>
 document.getElementById('copyBtn').addEventListener('click',function(){
   navigator.clipboard.writeText(location.href).then(()=>{
@@ -170,6 +183,27 @@ document.getElementById('copyBtn').addEventListener('click',function(){
     setTimeout(()=>{this.textContent='Copy link';this.classList.remove('copied');},2000);
   });
 });
+(function(){
+const lb=document.getElementById('lightbox'),img=document.getElementById('lbImg'),zl=document.getElementById('lbZoom');
+let s=1,tx=0,ty=0,fitS=1,lastDist=0,moved=false;const ptrs=new Map();
+function apply(){img.style.transform='translate('+tx+'px,'+ty+'px) scale('+s+')';zl.textContent=Math.round(s*100)+'%';}
+function fit(){const w=img.naturalWidth||1,h=img.naturalHeight||1;fitS=Math.min(innerWidth/w,innerHeight/h,1);s=fitS;tx=(innerWidth-w*s)/2;ty=(innerHeight-h*s)/2;apply();}
+function zoomAt(f,cx,cy){const ns=Math.min(Math.max(s*f,Math.min(fitS,1)*0.25),8);tx=cx-(cx-tx)*ns/s;ty=cy-(cy-ty)*ns/s;s=ns;apply();}
+window.openLightbox=function(src){img.src=src;lb.hidden=false;document.body.style.overflow='hidden';if(img.complete&&img.naturalWidth)fit();else img.onload=fit;};
+function close(){lb.hidden=true;document.body.style.overflow='';}
+lb.addEventListener('click',e=>{if(e.target===lb&&!moved)close();});
+document.addEventListener('keydown',e=>{if(!lb.hidden&&e.key==='Escape')close();});
+lb.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.deltaY<0?1.25:0.8,e.clientX,e.clientY);},{passive:false});
+img.addEventListener('dblclick',e=>{if(Math.abs(s-1)<0.01)fit();else zoomAt(1/s,e.clientX,e.clientY);});
+lb.addEventListener('pointerdown',e=>{ptrs.set(e.pointerId,[e.clientX,e.clientY]);lb.setPointerCapture(e.pointerId);moved=false;});
+lb.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;const prev=ptrs.get(e.pointerId);ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+if(ptrs.size===1){tx+=e.clientX-prev[0];ty+=e.clientY-prev[1];if(Math.abs(e.clientX-prev[0])+Math.abs(e.clientY-prev[1])>2)moved=true;apply();}
+else if(ptrs.size===2){const p=[...ptrs.values()];const d=Math.hypot(p[0][0]-p[1][0],p[0][1]-p[1][1]);if(lastDist)zoomAt(d/lastDist,(p[0][0]+p[1][0])/2,(p[0][1]+p[1][1])/2);lastDist=d;moved=true;}});
+['pointerup','pointercancel'].forEach(ev=>lb.addEventListener(ev,e=>{ptrs.delete(e.pointerId);lastDist=0;}));
+document.querySelectorAll('[data-lb]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const a=b.dataset.lb;if(a==='in')zoomAt(1.25,innerWidth/2,innerHeight/2);else if(a==='out')zoomAt(0.8,innerWidth/2,innerHeight/2);else if(a==='fit')fit();else close();}));
+const photo=document.getElementById('photoImg');
+if(photo)photo.addEventListener('click',()=>openLightbox(photo.src));
+})();
 </script>
 </body>
 </html>`;
