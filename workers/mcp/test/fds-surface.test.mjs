@@ -536,6 +536,16 @@ test('photo page and gallery disclose origin', async () => {
   assert.match(mcpSource, /origin_tool/);
 });
 
+test('console offers AI generation with origin disclosure', async () => {
+  const console_ = await readRepo('store/console/index.html');
+  assert.match(console_, /data-view="generate"/);
+  assert.match(console_, /image\.pollinations\.ai/);
+  assert.match(console_, /width=768&height=768/); // square-native only — Pollinations stretches non-square
+  assert.match(console_, /origin_tool:'Pollinations'/);
+  assert.match(console_, /origin:'ai-generated'/);
+  assert.match(console_, /create_asset_from_url/);
+});
+
 test('terms and privacy pages state the CC0 dedication', async () => {
   const terms = await readRepo('store/terms/index.html');
   assert.match(terms, /CC0 1\.0 Universal/);

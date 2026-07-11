@@ -18,7 +18,7 @@ It follows the FAS/FAGS/PAGS pattern: a dedicated Cloudflare Worker using `agent
 - `my_assets` - lists assets owned by the authenticated creator account.
 - `get_asset` - returns metadata and download URL for one asset.
 - `create_svg_asset` - stores a generated SVG illustration/icon/pattern/background under the authenticated account.
-- `create_asset_from_url` - fetches a public HTTPS non-Unsplash image (or MP4/WebM video) and stores it in R2 under the authenticated account. Requires an `origin` disclosure (ai-generated origins must name the tool).
+- `create_asset_from_url` - fetches a public HTTPS non-Unsplash image (or MP4/WebM video) and stores it in R2 under the authenticated account. Requires an `origin` disclosure (ai-generated origins must name the tool). This is also the AI-generation publish path: the console's "Generate with AI" view (and any MCP agent) previews Pollinations URLs (`https://image.pollinations.ai/prompt/<prompt>?width=768&height=768&seed=N&nologo=true&model=flux`) and passes the chosen URL here with `origin: ai-generated`, `origin_tool: Pollinations`, and the prompt. Generate square only — Pollinations stretches non-square requests.
 - `update_asset` - patches metadata on an owned asset (admin: any asset): title, category, tags, origin disclosure, license, purpose, safe flag.
 - `moderate_asset` - publishes or rejects pending assets.
 - `publish_asset` - lets a creator publish their own pending asset.
