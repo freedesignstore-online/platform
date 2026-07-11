@@ -739,3 +739,21 @@ test('video rendering is wired across surfaces', async () => {
   const profilePage = await readRepo('functions/u/[handle].js');
   assert.match(profilePage, /<video muted loop playsinline/);
 });
+
+// --- Admin allowlist + console gating ---
+
+test('console gates views behind sign-in and exposes admin moderation', async () => {
+  const consoleHtml = await readRepo('store/console/index.html');
+  assert.match(consoleHtml, /body\.locked \.view\{display:none!important\}/);
+  assert.match(consoleHtml, /classList\.toggle\('locked',!on\)/);
+  assert.match(consoleHtml, /id="adminNavBtn"/);
+  assert.match(consoleHtml, /moderate_asset/);
+  assert.match(consoleHtml, /data-approve/);
+  assert.match(consoleHtml, /data-takedown/);
+
+  const oauth = await readRepo('workers/mcp/src/oauth-provider.ts');
+  assert.match(oauth, /adminLogins/);
+  assert.match(oauth, /roles\.push\('admin'\)/);
+  const wranglerToml = await readRepo('workers/mcp/wrangler.toml');
+  assert.match(wranglerToml, /FDS_ADMIN_LOGINS = "serge-ivo"/);
+});
