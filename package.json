@@ -1,0 +1,21 @@
+{
+  "name": "fds-platform",
+  "version": "1.0.0",
+  "description": "FreeDesignStore platform \u2014 static site + Pages Functions + MCP worker",
+  "scripts": {
+    "tw": "tailwindcss -i tailwind.css -o store/tw.css --minify"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/freedesignstore-online/platform.git"
+  },
+  "bugs": {
+    "url": "https://github.com/freedesignstore-online/platform/issues"
+  },
+  "homepage": "https://github.com/freedesignstore-online/platform#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.2",
+    "tailwindcss": "^4.3.2"
+  },
+  "private": true
+}

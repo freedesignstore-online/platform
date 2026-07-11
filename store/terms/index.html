@@ -8,34 +8,14 @@
 <link rel="canonical" href="https://freedesignstore.online/terms/">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--accent:#ec4899;--bg:#fdfcfd;--panel:#fff;--line:#f1e5ec;--text:#1f2430;--muted:#6b7280;--soft:#fdf2f8}
-body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
-header{position:sticky;top:0;backdrop-filter:blur(14px);background:rgba(253,252,253,.86);padding:.6rem 1.5rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid var(--line);z-index:10}
-.brand{display:flex;align-items:center;gap:.5rem;text-decoration:none;color:var(--text)}
-.brand-name{font-family:'Fraunces',serif;font-size:1.05rem;font-weight:700}
-nav{display:flex;gap:.85rem;font-size:.82rem;font-weight:600;margin-left:auto}
-nav a{color:var(--muted)}nav a:hover{color:var(--text);text-decoration:none}
-.wrap{max-width:760px;margin:0 auto;padding:2.4rem 1.5rem 3rem}
-h1{font-family:'Fraunces',serif;font-size:1.9rem;margin-bottom:.4rem}
-.updated{color:var(--muted);font-size:.78rem;margin-bottom:1.6rem}
-h2{font-family:'Fraunces',serif;font-size:1.2rem;margin:1.8rem 0 .5rem}
-p,li{font-size:.9rem;line-height:1.65;color:#374151}
-ul{padding-left:1.2rem;margin:.4rem 0}
-li{margin:.25rem 0}
-.highlight{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.2rem;margin:1.2rem 0}
-.highlight strong{color:var(--text)}
-footer{border-top:1px solid var(--line);padding:1rem;text-align:center;font-size:.7rem;color:var(--muted)}
-</style>
+<link rel="stylesheet" href="/tw.css">
 </head>
 <body>
-<header>
+<header class="fds-header">
 <a href="/" class="brand"><span style="font-size:1.4rem">🎨</span><span class="brand-name">FreeDesignStore</span></a>
-<nav><a href="/tools/">Tools</a><a href="/images/stock-photos/">Assets</a><a href="/creators">Creators</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
+<nav class="fds-nav"><a href="/tools/">Tools</a><a href="/images/stock-photos/">Assets</a><a href="/creators">Creators</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
 </header>
-<div class="wrap">
+<div class="legal-wrap">
 <h1>Terms &amp; License</h1>
 <p class="updated">Last updated: July 11, 2026</p>
 
@@ -82,8 +62,8 @@ footer{border-top:1px solid var(--line);padding:1rem;text-align:center;font-size
 <h2>7. Changes</h2>
 <p>We may update these terms; the "last updated" date changes when we do. The CC0 dedication of already-published assets is irrevocable and survives any change to these terms.</p>
 
-<p style="margin-top:2rem;color:var(--muted);font-size:.8rem;">Questions? Open an issue on <a href="https://github.com/freedesignstore-online/platform/issues" target="_blank" rel="noopener">GitHub</a>. See also our <a href="/privacy/">Privacy Policy</a>.</p>
+<p class="mt-8 !text-muted !text-[.8rem]">Questions? Open an issue on <a href="https://github.com/freedesignstore-online/platform/issues" target="_blank" rel="noopener">GitHub</a>. See also our <a href="/privacy/">Privacy Policy</a>.</p>
 </div>
-<footer>FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a> · <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></footer>
+<footer class="fds-footer">FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a> · <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></footer>
 </body>
 </html>

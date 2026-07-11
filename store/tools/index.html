@@ -10,72 +10,36 @@
 <link rel="canonical" href="https://freedesignstore.online/tools/">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--accent:#ec4899;--bg:#fafafa;--text:#1a1a1a;--muted:#6b7280;--panel:#ffffff;--line:#e5e7eb}
-body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--text)}
-a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
-header{position:sticky;top:0;z-index:40;border-bottom:1px solid var(--line);padding:.6rem 1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;background:rgba(255,255,255,.94);backdrop-filter:blur(14px)}
-.brand{display:flex;align-items:center;gap:.5rem;text-decoration:none;color:var(--text)}
-.brand-emoji{font-size:1.4rem}.brand-name{font-family:'Fraunces',serif;font-size:1.05rem;font-weight:700}
-nav{display:flex;gap:.85rem;font-size:.82rem;font-weight:600;margin-left:auto}
-nav a{color:var(--muted)}nav a:hover{color:var(--text);text-decoration:none}
-.shell{max-width:1100px;margin:0 auto;padding:1.5rem}
-.hero{margin-bottom:1.2rem}
-.hero h1{font-family:'Fraunces',serif;font-size:2rem;font-weight:700;margin-bottom:.3rem}
-.hero p{color:var(--muted);font-size:.88rem;line-height:1.5;max-width:640px}
-.stats{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem}
-.badge{display:inline-block;padding:.2rem .6rem;border-radius:99px;font-size:.72rem;font-weight:600;background:var(--panel);border:1px solid var(--line);color:var(--muted)}
-.toolbar{display:flex;gap:.5rem;align-items:center;margin-bottom:.8rem;flex-wrap:wrap}
-.search-input{flex:1;min-width:200px;padding:.5rem .75rem;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:.82rem;background:#fff}
-.search-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(236,72,153,.1)}
-.filters{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.8rem}
-.filter-btn{background:var(--panel);border:1px solid var(--line);color:var(--muted);padding:.3rem .7rem;border-radius:99px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
-.filter-btn:hover{border-color:var(--accent);color:var(--text)}
-.filter-btn.active{background:var(--accent);border-color:var(--accent);color:white}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.7rem;padding-bottom:2rem}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.85rem;display:flex;gap:.7rem;align-items:flex-start;transition:all .2s;text-decoration:none;color:inherit;box-shadow:0 1px 2px rgba(0,0,0,.03)}
-.card:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.06);text-decoration:none}
-.card.hidden{display:none}
-.card-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;color:white}
-.card-body{flex:1;min-width:0}.card-name{font-size:.84rem;font-weight:700;margin-bottom:.1rem}
-.card-desc{font-size:.68rem;color:var(--muted);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.card-cta{font-size:.68rem;font-weight:600;color:var(--accent);white-space:nowrap;align-self:center}
-.empty{text-align:center;color:var(--muted);padding:2rem;font-size:.88rem;display:none}
-.count{font-size:.78rem;color:var(--muted);margin-bottom:.5rem}
-footer{border-top:1px solid var(--line);padding:1rem;text-align:center;font-size:.7rem;color:var(--muted);background:var(--panel)}
-footer a{color:var(--accent)}
-@media(max-width:520px){.grid{grid-template-columns:1fr}.hero h1{font-size:1.5rem}}
-</style>
+<link rel="stylesheet" href="/tw.css">
 </head>
 <body>
-<header>
+<header class="fds-header">
 <a href="/" class="brand"><span class="brand-emoji">🎨</span><span class="brand-name">FreeDesignStore</span></a>
-<nav><a href="/tools/">Tools</a><a href="/images/stock-photos/">Assets</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
+<nav class="fds-nav"><a href="/tools/">Tools</a><a href="/images/stock-photos/">Assets</a><a href="/creators">Creators</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
 </header>
-<main class="shell">
-<section class="hero">
-<h1>Design Tools</h1>
-<p>46 free browser-based tools for designers. Create, edit, convert, and prepare assets. No signup, no install — everything runs in your browser.</p>
-<div class="stats">
+<main class="max-w-[1100px] mx-auto p-6">
+<section class="mb-5">
+<h1 class="font-display text-[2rem] font-bold mb-1 max-[520px]:text-2xl">Design Tools</h1>
+<p class="text-muted text-[.88rem] leading-normal max-w-[640px]">46 free browser-based tools for designers. Create, edit, convert, and prepare assets. No signup, no install — everything runs in your browser.</p>
+<div class="flex gap-1.5 flex-wrap mt-2">
 <span class="badge">Brand (16)</span>
 <span class="badge">Images (15)</span>
 <span class="badge">Templates (6)</span>
 <span class="badge">UI/UX (9)</span>
 </div>
 </section>
-<div class="toolbar">
-<input type="search" class="search-input" id="search" placeholder="Search tools..." autocomplete="off">
+<div class="flex gap-2 items-center mb-3 flex-wrap">
+<input type="search" class="search-input flex-1 min-w-[200px]" id="search" placeholder="Search tools..." autocomplete="off">
 </div>
-<div class="filters" id="filters">
+<div class="flex gap-1.5 flex-wrap mb-3" id="filters">
 <button class="filter-btn active" data-cat="all">All (46)</button>
 <button class="filter-btn" data-cat="brand">Brand (16)</button>
 <button class="filter-btn" data-cat="images">Images (15)</button>
 <button class="filter-btn" data-cat="templates">Templates (6)</button>
 <button class="filter-btn" data-cat="uiux">UI/UX (9)</button>
 </div>
-<div class="count" id="count">Showing 46 tools</div>
-<div class="grid" id="grid">
+<div class="text-[.78rem] text-muted mb-2" id="count">Showing 46 tools</div>
+<div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-3 pb-8 max-[520px]:grid-cols-1" id="grid">
 <a href="/brand/logo-maker/" class="card" data-cat="brand" data-search="logo maker type brand name font style svg"><div class="card-icon" style="background:#ec4899">✏️</div><div class="card-body"><div class="card-name">Logo Maker</div><div class="card-desc">Type your brand name, pick a font and style, download SVG instantly. No signup.</div></div><span class="card-cta">Open →</span></a>
 <a href="/brand/color-palette/" class="card" data-cat="brand" data-search="color palette generator harmonious complementary analogous triadic image a11y contrast"><div class="card-icon" style="background:#8b5cf6">🎨</div><div class="card-body"><div class="card-name">Color Palette Generator</div><div class="card-desc">Generate harmonious palettes. Complementary, analogous, triadic. Extract from image. A11y contrast check.</div></div><span class="card-cta">Open →</span></a>
 <a href="/brand/typography-pairing/" class="card" data-cat="brand" data-search="typography font pairing combinations preview css import"><div class="card-icon" style="background:#3b82f6">Aa</div><div class="card-body"><div class="card-name">Typography Pairing</div><div class="card-desc">Find perfect font combinations. Preview in context, adjust sizing, export CSS with @import.</div></div><span class="card-cta">Open →</span></a>
@@ -123,9 +87,9 @@ footer a{color:var(--accent)}
 <a href="/components/sitemap-builder/" class="card" data-cat="uiux" data-search="sitemap generator visual page hierarchy tree drag reparent import urls export xml seo"><div class="card-icon" style="background:#10b981">🗺️</div><div class="card-body"><div class="card-name">Sitemap Generator</div><div class="card-desc">Visual page hierarchy tree. Drag to reparent, import URLs, export XML sitemap for SEO.</div></div><span class="card-cta">Open →</span></a>
 <a href="/components/design-handoff/" class="card" data-cat="uiux" data-search="design handoff sheet upload mockup measurement pins extract colors redlines export html specs"><div class="card-icon" style="background:#f97316">📏</div><div class="card-body"><div class="card-name">Design Handoff Sheet</div><div class="card-desc">Upload mockup, add measurement pins, extract colors, redlines. Export HTML specs for developers.</div></div><span class="card-cta">Open →</span></a>
 </div>
-<p class="empty" id="empty">No matching tools.</p>
+<p class="hidden text-center text-muted p-8 text-[.88rem]" id="empty">No matching tools.</p>
 </main>
-<footer>FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a> | <a href="https://openfrontier-docs.pages.dev">Docs</a> | <a href="/terms/">Terms</a> | <a href="/privacy/">Privacy</a></footer>
+<footer class="fds-footer">FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a> | <a href="https://openfrontier-docs.pages.dev">Docs</a> | <a href="/terms/">Terms</a> | <a href="/privacy/">Privacy</a></footer>
 <script>
 (function(){
   var search=document.getElementById('search');
