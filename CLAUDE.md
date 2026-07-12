@@ -1,6 +1,6 @@
 # FreeDesignStore Platform
 
-Unified R2 catalog (225 curated + community assets: photos, illustrations, renders, AI art, video), 46 browser tools, contributor identity with public profiles, publishing via MCP.
+Unified R2 catalog (242 curated + community assets: photos, illustrations, renders, AI art, video), 46 browser tools, contributor identity with public profiles, publishing via MCP.
 
 ## MCP-first workflow
 
@@ -89,7 +89,7 @@ workers/mcp/            MCP server (Cloudflare Worker, 18 tools)
 
 - ALL asset binaries live in R2 (`fds-stock-assets`); metadata in KV (`FDS_STOCK_KV`). Nothing binary is committed to git.
 - KV keys: `stock:item:{id}`, `stock:index:{public,pending}`, `stock:index:account:{accountId}`, `profile:account:{accountId}`, `profile:handle:{handle}`.
-- Curated set: 225 items (incl. 3 hi-res background videos) owned by `fds-official` (`source: "hosted"`), objects at `hosted/<filename>`; legacy `/assets/stock/<file>` URLs served by `functions/assets/stock/[file].js` (HeartFull stores them).
+- Curated set: 242 items (incl. 3 hi-res background videos) owned by `fds-official` (`source: "hosted"`), objects at `hosted/<filename>`; legacy `/assets/stock/<file>` URLs served by `functions/assets/stock/[file].js` (HeartFull stores them).
 - Uploads require sign-in (session cookie verified in Pages via `functions/api/_session.js`, needs SESSION_SIGNING_KEY on the Pages project; proxies to the MCP worker until set) and publish instantly; moderation is takedown-based.
 - Taxonomy axes on every asset: `assetType` (13 types incl. video/animation), `origin` (photograph | ai-generated | 3d-render | digital-illustration | vector-art | scan | mixed, with `originDetail` tool/model/prompt — AI must name the tool), `licenseId` (always `cc0` — the whole catalog is public-domain dedicated, uploads force it; `fds-free | attribution` are legacy render-only ids), `purpose`, `safe`. Origin is disclosed on asset pages.
 - Legal pages: `/terms/` (CC0 dedication, contributor terms, takedowns) and `/privacy/` (cookieless analytics, contributor OAuth data). Linked from every footer.
