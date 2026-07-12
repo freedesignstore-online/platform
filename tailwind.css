@@ -25,6 +25,7 @@
 }
 
 @layer base {
+  :root { color-scheme: light dark; }
   body { @apply font-sans bg-paper text-ink; }
   a { @apply text-accent no-underline; }
   a:hover { @apply underline; }
@@ -32,7 +33,7 @@
 
 @layer components {
   /* --- chrome shared by every page --- */
-  .fds-header { @apply sticky top-0 z-40 border-b border-hairline px-6 py-3 flex items-center gap-4 flex-wrap bg-white/90 backdrop-blur-xl; }
+  .fds-header { @apply sticky top-0 z-40 border-b border-hairline px-6 py-3 flex items-center gap-4 flex-wrap bg-panel/90 backdrop-blur-xl; }
   .brand { @apply flex items-center gap-2 no-underline text-ink; }
   .brand:hover { @apply no-underline; }
   .brand-emoji { @apply text-[1.4rem]; }
@@ -40,7 +41,7 @@
   .fds-nav { @apply flex gap-3.5 text-[.82rem] font-semibold ml-auto; }
   .fds-nav a { @apply text-muted px-2.5 py-1.5 rounded-full transition; }
   .fds-nav a:hover { @apply text-accent bg-blush no-underline; }
-  .fds-footer { @apply border-t border-hairline px-4 py-8 text-center text-[.74rem] text-muted bg-white; }
+  .fds-footer { @apply border-t border-hairline px-4 py-8 text-center text-[.74rem] text-muted bg-panel; }
   .fds-footer a { @apply text-accent; }
 
   /* --- hero --- */
@@ -52,7 +53,7 @@
   .hero-btn:hover { @apply bg-accent-deep no-underline shadow-accent/40 -translate-y-px; }
   .hero-btn.secondary { @apply bg-panel text-ink border-hairline; }
   .hero-btn.secondary:hover { @apply border-accent text-accent no-underline; }
-  .badge { @apply inline-block px-3 py-1 rounded-full text-[.72rem] font-semibold bg-white border border-hairline text-muted m-0.5 shadow-[0_1px_2px_rgba(0,0,0,.04)]; }
+  .badge { @apply inline-block px-3 py-1 rounded-full text-[.72rem] font-semibold bg-panel border border-hairline text-muted m-0.5 shadow-[0_1px_2px_rgba(0,0,0,.04)]; }
   .badge.ai { @apply bg-violet-500/10 border-violet-500/30 text-violet-500; }
 
   /* --- asset rail (JS-generated on the homepage) --- */
@@ -89,7 +90,7 @@
   .section-title h2 { @apply font-display text-[1.45rem] tracking-tight; }
   .section-title p { @apply text-muted text-[.75rem] leading-snug mt-0.5; }
   .filters { @apply max-w-[1100px] mx-auto px-6 py-2.5 flex gap-1.5 flex-wrap justify-center; }
-  .filter-btn { @apply bg-white border border-hairline text-muted px-3.5 py-1.5 rounded-full text-[.74rem] font-semibold cursor-pointer transition; font-family: inherit; }
+  .filter-btn { @apply bg-panel border border-hairline text-muted px-3.5 py-1.5 rounded-full text-[.74rem] font-semibold cursor-pointer transition; font-family: inherit; }
   .filter-btn:hover { @apply border-accent text-ink; }
   .filter-btn.active { @apply bg-accent border-accent text-white shadow-md shadow-accent/25; }
   .tool-grid { @apply max-w-[1100px] mx-auto px-6 pb-10 grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4; }
@@ -102,7 +103,7 @@
   .card-cta { @apply text-[.68rem] font-semibold text-accent whitespace-nowrap self-center; }
 
   /* --- inputs --- */
-  .search-input { @apply px-3 py-2 border border-hairline rounded-lg text-[.82rem] bg-white; font: inherit; }
+  .search-input { @apply px-3 py-2 border border-hairline rounded-lg text-[.82rem] bg-panel text-ink; font: inherit; }
   .search-input:focus { @apply outline-none border-accent ring-[3px] ring-accent/10; }
 
   /* --- cross-store strip --- */
@@ -117,7 +118,7 @@
   .legal-wrap h1 { @apply font-display text-[1.9rem] mb-1.5; }
   .legal-wrap .updated { @apply text-muted text-[.78rem] mb-6; }
   .legal-wrap h2 { @apply font-display text-[1.2rem] mt-7 mb-2; }
-  .legal-wrap p, .legal-wrap li { @apply text-[.9rem] leading-[1.65] text-gray-700; }
+  .legal-wrap p, .legal-wrap li { @apply text-[.9rem] leading-[1.65] text-ink/80; }
   .legal-wrap ul { @apply pl-5 my-1.5 list-disc; }
   .legal-wrap li { @apply my-1; }
   .highlight { @apply bg-blush border border-hairline rounded-xl px-5 py-4 my-5; }
@@ -345,4 +346,59 @@
   .console .genCard.selected { @apply border-accent shadow-[0_0_0_2px_rgba(236,72,153,.25)]; }
   .console .toolbar { @apply flex justify-between items-center gap-3 mb-3; }
   .console .toolbar h2 { @apply m-0; }
+}
+
+/* --- Dark mode: real theme so Chrome uses these instead of auto-inverting.
+       Token overrides flip every semantic surface (bg-paper/panel, text-ink,
+       border-hairline, bg-blush); gallery is scoped-hardcoded so it gets
+       explicit overrides. Console (dark-sidebar app) intentionally stays light. --- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: #131118;
+    --color-panel: #1c1922;
+    --color-ink: #f4f2f7;
+    --color-hairline: #302b39;
+    --color-blush: #2a1a24;
+    --color-muted: #9aa2af;
+  }
+  .card { box-shadow: 0 1px 3px rgba(0,0,0,.4); }
+  .card:hover { box-shadow: 0 12px 28px rgba(236,72,153,.18); }
+  .badge, .fds-header, .fds-footer { box-shadow: none; }
+  .hero { background: radial-gradient(ellipse 60% 50% at 50% -10%, rgba(236,72,153,.16), transparent); }
+  .card-icon { box-shadow: inset 0 -6px 12px rgba(0,0,0,.35); }
+
+  /* asset library (gallery) — scoped hardcoded light palette → dark */
+  .gallery-page { background: #131118; color: #f4f2f7; }
+  .gallery-page .pill,
+  .gallery-page .panel,
+  .gallery-page .photo-card,
+  .gallery-page .tab,
+  .gallery-page .filter,
+  .gallery-page .btn-secondary,
+  .gallery-page .drop-zone,
+  .gallery-page .upload-preview,
+  .gallery-page .empty,
+  .gallery-page .search input,
+  .gallery-page .api input,
+  .gallery-page .upload-form input,
+  .gallery-page .upload-form select,
+  .gallery-page .upload-form textarea,
+  .gallery-page .generator-preview,
+  .gallery-page .generator-controls input,
+  .gallery-page .generator-controls select { background: #1c1922; border-color: #302b39; color: #f4f2f7; }
+  .gallery-page .photo-card img,
+  .gallery-page .upload-preview img { background: #0f0e13; }
+  .gallery-page .photo-title strong,
+  .gallery-page .modal-meta strong,
+  .gallery-page .modal-details h2 { color: #f4f2f7; }
+  .gallery-page .modal-meta { color: #cbd0d9; }
+  .gallery-page .btn-secondary:hover { border-color: var(--color-accent); color: var(--color-accent); }
+  .gallery-page .notice { background: #1c1922; border-color: #302b39; color: #b9c0cc; }
+  .gallery-page .photo-card[data-photo-id]:hover { border-color: rgba(236,72,153,.6); box-shadow: 0 10px 24px rgba(0,0,0,.5); }
+  .gallery-page .asset-modal { background: #1c1922; box-shadow: 0 24px 80px rgba(0,0,0,.6); }
+  .gallery-page .modal-media { background: #0f0e13; }
+  .gallery-page .modal-close { background: #1c1922; border-color: #302b39; color: #f4f2f7; }
+  .gallery-page .modal-meta div { border-color: #302b39; }
+  .gallery-page .tag { background: #2a1a24; color: #f5a8c8; }
+  .gallery-page .tag.origin-tag { background: #17243a; color: #93c5fd; }
 }
