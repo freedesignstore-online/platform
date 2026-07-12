@@ -96,53 +96,12 @@ ${String(item.contentType || "").startsWith("video/") ? `<meta property="og:vide
 <link rel="canonical" href="${esc(pageUrl)}">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--accent:#ec4899;--bg:#0f0f0f;--panel:#1a1a1a;--line:#2a2a2a;--text:#f5f5f5;--muted:#9ca3af}
-body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
-header{padding:.6rem 1.5rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid var(--line);background:var(--panel)}
-.brand{display:flex;align-items:center;gap:.5rem;text-decoration:none;color:var(--text)}
-.brand-name{font-family:'Fraunces',serif;font-size:1.05rem;font-weight:700}
-nav{display:flex;gap:.85rem;font-size:.82rem;font-weight:600;margin-left:auto}
-nav a{color:var(--muted)}nav a:hover{color:var(--text);text-decoration:none}
-.photo-wrap{max-width:1200px;margin:0 auto;padding:1.5rem}
-.photo-img{width:100%;border-radius:12px;display:block;background:var(--panel)}
-.meta{max-width:1200px;margin:0 auto;padding:0 1.5rem 2rem;display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:start}
-.info h1{font-family:'Fraunces',serif;font-size:1.6rem;margin-bottom:.3rem}
-.info p{color:var(--muted);font-size:.82rem;line-height:1.5}
-.tags{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.5rem}
-.tag{font-size:.7rem;font-weight:700;color:var(--accent);background:rgba(236,72,153,.12);border-radius:99px;padding:.2rem .55rem}
-.actions{display:flex;flex-direction:column;gap:.5rem;align-items:flex-end}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:.55rem 1.2rem;border-radius:8px;border:1px solid transparent;font:inherit;font-size:.78rem;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap;text-decoration:none}
-.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}.btn-primary:hover{background:#db2777;text-decoration:none}
-.btn-outline{background:transparent;color:var(--text);border-color:var(--line)}.btn-outline:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
-.share-row{display:flex;gap:.4rem;flex-wrap:wrap}
-.share-btn{display:inline-flex;align-items:center;gap:5px;padding:.4rem .7rem;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font:inherit;font-size:.7rem;font-weight:700;cursor:pointer;transition:.15s;text-decoration:none}
-.share-btn:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
-.share-btn.copied{border-color:#10b981;color:#10b981}
-.license{max-width:1200px;margin:0 auto;padding:0 1.5rem 2rem;font-size:.72rem;color:var(--muted);line-height:1.5}
-.made{margin-top:.9rem;padding:.7rem .9rem;border:1px solid var(--line);border-radius:10px;background:var(--panel);font-size:.75rem}
-.made strong{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.made p{margin-top:.25rem;color:var(--text)}
-.made details{margin-top:.4rem}.made summary{cursor:pointer;color:var(--accent);font-size:.72rem;font-weight:700}
-.made .prompt{color:var(--muted);font-size:.72rem;margin-top:.3rem;line-height:1.5}
-footer{border-top:1px solid var(--line);padding:1rem;text-align:center;font-size:.7rem;color:var(--muted);background:var(--panel)}
-img.photo-img{cursor:zoom-in}
-.zoom-hint{max-width:1200px;margin:-1rem auto 0;padding:0 1.5rem 1rem;font-size:.7rem;color:var(--muted)}
-#lightbox{position:fixed;inset:0;background:rgba(5,5,8,.97);z-index:1000;overflow:hidden;cursor:grab;touch-action:none}
-#lightbox img{position:absolute;top:0;left:0;transform-origin:0 0;max-width:none;user-select:none;-webkit-user-drag:none}
-.lb-ui{position:fixed;top:14px;right:14px;display:flex;gap:6px;align-items:center;z-index:1001}
-.lb-ui button{border:1px solid rgba(255,255,255,.25);background:rgba(20,20,24,.85);color:#fff;border-radius:8px;min-width:36px;height:36px;font:inherit;font-size:1rem;font-weight:700;cursor:pointer}
-.lb-ui button:hover{border-color:var(--accent)}
-.lb-ui span{color:#cbd5e1;font-size:.75rem;min-width:44px;text-align:center}
-@media(max-width:640px){.meta{grid-template-columns:1fr}.actions{align-items:flex-start;flex-direction:row;flex-wrap:wrap}}
-</style>
+<link rel="stylesheet" href="/tw.css">
 </head>
-<body>
-<header>
+<body class="asset-page">
+<header class="fds-header-dark">
 <a href="/" class="brand"><span style="font-size:1.4rem">🎨</span><span class="brand-name">FreeDesignStore</span></a>
-<nav><a href="/tools/">Tools</a><a href="/images/stock-photos/">Assets</a><a href="/creators">Creators</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
+<nav class="fds-nav-dark"><a href="/tools/">Tools</a><a href="/images/stock-photos/">Assets</a><a href="/creators">Creators</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
 </header>
 <div class="photo-wrap">
 ${String(item.contentType || "").startsWith("video/")
@@ -171,7 +130,7 @@ ${originBlock}
 </div>
 <p class="license">${esc(licenseNote)} · <a href="/terms/">Terms &amp; License</a> · <a href="https://github.com/freedesignstore-online/platform/issues/new?title=${encodeURIComponent(`Report asset ${item.id}`)}&body=${encodeURIComponent(`Asset: ${pageUrl}\n\nReason (copyright, inappropriate content, wrong attribution, other):\n`)}" target="_blank" rel="noopener">Report this asset</a></p>
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
-<footer>FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a> · <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></footer>
+<footer class="fds-footer-dark">FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a> · <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></footer>
 <div id="lightbox" hidden>
 <img id="lbImg" alt="Full size preview">
 <div class="lb-ui"><button data-lb="out" aria-label="Zoom out">&minus;</button><span id="lbZoom">100%</span><button data-lb="in" aria-label="Zoom in">+</button><button data-lb="fit">Fit</button><button data-lb="close" aria-label="Close">&times;</button></div>
