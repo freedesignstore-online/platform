@@ -23,7 +23,11 @@ const HOSTED_ACCOUNT = "fds-official";
 // returning `nextOffset` so the client can continue.
 const DEFAULT_LIMIT = 60;
 const MAX_LIMIT = 500; // legacy callers expect big pages; new clients page with 60-100
-const FETCH_CAP = 600; // max KV item reads per request (bounds work well under CF per-invocation op limits)
+const FETCH_CAP = 900; // max KV item reads per request. Keeps facet counts and
+// single-request filtering exact while the catalog fits this budget (stays under
+// CF's per-invocation subrequest limit). Past this, facets flag `facetsPartial`
+// and deep filters paginate via nextOffset — a maintained KV facet summary is the
+// proper next step when the catalog approaches its 2000-item ceiling.
 const SCAN_BATCH = 100;
 
 export async function onRequestGet({ request, env }) {
