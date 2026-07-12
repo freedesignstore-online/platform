@@ -36,9 +36,15 @@
   .fds-header { @apply sticky top-0 z-40 border-b border-hairline px-6 py-3 flex items-center gap-4 flex-wrap bg-panel/90 backdrop-blur-xl; }
   .brand { @apply flex items-center gap-2 no-underline text-ink; }
   .brand:hover { @apply no-underline; }
-  .brand-emoji { @apply text-[1.4rem]; }
+  /* Brand mark: an SVG logo rendered via CSS so every page's emoji updates at once. */
+  .brand-emoji {
+    display: inline-block; width: 1.85rem; height: 1.85rem; flex: none;
+    font-size: 0; line-height: 0; color: transparent;
+    background-repeat: no-repeat; background-position: center; background-size: contain;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23f472b6'/%3E%3Cstop offset='1' stop-color='%23db2777'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='url(%23g)'/%3E%3Ccircle cx='12.4' cy='13' r='5.7' fill='%23ffffff' opacity='.95'/%3E%3Ccircle cx='19.6' cy='13' r='5.7' fill='%23fcd34d' opacity='.85'/%3E%3Ccircle cx='16' cy='19.6' r='5.7' fill='%235eead4' opacity='.85'/%3E%3C/svg%3E");
+  }
   .brand-name { @apply font-display text-[1.15rem] font-bold tracking-tight; }
-  .fds-nav { @apply flex gap-3.5 text-[.82rem] font-semibold ml-auto; }
+  .fds-nav { @apply flex flex-wrap justify-end gap-x-3.5 gap-y-1 text-[.82rem] font-semibold ml-auto; }
   .fds-nav a { @apply text-muted px-2.5 py-1.5 rounded-full transition; }
   .fds-nav a:hover { @apply text-accent bg-blush no-underline; }
   .fds-footer { @apply border-t border-hairline px-4 py-8 text-center text-[.74rem] text-muted bg-panel; }
@@ -127,7 +133,7 @@
   /* --- dark chrome (SSR photo detail page) --- */
   .fds-header-dark { @apply px-6 py-2.5 flex items-center gap-4 border-b border-night-line bg-night-panel; }
   .fds-header-dark .brand { @apply text-neutral-100; }
-  .fds-nav-dark { @apply flex gap-3.5 text-[.82rem] font-semibold ml-auto; }
+  .fds-nav-dark { @apply flex flex-wrap justify-end gap-x-3.5 gap-y-1 text-[.82rem] font-semibold ml-auto; }
   .fds-nav-dark a { @apply text-gray-400; }
   .fds-nav-dark a:hover { @apply text-neutral-100 no-underline; }
   .fds-footer-dark { @apply border-t border-night-line p-4 text-center text-[.7rem] text-gray-400 bg-night-panel; }

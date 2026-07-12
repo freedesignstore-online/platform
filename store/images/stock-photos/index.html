@@ -16,18 +16,9 @@
 </header>
 <main class="max-w-[1220px] mx-auto p-[22px]">
 
-  <section class="grid grid-cols-[minmax(0,1fr)_auto] gap-5 items-end mb-[18px] max-[820px]:grid-cols-1">
-    <div>
-      <h1 class="font-display text-[32px] leading-[1.05] font-extrabold mb-2">Free Design Asset Library</h1>
-      <p class="text-muted text-[15px] leading-[1.55] max-w-[760px]">Download and share images, illustrations, icons, patterns, textures, backgrounds, UI assets, and generated SVGs for other creators.</p>
-    </div>
-    <div class="flex gap-2 flex-wrap justify-end max-[820px]:justify-start">
-      <span class="pill">Images</span>
-      <span class="pill">Illustrations</span>
-      <span class="pill">Icons</span>
-      <span class="pill">Patterns</span>
-      <span class="pill">Textures</span>
-    </div>
+  <section class="mb-[18px]">
+    <h1 class="font-display text-[32px] leading-[1.05] font-extrabold mb-2">Free Design Asset Library</h1>
+    <p class="text-muted text-[15px] leading-[1.55] max-w-[760px]">Download and share images, illustrations, icons, patterns, textures, backgrounds, UI assets, and generated SVGs for other creators.</p>
   </section>
 
   <section class="panel">
@@ -213,6 +204,7 @@ let catalogNextOffset=null;
 let catalogLoading=false;
 let categoryCounts=null;
 let catalogCategoriesTotal=null; // "All" count under the active non-category filters
+let assetTypeCounts=null,originCounts=null,licenseCounts=null; // per-axis facet counts; hide empty options
 const PAGE_LIMIT=100;
 let pendingFiles=[];
 let generatedSvg='';
@@ -270,6 +262,7 @@ async function init(){
   renderAssetTypes();
   renderFilters();
   await loadCatalogPage(true);
+  renderAssetTypes();
   renderFilters();
   render();
   $('loadMorePhotos').addEventListener('click',loadMorePhotos);
@@ -330,7 +323,15 @@ function bindEvents(){
 }
 
 function renderAssetTypes(){
-  $('assetTypes').innerHTML=ASSET_TYPES.map(type=>`<button class="filter ${type.id===activeAssetType?'active':''}" data-type="${type.id}">${type.label}</button>`).join('');
+  // Hide asset types with no matching assets under the current filters (keep
+  // "All" and the active one). Counts come from the server facet map.
+  $('assetTypes').innerHTML=ASSET_TYPES.map(type=>{
+    if(type.id==='all') return `<button class="filter ${activeAssetType==='all'?'active':''}" data-type="all">All Assets</button>`;
+    const n=assetTypeCounts?(assetTypeCounts[type.id]||0):null;
+    if(assetTypeCounts&&!n&&type.id!==activeAssetType) return '';
+    const label=n!=null?`${type.label} (${n})`:type.label;
+    return `<button class="filter ${type.id===activeAssetType?'active':''}" data-type="${type.id}">${label}</button>`;
+  }).join('');
   document.querySelectorAll('#assetTypes [data-type]').forEach(btn=>{
     btn.onclick=()=>{activeAssetType=btn.dataset.type;renderAssetTypes();refresh()};
   });
@@ -351,11 +352,25 @@ function renderFilters(){
   document.querySelectorAll('#filters .filter').forEach(btn=>{
     btn.onclick=()=>{activeCategory=btn.dataset.cat;renderFilters();refresh()};
   });
-  $('originFilters').innerHTML=ORIGIN_FILTERS.map(o=>`<button class="filter ${o.id===activeOrigin?'active':''}" data-origin="${o.id}">${o.label}</button>`).join('');
+  // Origin/License rows hide options with no matching assets under the other
+  // active filters (keep the "Any" option and the active one).
+  $('originFilters').innerHTML=ORIGIN_FILTERS.map(o=>{
+    if(o.id==='all') return `<button class="filter ${activeOrigin==='all'?'active':''}" data-origin="all">${o.label}</button>`;
+    const n=originCounts?(originCounts[o.id]||0):null;
+    if(originCounts&&!n&&o.id!==activeOrigin) return '';
+    const label=n!=null?`${o.label} (${n})`:o.label;
+    return `<button class="filter ${o.id===activeOrigin?'active':''}" data-origin="${o.id}">${label}</button>`;
+  }).join('');
   document.querySelectorAll('#originFilters .filter').forEach(btn=>{
     btn.onclick=()=>{activeOrigin=btn.dataset.origin;renderFilters();refresh()};
   });
-  $('licenseFilters').innerHTML=LICENSE_FILTERS.map(l=>`<button class="filter ${l.id===activeLicense?'active':''}" data-license="${l.id}">${l.label}</button>`).join('');
+  $('licenseFilters').innerHTML=LICENSE_FILTERS.map(l=>{
+    if(l.id==='all') return `<button class="filter ${activeLicense==='all'?'active':''}" data-license="all">${l.label}</button>`;
+    const n=licenseCounts?(licenseCounts[l.id]||0):null;
+    if(licenseCounts&&!n&&l.id!==activeLicense) return '';
+    const label=n!=null?`${l.label} (${n})`:l.label;
+    return `<button class="filter ${l.id===activeLicense?'active':''}" data-license="${l.id}">${label}</button>`;
+  }).join('');
   document.querySelectorAll('#licenseFilters .filter').forEach(btn=>{
     btn.onclick=()=>{activeLicense=btn.dataset.license;renderFilters();refresh()};
   });
@@ -392,7 +407,8 @@ async function loadCatalogPage(reset){
     catalogPhotos=reset?items:[...catalogPhotos,...items];
     catalogTotal=data.total??catalogPhotos.length;
     catalogNextOffset=data.nextOffset??null;
-    if(data.categories){categoryCounts=data.categories;catalogCategoriesTotal=data.categoriesTotal??null;}
+    if(data.categories){categoryCounts=data.categories;catalogCategoriesTotal=data.categoriesTotal??null;
+      assetTypeCounts=data.assetTypes??null;originCounts=data.origins??null;licenseCounts=data.licenses??null;}
   }catch(err){
     if(reset){catalogPhotos=[];catalogTotal=0;}
     catalogNextOffset=null;
@@ -406,7 +422,7 @@ async function refresh(){
   if(activeSource==='submit') return;
   syncUrl();
   if(activeSource!=='unsplash') await loadCatalogPage(true);
-  renderFilters(); // reflect fresh facet counts for the new filter set
+  renderAssetTypes(); renderFilters(); // reflect fresh facet counts for the new filter set
   render();
 }
 

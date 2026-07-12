@@ -100,7 +100,7 @@ ${String(item.contentType || "").startsWith("video/") ? `<meta property="og:vide
 </head>
 <body class="asset-page">
 <header class="fds-header-dark">
-<a href="/" class="brand"><span style="font-size:1.4rem">🎨</span><span class="brand-name">FreeDesignStore</span></a>
+<a href="/" class="brand"><span class="brand-emoji">🎨</span><span class="brand-name">FreeDesignStore</span></a>
 <nav class="fds-nav-dark"><a href="/tools/">Tools</a><a href="/images/stock-photos/">Assets</a><a href="/creators">Creators</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
 </header>
 <div style="max-width:1100px;margin:16px auto -4px;padding:0 20px">

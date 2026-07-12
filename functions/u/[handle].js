@@ -93,7 +93,7 @@ ${profile.avatarUrl ? `<meta property="og:image" content="${esc(profile.avatarUr
 </head>
 <body class="min-h-screen">
 <header class="fds-header">
-<a href="/" class="brand"><span style="font-size:1.4rem">🎨</span><span class="brand-name">FreeDesignStore</span></a>
+<a href="/" class="brand"><span class="brand-emoji">🎨</span><span class="brand-name">FreeDesignStore</span></a>
 <nav class="fds-nav"><a href="/tools/">Tools</a><a href="/images/stock-photos/">Assets</a><a href="/creators">Creators</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
 </header>
 <div class="max-w-[1100px] mx-auto pt-[2.2rem] px-6 pb-[1.4rem] flex gap-[1.3rem] items-center max-[640px]:flex-col max-[640px]:text-center">

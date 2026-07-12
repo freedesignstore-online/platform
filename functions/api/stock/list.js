@@ -86,44 +86,58 @@ export async function onRequestGet({ request, env }) {
     if (source === "community") return item.ownerAccountId !== HOSTED_ACCOUNT;
     return true;
   };
-  // matchesBase applies every active filter EXCEPT category — the facet counts
-  // build on it so each category chip shows how many results it would yield
-  // under the OTHER active filters (standard faceted search). matches() adds
-  // the category clause for the actual result page.
-  const matchesBase = (item) =>
-    matchesSource(item) &&
-    (!assetType || item.assetType === assetType) &&
-    (!orientation || orientationOf(item) === orientation) &&
-    (!purpose || (item.purpose || []).some((value) => String(value || "").toLowerCase() === purpose)) &&
-    (!originFilter || item.origin === originFilter) &&
-    (!licenseFilter || item.licenseId === licenseFilter) &&
-    (!safe || item.safe !== false) &&
-    (!query ||
-      [item.title, item.author, item.category, item.license, item.assetType, orientationOf(item), ...(item.tags || []), ...(item.purpose || [])]
-        .join(" ")
-        .toLowerCase()
-        .includes(query));
-  const matches = (item) =>
-    matchesBase(item) && (!category || String(item.category || "").toLowerCase() === category);
+  // Per-axis predicates so faceting can exclude one axis at a time (standard
+  // faceted search: each chip's count reflects the OTHER active filters).
+  const pType = (i) => !assetType || i.assetType === assetType;
+  const pCat = (i) => !category || String(i.category || "").toLowerCase() === category;
+  const pOrient = (i) => !orientation || orientationOf(i) === orientation;
+  const pPurpose = (i) => !purpose || (i.purpose || []).some((v) => String(v || "").toLowerCase() === purpose);
+  const pOrigin = (i) => !originFilter || i.origin === originFilter;
+  const pLicense = (i) => !licenseFilter || i.licenseId === licenseFilter;
+  const pSafe = (i) => !safe || i.safe !== false;
+  const pQuery = (i) =>
+    !query ||
+    [i.title, i.author, i.category, i.license, i.assetType, orientationOf(i), ...(i.tags || []), ...(i.purpose || [])]
+      .join(" ")
+      .toLowerCase()
+      .includes(query);
+  const matches = (i) =>
+    matchesSource(i) && pType(i) && pCat(i) && pOrient(i) && pPurpose(i) && pOrigin(i) && pLicense(i) && pSafe(i) && pQuery(i);
 
-  // Facets: category counts over the newest FETCH_CAP items — exact while the
-  // catalog fits the read budget, flagged partial beyond. Counts respect all
-  // active filters except category, so chips never advertise results that the
-  // current origin/license/type/search filters would hide. categoriesTotal is
-  // the "All" count under those same filters.
+  // Facets over the newest FETCH_CAP items — exact while the catalog fits the
+  // read budget, flagged partial beyond. Each axis (category/assetType/origin/
+  // license) is counted with all OTHER active filters applied but its own axis
+  // released, so chips never advertise results the current filters would hide
+  // and empty options can be hidden client-side. categoriesTotal backs "All".
   let categories = null;
   let categoriesTotal = null;
+  let assetTypes = null;
+  let origins = null;
+  let licenses = null;
   let facetsPartial = false;
   if (wantFacets) {
     const facetIds = ids.slice(0, FETCH_CAP);
     const facetItems = (await Promise.all(facetIds.map(fetchItem))).filter(Boolean);
     categories = {};
+    assetTypes = {};
+    origins = {};
+    licenses = {};
     categoriesTotal = 0;
     for (const item of facetItems) {
-      if (!matchesBase(item)) continue;
-      categoriesTotal += 1;
-      const cat = String(item.category || "").toLowerCase();
-      if (cat) categories[cat] = (categories[cat] || 0) + 1;
+      // Common predicates shared by every axis (source/orientation/purpose/safe/query).
+      if (!(matchesSource(item) && pOrient(item) && pPurpose(item) && pSafe(item) && pQuery(item))) continue;
+      const inType = pType(item), inCat = pCat(item), inOrigin = pOrigin(item), inLicense = pLicense(item);
+      if (inType && inOrigin && inLicense) { // category facet (release category axis)
+        categoriesTotal += 1;
+        const cat = String(item.category || "").toLowerCase();
+        if (cat) categories[cat] = (categories[cat] || 0) + 1;
+      }
+      if (inCat && inOrigin && inLicense && item.assetType) // assetType facet
+        assetTypes[item.assetType] = (assetTypes[item.assetType] || 0) + 1;
+      if (inCat && inType && inLicense && item.origin) // origin facet
+        origins[item.origin] = (origins[item.origin] || 0) + 1;
+      if (inCat && inType && inOrigin && item.licenseId) // license facet
+        licenses[item.licenseId] = (licenses[item.licenseId] || 0) + 1;
     }
     facetsPartial = total > facetIds.length;
   }
@@ -166,7 +180,7 @@ export async function onRequestGet({ request, env }) {
     limit,
     scanned,
     nextOffset,
-    ...(categories ? { categories, categoriesTotal, facetsPartial } : {}),
+    ...(categories ? { categories, categoriesTotal, assetTypes, origins, licenses, facetsPartial } : {}),
     items: matched.map((item) => publicItem(item, origin)),
   });
 }
