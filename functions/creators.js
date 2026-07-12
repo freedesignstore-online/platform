@@ -1,11 +1,18 @@
-import { PUBLIC_INDEX, getProfile, listItems, publicItem, requireStore } from "./api/stock/_lib.js";
+import { PUBLIC_INDEX, getItem, getProfile, publicItem, readIndex, requireStore } from "./api/stock/_lib.js";
+
+// Bound the number of public items scanned per request so the directory page
+// stays under Cloudflare's per-invocation KV-op limit as the catalog grows
+// past ~1000 items. Beyond this the directory reflects the newest contributors
+// (ids are appended newest-last, so we take the tail).
+const DIRECTORY_SCAN = 600;
 
 export async function onRequestGet({ request, env }) {
   const store = requireStore(env);
   if (store.missing) return new Response("Creator directory is unavailable.", { status: 503 });
   const origin = new URL(request.url).origin;
 
-  const items = await listItems(store.kv, PUBLIC_INDEX);
+  const ids = (await readIndex(store.kv, PUBLIC_INDEX)).slice(-DIRECTORY_SCAN);
+  const items = (await Promise.all(ids.map((id) => getItem(store.kv, id)))).filter(Boolean);
   const byOwner = new Map();
   for (const item of items) {
     if (!item.ownerAccountId || item.status !== "public") continue;

@@ -1,10 +1,17 @@
 import {
   accountIndexKey,
+  getItem,
   getProfileByHandle,
-  listItems,
   publicItem,
+  readIndex,
   requireStore,
 } from "../api/stock/_lib.js";
+
+// Cap works rendered server-side so a prolific profile stays under
+// Cloudflare's per-invocation KV-op limit (fds-official has 240+ works today).
+// Ids are appended newest-last; we take the newest tail and show those. A note
+// is rendered when more exist.
+const WORKS_CAP = 120;
 
 const SOCIAL_URLS = {
   x: (v) => `https://x.com/${v}`,
@@ -22,9 +29,13 @@ export async function onRequestGet({ params, request, env }) {
   if (!profile) return new Response("Creator not found", { status: 404 });
 
   const origin = new URL(request.url).origin;
-  // Newest ids sit at the end of the account index — reverse for newest-first.
-  const owned = (await listItems(store.kv, accountIndexKey(profile.accountId))).reverse();
+  // Newest ids sit at the end of the account index — take the newest tail and
+  // reverse for newest-first. Only the capped slice is fetched from KV.
+  const allIds = await readIndex(store.kv, accountIndexKey(profile.accountId));
+  const pageIds = allIds.slice(-WORKS_CAP).reverse();
+  const owned = (await Promise.all(pageIds.map((id) => getItem(store.kv, id)))).filter(Boolean);
   const items = owned.filter((item) => item.status === "public").map((item) => publicItem(item, origin));
+  const hasMore = allIds.length > pageIds.length;
   const pageUrl = `${origin}/u/${encodeURIComponent(profile.handle)}`;
 
   const sameAs = [
@@ -95,7 +106,7 @@ ${profile.bio ? `<p class="mt-[.35rem] text-muted text-[.85rem] max-w-[640px] le
 </div>
 <div class="profile-count"><strong>${items.length}</strong>free asset${items.length === 1 ? "" : "s"}</div>
 </div>
-${items.length ? `<div class="max-w-[1100px] mx-auto px-6 pb-12 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3.5">${cards}</div>` : `<p class="max-w-[1100px] mx-auto px-6 py-8 text-muted text-[.85rem]">No published assets yet.</p>`}
+${items.length ? `<div class="max-w-[1100px] mx-auto px-6 pb-12 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3.5">${cards}</div>${hasMore ? `<p class="max-w-[1100px] mx-auto px-6 pb-12 -mt-8 text-muted text-[.8rem]">Showing the ${WORKS_CAP} newest works.</p>` : ""}` : `<p class="max-w-[1100px] mx-auto px-6 py-8 text-muted text-[.85rem]">No published assets yet.</p>`}
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
 <footer class="fds-footer">FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a> · <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></footer>
 </body>

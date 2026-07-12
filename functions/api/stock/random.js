@@ -1,8 +1,15 @@
-import { PUBLIC_INDEX, error, isAssetType, listItems, publicItem, requireStore } from "./_lib.js";
+import { PUBLIC_INDEX, error, getItem, isAssetType, publicItem, readIndex, requireStore } from "./_lib.js";
 
 const MAX_COUNT = 20;
 const CACHE_SECONDS = 60;
 const HOSTED_ACCOUNT = "fds-official";
+// Bounded sampling: instead of fetching every indexed item, take a random
+// sample of candidate ids and fetch only those from KV, filter, and repeat a
+// bounded number of times until we have `count` matches. Caps total KV item
+// reads at SAMPLE_SIZE * MAX_ROUNDS (~120) regardless of catalog size, keeping
+// us well under Cloudflare's per-invocation op limit as the catalog grows.
+const SAMPLE_SIZE = 40;
+const MAX_ROUNDS = 3;
 
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
@@ -24,21 +31,39 @@ export async function onRequestGet({ request, env }) {
   const store = requireStore(env);
   if (store.missing) return store.response;
 
-  const matches = (await listItems(store.kv, PUBLIC_INDEX))
-    .filter((item) => item.ownerAccountId === HOSTED_ACCOUNT)
-    .filter((item) => !assetType || item.assetType === assetType)
-    .filter((item) => !category || String(item.category || "").toLowerCase() === category)
-    .filter((item) => !orientation || orientationOf(item) === orientation)
-    .filter((item) => !purpose || (item.purpose || []).some((value) => String(value || "").toLowerCase() === purpose))
-    .filter((item) => !safe || item.safe !== false)
-    .filter((item) => {
-      if (!query) return true;
-      return [item.title, item.author, item.category, item.license, item.assetType, orientationOf(item), ...(item.tags || []), ...(item.purpose || [])]
+  const matchesFilters = (item) =>
+    item.ownerAccountId === HOSTED_ACCOUNT &&
+    (!assetType || item.assetType === assetType) &&
+    (!category || String(item.category || "").toLowerCase() === category) &&
+    (!orientation || orientationOf(item) === orientation) &&
+    (!purpose || (item.purpose || []).some((value) => String(value || "").toLowerCase() === purpose)) &&
+    (!safe || item.safe !== false) &&
+    (!query ||
+      [item.title, item.author, item.category, item.license, item.assetType, orientationOf(item), ...(item.tags || []), ...(item.purpose || [])]
         .join(" ")
         .toLowerCase()
-        .includes(query);
-    });
-  const items = shuffle(matches).slice(0, count).map((item) => publicItem(item, url.origin));
+        .includes(query));
+
+  // Shuffle the id list once, then walk it in bounded batches: fetch a batch,
+  // filter, collect matches, and stop as soon as we have `count` (or the round
+  // budget is spent). We fetch at most SAMPLE_SIZE * MAX_ROUNDS items even for
+  // a 1500-id index, not the whole index.
+  const pool = shuffle(await readIndex(store.kv, PUBLIC_INDEX));
+  const collected = [];
+  const seen = new Set();
+  let pos = 0;
+  for (let round = 0; round < MAX_ROUNDS && collected.length < count && pos < pool.length; round += 1) {
+    const batchIds = pool.slice(pos, pos + SAMPLE_SIZE);
+    pos += batchIds.length;
+    const fetched = (await Promise.all(batchIds.map((id) => getItem(store.kv, id)))).filter(Boolean);
+    for (const item of fetched) {
+      if (!item || seen.has(item.id) || !matchesFilters(item)) continue;
+      seen.add(item.id);
+      collected.push(item);
+      if (collected.length >= count) break;
+    }
+  }
+  const items = collected.slice(0, count).map((item) => publicItem(item, url.origin));
 
   return new Response(
     JSON.stringify({

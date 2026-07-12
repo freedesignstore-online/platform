@@ -634,6 +634,75 @@ test('random API response shape is unchanged by catalog paging (HeartFull contra
   assert.ok(!('total' in body) && !('nextOffset' in body) && !('offset' in body));
 });
 
+test('random API samples a bounded number of ids from a huge index (no full scan)', async () => {
+  const { onRequestGet } = await importRepoFile('functions/api/stock/random.js');
+  const kv = memoryKV();
+  // 1500-id public index, all hosted/photo/landscape so every fetch matches.
+  const ids = Array.from({ length: 1500 }, (_, i) => `big-${i}`);
+  for (const id of ids) {
+    await kv.put(`stock:item:${id}`, JSON.stringify(catalogItem({ id, title: id })));
+  }
+  await kv.put('stock:index:public', JSON.stringify(ids));
+
+  // Count how many item reads happen for one request.
+  let itemReads = 0;
+  const rawGet = kv.get.bind(kv);
+  kv.get = async (key, type) => {
+    if (typeof key === 'string' && key.startsWith('stock:item:')) itemReads += 1;
+    return rawGet(key, type);
+  };
+
+  const res = await onRequestGet({
+    request: new Request('https://freedesignstore.online/api/stock/random?assetType=photo&orientation=landscape&count=3'),
+    env: { FDS_STOCK_KV: kv, FDS_STOCK_BUCKET: memoryBucket() },
+  });
+  assert.equal(res.status, 200);
+  const body = await res.json();
+
+  // Response shape unchanged.
+  assert.deepEqual(Object.keys(body).sort(), ['count', 'filters', 'items', 'ok', 'source']);
+  assert.equal(body.ok, true);
+  assert.equal(body.source, 'hosted');
+  assert.equal(body.count, 3);
+  assert.equal(body.items.length, 3);
+
+  // Far fewer than all 1500 items fetched — one sample batch (40) suffices here.
+  assert.ok(itemReads < 120, `expected bounded fetch, got ${itemReads}`);
+  assert.ok(itemReads <= 40, `expected a single sample batch, got ${itemReads}`);
+});
+
+test('random API does a bounded second round when the first sample is short on matches', async () => {
+  const { onRequestGet } = await importRepoFile('functions/api/stock/random.js');
+  const kv = memoryKV();
+  // 1500 ids, but only a sparse fraction match the requested category, so a
+  // single 40-id sample is unlikely to fill count=5 — forces extra rounds but
+  // still stays bounded at SAMPLE_SIZE * MAX_ROUNDS (120).
+  const ids = Array.from({ length: 1500 }, (_, i) => `mix-${i}`);
+  for (let i = 0; i < ids.length; i += 1) {
+    const item = catalogItem({ id: ids[i], title: ids[i], category: i % 20 === 0 ? 'Nature' : 'Lifestyle' });
+    await kv.put(`stock:item:${ids[i]}`, JSON.stringify(item));
+  }
+  await kv.put('stock:index:public', JSON.stringify(ids));
+
+  let itemReads = 0;
+  const rawGet = kv.get.bind(kv);
+  kv.get = async (key, type) => {
+    if (typeof key === 'string' && key.startsWith('stock:item:')) itemReads += 1;
+    return rawGet(key, type);
+  };
+
+  const res = await onRequestGet({
+    request: new Request('https://freedesignstore.online/api/stock/random?category=nature&count=5'),
+    env: { FDS_STOCK_KV: kv, FDS_STOCK_BUCKET: memoryBucket() },
+  });
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(body.source, 'hosted');
+  assert.ok(body.items.every((item) => item.category === 'Nature'));
+  // Bounded even with a hard-to-fill filter: never the whole 1500-id index.
+  assert.ok(itemReads <= 120, `expected <=120 fetches, got ${itemReads}`);
+});
+
 test('full-size lightbox preview with zoom on all image surfaces', async () => {
   for (const file of ['functions/photo/[id].js', 'store/images/stock-photos/index.html', 'store/console/index.html']) {
     const src = await readRepo(file);

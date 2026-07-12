@@ -99,6 +99,11 @@ const PENDING_INDEX = 'stock:index:pending';
 const ACCOUNT_INDEX_PREFIX = 'stock:index:account:';
 const ITEM_PREFIX = 'stock:item:';
 const MAX_ITEMS = 2000;
+// Cap the number of items an agent listing fetches per call so it stays under
+// Cloudflare's per-invocation KV-op limit as the catalog grows past ~1000
+// items. The index is reversed to newest-first before slicing, so this returns
+// the newest LIST_FETCH_CAP items.
+const LIST_FETCH_CAP = 200;
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 const MAX_SVG_SIZE = 1024 * 1024;
 const PUBLIC_BASE_FALLBACK = 'https://freedesignstore.online';
@@ -973,8 +978,9 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         if (authError) return txt(authError);
         const store = requireStore(this.env);
         if (typeof store === 'string') return txt(store);
-        // Newest ids sit at the end of the index — reverse to list newest first.
-        const ids = (await readIndex(store.kv, accountIndexKey(props.accountId || ''))).reverse();
+        // Newest ids sit at the end of the index — reverse to list newest first,
+        // then cap the fetch to the newest LIST_FETCH_CAP to bound KV ops.
+        const ids = (await readIndex(store.kv, accountIndexKey(props.accountId || ''))).reverse().slice(0, LIST_FETCH_CAP);
         const items = (await Promise.all(ids.map((id) => getItem(store.kv, id)))).filter((item): item is CatalogItem => Boolean(item));
         const filtered = items.filter((item) => status === 'all' || item.status === status).slice(0, limit);
         return jsonText(filtered.map((item) => itemForAccount(this.env, item)));
@@ -999,8 +1005,9 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         const props = currentProps(this.props);
         if (status === 'pending' && !props.isAdmin) return txt(assertAdmin(props) || 'Not authorized.');
 
-        // Newest ids sit at the end of the index — reverse to list newest first.
-        const ids = (await readIndex(store.kv, status === 'public' ? PUBLIC_INDEX : PENDING_INDEX)).reverse();
+        // Newest ids sit at the end of the index — reverse to list newest first,
+        // then cap the fetch to the newest LIST_FETCH_CAP to bound KV ops.
+        const ids = (await readIndex(store.kv, status === 'public' ? PUBLIC_INDEX : PENDING_INDEX)).reverse().slice(0, LIST_FETCH_CAP);
         const items = (await Promise.all(ids.map((id) => getItem(store.kv, id)))).filter((item): item is CatalogItem => Boolean(item));
         const needle = cleanText(q, '', 80).toLowerCase();
         const categoryFilter = cleanText(category, '', 64).toLowerCase();
