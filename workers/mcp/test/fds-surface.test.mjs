@@ -546,6 +546,15 @@ test('photo page and gallery disclose origin', async () => {
   assert.match(mcpSource, /origin_tool/);
 });
 
+test('catalog is browsable by tags and categories via deep links', async () => {
+  const gallery = await readRepo('store/images/stock-photos/index.html');
+  assert.match(gallery, /URLSearchParams/);
+  assert.match(gallery, /history\.replaceState/);
+
+  const photoPage = await readRepo('functions/photo/[id].js');
+  assert.match(photoPage, /\/images\/stock-photos\/\?tag=/);
+});
+
 test('console offers AI generation with origin disclosure', async () => {
   const console_ = await readRepo('store/console/index.html');
   assert.match(console_, /data-view="generate"/);

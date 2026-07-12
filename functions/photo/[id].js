@@ -112,8 +112,8 @@ ${String(item.contentType || "").startsWith("video/") ? "" : `<p class="zoom-hin
 <div class="meta">
 <div class="info">
 <h1>${esc(item.title)}</h1>
-<p>By ${item.ownerHandle ? `<a href="/u/${esc(item.ownerHandle)}">${esc(item.author)}</a>` : esc(item.author)} · ${esc(item.category)} · ${esc(item.license)}</p>
-<div class="tags">${(item.tags || []).map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</div>
+<p>By ${item.ownerHandle ? `<a href="/u/${esc(item.ownerHandle)}">${esc(item.author)}</a>` : esc(item.author)} · <a href="/images/stock-photos/?category=${encodeURIComponent(item.category || "")}">${esc(item.category)}</a> · ${esc(item.license)}</p>
+<div class="tags">${(item.tags || []).map((t) => `<a class="tag" href="/images/stock-photos/?tag=${encodeURIComponent(t)}">#${esc(t)}</a>`).join("")}</div>
 ${originBlock}
 </div>
 <div class="actions">

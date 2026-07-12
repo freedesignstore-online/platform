@@ -75,6 +75,7 @@ Any MCP client:
 
 - Store: https://freedesignstore.online
 - Asset library: https://freedesignstore.online/images/stock-photos/
+  Browse via URL params: ?category=<name>, ?type=<assetType>, ?tag=<tag> (or ?q=<query>), ?origin=<origin>, ?license=<licenseId>, ?source=<hosted|community|unsplash>. #<asset-id> opens the asset detail modal (params and hash combine).
 - Skills manifest: https://freedesignstore.online/skills/manifest.json
 - MCP discovery: https://freedesignstore.online/.well-known/mcp.json
 - MCP docs: https://freedesignstore.online/skills/

@@ -216,7 +216,43 @@ function escapeHtml(value){
   return String(value||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
 
+function applyUrlParams(){
+  const params=new URLSearchParams(location.search);
+  const source=params.get('source');
+  if(source&&['all','hosted','community','unsplash'].includes(source)){
+    activeSource=source;
+    document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.source===source));
+  }
+  const type=params.get('type');
+  if(type&&ASSET_TYPES.some(t=>t.id===type)) activeAssetType=type;
+  const origin=params.get('origin');
+  if(origin&&ORIGIN_FILTERS.some(o=>o.id===origin)) activeOrigin=origin;
+  const license=params.get('license');
+  if(license&&LICENSE_FILTERS.some(l=>l.id===license)) activeLicense=license;
+  const cat=params.get('category');
+  if(cat){
+    const match=['All',...CATEGORIES].find(c=>c.toLowerCase()===cat.toLowerCase());
+    activeCategory=match||cat;
+  }
+  const q=params.get('tag')||params.get('q');
+  if(q) $('searchInput').value=q;
+}
+
+function syncUrl(){
+  const params=new URLSearchParams();
+  if(activeSource!=='all'&&activeSource!=='submit') params.set('source',activeSource);
+  if(activeAssetType!=='all') params.set('type',activeAssetType);
+  if(activeCategory!=='All') params.set('category',activeCategory);
+  if(activeOrigin!=='all') params.set('origin',activeOrigin);
+  if(activeLicense!=='all') params.set('license',activeLicense);
+  const q=$('searchInput').value.trim();
+  if(q) params.set('q',q);
+  const qs=params.toString();
+  history.replaceState(null,'',location.pathname+(qs?'?'+qs:'')+location.hash);
+}
+
 async function init(){
+  applyUrlParams();
   if(apiKey){
     $('apiKey').value=apiKey;
     $('apiStatus').textContent='Personal Unsplash key saved';
@@ -226,6 +262,7 @@ async function init(){
   renderAssetTypes();
   renderFilters();
   await loadCommunityPhotos();
+  renderFilters();
   render();
   $('loadMorePhotos').addEventListener('click',loadMorePhotos);
   var sentinel=$('photoSentinel');
@@ -292,7 +329,15 @@ function renderAssetTypes(){
 }
 
 function renderFilters(){
-  $('filters').innerHTML=['All',...CATEGORIES].map(cat=>`<button class="filter ${cat===activeCategory?'active':''}" data-cat="${cat}">${cat}</button>`).join('');
+  const counts={};
+  allPhotos().forEach(p=>{const c=String(p.category||'').toLowerCase();counts[c]=(counts[c]||0)+1;});
+  const total=allPhotos().length;
+  $('filters').innerHTML=['All',...CATEGORIES].map(cat=>{
+    const n=cat==='All'?total:(counts[cat.toLowerCase()]||0);
+    if(total&&!n&&cat!=='All'&&cat!==activeCategory) return '';
+    const label=total?`${cat} (${n})`:cat;
+    return `<button class="filter ${cat===activeCategory?'active':''}" data-cat="${cat}">${label}</button>`;
+  }).join('');
   document.querySelectorAll('#filters .filter').forEach(btn=>{
     btn.onclick=()=>{activeCategory=btn.dataset.cat;renderFilters();render()};
   });
@@ -332,7 +377,7 @@ function filteredPhotos(){
   if(activeOrigin!=='all') photos=photos.filter(p=>p.origin===activeOrigin);
   if(activeLicense!=='all') photos=photos.filter(p=>p.licenseId===activeLicense);
   if(activeCategory!=='All') photos=photos.filter(p=>String(p.category||'').toLowerCase()===activeCategory.toLowerCase());
-  if(q) photos=photos.filter(p=>[p.title,p.author,p.category,p.license,...(p.tags||[])].join(' ').toLowerCase().includes(q));
+  if(q) photos=photos.filter(p=>[p.title,p.author,p.category,p.license,p.assetType,...(p.tags||[])].join(' ').toLowerCase().includes(q));
   return photos;
 }
 
@@ -342,6 +387,7 @@ var photosShown=0;
 
 function render(){
   if(activeSource==='submit') return;
+  syncUrl();
   allFiltered=filteredPhotos();
   photosShown=0;
   $('gallery').innerHTML='';
@@ -386,7 +432,7 @@ function photoCard(photo){
     <div class="photo-body">
       <div class="photo-title"><strong>${escapeHtml(photo.title)}</strong><span class="source ${sourceClass}">${sourceLabel}</span></div>
       <p class="meta">${credit}</p>
-      <div class="tags"><span class="tag">${escapeHtml(photo.assetType||'photo')}</span>${photo.origin?`<span class="tag origin-tag">${escapeHtml(ORIGIN_BADGES[photo.origin]||photo.origin)}</span>`:''}${(photo.tags||[]).slice(0,3).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
+      <div class="tags"><span class="tag">${escapeHtml(photo.assetType||'photo')}</span>${photo.origin?`<span class="tag origin-tag">${escapeHtml(ORIGIN_BADGES[photo.origin]||photo.origin)}</span>`:''}${(photo.tags||[]).slice(0,3).map(t=>`<a class="tag" href="/images/stock-photos/?tag=${encodeURIComponent(t)}" data-tag="${escapeHtml(t)}">${escapeHtml(t)}</a>`).join('')}</div>
       <div class="actions">
         ${primaryAction.replace('onclick="','onclick="event.stopPropagation();')}
         <button class="btn btn-secondary btn-small" onclick="event.stopPropagation();copyCredit('${escapeHtml(photo.id)}')">Copy Credit</button>
@@ -395,9 +441,18 @@ function photoCard(photo){
   </article>`;
 }
 
+function applyTagFilter(tag){
+  if(!$('assetModal').hidden) closeAssetModal();
+  $('searchInput').value=tag;
+  render();
+}
+
 function bindAssetCards(){
   document.querySelectorAll('.photo-card[data-photo-id]').forEach(card=>{
     const href=card.dataset.href;
+    card.querySelectorAll('a[data-tag]').forEach(a=>{
+      a.onclick=e=>{e.preventDefault();e.stopPropagation();applyTagFilter(a.dataset.tag);};
+    });
     card.onclick=()=>{
       if(href) { location.href=href; } else { openAssetModal(card.dataset.photoId); }
     };
@@ -430,7 +485,10 @@ function openAssetModal(id){
   $('modalImage').alt=photo.title;
   $('modalKicker').innerHTML=`<span class="source ${sourceClass}">${sourceLabel}</span><span class="pill">${escapeHtml(photo.assetType||'photo')}</span><span class="pill">${escapeHtml(photo.category||'Uncategorized')}</span>${photo.origin?`<span class="pill">${escapeHtml(ORIGIN_BADGES[photo.origin]||photo.origin)}</span>`:''}${photo.licenseId?`<span class="pill">${escapeHtml((LICENSE_FILTERS.find(l=>l.id===photo.licenseId)||{}).label||photo.licenseId)}</span>`:''}`;
   $('modalTitle').textContent=photo.title||'Untitled asset';
-  $('modalTags').innerHTML=[photo.assetType,...(photo.tags||[])].filter(Boolean).slice(0,8).map(tag=>`<span class="tag">${escapeHtml(tag)}</span>`).join('');
+  $('modalTags').innerHTML=[photo.assetType,...(photo.tags||[])].filter(Boolean).slice(0,8).map(tag=>`<a class="tag" href="/images/stock-photos/?tag=${encodeURIComponent(tag)}" data-tag="${escapeHtml(tag)}">${escapeHtml(tag)}</a>`).join('');
+  document.querySelectorAll('#modalTags a[data-tag]').forEach(a=>{
+    a.onclick=e=>{e.preventDefault();applyTagFilter(a.dataset.tag);};
+  });
   const sourceDetail=photo.source==='unsplash'
     ? `Displayed from Unsplash. Open on Unsplash for download and source details.`
     : `Served by FreeDesignStore.`;
@@ -458,7 +516,7 @@ function openAssetModal(id){
     <button class="btn btn-secondary" type="button" onclick="copyCredit('${escapeHtml(photo.id)}')">Copy Credit</button>
     <a class="btn btn-secondary" href="${escapeHtml(photo.url)}" target="_blank" rel="noopener">Open Image</a>
     ${shareRow}`;
-  if(photo.source==='hosted') history.replaceState(null,'','/images/stock-photos/#'+photo.id);
+  if(photo.source==='hosted') history.replaceState(null,'',location.pathname+location.search+'#'+photo.id);
   $('assetModal').hidden=false;
   document.body.classList.add('modal-open');
   $('modalClose').focus();
@@ -474,7 +532,7 @@ function shareAsset(id,title){
 }
 
 function closeAssetModal(){
-  if(location.hash) history.replaceState(null,'',location.pathname);
+  if(location.hash) history.replaceState(null,'',location.pathname+location.search);
   $('assetModal').hidden=true;
   document.body.classList.remove('modal-open');
   $('modalImage').removeAttribute('src');
@@ -739,6 +797,7 @@ async function submitPhotos(){
   status.textContent=pending?`${ok} asset(s) submitted for review.`:`${ok} asset(s) published.`;
   status.classList.add('ok');
   await loadCommunityPhotos();
+  renderFilters();
   if(!pending){
     activeSource='community';
     document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.source==='community'));

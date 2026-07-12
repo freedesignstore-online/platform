@@ -151,6 +151,8 @@
   .asset-page .info p { @apply text-gray-400 text-[.82rem] leading-normal; }
   .asset-page .tags { @apply flex gap-[.35rem] flex-wrap mt-2; }
   .asset-page .tag { @apply text-[.7rem] font-bold text-accent bg-accent/[.12] rounded-full py-[.2rem] px-[.55rem]; }
+  .asset-page a.tag { @apply transition no-underline; }
+  .asset-page a.tag:hover { @apply bg-accent text-white no-underline; }
   .asset-page .actions { @apply flex flex-col gap-2 items-end max-[640px]:items-start max-[640px]:flex-row max-[640px]:flex-wrap; }
   .asset-page .btn { @apply inline-flex items-center justify-center gap-1.5 py-[.55rem] px-[1.2rem] rounded-lg border border-transparent text-[.78rem] font-bold cursor-pointer transition whitespace-nowrap no-underline; }
   .asset-page .btn-primary { @apply bg-accent text-white border-accent; }
@@ -228,6 +230,8 @@
   .gallery-page .tags { @apply flex gap-[5px] flex-wrap mb-[11px]; }
   .gallery-page .tag { @apply text-[11px] text-pink-700 bg-blush rounded-full py-[3px] px-[7px] font-bold; }
   .gallery-page .tag.origin-tag { @apply text-blue-700 bg-blue-100; }
+  .gallery-page a.tag { @apply transition no-underline cursor-pointer; }
+  .gallery-page a.tag:hover { @apply bg-accent text-white no-underline; }
   .gallery-page .actions { @apply flex gap-[7px] flex-wrap; }
   .gallery-page .actions .btn { @apply flex-1; }
   .gallery-page .section { @apply hidden; }
