@@ -1,0 +1,8 @@
+# Force revalidation of deploy-versioned assets so design/JS changes appear
+# immediately instead of being cached for hours. ETag makes this cheap (304s).
+/tw.css
+  Cache-Control: public, max-age=0, must-revalidate
+/related.js
+  Cache-Control: public, max-age=0, must-revalidate
+/registry.json
+  Cache-Control: public, max-age=0, must-revalidate
