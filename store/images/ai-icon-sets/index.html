@@ -49,10 +49,27 @@
 <script>
 const $=id=>document.getElementById(id);
 let icons=[];
-function safeSvg(svg){
-  if(!/^<svg[\s>]/i.test(svg.trim()))return null;
-  if(/<script|on\w+\s*=|javascript:|<foreignObject|<iframe|<embed|href\s*=\s*["']?\s*http/i.test(svg))return null;
-  return svg.trim();
+const API='https://text.pollinations.ai/';
+function extract(text){
+  try{const d=JSON.parse(text);if(d&&typeof d==='object'&&!Array.isArray(d)){if(typeof d.content==='string'&&d.content)text=d.content;else if(d.name||d.body||d.length)return d;}}catch{}
+  text=String(text).replace(/```json|```/g,'');
+  const a=text.indexOf('[')>=0?text.slice(text.indexOf('['),text.lastIndexOf(']')+1):null;
+  const o=text.indexOf('{')>=0?text.slice(text.indexOf('{'),text.lastIndexOf('}')+1):null;
+  try{return JSON.parse(a||o);}catch{try{return JSON.parse(o||a);}catch{return null;}}
+}
+async function ask(prompt){
+  const res=await fetch(API+encodeURIComponent(prompt)+'?seed='+Math.floor(Math.random()*1e6));
+  return extract(await res.text());
+}
+function safeBody(body){
+  body=String(body||'').trim();
+  if(!body||/[<]script|on\w+\s*=|javascript:|foreignObject|iframe|embed|href/i.test(body))return null;
+  if(!/^<(path|rect|circle|line|ellipse|polyline|polygon|g)[\s>]/i.test(body))return null;
+  return body;
+}
+function wrap(body){
+  const outline=$('style').value==='outline';
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${outline?'none':'currentColor'}" stroke="${outline?'currentColor':'none'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
 }
 function tinted(svg){return svg.replace(/currentColor/g,$('color').value);}
 function render(){
@@ -70,22 +87,22 @@ function render(){
 $('genBtn').addEventListener('click',async()=>{
   const theme=$('theme').value.trim();if(!theme)return;
   const n=+$('count').value;
-  const styleDesc=$('style').value==='outline'
-    ?'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" outline style, consistent 2px strokes'
-    :'fill="currentColor" stroke="none" solid filled style';
-  const prompt=`Return ONLY a JSON array, no prose, no markdown fences: exactly ${n} SVG icons for the theme "${theme}". Each element: {"name": kebab-case string, "svg": string}. Every svg must be a complete <svg viewBox="0 0 24 24" ${styleDesc}> using simple clean geometric paths on a 24x24 grid with 2px padding, visually consistent as a set. No text elements, no ids, no defs.`;
-  $('genBtn').disabled=true;$('status').textContent='Generating '+n+' icons… (free model, can take ~30s)';
+  $('genBtn').disabled=true;icons=[];render();
   try{
-    const res=await fetch('https://text.pollinations.ai/'+encodeURIComponent(prompt)+'?seed='+Math.floor(Math.random()*1e6));
-    let text=await res.text();
-    text=text.replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/```\s*$/,'');
-    const start=text.indexOf('[');const end=text.lastIndexOf(']');
-    const list=JSON.parse(text.slice(start,end+1));
-    icons=list.map(x=>({name:String(x.name||'icon'),svg:safeSvg(String(x.svg||''))})).filter(x=>x.svg);
-    if(!icons.length)throw new Error('model returned no usable icons — try again');
-    render();
-    $('status').textContent=icons.length+' icons ready.'+(icons.length<n?' ('+(n-icons.length)+' failed validation)':'');
-  }catch(err){$('status').textContent='Failed: '+err.message+' — try again.';}
+    $('status').textContent='Planning the set\u2026';
+    let names=await ask(`Output ONLY a JSON array of exactly ${n} kebab-case strings, no prose: distinct icon names for the theme "${theme}".`);
+    if(!Array.isArray(names))throw new Error('could not plan icon names');
+    names=names.map(String).slice(0,n);
+    for(let i=0;i<names.length;i++){
+      $('status').textContent=`Generating icon ${i+1} of ${names.length} (${names[i]})\u2026 free model, ~10s each`;
+      try{
+        const r=await ask(`Output ONLY minified JSON {"body":"..."}, no prose: body = SVG inner elements only (path/rect/circle/line, no svg wrapper, no text, no ids) drawing a simple clean "${names[i]}" icon on a 24x24 grid with 2px padding, geometric and minimal, max 300 chars.`);
+        const body=safeBody(r&&(r.body||r.svg));
+        if(body){icons.push({name:names[i],svg:wrap(body)});render();}
+      }catch{}
+    }
+    $('status').textContent=icons.length?`${icons.length} of ${names.length} icons ready.`:'The free model returned nothing usable \u2014 try again.';
+  }catch(err){$('status').textContent='Failed: '+err.message+' \u2014 try again.';}
   finally{$('genBtn').disabled=false;}
 });
 $('color').addEventListener('input',render);
