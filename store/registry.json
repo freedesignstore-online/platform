@@ -4,7 +4,7 @@
       "id": "logo-maker",
       "name": "Logo Maker",
       "description": "Type your brand name, pick a font and style, download SVG instantly. No signup.",
-      "icon": "✏️",
+      "icon": "\u270f\ufe0f",
       "iconBg": "#ec4899",
       "category": "brand",
       "section": "brand"
@@ -13,7 +13,7 @@
       "id": "color-palette",
       "name": "Color Palette Generator",
       "description": "Generate harmonious palettes. Complementary, analogous, triadic. Extract from image. A11y contrast check.",
-      "icon": "🎨",
+      "icon": "\ud83c\udfa8",
       "iconBg": "#8b5cf6",
       "category": "brand",
       "section": "brand"
@@ -31,7 +31,7 @@
       "id": "brand-kit",
       "name": "Brand Kit Builder",
       "description": "Assemble a complete brand guide: logo + colors + fonts + usage rules. Download as HTML.",
-      "icon": "📋",
+      "icon": "\ud83d\udccb",
       "iconBg": "#10b981",
       "category": "brand",
       "section": "brand"
@@ -40,7 +40,7 @@
       "id": "business-card",
       "name": "Business Card Designer",
       "description": "Pick a template, enter your details, apply brand colors. Download print-ready SVG.",
-      "icon": "💼",
+      "icon": "\ud83d\udcbc",
       "iconBg": "#f59e0b",
       "category": "brand",
       "section": "brand"
@@ -49,7 +49,7 @@
       "id": "favicon-generator",
       "name": "Favicon Generator",
       "description": "Letters or emoji to favicon. Multiple sizes (16-512px), SVG/PNG/ICO download, copy HTML tags.",
-      "icon": "⭐",
+      "icon": "\u2b50",
       "iconBg": "#06b6d4",
       "category": "brand",
       "section": "brand"
@@ -58,7 +58,7 @@
       "id": "image-resizer",
       "name": "Image Resizer & Cropper",
       "description": "Resize to Instagram, X, LinkedIn, YouTube dimensions. Custom crop, quality control, drag & drop.",
-      "icon": "📐",
+      "icon": "\ud83d\udcd0",
       "iconBg": "#f97316",
       "category": "images",
       "section": "images"
@@ -67,7 +67,7 @@
       "id": "icon-library",
       "name": "SVG Icon Library",
       "description": "200+ icons searchable by name. Customize color and size. Copy SVG or download.",
-      "icon": "🔷",
+      "icon": "\ud83d\udd37",
       "iconBg": "#6366f1",
       "category": "images",
       "section": "images"
@@ -76,7 +76,7 @@
       "id": "social-templates",
       "name": "Social Media Templates",
       "description": "Platform-sized templates for Instagram, X, LinkedIn. Edit text, colors, download PNG.",
-      "icon": "📱",
+      "icon": "\ud83d\udcf1",
       "iconBg": "#ec4899",
       "category": "templates",
       "section": "templates"
@@ -85,7 +85,7 @@
       "id": "og-image-maker",
       "name": "OG Image Maker",
       "description": "Generate Open Graph images for link previews. Blog, product, event templates. 1200x630 PNG.",
-      "icon": "🖼️",
+      "icon": "\ud83d\uddbc\ufe0f",
       "iconBg": "#8b5cf6",
       "category": "templates",
       "section": "templates"
@@ -94,7 +94,7 @@
       "id": "gradient-maker",
       "name": "Gradient & Background Maker",
       "description": "Linear, radial, conic gradients. Mesh backgrounds. Drag color stops, 24 presets, copy CSS, download PNG.",
-      "icon": "🌈",
+      "icon": "\ud83c\udf08",
       "iconBg": "#a855f7",
       "category": "images",
       "section": "images"
@@ -103,7 +103,7 @@
       "id": "presentation-maker",
       "name": "Slide Deck Builder",
       "description": "Build presentations with 6 slide types. Theme colors, reorder slides, export as self-contained HTML slideshow.",
-      "icon": "📊",
+      "icon": "\ud83d\udcca",
       "iconBg": "#f59e0b",
       "category": "templates",
       "section": "templates"
@@ -111,8 +111,8 @@
     {
       "id": "ai-color-from-text",
       "name": "Smart Color from Description",
-      "description": "Type a mood or scene — get a matching 5-color palette. \"Sunset ocean\" → warm pinks, deep blues.",
-      "icon": "🧠",
+      "description": "Type a mood or scene \u2014 get a matching 5-color palette. \"Sunset ocean\" \u2192 warm pinks, deep blues.",
+      "icon": "\ud83e\udde0",
       "iconBg": "#a855f7",
       "category": "brand",
       "section": "brand"
@@ -121,7 +121,7 @@
       "id": "ai-logo-concepts",
       "name": "Smart Logo Concepts",
       "description": "Enter brand name + industry. Get 6 unique procedural logos: geometric, monogram, spirograph, fractal.",
-      "icon": "💡",
+      "icon": "\ud83d\udca1",
       "iconBg": "#ec4899",
       "category": "brand",
       "section": "brand"
@@ -130,7 +130,7 @@
       "id": "ai-background-remover",
       "name": "Background Remover",
       "description": "Upload photo, remove background instantly. Edge detection + flood fill. Download transparent PNG.",
-      "icon": "✂️",
+      "icon": "\u2702\ufe0f",
       "iconBg": "#10b981",
       "category": "images",
       "section": "images"
@@ -139,7 +139,7 @@
       "id": "pitch-deck",
       "name": "Pitch Deck Generator",
       "description": "Choose deck type (Startup/Sales/Investor), fill a form, get 10 pro slides auto-generated. Fullscreen present mode.",
-      "icon": "📊",
+      "icon": "\ud83d\udcca",
       "iconBg": "#f59e0b",
       "category": "templates",
       "section": "templates"
@@ -147,8 +147,8 @@
     {
       "id": "design-tokens",
       "name": "Design Token Generator",
-      "description": "Pick colors + fonts → export as CSS vars, Tailwind, SCSS, JSON, Swift, Kotlin. Live component preview.",
-      "icon": "🎯",
+      "description": "Pick colors + fonts \u2192 export as CSS vars, Tailwind, SCSS, JSON, Swift, Kotlin. Live component preview.",
+      "icon": "\ud83c\udfaf",
       "iconBg": "#6366f1",
       "category": "brand",
       "section": "brand"
@@ -157,7 +157,7 @@
       "id": "mockup-generator",
       "name": "Device Mockup Generator",
       "description": "Upload screenshot, choose device (iPhone, MacBook, iPad, Watch). Adjust angle, shadow. Download PNG.",
-      "icon": "📱",
+      "icon": "\ud83d\udcf1",
       "iconBg": "#06b6d4",
       "category": "templates",
       "section": "templates"
@@ -166,7 +166,7 @@
       "id": "qr-code-designer",
       "name": "QR Code Designer",
       "description": "Generate QR codes with custom colors, corner styles, logo overlay. Download PNG or SVG.",
-      "icon": "📷",
+      "icon": "\ud83d\udcf7",
       "iconBg": "#1a1a1a",
       "category": "brand",
       "section": "brand"
@@ -175,7 +175,7 @@
       "id": "wireframe-kit",
       "name": "Wireframe Builder",
       "description": "Drag-and-drop wireframe components. Snap to grid, resize, 3 page presets. Export SVG/PNG.",
-      "icon": "📐",
+      "icon": "\ud83d\udcd0",
       "iconBg": "#6b7280",
       "category": "templates",
       "section": "templates"
@@ -184,7 +184,7 @@
       "id": "contrast-checker",
       "name": "Contrast Checker",
       "description": "WCAG contrast ratio calculator. AA/AAA pass/fail, accessible alternatives, batch palette check.",
-      "icon": "👁️",
+      "icon": "\ud83d\udc41\ufe0f",
       "iconBg": "#10b981",
       "category": "brand",
       "section": "brand"
@@ -193,7 +193,7 @@
       "id": "pattern-maker",
       "name": "Pattern Generator",
       "description": "Seamless patterns: dots, lines, waves, hexagons. Layers, 20 presets. Download SVG/PNG/CSS.",
-      "icon": "🔲",
+      "icon": "\ud83d\udd32",
       "iconBg": "#8b5cf6",
       "category": "images",
       "section": "images"
@@ -202,7 +202,7 @@
       "id": "stock-photos",
       "name": "Design Asset Library",
       "description": "Browse, generate, upload, and download images, illustrations, icons, patterns, textures, backgrounds, and UI assets.",
-      "icon": "📦",
+      "icon": "\ud83d\udce6",
       "iconBg": "#06b6d4",
       "category": "images",
       "section": "images"
@@ -211,7 +211,7 @@
       "id": "free-logos",
       "name": "Free Logo Templates",
       "description": "24+ customizable SVG logo templates. Edit text, colors, icons. Download instantly. Favorites saved locally.",
-      "icon": "✨",
+      "icon": "\u2728",
       "iconBg": "#f59e0b",
       "category": "images",
       "section": "images"
@@ -220,7 +220,7 @@
       "id": "asset-manager",
       "name": "Personal Asset Manager",
       "description": "Local-first design library. Upload, organize, tag, search, export. All stored on YOUR device (IndexedDB).",
-      "icon": "📁",
+      "icon": "\ud83d\udcc1",
       "iconBg": "#6366f1",
       "category": "images",
       "section": "images"
@@ -229,7 +229,7 @@
       "id": "format-converter",
       "name": "Format Converter",
       "description": "Convert between PNG, JPEG, WebP, AVIF, BMP, ICO, Base64, SVG trace. Batch mode, EXIF strip, DPI control.",
-      "icon": "🔄",
+      "icon": "\ud83d\udd04",
       "iconBg": "#3b82f6",
       "category": "images",
       "section": "images"
@@ -238,7 +238,7 @@
       "id": "tailwind-theme",
       "name": "Tailwind Theme Builder",
       "description": "Visual editor for tailwind.config.js. Colors with 50-950 scales, typography, spacing, shadows, breakpoints. Live preview.",
-      "icon": "🎨",
+      "icon": "\ud83c\udfa8",
       "iconBg": "#06b6d4",
       "category": "brand",
       "section": "brand"
@@ -247,7 +247,7 @@
       "id": "css-animation",
       "name": "CSS Animation Studio",
       "description": "Visual keyframe editor. Timeline, cubic-bezier curves, 20 presets. Preview + export @keyframes CSS.",
-      "icon": "🎬",
+      "icon": "\ud83c\udfac",
       "iconBg": "#8b5cf6",
       "category": "brand",
       "section": "brand"
@@ -256,7 +256,7 @@
       "id": "css-effects",
       "name": "CSS Effects Generator",
       "description": "Glassmorphism, neumorphism, multi-layer shadows, and gradient builder. Presets, live preview, copy CSS.",
-      "icon": "✨",
+      "icon": "\u2728",
       "iconBg": "#8b5cf6",
       "category": "brand",
       "section": "brand"
@@ -265,7 +265,7 @@
       "id": "noise-texture",
       "name": "Noise & Texture Generator",
       "description": "Perlin, simplex, film grain, paper, fabric, concrete, wood, marble. Tileable PNG, CSS, SVG filter export.",
-      "icon": "🔲",
+      "icon": "\ud83d\udd32",
       "iconBg": "#6366f1",
       "category": "images",
       "section": "images"
@@ -274,7 +274,7 @@
       "id": "micro-animations",
       "name": "Micro-Interaction Library",
       "description": "100+ CSS animations: hover effects, spinners, transitions, attention seekers, buttons, text effects. Copy-paste.",
-      "icon": "🎬",
+      "icon": "\ud83c\udfac",
       "iconBg": "#ec4899",
       "category": "brand",
       "section": "brand"
@@ -283,7 +283,7 @@
       "id": "svg-optimizer",
       "name": "SVG Optimizer & Editor",
       "description": "Clean, minify, and edit SVGs. Remove cruft, shorten IDs, change colors. Export as SVG, data URL, or React.",
-      "icon": "⚡",
+      "icon": "\u26a1",
       "iconBg": "#10b981",
       "category": "images",
       "section": "images"
@@ -291,8 +291,8 @@
     {
       "id": "color-blindness",
       "name": "Color Blindness Simulator",
-      "description": "Upload image → see through 8 types of color blindness. Palette checker, accessible alternatives.",
-      "icon": "👁️",
+      "description": "Upload image \u2192 see through 8 types of color blindness. Palette checker, accessible alternatives.",
+      "icon": "\ud83d\udc41\ufe0f",
       "iconBg": "#10b981",
       "category": "brand",
       "section": "brand"
@@ -301,7 +301,7 @@
       "id": "avatar-generator",
       "name": "Avatar Generator",
       "description": "7 styles: initials, geometric, gradient, pixel art, pattern, rings, blob. Deterministic from name. Batch mode.",
-      "icon": "👤",
+      "icon": "\ud83d\udc64",
       "iconBg": "#f59e0b",
       "category": "images",
       "section": "images"
@@ -310,7 +310,7 @@
       "id": "ui-kit",
       "name": "UI Component Library",
       "description": "50+ copy-paste HTML/CSS components. Buttons, cards, forms, tables, modals. HTML, Tailwind, React JSX export.",
-      "icon": "🧩",
+      "icon": "\ud83e\udde9",
       "iconBg": "#6366f1",
       "category": "uiux",
       "section": "components"
@@ -319,7 +319,7 @@
       "id": "layout-builder",
       "name": "CSS Layout Builder",
       "description": "Visual Grid + Flexbox editor. Drag cells, set fr/px/%, named areas. Export CSS, Tailwind, HTML.",
-      "icon": "📐",
+      "icon": "\ud83d\udcd0",
       "iconBg": "#3b82f6",
       "category": "uiux",
       "section": "components"
@@ -328,7 +328,7 @@
       "id": "form-builder",
       "name": "Form Builder",
       "description": "Drag & drop form builder. 16 field types, multi-step wizards, 7 presets. Export HTML, Tailwind, React JSX.",
-      "icon": "📝",
+      "icon": "\ud83d\udcdd",
       "iconBg": "#10b981",
       "category": "uiux",
       "section": "components"
@@ -337,7 +337,7 @@
       "id": "landing-builder",
       "name": "Landing Page Builder",
       "description": "Stack 17 section types to build pages. Hero, features, pricing, FAQ, CTA. Responsive preview. Export HTML.",
-      "icon": "🏗️",
+      "icon": "\ud83c\udfd7\ufe0f",
       "iconBg": "#f97316",
       "category": "uiux",
       "section": "components"
@@ -346,7 +346,7 @@
       "id": "dashboard-builder",
       "name": "Dashboard Builder",
       "description": "Admin dashboard templates. Sidebar, charts, tables, widgets. Light/dark theme. Export HTML + React.",
-      "icon": "📊",
+      "icon": "\ud83d\udcca",
       "iconBg": "#8b5cf6",
       "category": "uiux",
       "section": "components"
@@ -355,7 +355,7 @@
       "id": "moodboard",
       "name": "Moodboard Builder",
       "description": "Freeform canvas for visual inspiration. Drag images, colors, fonts, shapes. Export PNG.",
-      "icon": "🎯",
+      "icon": "\ud83c\udfaf",
       "iconBg": "#ec4899",
       "category": "uiux",
       "section": "components"
@@ -364,7 +364,7 @@
       "id": "user-flow",
       "name": "User Flow Builder",
       "description": "Draw screen flows. 4 node types, bezier connections, labels, auto-layout, minimap. Export SVG/PNG.",
-      "icon": "🔀",
+      "icon": "\ud83d\udd00",
       "iconBg": "#3b82f6",
       "category": "uiux",
       "section": "components"
@@ -373,7 +373,7 @@
       "id": "sitemap-builder",
       "name": "Sitemap Generator",
       "description": "Visual page hierarchy tree. Drag to reparent, import URLs, export XML sitemap for SEO.",
-      "icon": "🗺️",
+      "icon": "\ud83d\uddfa\ufe0f",
       "iconBg": "#10b981",
       "category": "uiux",
       "section": "components"
@@ -382,7 +382,7 @@
       "id": "design-handoff",
       "name": "Design Handoff Sheet",
       "description": "Upload mockup, add measurement pins, extract colors, redlines. Export HTML specs for developers.",
-      "icon": "📏",
+      "icon": "\ud83d\udccf",
       "iconBg": "#f97316",
       "category": "uiux",
       "section": "components"
@@ -391,7 +391,7 @@
       "id": "photo-editor",
       "name": "Photo Editor",
       "description": "Mini-Photoshop. 15 tools, layers, adjustments, clone stamp, blur, gradient. Undo/redo, keyboard shortcuts.",
-      "icon": "🖼️",
+      "icon": "\ud83d\uddbc\ufe0f",
       "iconBg": "#1a1a1a",
       "category": "images",
       "section": "images"
@@ -400,7 +400,7 @@
       "id": "vector-editor",
       "name": "Vector Editor",
       "description": "Mini-Illustrator. Pen tool, shapes, bezier paths, layers, align/distribute. SVG-native. Export clean SVG/PNG.",
-      "icon": "✒️",
+      "icon": "\u2712\ufe0f",
       "iconBg": "#6366f1",
       "category": "images",
       "section": "images"
@@ -409,10 +409,20 @@
       "id": "pixel-editor",
       "name": "Pixel Art Editor",
       "description": "Sprite editor with animation frames, onion skin, layers, mirror mode. Export PNG/spritesheet/GIF. 8-128px grids.",
-      "icon": "👾",
+      "icon": "\ud83d\udc7e",
       "iconBg": "#ef4444",
       "category": "images",
       "section": "images"
+    }
+  ],
+  "tools": [
+    {
+      "id": "ai-icon-sets",
+      "name": "AI Icon Set Generator",
+      "url": "/images/ai-icon-sets/",
+      "emoji": "\ud83e\uddff",
+      "description": "Generate consistent SVG icon sets from a theme with a free AI model. Recolor, copy, download icons or a sprite.",
+      "category": "images"
     }
   ]
 }
