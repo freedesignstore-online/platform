@@ -69,7 +69,7 @@ Any MCP client:
 - Allowed types: JPEG, PNG, WebP, AVIF, SVG
 - SVG safety: no <script>, event handlers, javascript: URIs, <iframe>/<object>/<embed>
 - Unsplash images: link-off only, never mirror to R2
-- Max catalog size: 500 items
+- Max catalog size: 2000 items
 
 ## Links
 

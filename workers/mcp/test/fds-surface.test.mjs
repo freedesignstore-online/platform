@@ -138,7 +138,7 @@ test('home and public library make assets a first-class FDS surface', async () =
   assert.match(homeHtml, /Free Design Assets and Tools/);
   assert.match(homeHtml, /href="\/images\/stock-photos\/">Assets/);
   assert.match(homeHtml, /id="assetRail"/);
-  assert.match(homeHtml, /fetch\('\/api\/stock\/list\?source=all'/);
+  assert.match(homeHtml, /fetch\('\/api\/stock\/list\?source=all&limit=60'/);
   assert.doesNotMatch(homeHtml, /const hostedAssets=/);
   assert.match(homeHtml, /Community-published FDS assets appear here first/);
   assert.match(homeHtml, /id="tools"/);
@@ -155,7 +155,10 @@ test('home and public library make assets a first-class FDS surface', async () =
     assert.match(libraryHtml, new RegExp(type.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
   assert.match(libraryHtml, /Lifestyle/);
-  assert.match(libraryHtml, /fetch\('\/api\/stock\/list\?source=all'\)/);
+  // Gallery is server-paged: it builds /api/stock/list requests with filter,
+  // limit, and offset params instead of one unpaged source=all fetch.
+  assert.match(libraryHtml, /fetch\('\/api\/stock\/list\?'\+params\.toString\(\)\)/);
+  assert.match(libraryHtml, /catalogNextOffset/);
   assert.match(libraryHtml, /\[\.\.\.catalogPhotos,\.\.\.apiResults\]/);
   assert.doesNotMatch(libraryHtml, /HOSTED_PHOTOS/);
 });
@@ -518,6 +521,119 @@ test('stock list API filters by origin and license', async () => {
   assert.equal(bad.status, 400);
 });
 
+// --- Server-side paging (thousands-of-assets scale) ---
+
+// Index convention: JSON array of ids, newest appended at the END.
+// p-1 is the oldest, p-8 the newest.
+async function seedPagedCatalog(kv, count = 8) {
+  const items = Array.from({ length: count }, (_, i) =>
+    catalogItem({
+      id: `p-${i + 1}`,
+      title: `Asset ${i + 1}`,
+      category: i % 2 ? 'Nature' : 'Lifestyle',
+    })
+  );
+  for (const item of items) await kv.put(`stock:item:${item.id}`, JSON.stringify(item));
+  await kv.put('stock:index:public', JSON.stringify(items.map((i) => i.id)));
+  return items;
+}
+
+test('list API pages newest-first with offset/limit, total, and nextOffset', async () => {
+  const { onRequestGet } = await importRepoFile('functions/api/stock/list.js');
+  const kv = memoryKV();
+  await seedPagedCatalog(kv, 8);
+  const env = { FDS_STOCK_KV: kv, FDS_STOCK_BUCKET: memoryBucket() };
+  const page = async (qs) =>
+    (await onRequestGet({ request: new Request(`https://freedesignstore.online/api/stock/list?${qs}`), env })).json();
+
+  const page1 = await page('limit=3&offset=0');
+  assert.equal(page1.ok, true);
+  assert.equal(page1.total, 8);
+  assert.equal(page1.offset, 0);
+  assert.equal(page1.limit, 3);
+  assert.deepEqual(page1.items.map((item) => item.id), ['p-8', 'p-7', 'p-6']);
+  assert.equal(page1.nextOffset, 3);
+
+  const page2 = await page('limit=3&offset=3');
+  assert.deepEqual(page2.items.map((item) => item.id), ['p-5', 'p-4', 'p-3']);
+  assert.equal(page2.total, 8);
+  assert.equal(page2.nextOffset, 6);
+
+  const page3 = await page('limit=3&offset=6');
+  assert.deepEqual(page3.items.map((item) => item.id), ['p-2', 'p-1']);
+  assert.equal(page3.nextOffset, null);
+
+  // Default limit (60) still returns the whole small catalog in one page.
+  const all = await page('source=all');
+  assert.equal(all.items.length, 8);
+  assert.equal(all.nextOffset, null);
+});
+
+test('list API filtered paging resumes from nextOffset positions in the id list', async () => {
+  const { onRequestGet } = await importRepoFile('functions/api/stock/list.js');
+  const kv = memoryKV();
+  await seedPagedCatalog(kv, 8);
+  const env = { FDS_STOCK_KV: kv, FDS_STOCK_BUCKET: memoryBucket() };
+  const page = async (qs) =>
+    (await onRequestGet({ request: new Request(`https://freedesignstore.online/api/stock/list?${qs}`), env })).json();
+
+  // Newest-first id order: p-8(N), p-7(L), p-6(N), p-5(L), p-4(N), p-3(L), p-2(N), p-1(L)
+  const nature1 = await page('category=nature&limit=2&offset=0');
+  assert.deepEqual(nature1.items.map((item) => item.id), ['p-8', 'p-6']);
+  assert.equal(nature1.nextOffset, 3); // scan consumed positions 0..2
+
+  const nature2 = await page(`category=nature&limit=2&offset=${nature1.nextOffset}`);
+  assert.deepEqual(nature2.items.map((item) => item.id), ['p-4', 'p-2']);
+  assert.equal(nature2.nextOffset, 7);
+
+  const nature3 = await page(`category=nature&limit=2&offset=${nature2.nextOffset}`);
+  assert.deepEqual(nature3.items, []);
+  assert.equal(nature3.nextOffset, null);
+});
+
+test('list API returns a category facets map when facets=1', async () => {
+  const { onRequestGet } = await importRepoFile('functions/api/stock/list.js');
+  const kv = memoryKV();
+  await seedPagedCatalog(kv, 8);
+  const env = { FDS_STOCK_KV: kv, FDS_STOCK_BUCKET: memoryBucket() };
+
+  const res = await onRequestGet({
+    request: new Request('https://freedesignstore.online/api/stock/list?facets=1&limit=2'),
+    env,
+  });
+  const body = await res.json();
+  assert.deepEqual(body.categories, { lifestyle: 4, nature: 4 });
+  assert.equal(body.facetsPartial, false);
+  assert.equal(body.total, 8);
+  assert.equal(body.items.length, 2);
+
+  // No facets key unless requested.
+  const plain = await onRequestGet({
+    request: new Request('https://freedesignstore.online/api/stock/list?limit=2'),
+    env,
+  });
+  assert.ok(!('categories' in (await plain.json())));
+});
+
+test('random API response shape is unchanged by catalog paging (HeartFull contract)', async () => {
+  const { onRequestGet } = await importRepoFile('functions/api/stock/random.js');
+  const kv = memoryKV();
+  await seedUnifiedCatalog(kv);
+  const env = { FDS_STOCK_KV: kv, FDS_STOCK_BUCKET: memoryBucket() };
+  const res = await onRequestGet({
+    request: new Request('https://freedesignstore.online/api/stock/random?count=2'),
+    env,
+  });
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.deepEqual(Object.keys(body).sort(), ['count', 'filters', 'items', 'ok', 'source']);
+  assert.deepEqual(Object.keys(body.filters).sort(), ['assetType', 'category', 'orientation', 'purpose', 'q', 'safe']);
+  assert.equal(body.ok, true);
+  assert.equal(body.source, 'hosted');
+  assert.equal(body.count, body.items.length);
+  assert.ok(!('total' in body) && !('nextOffset' in body) && !('offset' in body));
+});
+
 test('full-size lightbox preview with zoom on all image surfaces', async () => {
   for (const file of ['functions/photo/[id].js', 'store/images/stock-photos/index.html', 'store/console/index.html']) {
     const src = await readRepo(file);
@@ -848,9 +964,9 @@ test('upload enforces account quotas and rate limits', async () => {
   assert.equal(rate.status, 429);
   assert.match((await rate.json()).error, /rate limit/);
 
-  // full catalog
+  // full catalog (capacity is 2000 public + pending ids)
   await kv.delete(`rl:upload:github-9:${hour}`);
-  await kv.put('stock:index:public', JSON.stringify(Array.from({ length: 500 }, (_, i) => `p${i}`)));
+  await kv.put('stock:index:public', JSON.stringify(Array.from({ length: 2000 }, (_, i) => `p${i}`)));
   const full = await onRequestPost({ request: makeReq(), env });
   assert.equal(full.status, 429);
   assert.match((await full.json()).error, /capacity/);

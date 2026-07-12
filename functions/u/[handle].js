@@ -22,7 +22,8 @@ export async function onRequestGet({ params, request, env }) {
   if (!profile) return new Response("Creator not found", { status: 404 });
 
   const origin = new URL(request.url).origin;
-  const owned = await listItems(store.kv, accountIndexKey(profile.accountId));
+  // Newest ids sit at the end of the account index — reverse for newest-first.
+  const owned = (await listItems(store.kv, accountIndexKey(profile.accountId))).reverse();
   const items = owned.filter((item) => item.status === "public").map((item) => publicItem(item, origin));
   const pageUrl = `${origin}/u/${encodeURIComponent(profile.handle)}`;
 

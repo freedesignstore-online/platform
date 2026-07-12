@@ -98,7 +98,7 @@ const PUBLIC_INDEX = 'stock:index:public';
 const PENDING_INDEX = 'stock:index:pending';
 const ACCOUNT_INDEX_PREFIX = 'stock:index:account:';
 const ITEM_PREFIX = 'stock:item:';
-const MAX_ITEMS = 500;
+const MAX_ITEMS = 2000;
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 const MAX_SVG_SIZE = 1024 * 1024;
 const PUBLIC_BASE_FALLBACK = 'https://freedesignstore.online';
@@ -632,8 +632,10 @@ async function readIndex(kv: KVNamespace, key: string): Promise<string[]> {
   return Array.isArray(value) ? value : [];
 }
 
+// Index format: JSON array of ids, newest appended at the END (batch ingest
+// scripts follow the same convention). Truncation keeps the end (newest).
 async function writeIndex(kv: KVNamespace, key: string, ids: string[]): Promise<void> {
-  await kv.put(key, JSON.stringify([...new Set(ids)].slice(0, MAX_ITEMS)));
+  await kv.put(key, JSON.stringify([...new Set(ids)].slice(-MAX_ITEMS)));
 }
 
 async function getItem(kv: KVNamespace, id: string): Promise<CatalogItem | null> {
@@ -650,7 +652,7 @@ async function deleteItem(kv: KVNamespace, id: string): Promise<void> {
 
 async function addToIndex(kv: KVNamespace, key: string, id: string): Promise<void> {
   const ids = await readIndex(kv, key);
-  await writeIndex(kv, key, [id, ...ids.filter((itemId) => itemId !== id)]);
+  await writeIndex(kv, key, [...ids.filter((itemId) => itemId !== id), id]);
 }
 
 async function removeFromIndex(kv: KVNamespace, key: string, id: string): Promise<void> {
@@ -971,7 +973,8 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         if (authError) return txt(authError);
         const store = requireStore(this.env);
         if (typeof store === 'string') return txt(store);
-        const ids = await readIndex(store.kv, accountIndexKey(props.accountId || ''));
+        // Newest ids sit at the end of the index — reverse to list newest first.
+        const ids = (await readIndex(store.kv, accountIndexKey(props.accountId || ''))).reverse();
         const items = (await Promise.all(ids.map((id) => getItem(store.kv, id)))).filter((item): item is CatalogItem => Boolean(item));
         const filtered = items.filter((item) => status === 'all' || item.status === status).slice(0, limit);
         return jsonText(filtered.map((item) => itemForAccount(this.env, item)));
@@ -996,7 +999,8 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         const props = currentProps(this.props);
         if (status === 'pending' && !props.isAdmin) return txt(assertAdmin(props) || 'Not authorized.');
 
-        const ids = await readIndex(store.kv, status === 'public' ? PUBLIC_INDEX : PENDING_INDEX);
+        // Newest ids sit at the end of the index — reverse to list newest first.
+        const ids = (await readIndex(store.kv, status === 'public' ? PUBLIC_INDEX : PENDING_INDEX)).reverse();
         const items = (await Promise.all(ids.map((id) => getItem(store.kv, id)))).filter((item): item is CatalogItem => Boolean(item));
         const needle = cleanText(q, '', 80).toLowerCase();
         const categoryFilter = cleanText(category, '', 64).toLowerCase();

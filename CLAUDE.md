@@ -46,7 +46,7 @@ claude mcp add freedesignstore https://mcp.freedesignstore.online/mcp
 - Unsplash images must not be mirrored — use Unsplash link-off only
 - Creators can only manage their own assets
 - Admin token required for moderation and viewing pending assets
-- Max 8 MB raster, 1 MB SVG, 500 catalog items
+- Max 8 MB raster, 1 MB SVG, 2000 catalog items
 
 ## Project structure
 

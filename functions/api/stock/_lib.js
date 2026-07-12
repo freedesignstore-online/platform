@@ -5,7 +5,7 @@ const PENDING_INDEX = "stock:index:pending";
 const ITEM_PREFIX = "stock:item:";
 const PROFILE_PREFIX = "profile:account:";
 const HANDLE_PREFIX = "profile:handle:";
-const MAX_ITEMS = 500;
+const MAX_ITEMS = 2000;
 const MAX_ACCOUNT_ASSETS = 100;
 const MAX_UPLOADS_PER_HOUR = 20;
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
@@ -97,8 +97,10 @@ export async function readIndex(kv, key) {
   return Array.isArray(value) ? value : [];
 }
 
+// Index format: JSON array of ids, newest appended at the END (batch ingest
+// scripts follow the same convention). Truncation keeps the end (newest).
 export async function writeIndex(kv, key, ids) {
-  await kv.put(key, JSON.stringify([...new Set(ids)].slice(0, MAX_ITEMS)));
+  await kv.put(key, JSON.stringify([...new Set(ids)].slice(-MAX_ITEMS)));
 }
 
 export async function getItem(kv, id) {
@@ -121,7 +123,7 @@ export async function listItems(kv, key) {
 
 export async function addToIndex(kv, key, id) {
   const ids = await readIndex(kv, key);
-  await writeIndex(kv, key, [id, ...ids.filter((itemId) => itemId !== id)]);
+  await writeIndex(kv, key, [...ids.filter((itemId) => itemId !== id), id]);
 }
 
 export async function removeFromIndex(kv, key, id) {

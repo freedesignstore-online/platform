@@ -177,21 +177,26 @@ function shareCard(btn,id,title){
   async function loadAssetRail(){
     if(!assetRail) return;
     let community=[];
+    let total=0;
     try{
-      const res=await fetch('/api/stock/list?source=all',{cache:'no-store'});
-      if(res.ok){const data=await res.json();community=data.items||[];}
+      // One server page is plenty for the rail: 4 hero cards + a few batches.
+      const res=await fetch('/api/stock/list?source=all&limit=60',{cache:'no-store'});
+      if(res.ok){const data=await res.json();community=data.items||[];total=data.total||community.length;}
     }catch(err){}
     allItems=community;
-    renderHero(allItems,allItems.length);
+    renderHero(allItems,total);
     shown=4;
     loadMoreBtn.classList.toggle('hidden',shown>=allItems.length);
     loadMoreBtn.addEventListener('click',loadMore);
     var sentinel=document.getElementById('scrollSentinel');
+    var autoBatches=0;
     if('IntersectionObserver' in window && sentinel){
       new IntersectionObserver(function(entries){
-        if(entries[0].isIntersecting&&shown<allItems.length){
+        if(entries[0].isIntersecting&&shown<allItems.length&&autoBatches<3){
+          autoBatches+=1;
           loadMore();
-          if(shown>=allItems.length) sentinel.style.display='none';
+          // Cap auto-loading so the homepage settles; the button loads the rest.
+          if(shown>=allItems.length||autoBatches>=3) sentinel.style.display='none';
         }
       },{rootMargin:'400px'}).observe(sentinel);
     }

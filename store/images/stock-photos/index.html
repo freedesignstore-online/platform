@@ -206,6 +206,13 @@ let activeLicense='all';
 let apiKey=localStorage.getItem('unsplash_key')||'';
 let apiResults=[];
 let catalogPhotos=[];
+// Server-paged catalog state: the API filters and pages (newest first);
+// the client only appends pages and re-requests when filters change.
+let catalogTotal=0;
+let catalogNextOffset=null;
+let catalogLoading=false;
+let categoryCounts=null;
+const PAGE_LIMIT=100;
 let pendingFiles=[];
 let generatedSvg='';
 let lastFocusedAsset=null;
@@ -261,14 +268,14 @@ async function init(){
   bindEvents();
   renderAssetTypes();
   renderFilters();
-  await loadCommunityPhotos();
+  await loadCatalogPage(true);
   renderFilters();
   render();
   $('loadMorePhotos').addEventListener('click',loadMorePhotos);
   var sentinel=$('photoSentinel');
   if('IntersectionObserver' in window && sentinel){
     new IntersectionObserver(function(entries){
-      if(entries[0].isIntersecting&&photosShown<allFiltered.length) loadMorePhotos();
+      if(entries[0].isIntersecting&&hasMorePhotos()) loadMorePhotos();
     },{rootMargin:'400px'}).observe(sentinel);
   }
 }
@@ -281,7 +288,7 @@ function bindEvents(){
       $('submitSection').classList.toggle('active',activeSource==='submit');
       $('librarySection').classList.toggle('active',activeSource!=='submit');
       if(activeSource==='submit') checkContributorAuth();
-      render();
+      refresh();
     });
   });
   $('searchBtn').onclick=search;
@@ -293,7 +300,7 @@ function bindEvents(){
     $('uploadOriginModel').style.display=showAi?'':'none';
     $('uploadOriginPrompt').style.display=showAi?'':'none';
   });
-  $('resetBtn').onclick=()=>{$('searchInput').value='';activeAssetType='all';activeCategory='All';activeOrigin='all';activeLicense='all';apiResults=[];renderAssetTypes();renderFilters();render()};
+  $('resetBtn').onclick=()=>{$('searchInput').value='';activeAssetType='all';activeCategory='All';activeOrigin='all';activeLicense='all';apiResults=[];renderAssetTypes();renderFilters();refresh()};
   $('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
   $('searchInput').addEventListener('input',()=>{
     const q=$('searchInput').value.trim();
@@ -324,55 +331,89 @@ function bindEvents(){
 function renderAssetTypes(){
   $('assetTypes').innerHTML=ASSET_TYPES.map(type=>`<button class="filter ${type.id===activeAssetType?'active':''}" data-type="${type.id}">${type.label}</button>`).join('');
   document.querySelectorAll('#assetTypes [data-type]').forEach(btn=>{
-    btn.onclick=()=>{activeAssetType=btn.dataset.type;renderAssetTypes();render()};
+    btn.onclick=()=>{activeAssetType=btn.dataset.type;renderAssetTypes();refresh()};
   });
 }
 
 function renderFilters(){
-  const counts={};
-  allPhotos().forEach(p=>{const c=String(p.category||'').toLowerCase();counts[c]=(counts[c]||0)+1;});
-  const total=allPhotos().length;
+  // Category counts come from the server facets map (?facets=1) so they
+  // cover the whole catalog, not just the pages loaded so far.
+  const counts=categoryCounts||{};
+  const total=catalogTotal||0;
   $('filters').innerHTML=['All',...CATEGORIES].map(cat=>{
     const n=cat==='All'?total:(counts[cat.toLowerCase()]||0);
-    if(total&&!n&&cat!=='All'&&cat!==activeCategory) return '';
-    const label=total?`${cat} (${n})`:cat;
+    if(categoryCounts&&!n&&cat!=='All'&&cat!==activeCategory) return '';
+    const label=categoryCounts?`${cat} (${n})`:cat;
     return `<button class="filter ${cat===activeCategory?'active':''}" data-cat="${cat}">${label}</button>`;
   }).join('');
   document.querySelectorAll('#filters .filter').forEach(btn=>{
-    btn.onclick=()=>{activeCategory=btn.dataset.cat;renderFilters();render()};
+    btn.onclick=()=>{activeCategory=btn.dataset.cat;renderFilters();refresh()};
   });
   $('originFilters').innerHTML=ORIGIN_FILTERS.map(o=>`<button class="filter ${o.id===activeOrigin?'active':''}" data-origin="${o.id}">${o.label}</button>`).join('');
   document.querySelectorAll('#originFilters .filter').forEach(btn=>{
-    btn.onclick=()=>{activeOrigin=btn.dataset.origin;renderFilters();render()};
+    btn.onclick=()=>{activeOrigin=btn.dataset.origin;renderFilters();refresh()};
   });
   $('licenseFilters').innerHTML=LICENSE_FILTERS.map(l=>`<button class="filter ${l.id===activeLicense?'active':''}" data-license="${l.id}">${l.label}</button>`).join('');
   document.querySelectorAll('#licenseFilters .filter').forEach(btn=>{
-    btn.onclick=()=>{activeLicense=btn.dataset.license;renderFilters();render()};
+    btn.onclick=()=>{activeLicense=btn.dataset.license;renderFilters();refresh()};
   });
 }
 
-async function loadCommunityPhotos(){
+function catalogParams(offset){
+  const params=new URLSearchParams();
+  params.set('source',activeSource==='hosted'||activeSource==='community'?activeSource:'all');
+  if(activeAssetType!=='all') params.set('asset_type',activeAssetType);
+  if(activeCategory!=='All') params.set('category',activeCategory.toLowerCase());
+  if(activeOrigin!=='all') params.set('origin',activeOrigin);
+  if(activeLicense!=='all') params.set('license',activeLicense);
+  const q=$('searchInput').value.trim();
+  if(q) params.set('q',q);
+  params.set('limit',String(PAGE_LIMIT));
+  params.set('offset',String(offset));
+  return params;
+}
+
+// Fetch one server page. reset=true starts from offset 0 and replaces the
+// loaded set; otherwise the next page (data.nextOffset) is appended.
+async function loadCatalogPage(reset){
+  if(catalogLoading) return;
+  catalogLoading=true;
   try{
-    const res=await fetch('/api/stock/list?source=all');
+    const params=catalogParams(reset?0:(catalogNextOffset??0));
+    if(!categoryCounts) params.set('facets','1');
+    const res=await fetch('/api/stock/list?'+params.toString());
     if(!res.ok) throw new Error('not configured');
     const data=await res.json();
-    catalogPhotos=(data.items||[]).map(item=>({...item,source:item.source||'community',assetType:item.assetType||'photo'}));
+    const items=(data.items||[]).map(item=>({...item,source:item.source||'community',assetType:item.assetType||'photo'}));
+    catalogPhotos=reset?items:[...catalogPhotos,...items];
+    catalogTotal=data.total??catalogPhotos.length;
+    catalogNextOffset=data.nextOffset??null;
+    if(data.categories) categoryCounts=data.categories;
   }catch(err){
-    catalogPhotos=[];
+    if(reset){catalogPhotos=[];catalogTotal=0;}
+    catalogNextOffset=null;
+  }finally{
+    catalogLoading=false;
   }
+}
+
+// Re-request page 1 from the server with the current filters, then re-render.
+async function refresh(){
+  if(activeSource==='submit') return;
+  syncUrl();
+  if(activeSource!=='unsplash') await loadCatalogPage(true);
+  render();
 }
 
 function allPhotos(){
   return [...catalogPhotos,...apiResults];
 }
 
-function filteredPhotos(){
+// Unsplash results come from client-side search and are filtered locally;
+// catalog items are already filtered server-side.
+function filteredApiResults(){
   const q=$('searchInput').value.trim().toLowerCase();
-  let photos=allPhotos();
-  if(activeSource==='hosted') photos=photos.filter(p=>p.source==='hosted');
-  if(activeSource==='community') photos=photos.filter(p=>p.source==='community');
-  if(activeSource==='unsplash') photos=photos.filter(p=>p.source==='unsplash');
-  if(activeSource==='all') photos=photos.filter(p=>p.source!=='unsplash' || apiResults.length);
+  let photos=apiResults;
   if(activeAssetType!=='all') photos=photos.filter(p=>p.assetType===activeAssetType);
   if(activeOrigin!=='all') photos=photos.filter(p=>p.origin===activeOrigin);
   if(activeLicense!=='all') photos=photos.filter(p=>p.licenseId===activeLicense);
@@ -381,35 +422,54 @@ function filteredPhotos(){
   return photos;
 }
 
+function displayPhotos(){
+  if(activeSource==='unsplash') return filteredApiResults();
+  if(activeSource==='all'&&apiResults.length) return [...catalogPhotos,...filteredApiResults()];
+  return catalogPhotos;
+}
+
+function hasMorePhotos(){
+  if(photosShown<displayPhotos().length) return true;
+  return activeSource!=='unsplash'&&catalogNextOffset!==null;
+}
+
 var PHOTO_BATCH=12;
-var allFiltered=[];
 var photosShown=0;
 
 function render(){
   if(activeSource==='submit') return;
   syncUrl();
-  allFiltered=filteredPhotos();
   photosShown=0;
   $('gallery').innerHTML='';
-  loadMorePhotos();
-  $('emptyState').style.display=allFiltered.length?'none':'block';
+  appendMorePhotos();
 }
 
-function loadMorePhotos(){
-  var next=allFiltered.slice(photosShown,photosShown+PHOTO_BATCH);
-  if(!next.length) return;
-  $('gallery').insertAdjacentHTML('beforeend',next.map(photoCard).join(''));
-  photosShown+=next.length;
-  bindAssetCards();
-  var btn=$('loadMorePhotos');
-  var sentinel=$('photoSentinel');
-  if(photosShown>=allFiltered.length){
-    btn.style.display='none';
-    if(sentinel) sentinel.style.display='none';
-  }else{
-    btn.style.display='';
-    if(sentinel) sentinel.style.display='';
+async function loadMorePhotos(){
+  if(photosShown<displayPhotos().length){appendMorePhotos();return;}
+  // Server pages can come back empty while nextOffset advances (bounded
+  // filtered scans); keep going a few pages until items arrive or the end.
+  var guard=0;
+  while(activeSource!=='unsplash'&&catalogNextOffset!==null&&guard<10){
+    guard+=1;
+    await loadCatalogPage(false);
+    if(photosShown<displayPhotos().length) break;
   }
+  appendMorePhotos();
+}
+
+function appendMorePhotos(){
+  var list=displayPhotos();
+  var next=list.slice(photosShown,photosShown+PHOTO_BATCH);
+  if(next.length){
+    $('gallery').insertAdjacentHTML('beforeend',next.map(photoCard).join(''));
+    photosShown+=next.length;
+    bindAssetCards();
+  }
+  var more=hasMorePhotos();
+  $('loadMorePhotos').style.display=more?'':'none';
+  var sentinel=$('photoSentinel');
+  if(sentinel) sentinel.style.display=more?'':'none';
+  $('emptyState').style.display=(list.length||more)?'none':'block';
 }
 
 function photoCard(photo){
@@ -444,7 +504,7 @@ function photoCard(photo){
 function applyTagFilter(tag){
   if(!$('assetModal').hidden) closeAssetModal();
   $('searchInput').value=tag;
-  render();
+  refresh();
 }
 
 function bindAssetCards(){
@@ -545,7 +605,7 @@ async function search(){
   if((activeSource==='unsplash' || activeSource==='all') && q){
     await searchUnsplash(q);
   }
-  render();
+  await refresh();
 }
 
 async function searchUnsplash(q){
@@ -796,15 +856,16 @@ async function submitPhotos(){
   $('fileInput').value='';
   status.textContent=pending?`${ok} asset(s) submitted for review.`:`${ok} asset(s) published.`;
   status.classList.add('ok');
-  await loadCommunityPhotos();
-  renderFilters();
+  categoryCounts=null; // counts changed — refetch facets with the next page load
   if(!pending){
     activeSource='community';
     document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.source==='community'));
     $('submitSection').classList.remove('active');
     $('librarySection').classList.add('active');
-    render();
   }
+  await loadCatalogPage(true);
+  renderFilters();
+  if(!pending) render();
 }
 
 init().then(()=>{

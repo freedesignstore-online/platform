@@ -29,13 +29,13 @@ The MCP worker (`workers/mcp`) shares the same KV/R2 and sets `FDS_ADMIN_LOGINS`
 
 ## Limits (soft, non-admin accounts)
 
-- 20 uploads per hour per account, 100 assets per account, 500 catalog items total.
+- 20 uploads per hour per account, 100 assets per account, 2000 catalog items total.
 - Images (JPG/PNG/WebP/AVIF): 8 MB. SVG: 1 MB, sanitized and served with restrictive security headers. Video (MP4/WebM): 40 MB, 90 seconds.
 - Video uploads arrive as multipart form data, which buffers in Worker memory — raising the video cap requires a raw-body upload endpoint.
 
 ## API
 
-- `GET /api/stock/list`: unified public catalog. Filters: `source=hosted|community|all`, `assetType`, `category`, `orientation`, `purpose`, `origin`, `license`, `safe`, `q`.
+- `GET /api/stock/list`: unified public catalog, newest first, server-paged. Filters: `source=hosted|community|all`, `assetType`, `category`, `orientation`, `purpose`, `origin`, `license`, `safe`, `q`. Paging: `limit` (default 60, max 500) + `offset`; the response adds `total`, `nextOffset` (pass it back as `offset` to continue; filtered scans are read-bounded, so a page can be short with `nextOffset` set), and `categories` counts when `facets=1`.
 - `GET /api/stock/random?purpose=profile_background&count=3`: random curated assets (HeartFull integration — response shape is stable).
 - `POST /api/stock/upload`: multipart upload; requires session cookie + `rightsConsent=yes`, `releaseConsent=yes`, `origin`. Optional: `originTool/originModel/originPrompt`, `license`, `purpose`, `safe`, client `width/height/duration`.
 - `GET /api/stock/image/:id`: serve from R2 (supports Range requests for video seeking).
