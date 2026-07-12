@@ -2,481 +2,177 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smart Background Remover - FreeDesignStore</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AI Background Remover - FreeDesignStore</title>
+<meta name="description" content="Remove image backgrounds with an on-device AI model (RMBG-1.4). Runs 100% in your browser — images never leave your device. Free, no signup.">
+<link rel="canonical" href="https://freedesignstore.online/images/ai-background-remover/">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Manrope', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; min-height: 100vh; padding: 24px; }
-a.back { display: inline-block; margin-bottom: 24px; color: #ec4899; text-decoration: none; font-weight: 500; }
-a.back:hover { text-decoration: underline; }
-h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
-p.subtitle { color: #6b7280; margin-bottom: 24px; }
-.panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 24px; margin-bottom: 24px; }
-.drop-zone { border: 2px dashed #e5e7eb; border-radius: 12px; padding: 60px 24px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; }
-.drop-zone:hover, .drop-zone.dragover { border-color: #ec4899; background: #fdf2f8; }
-.drop-zone .icon { font-size: 48px; color: #ec4899; margin-bottom: 8px; }
-.drop-zone p { color: #6b7280; font-size: 14px; }
-.drop-zone input { display: none; }
-.btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 14px; transition: all .15s; }
-.btn:hover { opacity: .85; }
-.btn-primary { background: #ec4899; color: #fff; }
-.btn-secondary { background: #f3f4f6; color: #1a1a1a; border: 1px solid #e5e7eb; }
-.btn-primary:disabled { opacity: .5; cursor: not-allowed; }
-.editor { display: none; }
-.editor.active { display: block; }
-.toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; padding: 12px 16px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; }
-.toolbar label { font-size: 13px; font-weight: 500; color: #6b7280; }
-.toolbar input[type="range"] { width: 140px; accent-color: #ec4899; }
-.toolbar .val { font-size: 12px; color: #ec4899; font-weight: 600; min-width: 30px; }
-.toolbar .separator { width: 1px; height: 24px; background: #e5e7eb; }
-.brush-tools { display: flex; gap: 8px; }
-.brush-btn { padding: 6px 14px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer; transition: all .15s; }
-.brush-btn:hover, .brush-btn.active { border-color: #ec4899; background: #fdf2f8; color: #ec4899; }
-.canvas-container { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-@media (max-width: 800px) { .canvas-container { grid-template-columns: 1fr; } }
-.canvas-wrap { position: relative; border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb; }
-.canvas-wrap h3 { position: absolute; top: 8px; left: 12px; font-size: 12px; font-weight: 600; color: #6b7280; background: rgba(255,255,255,.85); padding: 4px 8px; border-radius: 4px; z-index: 2; }
-.canvas-wrap canvas { width: 100%; display: block; cursor: crosshair; }
-.checkerboard { background-image: linear-gradient(45deg, #e5e7eb 25%, transparent 25%), linear-gradient(-45deg, #e5e7eb 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e5e7eb 75%), linear-gradient(-45deg, transparent 75%, #e5e7eb 75%); background-size: 16px 16px; background-position: 0 0, 0 8px, 8px -8px, -8px 0px; }
-.actions { display: flex; gap: 12px; flex-wrap: wrap; }
-.progress { margin-bottom: 16px; display: none; }
-.progress.active { display: block; }
-.progress-bar { height: 4px; background: #e5e7eb; border-radius: 2px; overflow: hidden; }
-.progress-bar .fill { height: 100%; background: #ec4899; transition: width .3s; }
-.progress-text { font-size: 12px; color: #6b7280; margin-top: 6px; }
-.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; }
-.toast.show { opacity: 1; }
-.size-info { font-size: 12px; color: #6b7280; margin-bottom: 12px; }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/tw.css">
 </head>
 <body>
-<a class="back" href="/tools/">&larr; Tools</a>
-<h1>Smart Background Remover</h1>
-<p class="subtitle">Remove backgrounds from images using edge detection and flood-fill — works entirely in your browser.</p>
+<header class="fds-header">
+<a href="/" class="brand"><span class="brand-emoji">🎨</span><span class="brand-name">FreeDesignStore</span></a>
+<nav class="fds-nav"><a href="/tools/">Tools</a><a href="/images/stock-photos/">Assets</a><a href="/creators">Creators</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
+</header>
+<main class="max-w-[1100px] mx-auto p-6">
+<a class="back text-[.78rem] font-bold" href="/tools/">&larr; Tools</a>
+<h1 class="font-display text-[2rem] font-bold mt-2 mb-1">AI Background Remover</h1>
+<p class="text-muted text-[.88rem] leading-normal max-w-[680px]">Drop in a photo and an on-device AI model (RMBG-1.4) cuts the background out — entirely in your browser. Nothing is uploaded, ever. Download a transparent PNG, or fill the background with white or any color.</p>
 
-<div class="panel">
-  <div class="drop-zone" id="dropZone">
-    <div class="icon">&#128444;</div>
-    <p><strong>Drop an image here</strong> or click to browse</p>
-    <p style="margin-top:8px;font-size:12px;">Supports PNG, JPG, WebP up to 10MB</p>
-    <input type="file" id="fileInput" accept="image/*">
+<div class="bg-panel border border-hairline rounded-[10px] p-4 mt-4 grid gap-3">
+  <div id="drop" class="border-2 border-dashed border-hairline rounded-[10px] py-12 px-6 text-center cursor-pointer transition-colors hover:border-accent hover:bg-blush">
+    <div class="text-[2.4rem]">🖼️</div>
+    <p class="font-bold mt-1">Drop an image here or click to browse</p>
+    <p class="text-muted text-[.78rem] mt-1">JPG, PNG or WebP · processed on your device, never uploaded</p>
+    <input id="file" type="file" accept="image/jpeg,image/png,image/webp" class="hidden">
   </div>
-
-  <div class="editor" id="editor">
-    <div class="size-info" id="sizeInfo"></div>
-
-    <div class="toolbar">
-      <label>Threshold</label>
-      <input type="range" id="threshold" min="5" max="80" value="25">
-      <span class="val" id="thresholdVal">25</span>
-
-      <div class="separator"></div>
-
-      <label>Edge Strength</label>
-      <input type="range" id="edgeStrength" min="10" max="150" value="50">
-      <span class="val" id="edgeVal">50</span>
-
-      <div class="separator"></div>
-
-      <label>Brush Size</label>
-      <input type="range" id="brushSize" min="5" max="50" value="15">
-      <span class="val" id="brushVal">15</span>
-
-      <div class="separator"></div>
-
-      <div class="brush-tools">
-        <button class="brush-btn" id="brushErase" onclick="setBrush('erase')">Erase</button>
-        <button class="brush-btn" id="brushRestore" onclick="setBrush('restore')">Restore</button>
-      </div>
-    </div>
-
-    <div class="progress" id="progress">
-      <div class="progress-bar"><div class="fill" id="progressFill"></div></div>
-      <div class="progress-text" id="progressText">Processing...</div>
-    </div>
-
-    <div class="canvas-container">
-      <div class="canvas-wrap">
-        <h3>Original</h3>
-        <canvas id="canvasOriginal"></canvas>
-      </div>
-      <div class="canvas-wrap checkerboard">
-        <h3>Result</h3>
-        <canvas id="canvasResult"></canvas>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button class="btn btn-primary" onclick="processImage()">Remove Background</button>
-      <button class="btn btn-secondary" onclick="downloadResult()">Download PNG</button>
-      <button class="btn btn-secondary" onclick="reset()">New Image</button>
-    </div>
+  <div class="flex gap-2 items-center flex-wrap">
+    <span class="text-[.72rem] font-bold text-gray-600">Background:</span>
+    <button type="button" class="filter-btn active" data-bg="transparent">Transparent</button>
+    <button type="button" class="filter-btn" data-bg="white">White</button>
+    <button type="button" class="filter-btn" data-bg="custom">Custom</button>
+    <input id="bgColor" type="color" value="#ec4899" class="h-[30px] w-[44px] border border-hairline rounded-lg bg-white cursor-pointer" hidden>
+    <button id="dlBtn" class="hero-btn cursor-pointer ml-auto disabled:opacity-50 disabled:cursor-not-allowed" disabled>Download PNG</button>
   </div>
+  <p id="status" class="text-[.78rem] text-muted m-0" role="status"></p>
 </div>
 
-<div class="toast" id="toast"></div>
+<div id="results" class="grid grid-cols-2 gap-3 mt-4 max-[820px]:grid-cols-1" hidden>
+  <figure class="m-0 bg-panel border border-hairline rounded-[10px] p-3 grid gap-2">
+    <figcaption class="text-[.72rem] font-bold text-gray-600">Original</figcaption>
+    <img id="origImg" alt="Original image" class="w-full h-auto rounded-lg">
+  </figure>
+  <figure class="m-0 bg-panel border border-hairline rounded-[10px] p-3 grid gap-2">
+    <figcaption class="text-[.72rem] font-bold text-gray-600">Result</figcaption>
+    <div class="rounded-lg overflow-hidden" style="background-image:linear-gradient(45deg,#e5e7eb 25%,transparent 25%),linear-gradient(-45deg,#e5e7eb 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e5e7eb 75%),linear-gradient(-45deg,transparent 75%,#e5e7eb 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0">
+      <canvas id="outCanvas" class="w-full h-auto block"></canvas>
+    </div>
+  </figure>
+</div>
 
+<p class="text-[.72rem] text-muted mt-4 pb-8">Runs 100% on-device: the model (~44 MB) downloads to your browser once and is cached; your images stay on your device and are never sent anywhere. Model: <a href="https://huggingface.co/briaai/RMBG-1.4" target="_blank" rel="noopener">BRIA RMBG-1.4</a> (research license) running locally. For commercial-grade cutouts consider your own licensed tooling.</p>
+</main>
+<footer class="fds-footer">FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a> | <a href="https://openfrontier-docs.pages.dev">Docs</a> | <a href="/terms/">Terms</a> | <a href="/privacy/">Privacy</a></footer>
 <script>
-let originalImage = null;
-let originalData = null;
-let maskData = null;
-let imgWidth = 0, imgHeight = 0;
-let brushMode = null; // 'erase' or 'restore'
-let painting = false;
+const $=id=>document.getElementById(id);
+let pipelinePromise=null,currentUrl=null,cutout=null,bgMode='transparent',busy=false;
 
-// --- File upload ---
-const dropZone = document.getElementById('dropZone');
-const fileInput = document.getElementById('fileInput');
-
-dropZone.addEventListener('click', () => fileInput.click());
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-dropZone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropZone.classList.remove('dragover');
-  const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) loadImage(file);
-});
-fileInput.addEventListener('change', e => {
-  if (e.target.files[0]) loadImage(e.target.files[0]);
-});
-
-function loadImage(file) {
-  if (file.size > 10 * 1024 * 1024) { showToast('File too large (max 10MB)'); return; }
-  const img = new Image();
-  img.onload = () => {
-    // Limit dimensions for performance
-    const maxDim = 1200;
-    let w = img.width, h = img.height;
-    if (w > maxDim || h > maxDim) {
-      const scale = maxDim / Math.max(w, h);
-      w = Math.round(w * scale);
-      h = Math.round(h * scale);
-    }
-    imgWidth = w;
-    imgHeight = h;
-
-    // Draw to original canvas
-    const cOrig = document.getElementById('canvasOriginal');
-    cOrig.width = w; cOrig.height = h;
-    const ctx = cOrig.getContext('2d');
-    ctx.drawImage(img, 0, 0, w, h);
-    originalData = ctx.getImageData(0, 0, w, h);
-
-    // Prepare result canvas
-    const cRes = document.getElementById('canvasResult');
-    cRes.width = w; cRes.height = h;
-
-    // Show editor
-    dropZone.style.display = 'none';
-    document.getElementById('editor').classList.add('active');
-    document.getElementById('sizeInfo').textContent = `Image: ${w} x ${h} pixels`;
-
-    // Auto-process
-    processImage();
-  };
-  img.src = URL.createObjectURL(file);
-  originalImage = img;
+function status(msg,isError){
+  const s=$('status');
+  s.textContent=msg;
+  s.classList.toggle('text-red-600',!!isError);
+  s.classList.toggle('text-muted',!isError);
 }
 
-// --- Sliders ---
-document.getElementById('threshold').addEventListener('input', e => {
-  document.getElementById('thresholdVal').textContent = e.target.value;
-});
-document.getElementById('edgeStrength').addEventListener('input', e => {
-  document.getElementById('edgeVal').textContent = e.target.value;
-});
-document.getElementById('brushSize').addEventListener('input', e => {
-  document.getElementById('brushVal').textContent = e.target.value;
-});
-
-// --- Processing ---
-function processImage() {
-  if (!originalData) return;
-  const threshold = parseInt(document.getElementById('threshold').value);
-  const edgeThreshold = parseInt(document.getElementById('edgeStrength').value);
-
-  showProgress(0, 'Detecting edges...');
-
-  // Use requestAnimationFrame to not block UI
-  requestAnimationFrame(() => {
-    const w = imgWidth, h = imgHeight;
-    const src = originalData.data;
-
-    // Step 1: Convert to grayscale
-    const gray = new Float32Array(w * h);
-    for (let i = 0; i < w * h; i++) {
-      const idx = i * 4;
-      gray[i] = 0.299 * src[idx] + 0.587 * src[idx + 1] + 0.114 * src[idx + 2];
-    }
-
-    showProgress(20, 'Computing Sobel edges...');
-
-    requestAnimationFrame(() => {
-      // Step 2: Sobel edge detection
-      const edges = new Float32Array(w * h);
-      for (let y = 1; y < h - 1; y++) {
-        for (let x = 1; x < w - 1; x++) {
-          const idx = y * w + x;
-          // Sobel X
-          const gx = -gray[(y-1)*w+(x-1)] + gray[(y-1)*w+(x+1)]
-                     -2*gray[y*w+(x-1)] + 2*gray[y*w+(x+1)]
-                     -gray[(y+1)*w+(x-1)] + gray[(y+1)*w+(x+1)];
-          // Sobel Y
-          const gy = -gray[(y-1)*w+(x-1)] - 2*gray[(y-1)*w+x] - gray[(y-1)*w+(x+1)]
-                     +gray[(y+1)*w+(x-1)] + 2*gray[(y+1)*w+x] + gray[(y+1)*w+(x+1)];
-          edges[idx] = Math.sqrt(gx * gx + gy * gy);
-        }
-      }
-
-      showProgress(50, 'Flood-filling background...');
-
-      requestAnimationFrame(() => {
-        // Step 3: Flood fill from edges
-        // Sample background color from corners and edges
-        const bgSamples = [];
-        const samplePoints = [];
-        // Top/bottom rows
-        for (let x = 0; x < w; x += Math.max(1, Math.floor(w / 20))) {
-          samplePoints.push(x); // top
-          samplePoints.push((h - 1) * w + x); // bottom
-        }
-        // Left/right cols
-        for (let y = 0; y < h; y += Math.max(1, Math.floor(h / 20))) {
-          samplePoints.push(y * w); // left
-          samplePoints.push(y * w + w - 1); // right
-        }
-
-        for (const idx of samplePoints) {
-          const i4 = idx * 4;
-          bgSamples.push([src[i4], src[i4 + 1], src[i4 + 2]]);
-        }
-
-        // Average background color
-        const bgR = bgSamples.reduce((s, c) => s + c[0], 0) / bgSamples.length;
-        const bgG = bgSamples.reduce((s, c) => s + c[1], 0) / bgSamples.length;
-        const bgB = bgSamples.reduce((s, c) => s + c[2], 0) / bgSamples.length;
-
-        // Flood fill: BFS from all border pixels
-        maskData = new Uint8Array(w * h); // 0 = background, 255 = foreground
-        maskData.fill(255); // start with everything as foreground
-
-        const visited = new Uint8Array(w * h);
-        const queue = [];
-
-        // Seed from all border pixels
-        for (let x = 0; x < w; x++) {
-          queue.push(x); // top
-          queue.push((h - 1) * w + x); // bottom
-        }
-        for (let y = 0; y < h; y++) {
-          queue.push(y * w); // left
-          queue.push(y * w + w - 1); // right
-        }
-
-        // Mark border pixels as visited seeds
-        for (const idx of queue) {
-          visited[idx] = 1;
-        }
-
-        const threshSq = threshold * threshold * 3; // threshold for color distance
-
-        let qi = 0;
-        while (qi < queue.length) {
-          const idx = queue[qi++];
-          const i4 = idx * 4;
-          const r = src[i4], g = src[i4 + 1], b = src[i4 + 2];
-
-          // Check if pixel is similar to background
-          const dr = r - bgR, dg = g - bgG, db = b - bgB;
-          const dist = dr * dr + dg * dg + db * db;
-
-          // Check if pixel is on a strong edge
-          const isEdge = edges[idx] > edgeThreshold;
-
-          if (dist < threshSq && !isEdge) {
-            maskData[idx] = 0; // mark as background
-
-            // Expand to neighbors
-            const x = idx % w, y = Math.floor(idx / w);
-            const neighbors = [
-              y > 0 ? idx - w : -1,
-              y < h - 1 ? idx + w : -1,
-              x > 0 ? idx - 1 : -1,
-              x < w - 1 ? idx + 1 : -1
-            ];
-            for (const n of neighbors) {
-              if (n >= 0 && !visited[n]) {
-                visited[n] = 1;
-                queue.push(n);
-              }
-            }
-          }
-        }
-
-        showProgress(80, 'Refining edges...');
-
-        requestAnimationFrame(() => {
-          // Step 4: Soften mask edges (simple gaussian-like blur on mask boundary)
-          const softMask = new Uint8Array(w * h);
-          const blurR = 2;
-          for (let y = 0; y < h; y++) {
-            for (let x = 0; x < w; x++) {
-              const idx = y * w + x;
-              let sum = 0, count = 0;
-              for (let dy = -blurR; dy <= blurR; dy++) {
-                for (let dx = -blurR; dx <= blurR; dx++) {
-                  const ny = y + dy, nx = x + dx;
-                  if (ny >= 0 && ny < h && nx >= 0 && nx < w) {
-                    sum += maskData[ny * w + nx];
-                    count++;
-                  }
-                }
-              }
-              softMask[idx] = Math.round(sum / count);
-            }
-          }
-          maskData = softMask;
-
-          showProgress(100, 'Done!');
-          renderResult();
-
-          setTimeout(() => {
-            document.getElementById('progress').classList.remove('active');
-          }, 500);
-        });
-      });
-    });
-  });
-}
-
-function renderResult() {
-  const cRes = document.getElementById('canvasResult');
-  const ctx = cRes.getContext('2d');
-  const resultData = ctx.createImageData(imgWidth, imgHeight);
-  const src = originalData.data;
-  const dst = resultData.data;
-
-  for (let i = 0; i < imgWidth * imgHeight; i++) {
-    const i4 = i * 4;
-    dst[i4] = src[i4];
-    dst[i4 + 1] = src[i4 + 1];
-    dst[i4 + 2] = src[i4 + 2];
-    dst[i4 + 3] = maskData[i]; // alpha from mask
+async function loadPipeline(){
+  const { AutoModel, AutoProcessor, RawImage, env } = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0');
+  env.allowLocalModels=false;
+  const modelOpts=d=>({config:{model_type:'custom'},device:d,dtype:'fp32'});
+  let device=navigator.gpu?'webgpu':'wasm',model;
+  try{
+    model=await AutoModel.from_pretrained('briaai/RMBG-1.4',modelOpts(device));
+  }catch(err){
+    if(device==='wasm')throw err;
+    device='wasm';
+    model=await AutoModel.from_pretrained('briaai/RMBG-1.4',modelOpts(device));
   }
-
-  ctx.putImageData(resultData, 0, 0);
+  const processor=await AutoProcessor.from_pretrained('briaai/RMBG-1.4',{config:{
+    do_normalize:true,do_pad:false,do_rescale:true,do_resize:true,
+    image_mean:[0.5,0.5,0.5],feature_extractor_type:'ImageFeatureExtractor',
+    image_std:[1,1,1],resample:2,rescale_factor:0.00392156862745098,
+    size:{width:1024,height:1024}
+  }});
+  return {model,processor,RawImage,device};
+}
+function getPipeline(){
+  if(!pipelinePromise)pipelinePromise=loadPipeline().catch(err=>{pipelinePromise=null;throw err;});
+  return pipelinePromise;
 }
 
-function showProgress(pct, text) {
-  const prog = document.getElementById('progress');
-  prog.classList.add('active');
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('progressText').textContent = text;
-}
-
-// --- Manual brush painting ---
-function setBrush(mode) {
-  brushMode = brushMode === mode ? null : mode;
-  document.getElementById('brushErase').classList.toggle('active', brushMode === 'erase');
-  document.getElementById('brushRestore').classList.toggle('active', brushMode === 'restore');
-}
-
-const canvasResult = document.getElementById('canvasResult');
-
-canvasResult.addEventListener('mousedown', e => {
-  if (!brushMode || !maskData) return;
-  painting = true;
-  paint(e);
-});
-canvasResult.addEventListener('mousemove', e => {
-  if (painting) paint(e);
-});
-canvasResult.addEventListener('mouseup', () => { painting = false; });
-canvasResult.addEventListener('mouseleave', () => { painting = false; });
-
-// Touch support
-canvasResult.addEventListener('touchstart', e => {
-  if (!brushMode || !maskData) return;
-  e.preventDefault();
-  painting = true;
-  paintTouch(e);
-});
-canvasResult.addEventListener('touchmove', e => {
-  if (painting) { e.preventDefault(); paintTouch(e); }
-});
-canvasResult.addEventListener('touchend', () => { painting = false; });
-
-function paintTouch(e) {
-  const touch = e.touches[0];
-  const rect = canvasResult.getBoundingClientRect();
-  const scaleX = imgWidth / rect.width;
-  const scaleY = imgHeight / rect.height;
-  const px = Math.round((touch.clientX - rect.left) * scaleX);
-  const py = Math.round((touch.clientY - rect.top) * scaleY);
-  applyBrush(px, py);
-}
-
-function paint(e) {
-  const rect = canvasResult.getBoundingClientRect();
-  const scaleX = imgWidth / rect.width;
-  const scaleY = imgHeight / rect.height;
-  const px = Math.round((e.clientX - rect.left) * scaleX);
-  const py = Math.round((e.clientY - rect.top) * scaleY);
-  applyBrush(px, py);
-}
-
-function applyBrush(px, py) {
-  const radius = parseInt(document.getElementById('brushSize').value);
-  const value = brushMode === 'erase' ? 0 : 255;
-
-  for (let dy = -radius; dy <= radius; dy++) {
-    for (let dx = -radius; dx <= radius; dx++) {
-      if (dx * dx + dy * dy > radius * radius) continue;
-      const x = px + dx, y = py + dy;
-      if (x >= 0 && x < imgWidth && y >= 0 && y < imgHeight) {
-        maskData[y * imgWidth + x] = value;
-      }
-    }
+async function processFile(file){
+  if(busy)return;
+  if(!/^image\/(jpeg|png|webp)$/.test(file.type)){status('Unsupported file type — use JPG, PNG or WebP.',true);return;}
+  busy=true;
+  $('dlBtn').disabled=true;
+  if(currentUrl)URL.revokeObjectURL(currentUrl);
+  currentUrl=URL.createObjectURL(file);
+  $('origImg').src=currentUrl;
+  $('results').hidden=false;
+  cutout=null;
+  $('outCanvas').width=1;$('outCanvas').height=1;
+  try{
+    status('Loading model (~44 MB, one-time)…');
+    const {model,processor,RawImage,device}=await getPipeline();
+    status('Removing background…');
+    const image=await RawImage.fromURL(currentUrl);
+    const {pixel_values}=await processor(image);
+    const {output}=await model({input:pixel_values});
+    const mask=await RawImage.fromTensor(output[0].mul(255).to('uint8')).resize(image.width,image.height);
+    cutout=document.createElement('canvas');
+    cutout.width=image.width;cutout.height=image.height;
+    const ctx=cutout.getContext('2d');
+    ctx.drawImage(image.toCanvas(),0,0);
+    const px=ctx.getImageData(0,0,image.width,image.height);
+    for(let i=0;i<mask.data.length;i++)px.data[i*4+3]=mask.data[i];
+    ctx.putImageData(px,0,0);
+    renderResult();
+    $('dlBtn').disabled=false;
+    status('Done — processed on-device ('+device+').');
+  }catch(err){
+    console.error(err);
+    status('Failed: '+((err&&err.message)||err)+' — this tool needs WebGPU or WebAssembly; try a recent Chrome or Edge.',true);
+  }finally{
+    busy=false;
   }
+}
+
+function renderResult(){
+  if(!cutout)return;
+  const out=$('outCanvas');
+  out.width=cutout.width;out.height=cutout.height;
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,out.width,out.height);
+  if(bgMode!=='transparent'){
+    ctx.fillStyle=bgMode==='white'?'#ffffff':$('bgColor').value;
+    ctx.fillRect(0,0,out.width,out.height);
+  }
+  ctx.drawImage(cutout,0,0);
+}
+
+// --- upload wiring ---
+const drop=$('drop'),fileInput=$('file');
+drop.addEventListener('click',()=>fileInput.click());
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('border-accent','bg-blush');});
+drop.addEventListener('dragleave',()=>drop.classList.remove('border-accent','bg-blush'));
+drop.addEventListener('drop',e=>{
+  e.preventDefault();
+  drop.classList.remove('border-accent','bg-blush');
+  const f=e.dataTransfer.files[0];
+  if(f)processFile(f);
+});
+fileInput.addEventListener('change',e=>{if(e.target.files[0])processFile(e.target.files[0]);});
+
+// --- background fill ---
+document.querySelectorAll('[data-bg]').forEach(btn=>btn.addEventListener('click',()=>{
+  bgMode=btn.dataset.bg;
+  document.querySelectorAll('[data-bg]').forEach(b=>b.classList.toggle('active',b===btn));
+  $('bgColor').hidden=bgMode!=='custom';
   renderResult();
-}
+}));
+$('bgColor').addEventListener('input',()=>{if(bgMode==='custom')renderResult();});
 
-// --- Download ---
-function downloadResult() {
-  if (!maskData) { showToast('Process an image first'); return; }
-  const cRes = document.getElementById('canvasResult');
-  const link = document.createElement('a');
-  link.download = 'background-removed.png';
-  link.href = cRes.toDataURL('image/png');
-  link.click();
-  showToast('Downloaded transparent PNG');
-}
-
-// --- Reset ---
-function reset() {
-  originalImage = null;
-  originalData = null;
-  maskData = null;
-  brushMode = null;
-  painting = false;
-  document.getElementById('editor').classList.remove('active');
-  document.getElementById('dropZone').style.display = '';
-  document.getElementById('brushErase').classList.remove('active');
-  document.getElementById('brushRestore').classList.remove('active');
-  fileInput.value = '';
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
-}
+// --- download ---
+$('dlBtn').addEventListener('click',()=>{
+  if(!cutout)return;
+  $('outCanvas').toBlob(blob=>{
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='background-removed.png';
+    a.click();
+  },'image/png');
+});
 </script>
-<script src="/ai-queue.js"></script>
 <script src="/related.js"></script>
 </body>
 </html>

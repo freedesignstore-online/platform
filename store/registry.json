@@ -129,7 +129,7 @@
     {
       "id": "ai-background-remover",
       "name": "Background Remover",
-      "description": "Upload photo, remove background instantly. Edge detection + flood fill. Download transparent PNG.",
+      "description": "Upload photo, AI removes the background. On-device model (RMBG-1.4) — images never leave your browser.",
       "icon": "\u2702\ufe0f",
       "iconBg": "#10b981",
       "category": "images",
