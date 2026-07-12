@@ -212,6 +212,7 @@ let catalogTotal=0;
 let catalogNextOffset=null;
 let catalogLoading=false;
 let categoryCounts=null;
+let catalogCategoriesTotal=null; // "All" count under the active non-category filters
 const PAGE_LIMIT=100;
 let pendingFiles=[];
 let generatedSvg='';
@@ -339,7 +340,8 @@ function renderFilters(){
   // Category counts come from the server facets map (?facets=1) so they
   // cover the whole catalog, not just the pages loaded so far.
   const counts=categoryCounts||{};
-  const total=catalogTotal||0;
+  // "All" reflects the filtered total when facets are loaded, else the full catalog.
+  const total=(categoryCounts&&catalogCategoriesTotal!=null)?catalogCategoriesTotal:(catalogTotal||0);
   $('filters').innerHTML=['All',...CATEGORIES].map(cat=>{
     const n=cat==='All'?total:(counts[cat.toLowerCase()]||0);
     if(categoryCounts&&!n&&cat!=='All'&&cat!==activeCategory) return '';
@@ -380,7 +382,9 @@ async function loadCatalogPage(reset){
   catalogLoading=true;
   try{
     const params=catalogParams(reset?0:(catalogNextOffset??0));
-    if(!categoryCounts) params.set('facets','1');
+    // Refetch facets on every fresh query so category counts reflect the
+    // current origin/asset-type/license/search filters (not just first load).
+    if(reset) params.set('facets','1');
     const res=await fetch('/api/stock/list?'+params.toString());
     if(!res.ok) throw new Error('not configured');
     const data=await res.json();
@@ -388,7 +392,7 @@ async function loadCatalogPage(reset){
     catalogPhotos=reset?items:[...catalogPhotos,...items];
     catalogTotal=data.total??catalogPhotos.length;
     catalogNextOffset=data.nextOffset??null;
-    if(data.categories) categoryCounts=data.categories;
+    if(data.categories){categoryCounts=data.categories;catalogCategoriesTotal=data.categoriesTotal??null;}
   }catch(err){
     if(reset){catalogPhotos=[];catalogTotal=0;}
     catalogNextOffset=null;
@@ -402,6 +406,7 @@ async function refresh(){
   if(activeSource==='submit') return;
   syncUrl();
   if(activeSource!=='unsplash') await loadCatalogPage(true);
+  renderFilters(); // reflect fresh facet counts for the new filter set
   render();
 }
 

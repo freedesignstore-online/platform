@@ -103,6 +103,9 @@ ${String(item.contentType || "").startsWith("video/") ? `<meta property="og:vide
 <a href="/" class="brand"><span style="font-size:1.4rem">🎨</span><span class="brand-name">FreeDesignStore</span></a>
 <nav class="fds-nav-dark"><a href="/tools/">Tools</a><a href="/images/stock-photos/">Assets</a><a href="/creators">Creators</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
 </header>
+<div style="max-width:1100px;margin:16px auto -4px;padding:0 20px">
+<a href="/images/stock-photos/" id="backBtn" class="btn btn-outline">&larr; Back to results <span style="opacity:.6;font-weight:600">Esc</span></a>
+</div>
 <div class="photo-wrap">
 ${String(item.contentType || "").startsWith("video/")
     ? `<video class="photo-img" src="${esc(item.url)}" controls playsinline></video>`
@@ -142,6 +145,15 @@ document.getElementById('copyBtn').addEventListener('click',function(){
     setTimeout(()=>{this.textContent='Copy link';this.classList.remove('copied');},2000);
   });
 });
+// Go back to the list exactly where the visitor left it (scroll + filters),
+// falling back to the gallery when this page was opened directly.
+function fdsGoBack(){
+  if(history.length>1&&document.referrer){
+    try{if(new URL(document.referrer).origin===location.origin){history.back();return;}}catch(e){}
+  }
+  location.href='/images/stock-photos/';
+}
+document.getElementById('backBtn').addEventListener('click',function(e){e.preventDefault();fdsGoBack();});
 (function(){
 const lb=document.getElementById('lightbox'),img=document.getElementById('lbImg'),zl=document.getElementById('lbZoom');
 let s=1,tx=0,ty=0,fitS=1,lastDist=0,moved=false;const ptrs=new Map();
@@ -151,7 +163,7 @@ function zoomAt(f,cx,cy){const ns=Math.min(Math.max(s*f,Math.min(fitS,1)*0.25),8
 window.openLightbox=function(src){img.src=src;lb.hidden=false;document.body.style.overflow='hidden';if(img.complete&&img.naturalWidth)fit();else img.onload=fit;};
 function close(){lb.hidden=true;document.body.style.overflow='';}
 lb.addEventListener('click',e=>{if(e.target===lb&&!moved)close();});
-document.addEventListener('keydown',e=>{if(!lb.hidden&&e.key==='Escape')close();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!lb.hidden)close();else fdsGoBack();}});
 lb.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.deltaY<0?1.25:0.8,e.clientX,e.clientY);},{passive:false});
 img.addEventListener('dblclick',e=>{if(Math.abs(s-1)<0.01)fit();else zoomAt(1/s,e.clientX,e.clientY);});
 lb.addEventListener('pointerdown',e=>{ptrs.set(e.pointerId,[e.clientX,e.clientY]);lb.setPointerCapture(e.pointerId);moved=false;});

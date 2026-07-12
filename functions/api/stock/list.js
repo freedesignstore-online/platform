@@ -86,10 +86,13 @@ export async function onRequestGet({ request, env }) {
     if (source === "community") return item.ownerAccountId !== HOSTED_ACCOUNT;
     return true;
   };
-  const matches = (item) =>
+  // matchesBase applies every active filter EXCEPT category — the facet counts
+  // build on it so each category chip shows how many results it would yield
+  // under the OTHER active filters (standard faceted search). matches() adds
+  // the category clause for the actual result page.
+  const matchesBase = (item) =>
     matchesSource(item) &&
     (!assetType || item.assetType === assetType) &&
-    (!category || String(item.category || "").toLowerCase() === category) &&
     (!orientation || orientationOf(item) === orientation) &&
     (!purpose || (item.purpose || []).some((value) => String(value || "").toLowerCase() === purpose)) &&
     (!originFilter || item.origin === originFilter) &&
@@ -100,19 +103,25 @@ export async function onRequestGet({ request, env }) {
         .join(" ")
         .toLowerCase()
         .includes(query));
+  const matches = (item) =>
+    matchesBase(item) && (!category || String(item.category || "").toLowerCase() === category);
 
   // Facets: category counts over the newest FETCH_CAP items — exact while the
-  // catalog fits the read budget, flagged partial beyond. Counts follow the
-  // source filter only (they back the gallery's category chips, which show
-  // catalog-wide counts regardless of the other active filters).
+  // catalog fits the read budget, flagged partial beyond. Counts respect all
+  // active filters except category, so chips never advertise results that the
+  // current origin/license/type/search filters would hide. categoriesTotal is
+  // the "All" count under those same filters.
   let categories = null;
+  let categoriesTotal = null;
   let facetsPartial = false;
   if (wantFacets) {
     const facetIds = ids.slice(0, FETCH_CAP);
     const facetItems = (await Promise.all(facetIds.map(fetchItem))).filter(Boolean);
     categories = {};
+    categoriesTotal = 0;
     for (const item of facetItems) {
-      if (!matchesSource(item)) continue;
+      if (!matchesBase(item)) continue;
+      categoriesTotal += 1;
       const cat = String(item.category || "").toLowerCase();
       if (cat) categories[cat] = (categories[cat] || 0) + 1;
     }
@@ -157,7 +166,7 @@ export async function onRequestGet({ request, env }) {
     limit,
     scanned,
     nextOffset,
-    ...(categories ? { categories, facetsPartial } : {}),
+    ...(categories ? { categories, categoriesTotal, facetsPartial } : {}),
     items: matched.map((item) => publicItem(item, origin)),
   });
 }
