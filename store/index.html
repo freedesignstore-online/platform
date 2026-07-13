@@ -150,6 +150,9 @@ function shareCard(btn,id,title){
   function esc(value){
     return String(value||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   }
+  // Request a small WebP thumbnail from FDS-served images (server falls back to
+  // the original if none exists). Non-FDS URLs pass through unchanged.
+  function thumbUrl(u,size){u=String(u||'');if(!u.includes('/api/stock/image/'))return u;return u+(u.includes('?')?'&':'?')+'size='+size;}
   const assetOverflow=document.getElementById('assetOverflow');
   const loadMoreBtn=document.getElementById('loadMoreBtn');
   const BATCH=8;
@@ -158,7 +161,7 @@ function shareCard(btn,id,title){
   function cardHtml(item){
     const href=item.id?`/photo/${esc(item.id)}`:'/images/stock-photos/';
     return `<a class="stock-card ${item.source==='FDS'||item.source==='hosted'?'hosted':''}" href="${href}" aria-label="Open ${esc(item.title)}">
-      <img src="${esc(item.url)}" alt="${esc(item.title)}" loading="lazy">
+      <img src="${esc(thumbUrl(item.url,400))}" srcset="${esc(thumbUrl(item.url,400))} 1x, ${esc(thumbUrl(item.url,800))} 2x" alt="${esc(item.title)}" loading="lazy" decoding="async">
       <div class="stock-caption"><strong>${esc(item.title)}</strong><span>${esc(item.source==='FDS'||item.source==='hosted'?'hosted':item.assetType||'asset')}</span></div>
       ${item.id?`<button class="share-overlay" onclick="event.preventDefault();event.stopPropagation();shareCard(this,'${esc(item.id)}','${esc(item.title)}')" aria-label="Share">&#8599;</button>`:''}
     </a>`;

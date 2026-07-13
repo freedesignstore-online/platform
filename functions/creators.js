@@ -45,7 +45,7 @@ export async function onRequestGet({ request, env }) {
     .map(({ profile, owned }) => {
       const previews = owned
         .slice(0, 3)
-        .map((item) => `<img loading="lazy" src="${esc(publicItem(item, origin).url)}" alt="">`)
+        .map((item) => `<img loading="lazy" decoding="async" src="${esc(publicItem(item, origin).url)}?size=400" alt="">`)
         .join("");
       return `<a class="creator" href="/u/${encodeURIComponent(profile.handle)}">
 <div class="previews">${previews}</div>

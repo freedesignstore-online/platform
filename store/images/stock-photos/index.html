@@ -216,6 +216,18 @@ function escapeHtml(value){
   return String(value||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
 
+// Gallery tiles request a small WebP thumbnail (?size=400/800) from FDS-served
+// images; the server falls back to the original if no thumb exists yet. External
+// (Unsplash) URLs are already small, so pass them through untouched.
+function tileSrc(photo){
+  const u=String(photo.url||'');
+  if(u.includes('/api/stock/image/')){
+    const j=u.includes('?')?'&':'?';
+    return {src:`${u}${j}size=400`, srcset:`${u}${j}size=400 1x, ${u}${j}size=800 2x`};
+  }
+  return {src:u, srcset:''};
+}
+
 function applyUrlParams(){
   const params=new URLSearchParams(location.search);
   const source=params.get('source');
@@ -507,7 +519,7 @@ function photoCard(photo){
   const isVideo=String(photo.contentType||'').startsWith('video/');
   const media=isVideo
     ? `<video src="${escapeHtml(photo.url)}" muted loop playsinline preload="metadata"></video>${photo.duration?`<span class="video-badge">${Math.round(photo.duration)}s</span>`:'<span class="video-badge">video</span>'}`
-    : `<img src="${escapeHtml(photo.url)}" alt="${escapeHtml(photo.title)}" loading="lazy">`;
+    : (()=>{const t=tileSrc(photo);return `<img src="${escapeHtml(t.src)}"${t.srcset?` srcset="${escapeHtml(t.srcset)}" sizes="245px"`:''} alt="${escapeHtml(photo.title)}" loading="lazy" decoding="async">`;})();
   return `<article class="photo-card ${photo.assetType==='photo'?'photo':''}" data-photo-id="${escapeHtml(photo.id)}"${detailHref?` data-href="${detailHref}"`:''} role="button" tabindex="0" aria-label="Open ${escapeHtml(photo.title)} details">
     ${media}
     <div class="photo-body">

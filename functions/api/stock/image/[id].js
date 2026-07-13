@@ -1,5 +1,7 @@
 import { canViewItem, error, getItem, requireStore } from "../_lib.js";
 
+const THUMB_SIZES = new Set(["400", "800"]);
+
 export async function onRequestGet({ params, request, env }) {
   const store = requireStore(env);
   if (store.missing) return store.response;
@@ -9,6 +11,26 @@ export async function onRequestGet({ params, request, env }) {
   if (!item) return error("Asset not found.", 404);
   if (!(await canViewItem(request, env, item))) {
     return error("Asset is not public.", 404);
+  }
+
+  // Pre-generated thumbnail path: ?size=400|800 serves a small WebP variant for
+  // gallery tiles instead of the multi-MB original. Falls back to the original
+  // when no thumb exists (e.g. server-created assets not yet backfilled), so this
+  // is a pure optimization that never 404s.
+  const reqUrl = new URL(request.url);
+  const sizeParam = reqUrl.searchParams.get("size");
+  const isRaster = String(item.contentType || "").startsWith("image/") && item.contentType !== "image/svg+xml";
+  if (sizeParam && THUMB_SIZES.has(sizeParam) && isRaster && !request.headers.get("range")) {
+    const thumb = await store.bucket.get(`thumb/${sizeParam}/${item.id}.webp`);
+    if (thumb) {
+      const h = new Headers();
+      thumb.writeHttpMetadata(h);
+      h.set("content-type", "image/webp");
+      h.set("etag", thumb.httpEtag);
+      h.set("cache-control", "public, max-age=31536000, immutable");
+      return new Response(thumb.body, { headers: h });
+    }
+    // no thumb → fall through and serve the original
   }
 
   // Range support so <video> elements can seek.

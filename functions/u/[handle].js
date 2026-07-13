@@ -70,7 +70,7 @@ export async function onRequestGet({ params, request, env }) {
         ? `<video muted loop playsinline preload="metadata" src="${esc(item.url)}"></video>${
             item.duration ? `<span class="duration">${Math.round(item.duration)}s</span>` : ""
           }`
-        : `<img loading="lazy" src="${esc(item.url)}" alt="${esc(item.title)}">`;
+        : `<img loading="lazy" decoding="async" src="${esc(item.url)}?size=400" srcset="${esc(item.url)}?size=400 1x, ${esc(item.url)}?size=800 2x" alt="${esc(item.title)}">`;
       return `<a class="work-card" href="/photo/${encodeURIComponent(item.id)}">${media}<span class="work-title">${esc(item.title)}</span></a>`;
     })
     .join("");
