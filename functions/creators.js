@@ -82,7 +82,7 @@ ${creators.length ? `<div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1
 </div>
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
 <footer class="fds-footer">FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a> · <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></footer>
-</body>
+<script src="/nav.js" defer></script></body>
 </html>`;
 
   return new Response(html, {

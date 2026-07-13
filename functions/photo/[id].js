@@ -176,7 +176,7 @@ const photo=document.getElementById('photoImg');
 if(photo)photo.addEventListener('click',()=>openLightbox(photo.src));
 })();
 </script>
-</body>
+<script src="/nav.js" defer></script></body>
 </html>`;
 
   return new Response(html, {

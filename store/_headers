@@ -6,3 +6,5 @@
   Cache-Control: public, max-age=0, must-revalidate
 /registry.json
   Cache-Control: public, max-age=0, must-revalidate
+/nav.js
+  Cache-Control: public, max-age=0, must-revalidate

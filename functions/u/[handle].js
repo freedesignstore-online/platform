@@ -109,7 +109,7 @@ ${profile.bio ? `<p class="mt-[.35rem] text-muted text-[.85rem] max-w-[640px] le
 ${items.length ? `<div class="max-w-[1100px] mx-auto px-6 pb-12 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3.5">${cards}</div>${hasMore ? `<p class="max-w-[1100px] mx-auto px-6 pb-12 -mt-8 text-muted text-[.8rem]">Showing the ${WORKS_CAP} newest works.</p>` : ""}` : `<p class="max-w-[1100px] mx-auto px-6 py-8 text-muted text-[.85rem]">No published assets yet.</p>`}
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
 <footer class="fds-footer">FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a> · <a href="/terms/">Terms</a> · <a href="/privacy/">Privacy</a></footer>
-</body>
+<script src="/nav.js" defer></script></body>
 </html>`;
 
   return new Response(html, {
