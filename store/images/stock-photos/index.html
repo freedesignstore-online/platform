@@ -228,6 +228,19 @@ function tileSrc(photo){
   return {src:u, srcset:''};
 }
 
+// Client-side WebP thumbnail from an ImageBitmap/Blob, uploaded alongside the
+// original so new uploads and AI-generated assets get thumbnails at publish time.
+async function makeThumb(src,size){
+  try{
+    const bmp=(typeof ImageBitmap!=='undefined'&&src instanceof ImageBitmap)?src:await createImageBitmap(src);
+    const w=Math.min(size,bmp.width), h=Math.max(1,Math.round(bmp.height*(w/bmp.width)));
+    const c=document.createElement('canvas'); c.width=w; c.height=h;
+    c.getContext('2d').drawImage(bmp,0,0,w,h);
+    if(bmp!==src) bmp.close?.();
+    return await new Promise(res=>c.toBlob(res,'image/webp',0.74));
+  }catch(_){return null;}
+}
+
 function applyUrlParams(){
   const params=new URLSearchParams(location.search);
   const source=params.get('source');
@@ -863,6 +876,10 @@ async function submitPhotos(){
         const bmp=await createImageBitmap(file);
         form.append('width',String(bmp.width));
         form.append('height',String(bmp.height));
+        for(const size of [400,800]){
+          const th=await makeThumb(bmp,size);
+          if(th) form.append('thumb'+size,th,'thumb'+size+'.webp');
+        }
         bmp.close();
       }else if(file.type.startsWith('video/')){
         const dims=await videoDimensions(file);

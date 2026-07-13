@@ -145,6 +145,21 @@ export async function onRequestPost({ request, env }) {
       license: item.license,
     },
   });
+  // Store client-generated WebP thumbnails (optional). Tiles fall back to the
+  // original when absent, so this is best-effort — a bad thumb never blocks upload.
+  if (String(file.type).startsWith("image/") && file.type !== "image/svg+xml") {
+    for (const size of ["400", "800"]) {
+      const thumb = form.get(`thumb${size}`);
+      if (thumb && typeof thumb.arrayBuffer === "function" && thumb.size > 0 && thumb.size < 500000) {
+        try {
+          await store.bucket.put(`thumb/${size}/${id}.webp`, await thumb.arrayBuffer(), {
+            httpMetadata: { contentType: "image/webp" },
+          });
+        } catch (_) { /* ignore thumb failures */ }
+      }
+    }
+  }
+
   await putItem(store.kv, item);
   await addToIndex(store.kv, status === "public" ? PUBLIC_INDEX : PENDING_INDEX, id);
   await addToIndex(store.kv, accountIndexKey(account.accountId), id);
