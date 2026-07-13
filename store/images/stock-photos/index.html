@@ -532,7 +532,7 @@ function photoCard(photo){
     : `${escapeHtml(photo.author)} - ${escapeHtml(photo.license)}`;
   const isVideo=String(photo.contentType||'').startsWith('video/');
   const media=isVideo
-    ? `<video src="${escapeHtml(photo.url)}" muted loop playsinline preload="metadata"></video>${photo.duration?`<span class="video-badge">${Math.round(photo.duration)}s</span>`:'<span class="video-badge">video</span>'}`
+    ? `<video src="${escapeHtml(photo.url)}" poster="${escapeHtml(photo.url)}?size=400" muted loop playsinline preload="metadata"></video>${photo.duration?`<span class="video-badge">${Math.round(photo.duration)}s</span>`:'<span class="video-badge">video</span>'}`
     : (()=>{const t=tileSrc(photo);return `<img src="${escapeHtml(t.src)}"${t.srcset?` srcset="${escapeHtml(t.srcset)}" sizes="245px"`:''} alt="${escapeHtml(photo.title)}" loading="lazy" decoding="async">`;})();
   return `<article class="photo-card ${photo.assetType==='photo'?'photo':''}" data-photo-id="${escapeHtml(photo.id)}"${detailHref?` data-href="${detailHref}"`:''} role="button" tabindex="0" aria-label="Open ${escapeHtml(photo.title)} details">
     ${media}

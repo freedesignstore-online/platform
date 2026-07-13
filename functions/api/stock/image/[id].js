@@ -19,8 +19,10 @@ export async function onRequestGet({ params, request, env }) {
   // is a pure optimization that never 404s.
   const reqUrl = new URL(request.url);
   const sizeParam = reqUrl.searchParams.get("size");
-  const isRaster = String(item.contentType || "").startsWith("image/") && item.contentType !== "image/svg+xml";
-  if (sizeParam && THUMB_SIZES.has(sizeParam) && isRaster && !request.headers.get("range")) {
+  const ct = String(item.contentType || "");
+  const isRaster = ct.startsWith("image/") && ct !== "image/svg+xml";
+  const isVideo = ct.startsWith("video/"); // videos have a pre-generated poster frame at the same thumb key
+  if (sizeParam && THUMB_SIZES.has(sizeParam) && (isRaster || isVideo) && !request.headers.get("range")) {
     const thumb = await store.bucket.get(`thumb/${sizeParam}/${item.id}.webp`);
     if (thumb) {
       const h = new Headers();
