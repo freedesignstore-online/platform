@@ -188,10 +188,11 @@ const LICENSE_FILTERS=[
   {id:'attribution',label:'Attribution'}
 ];
 const ORIGIN_BADGES={'photograph':'Photo','ai-generated':'AI','3d-render':'3D','digital-illustration':'Illustration','vector-art':'Vector','scan':'Scan','mixed':'Mixed'};
-const CATEGORIES=['Business','Technology','Marketing','Social','Lifestyle','Travel','Nature','Animals','Food','Architecture','People','Workspace','Abstract','Art','Community','Characters','Icons','Illustrations','Patterns','Textures','Backgrounds','UI','Mockups','Unsplash'];
+// Designer-practical categories lead; Art (largest but least "designer") sits near the end.
+const CATEGORIES=['Backgrounds','Textures','Patterns','Abstract','Nature','Food','Architecture','Travel','Workspace','People','Animals','Lifestyle','Business','Technology','Marketing','Social','Icons','Illustrations','UI','Mockups','Characters','Art','Community','Unsplash'];
 let activeSource='all';
 let activeAssetType='all';
-let activeCategory='All';
+let activeCategory='Backgrounds'; // open on a designer category, not the art-heavy "All"
 let activeOrigin='all';
 let activeLicense='all';
 let apiKey=localStorage.getItem('unsplash_key')||'';

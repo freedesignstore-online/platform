@@ -312,6 +312,18 @@
   .console .main { @apply min-w-0; }
   .console .top { @apply h-16 bg-white border-b border-[#dfe4ec] flex items-center justify-between gap-4 py-0 px-6 max-[900px]:h-auto max-[900px]:items-start max-[900px]:flex-col max-[900px]:p-4; }
   .console .top h1 { @apply text-lg m-0; }
+  .console .topLeft { @apply flex items-center gap-3 min-w-0; }
+  .console .burger { @apply hidden; }
+  @media (max-width: 900px) {
+    .console .side { position: fixed; top: 0; bottom: 0; left: 0; width: 260px; z-index: 50; overflow-y: auto; transform: translateX(-100%); transition: transform .25s ease; }
+    .console .app.nav-open .side { transform: translateX(0); box-shadow: 0 10px 40px rgba(0,0,0,.45); }
+    .console .backdrop { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,.4); }
+    .console .burger { display: inline-flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; width: 40px; height: 40px; flex: none; border: 1px solid #cfd6e3; border-radius: 10px; background: #fff; cursor: pointer; }
+    .console .burger span { display: block; width: 20px; height: 2px; border-radius: 2px; background: #17202a; transition: transform .2s, opacity .2s; }
+    .console .app.nav-open .burger span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .console .app.nav-open .burger span:nth-child(2) { opacity: 0; }
+    .console .app.nav-open .burger span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+  }
   .console .user { @apply flex items-center gap-2.5 text-gray-600 text-[13px] min-w-0 max-[900px]:w-full max-[900px]:flex-wrap; }
   .console .userLabel { @apply max-w-[260px] overflow-hidden text-ellipsis whitespace-nowrap max-[900px]:max-w-full; }
   .console .avatar { @apply w-8 h-8 rounded-full bg-gray-900 text-white grid place-items-center text-xs font-black uppercase flex-none bg-cover bg-center; }
