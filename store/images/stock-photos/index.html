@@ -255,6 +255,10 @@ function applyUrlParams(){
   if(origin&&ORIGIN_FILTERS.some(o=>o.id===origin)) activeOrigin=origin;
   const license=params.get('license');
   if(license&&LICENSE_FILTERS.some(l=>l.id===license)) activeLicense=license;
+  // The Backgrounds default is only for a cold landing (no filters). Any explicit
+  // filter or deep-link (tag, search, type, origin, license, source) spans "All"
+  // unless a category is named — otherwise a tag/search would be trapped in Backgrounds.
+  if(['category','tag','q','type','origin','license','source'].some(k=>params.has(k))) activeCategory='All';
   const cat=params.get('category');
   if(cat){
     const match=['All',...CATEGORIES].find(c=>c.toLowerCase()===cat.toLowerCase());
