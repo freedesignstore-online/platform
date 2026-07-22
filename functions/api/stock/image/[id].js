@@ -30,6 +30,8 @@ export async function onRequestGet({ params, request, env }) {
       h.set("content-type", "image/webp");
       h.set("etag", thumb.httpEtag);
       h.set("cache-control", "public, max-age=31536000, immutable");
+      // Public CC0 assets: allow cross-origin fetch/XHR + canvas reads (see #2).
+      h.set("access-control-allow-origin", "*");
       return new Response(thumb.body, { headers: h });
     }
     // no thumb → fall through and serve the original
@@ -50,7 +52,10 @@ export async function onRequestGet({ params, request, env }) {
       if (start >= totalSize || start > end) {
         return new Response(null, {
           status: 416,
-          headers: { "content-range": `bytes */${totalSize}` },
+          headers: {
+            "content-range": `bytes */${totalSize}`,
+            "access-control-allow-origin": "*",
+          },
         });
       }
       range = { offset: start, length: end - start + 1 };
@@ -66,6 +71,8 @@ export async function onRequestGet({ params, request, env }) {
   object.writeHttpMetadata(headers);
   headers.set("etag", object.httpEtag);
   headers.set("accept-ranges", "bytes");
+  // Public CC0 assets: allow cross-origin fetch/XHR + canvas reads (see #2).
+  headers.set("access-control-allow-origin", "*");
   headers.set("cache-control", item.status === "public" ? "public, max-age=86400" : "no-store");
   if (item.contentType === "image/svg+xml") {
     headers.set("content-security-policy", "default-src 'none'; img-src data:; style-src 'unsafe-inline'; sandbox");
@@ -83,6 +90,20 @@ export async function onRequestGet({ params, request, env }) {
     return new Response(object.body, { status: 206, headers });
   }
   return new Response(object.body, { headers });
+}
+
+// CORS preflight for cross-origin fetch/XHR that sends non-simple headers
+// (e.g. Range when seeking video). Public assets → wide-open policy.
+export function onRequestOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      "access-control-allow-origin": "*",
+      "access-control-allow-methods": "GET, HEAD, OPTIONS",
+      "access-control-allow-headers": "range, content-type",
+      "access-control-max-age": "86400",
+    },
+  });
 }
 
 export async function onRequestHead(context) {
