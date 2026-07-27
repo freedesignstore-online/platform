@@ -1,0 +1,67 @@
+{
+  "$description": "Open Frontier brand tokens. Canonical source of truth for colour, type, spacing, radius, and motion. W3C Design Tokens shape ($value / $type). Consume from https://<kb>.freedocstore.online/tokens.json.",
+  "color": {
+    "indigo": {
+      "600": { "$value": "#3B34D6", "$type": "color" },
+      "700": { "$value": "#2C26B0", "$type": "color" }
+    },
+    "cyan": {
+      "400": { "$value": "#22D3EE", "$type": "color" }
+    },
+    "ink": {
+      "900": { "$value": "#0B0B12", "$type": "color" },
+      "600": { "$value": "#4A4A57", "$type": "color" }
+    },
+    "paper": {
+      "0": { "$value": "#FFFFFF", "$type": "color" },
+      "50": { "$value": "#F6F6FB", "$type": "color" }
+    },
+    "brand": {
+      "primary": { "$value": "{color.indigo.600}", "$type": "color", "$description": "Primary brand colour - links, primary buttons, active state" },
+      "primaryStrong": { "$value": "{color.indigo.700}", "$type": "color", "$description": "Hover / pressed for primary" },
+      "accent": { "$value": "{color.cyan.400}", "$type": "color", "$description": "Highlights, AI-generated markers, focus glow - use sparingly" }
+    },
+    "text": {
+      "default": { "$value": "{color.ink.900}", "$type": "color" },
+      "muted": { "$value": "{color.ink.600}", "$type": "color" }
+    },
+    "surface": {
+      "default": { "$value": "{color.paper.0}", "$type": "color" },
+      "sunken": { "$value": "{color.paper.50}", "$type": "color" }
+    }
+  },
+  "font": {
+    "family": {
+      "text": { "$value": "Inter, system-ui, sans-serif", "$type": "fontFamily" },
+      "code": { "$value": "\"JetBrains Mono\", ui-monospace, monospace", "$type": "fontFamily" }
+    },
+    "scale": {
+      "body": { "$value": "1rem", "$type": "dimension" },
+      "small": { "$value": "0.875rem", "$type": "dimension" },
+      "h3": { "$value": "1.25rem", "$type": "dimension" },
+      "h2": { "$value": "1.75rem", "$type": "dimension" },
+      "h1": { "$value": "2.5rem", "$type": "dimension" }
+    }
+  },
+  "space": {
+    "xs": { "$value": "0.25rem", "$type": "dimension" },
+    "sm": { "$value": "0.5rem", "$type": "dimension" },
+    "md": { "$value": "1rem", "$type": "dimension" },
+    "lg": { "$value": "1.5rem", "$type": "dimension" },
+    "xl": { "$value": "3rem", "$type": "dimension" }
+  },
+  "radius": {
+    "sm": { "$value": "4px", "$type": "dimension" },
+    "md": { "$value": "8px", "$type": "dimension" },
+    "pill": { "$value": "999px", "$type": "dimension" }
+  },
+  "motion": {
+    "duration": {
+      "base": { "$value": "200ms", "$type": "duration" },
+      "slow": { "$value": "400ms", "$type": "duration" }
+    },
+    "easing": {
+      "standard": { "$value": "cubic-bezier(0.2, 0, 0, 1)", "$type": "cubicBezier" }
+    }
+  }
+}

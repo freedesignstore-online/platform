@@ -1,0 +1,60 @@
+<article class="doc">
+
+  <h1>Design tokens</h1>
+  <p class="lede">
+    {{ One sentence: these are the brand's visual decisions as machine-readable data - read them here, or consume them from tokens.json. }}
+  </p>
+
+  <p>The canonical source is <a href="tokens.json"><code>tokens.json</code></a>,
+  published alongside this page. The tables below are the human-readable view of
+  that file; when the two could disagree, the file wins.</p>
+
+  <h2>Colour</h2>
+  <table>
+    <thead><tr><th>Token</th><th>Value</th><th>Use for</th></tr></thead>
+    <tbody>
+      <tr><td><code>color.brand.primary</code></td><td>{{ #hex }}</td><td>{{ what it is for }}</td></tr>
+      <tr><td><code>color.brand.accent</code></td><td>{{ #hex }}</td><td>{{ ... }}</td></tr>
+      <tr><td><code>color.text.default</code></td><td>{{ #hex }}</td><td>{{ ... }}</td></tr>
+      <tr><td><code>color.surface.default</code></td><td>{{ #hex }}</td><td>{{ ... }}</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Typography</h2>
+  <table>
+    <thead><tr><th>Token</th><th>Value</th><th>Use for</th></tr></thead>
+    <tbody>
+      <tr><td><code>font.family.text</code></td><td>{{ "Inter", sans-serif }}</td><td>{{ body / UI }}</td></tr>
+      <tr><td><code>font.family.code</code></td><td>{{ "JetBrains Mono", monospace }}</td><td>{{ code }}</td></tr>
+      <tr><td><code>font.scale.body</code></td><td>{{ 1rem }}</td><td>{{ ... }}</td></tr>
+      <tr><td><code>font.scale.h1</code></td><td>{{ 2.5rem }}</td><td>{{ ... }}</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Spacing, radius, motion</h2>
+  <table>
+    <thead><tr><th>Token</th><th>Value</th><th>Use for</th></tr></thead>
+    <tbody>
+      <tr><td><code>space.md</code></td><td>{{ 1rem }}</td><td>{{ base rhythm unit }}</td></tr>
+      <tr><td><code>radius.md</code></td><td>{{ 8px }}</td><td>{{ default corner }}</td></tr>
+      <tr><td><code>motion.duration.base</code></td><td>{{ 200ms }}</td><td>{{ default transition }}</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The token file</h2>
+  <p>Canonical, W3C Design Tokens shape (<code>$value</code> / <code>$type</code>). Also fetchable at <code>tokens.json</code>.</p>
+  <pre><code>{{ paste the contents of tokens.json here, or a representative excerpt }}</code></pre>
+
+  <h2>How to consume</h2>
+
+  <h3>CSS custom properties</h3>
+  <pre><code>:root {
+  --color-brand-primary: {{ #hex }};
+  --font-family-text: {{ "Inter", sans-serif }};
+  --space-md: {{ 1rem }};
+}</code></pre>
+
+  <h3>Point an agent at it</h3>
+  <p>{{ Tell an AI builder: "Use the brand tokens at https://&lt;kb&gt;.freedocstore.online/tokens.json for all colours, fonts, and spacing." }}</p>
+
+</article>
