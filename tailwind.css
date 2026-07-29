@@ -52,14 +52,6 @@
   .nav-toggle.open .nav-toggle-bar:nth-child(1) { transform: translateY(6px) rotate(45deg); }
   .nav-toggle.open .nav-toggle-bar:nth-child(2) { opacity: 0; }
   .nav-toggle.open .nav-toggle-bar:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
-  @media (max-width: 640px) {
-    .nav-toggle { display: inline-flex; flex-direction: column; justify-content: center; align-items: center; width: 40px; height: 40px; margin-left: auto; border: 1px solid var(--color-hairline); border-radius: 10px; background: transparent; cursor: pointer; color: var(--color-ink); }
-    .fds-header-dark .nav-toggle { color: #f4f2f7; border-color: #302b39; }
-    .fds-nav, .fds-nav-dark { display: none; flex-basis: 100%; flex-direction: column; align-items: stretch; margin-left: 0; margin-top: 8px; gap: 2px; }
-    .fds-nav.open, .fds-nav-dark.open { display: flex; }
-    .fds-nav a, .fds-nav-dark a { padding: 11px 12px; border-radius: 8px; }
-    .fds-nav a:hover { background: var(--color-blush); }
-  }
   .fds-nav { @apply flex flex-wrap justify-end gap-x-3.5 gap-y-1 text-[.82rem] font-semibold ml-auto; }
   .fds-nav a { @apply text-muted px-2.5 py-1.5 rounded-full transition; }
   .fds-nav a:hover { @apply text-accent bg-blush no-underline; }
@@ -152,6 +144,14 @@
   .fds-nav-dark { @apply flex flex-wrap justify-end gap-x-3.5 gap-y-1 text-[.82rem] font-semibold ml-auto; }
   .fds-nav-dark a { @apply text-gray-400; }
   .fds-nav-dark a:hover { @apply text-neutral-100 no-underline; }
+  @media (max-width: 640px) {
+    .nav-toggle { display: inline-flex; flex-direction: column; justify-content: center; align-items: center; width: 40px; height: 40px; margin-left: auto; border: 1px solid var(--color-hairline); border-radius: 10px; background: transparent; cursor: pointer; color: var(--color-ink); }
+    .fds-header-dark .nav-toggle { color: #f4f2f7; border-color: #302b39; }
+    .fds-nav, .fds-nav-dark { display: none; flex-basis: 100%; flex-direction: column; align-items: stretch; margin-left: 0; margin-top: 8px; gap: 2px; }
+    .fds-nav.open, .fds-nav-dark.open { display: flex; }
+    .fds-nav a, .fds-nav-dark a { padding: 11px 12px; border-radius: 8px; }
+    .fds-nav a:hover { background: var(--color-blush); }
+  }
   .fds-footer-dark { @apply border-t border-night-line p-4 text-center text-[.7rem] text-gray-400 bg-night-panel; }
   .fds-footer-dark a { @apply text-accent; }
 
