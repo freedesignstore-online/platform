@@ -54,7 +54,7 @@ claude mcp add freedesignstore https://mcp.freedesignstore.online/mcp
 store/                  Static site (Cloudflare Pages output)
   tools/                Tools directory page with search + filters
   workflows/            Guided workflow hub + detail routes (local checklist state)
-  projects/             Local-first project workspace (localStorage)
+  projects/             Local-first project workspace (localStorage) + shared save helper
   brand/*/              16 brand tools (each a single index.html)
   images/*/             16 image tools + stock-photos library
   templates/*/          6 template tools

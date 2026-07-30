@@ -88,6 +88,7 @@
           <input id="generatorColor" type="color" value="#ec4899" aria-label="Accent color">
           <button class="btn btn-secondary" id="randomizeBtn">Randomize</button>
           <button class="btn btn-primary" id="useGeneratedBtn">Use Generated SVG</button>
+          <button class="btn btn-secondary" id="saveGeneratedBtn" type="button">Save to Project</button>
           <span class="submit-status" id="generatorStatus"></span>
         </div>
       </div>
@@ -154,6 +155,7 @@
 <div style="position:fixed;top:14px;right:14px;display:flex;gap:6px;align-items:center;z-index:1001"><button data-lb="out" aria-label="Zoom out" style="border:1px solid rgba(255,255,255,.25);background:rgba(20,20,24,.85);color:#fff;border-radius:8px;min-width:36px;height:36px;font:inherit;font-size:1rem;font-weight:700;cursor:pointer">&minus;</button><span id="lbZoom" style="color:#cbd5e1;font-size:.75rem;min-width:44px;text-align:center">100%</span><button data-lb="in" aria-label="Zoom in" style="border:1px solid rgba(255,255,255,.25);background:rgba(20,20,24,.85);color:#fff;border-radius:8px;min-width:36px;height:36px;font:inherit;font-size:1rem;font-weight:700;cursor:pointer">+</button><button data-lb="fit" style="border:1px solid rgba(255,255,255,.25);background:rgba(20,20,24,.85);color:#fff;border-radius:8px;min-width:36px;height:36px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer">Fit</button><button data-lb="close" aria-label="Close" style="border:1px solid rgba(255,255,255,.25);background:rgba(20,20,24,.85);color:#fff;border-radius:8px;min-width:36px;height:36px;font:inherit;font-size:1rem;font-weight:700;cursor:pointer">&times;</button></div>
 </div>
 
+<script src="/projects/project-save.js"></script>
 <script>
 const ASSET_TYPES=[
   {id:'all',label:'All Assets'},
@@ -335,6 +337,7 @@ function bindEvents(){
   $('submitBtn').onclick=submitPhotos;
   $('randomizeBtn').onclick=renderGeneratedAsset;
   $('useGeneratedBtn').onclick=useGeneratedAsset;
+  $('saveGeneratedBtn').onclick=saveGeneratedAssetToProject;
   $('generatorKind').onchange=renderGeneratedAsset;
   $('generatorPrompt').oninput=renderGeneratedAsset;
   $('generatorColor').oninput=renderGeneratedAsset;
@@ -547,6 +550,7 @@ function photoCard(photo){
       <div class="actions">
         ${primaryAction.replace('onclick="','onclick="event.stopPropagation();')}
         <button class="btn btn-secondary btn-small" onclick="event.stopPropagation();copyCredit('${escapeHtml(photo.id)}')">Copy Credit</button>
+        <button class="btn btn-secondary btn-small" onclick="event.stopPropagation();savePhotoToProject('${escapeHtml(photo.id)}')">Save</button>
       </div>
     </div>
   </article>`;
@@ -625,6 +629,7 @@ function openAssetModal(id){
     </div>`:'';
   $('modalActions').innerHTML=`${primaryAction}
     <button class="btn btn-secondary" type="button" onclick="copyCredit('${escapeHtml(photo.id)}')">Copy Credit</button>
+    <button class="btn btn-secondary" type="button" onclick="savePhotoToProject('${escapeHtml(photo.id)}')">Save to Project</button>
     <a class="btn btn-secondary" href="${escapeHtml(photo.url)}" target="_blank" rel="noopener">Open Image</a>
     ${shareRow}`;
   if(photo.source==='hosted') history.replaceState(null,'',location.pathname+location.search+'#'+photo.id);
@@ -640,6 +645,30 @@ function shareAsset(id,title){
   }else{
     navigator.clipboard.writeText(url).then(()=>{alert('Link copied!')});
   }
+}
+
+function projectAssetPayload(photo){
+  const pageUrl=photo.source==='hosted'||photo.source==='community'
+    ? location.origin+'/photo/'+encodeURIComponent(photo.id)
+    : (photo.photoUrl||photo.creditUrl||photo.url);
+  return {
+    label: photo.title||'Saved asset',
+    pageUrl: pageUrl,
+    mediaUrl: photo.download||photo.url,
+    type: photo.assetType||'asset',
+    source: photo.source||'fds',
+    assetId: photo.id,
+    author: photo.author,
+    license: photo.license,
+    category: photo.category,
+    tags: photo.tags||[]
+  };
+}
+
+function savePhotoToProject(id){
+  const photo=findPhoto(id);
+  if(!photo||!window.FDSProjects) return;
+  window.FDSProjects.saveAsset(projectAssetPayload(photo),{defaultProjectName:'Asset Collection'});
 }
 
 function closeAssetModal(){
@@ -801,6 +830,23 @@ function useGeneratedAsset(){
   $('uploadTags').value=[kind,'generated',prompt].filter(Boolean).join(', ');
   $('pendingUploads').innerHTML=`<div class="upload-preview"><img src="${URL.createObjectURL(file)}" alt="${escapeHtml(name)}"><p><strong>${escapeHtml(name)}</strong><br>Generated SVG ready to submit.</p></div>`;
   $('generatorStatus').textContent='Generated asset queued.';
+}
+
+function saveGeneratedAssetToProject(){
+  if(!generatedSvg) renderGeneratedAsset();
+  if(!window.FDSProjects) return;
+  const kind=$('generatorKind').value;
+  const prompt=$('generatorPrompt').value.trim()||kind;
+  window.FDSProjects.saveAsset({
+    label: prompt,
+    type: kind,
+    source: 'fds-generated-svg',
+    assetId: 'generated-'+hashString(kind+'-'+prompt+'-'+generatedSvg),
+    category: kind,
+    tags: [kind,'generated',prompt],
+    svg: generatedSvg
+  },{defaultProjectName:'Generated Assets'});
+  $('generatorStatus').textContent='Saved to project.';
 }
 
 function videoDimensions(file){

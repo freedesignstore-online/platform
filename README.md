@@ -35,7 +35,7 @@ Each workflow renders from `store/workflows/workflow.js` and includes required i
 
 ## Projects
 
-`/projects/` is a local-first workspace backed by browser storage. Users can create, rename, delete, import, and export projects without an account. A project stores notes, colors, fonts, assets/links, export metadata, and saved workflow progress from the workflow detail pages.
+`/projects/` is a local-first workspace backed by browser storage. Users can create, rename, delete, import, and export projects without an account. A project stores notes, colors, fonts, assets/links, export metadata, saved workflow progress from the workflow detail pages, and saved assets from the stock library, asset detail pages, and generated SVG panel.
 
 ## Tools (47)
 

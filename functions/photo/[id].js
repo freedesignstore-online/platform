@@ -101,7 +101,7 @@ ${String(item.contentType || "").startsWith("video/") ? `<meta property="og:vide
 <body class="asset-page">
 <header class="fds-header-dark">
 <a href="/" class="brand"><span class="brand-emoji">🎨</span><span class="brand-name">FreeDesignStore</span></a>
-<nav class="fds-nav-dark"><a href="/tools/">Tools</a><a href="/images/stock-photos/">Assets</a><a href="/creators">Creators</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
+<nav class="fds-nav-dark"><a href="/tools/">Tools</a><a href="/workflows/">Workflows</a><a href="/projects/">Projects</a><a href="/images/stock-photos/">Assets</a><a href="/creators">Creators</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
 </header>
 <div style="max-width:1100px;margin:16px auto -4px;padding:0 20px">
 <a href="/images/stock-photos/" id="backBtn" class="btn btn-outline">&larr; Back to results <span style="opacity:.6;font-weight:600">Esc</span></a>
@@ -121,6 +121,7 @@ ${originBlock}
 </div>
 <div class="actions">
 <a class="btn btn-primary" href="${esc(item.download)}" download="${esc(item.filename)}">Download</a>
+<button class="btn btn-outline" id="saveProjectBtn" type="button">Save to Project</button>
 <a class="btn btn-outline" href="/images/stock-photos/">Browse all assets</a>
 <div class="share-row">
 <button class="share-btn" id="copyBtn" type="button">Copy link</button>
@@ -138,7 +139,26 @@ ${originBlock}
 <img id="lbImg" alt="Full size preview">
 <div class="lb-ui"><button data-lb="out" aria-label="Zoom out">&minus;</button><span id="lbZoom">100%</span><button data-lb="in" aria-label="Zoom in">+</button><button data-lb="fit">Fit</button><button data-lb="close" aria-label="Close">&times;</button></div>
 </div>
+<script src="/projects/project-save.js"></script>
 <script>
+const fdsProjectAsset=${JSON.stringify({
+    label: item.title,
+    pageUrl,
+    mediaUrl: item.url,
+    type: item.assetType || "asset",
+    source: "hosted",
+    assetId: item.id,
+    author: item.author,
+    license: item.license,
+    category: item.category,
+    tags: item.tags || [],
+  }).replace(/</g, "\\u003c")};
+document.getElementById('saveProjectBtn').addEventListener('click',function(){
+  if(!window.FDSProjects) return;
+  const result=window.FDSProjects.saveAsset(fdsProjectAsset,{defaultProjectName:'Asset Collection'});
+  this.textContent='Saved to '+result.project.name;
+  setTimeout(()=>{this.textContent='Save to Project';},1800);
+});
 document.getElementById('copyBtn').addEventListener('click',function(){
   navigator.clipboard.writeText(location.href).then(()=>{
     this.textContent='Copied!';this.classList.add('copied');
