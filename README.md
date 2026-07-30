@@ -14,6 +14,7 @@ Part of [Open Frontier](https://openfrontier.pages.dev).
 | `/workflows/<slug>/` | Workflow detail pages with inputs, ordered steps, tool links, exports, and local checklist state |
 | `/projects/` | Local-first project workspace for notes, colors, fonts, assets, exports, and workflow progress |
 | `/readiness/` | Design readiness checker for contrast, dimensions, metadata, consistency, exports, and local reports |
+| `/reviews/` | Local/shareable review packages with asset previews, metadata, approval states, and feedback export |
 | `/images/stock-photos/` | Asset library — curated + community catalog (photos, illustrations, renders, AI art, video), Unsplash search, trust metadata modal |
 | `/photo/<id>` | Individual asset detail page with OG tags, share buttons, project save, and trust metadata |
 | `/skills/` | MCP playbooks + capability manifest |
@@ -36,7 +37,11 @@ Each workflow renders from `store/workflows/workflow.js` and includes required i
 
 ## Projects
 
-`/projects/` is a local-first workspace backed by browser storage. Users can create, rename, delete, import, and export projects without an account. A project stores notes, colors, fonts, assets/links, export metadata, saved workflow progress from the workflow detail pages, saved assets from the stock library, asset detail pages, and generated SVG panel, plus readiness reports from `/readiness/`.
+`/projects/` is a local-first workspace backed by browser storage. Users can create, rename, delete, import, and export projects without an account. A project stores notes, colors, fonts, assets/links, export metadata, saved workflow progress from the workflow detail pages, saved assets from the stock library, asset detail pages, and generated SVG panel, plus readiness reports from `/readiness/`. Saved project assets and exports can seed `/reviews/` packages for client/team approval.
+
+## Reviews
+
+`/reviews/` stores local review packages in browser storage. Packages can be seeded from an active project, a gallery asset, or an asset detail page. Each package contains asset previews, source metadata, approval state (`approved`, `needs changes`, `rejected`, `pending`), per-asset notes, copyable summaries, JSON export, and standalone review HTML export.
 
 ## Tools (48)
 
@@ -72,6 +77,7 @@ store/                  Static site (Cloudflare Pages)
   workflows/            Guided workflow hub + detail routes
   projects/             Local-first project workspace
   readiness/            Design readiness checker + local reports
+  reviews/              Local/shareable review packages
   brand/*/              16 brand tools
   images/*/             16 image tools + stock-photos library
   templates/*/          6 template tools

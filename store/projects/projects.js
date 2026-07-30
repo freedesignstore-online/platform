@@ -1,6 +1,7 @@
 (function () {
   var STORE_KEY = "fds.projects.v1";
   var ACTIVE_KEY = "fds.projects.active";
+  var REVIEW_SEED_KEY = "fds.review.seed";
 
   function now() {
     return new Date().toISOString();
@@ -93,6 +94,14 @@
     return entries.length ? entries.join("") : '<p class="text-[.78rem] text-muted">Open a workflow and use Save to Project to capture progress here.</p>';
   }
 
+  function reviewItems(project) {
+    return []
+      .concat(project.assets || [])
+      .concat((project.exports || []).map(function (item) {
+        return Object.assign({}, item, { type: item.type || "export", source: item.source || "project-export" });
+      }));
+  }
+
   function renderList(state) {
     var list = document.getElementById("projectList");
     if (!state.projects.length) {
@@ -115,7 +124,7 @@
     state.activeId = project.id;
     editor.innerHTML = [
       '<section class="bg-panel border border-hairline rounded-2xl p-4 grid gap-3">',
-      '<div class="flex justify-between gap-3 items-start max-[640px]:flex-col"><div>' + field("Project name", "projectName", project.name, "Client launch kit") + '</div><button class="filter-btn" id="deleteProject" type="button">Delete Project</button></div>',
+      '<div class="flex justify-between gap-3 items-start max-[640px]:flex-col"><div>' + field("Project name", "projectName", project.name, "Client launch kit") + '</div><div class="flex gap-2 flex-wrap"><button class="filter-btn" id="createReview" type="button">Create Review Package</button><button class="filter-btn" id="deleteProject" type="button">Delete Project</button></div></div>',
       textarea("Notes", "projectNotes", project.notes || "", "Brief, decisions, open questions, next actions..."),
       "</section>",
       '<section class="grid grid-cols-2 gap-4 max-[820px]:grid-cols-1">',
@@ -198,6 +207,16 @@
       state.activeId = (state.projects[0] && state.projects[0].id) || "";
       writeState(state);
       render(state);
+    };
+
+    document.getElementById("createReview").onclick = function () {
+      var items = reviewItems(project);
+      localStorage.setItem(REVIEW_SEED_KEY, JSON.stringify({
+        title: project.name + " review",
+        source: "project:" + project.id,
+        assets: items
+      }));
+      location.href = "/reviews/#new";
     };
 
     function addString(inputId, prop) {

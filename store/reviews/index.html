@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Review Packages - FreeDesignStore</title>
+<meta name="description" content="Create local/shareable review packages for FreeDesignStore assets with approval state, feedback notes, metadata, and copyable summaries.">
+<meta property="og:title" content="Review Packages - FreeDesignStore">
+<meta property="og:description" content="Package selected assets for client or team review with structured approval notes.">
+<link rel="canonical" href="https://freedesignstore.online/reviews/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/tw.css">
+<style>
+.review-page{max-width:1180px;margin:0 auto;padding:24px;color:var(--color-ink)}
+.review-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin-bottom:18px;flex-wrap:wrap}
+.review-title h1{font-family:var(--font-display);font-size:2rem;line-height:1.08;font-weight:700;letter-spacing:0;margin:.3rem 0}
+.review-title p{max-width:720px;color:var(--color-muted);font-size:.9rem;line-height:1.55}
+.back{font-size:.78rem;font-weight:800;color:var(--color-accent)}
+.review-shell{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:start}
+.panel{border:1px solid var(--color-hairline);background:var(--color-panel);border-radius:8px;padding:16px;box-shadow:0 1px 3px #00000008}
+.panel h2{font-size:.86rem;font-weight:800;text-transform:uppercase;color:var(--color-muted);letter-spacing:.04em;margin-bottom:12px}
+.pkg-list{display:grid;gap:8px}
+.pkg-btn{border:1px solid var(--color-hairline);border-radius:8px;background:var(--color-paper);padding:10px;text-align:left;color:var(--color-ink);cursor:pointer}
+.pkg-btn.active{border-color:var(--color-accent);background:var(--color-blush)}
+.pkg-btn strong{display:block;font-size:.82rem}
+.pkg-btn span{display:block;color:var(--color-muted);font-size:.7rem;margin-top:3px}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.field label{font-size:.73rem;color:var(--color-muted);font-weight:800}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--color-hairline);border-radius:8px;background:var(--color-paper);padding:10px 11px;color:var(--color-ink);font-size:.86rem;outline:none}
+.field textarea{min-height:74px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--color-accent);box-shadow:0 0 0 3px #ec48991a}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn{border:1px solid var(--color-hairline);background:var(--color-panel);color:var(--color-ink);border-radius:999px;padding:9px 13px;font-size:.8rem;font-weight:800;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--color-accent);color:var(--color-accent);text-decoration:none}
+.btn.primary{background:var(--color-accent);border-color:var(--color-accent);color:#fff}
+.btn.primary:hover{background:var(--color-accent-deep);color:#fff}
+.summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.metric{border:1px solid var(--color-hairline);border-radius:8px;padding:12px;background:var(--color-paper)}
+.metric strong{display:block;font-size:1.5rem;line-height:1;font-weight:800}
+.metric span{display:block;margin-top:5px;color:var(--color-muted);font-size:.7rem;font-weight:800;text-transform:uppercase}
+.asset-list{display:grid;gap:12px}
+.review-card{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;border:1px solid var(--color-hairline);border-radius:8px;background:var(--color-panel);padding:12px}
+.preview{height:116px;border:1px solid var(--color-hairline);border-radius:8px;background:var(--color-paper);display:grid;place-items:center;overflow:hidden;color:var(--color-muted);font-size:.72rem;font-weight:800;text-align:center}
+.preview img{width:100%;height:100%;object-fit:cover}
+.asset-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.asset-top h3{font-size:.96rem;font-weight:800;line-height:1.25;margin-bottom:4px}
+.asset-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.pill{border:1px solid var(--color-hairline);border-radius:999px;background:var(--color-paper);padding:3px 7px;color:var(--color-muted);font-size:.68rem;font-weight:800}
+.review-fields{display:grid;grid-template-columns:190px minmax(0,1fr);gap:10px}
+.empty{border:1px dashed #d8cbd3;border-radius:8px;background:var(--color-paper);padding:18px;color:var(--color-muted);font-size:.86rem;line-height:1.5}
+.report-box{border:1px solid var(--color-hairline);border-radius:8px;background:var(--color-paper);padding:12px;white-space:pre-wrap;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;max-height:300px;overflow:auto;margin-top:12px}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:2000;background:#111827;color:#fff;border:1px solid rgba(255,255,255,.2);box-shadow:0 12px 30px rgba(15,23,42,.22);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:800;opacity:0;pointer-events:none;transition:opacity .16s}
+.toast.show{opacity:1}
+@media (max-width:900px){.review-shell{grid-template-columns:1fr}.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.review-page{padding:18px}.field-grid,.review-card,.review-fields{grid-template-columns:1fr}.preview{height:180px}.actions .btn{width:100%;text-align:center}.summary-grid{grid-template-columns:1fr}}
+@media (prefers-color-scheme:dark){.pkg-btn,.field input,.field select,.field textarea,.metric,.preview,.empty,.report-box{background:#1c1922;border-color:#302b39}.pkg-btn.active{background:#2a1a24}.pill{background:#1c1922;border-color:#302b39}}
+</style>
+</head>
+<body>
+<header class="fds-header">
+<a href="/" class="brand"><span class="brand-emoji">🎨</span><span class="brand-name">FreeDesignStore</span></a>
+<nav class="fds-nav"><a href="/tools/">Tools</a><a href="/workflows/">Workflows</a><a href="/projects/">Projects</a><a href="/images/stock-photos/">Assets</a><a href="/creators">Creators</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
+</header>
+<main class="review-page">
+<div class="review-head">
+<div class="review-title">
+<a class="back" href="/projects/">&larr; Projects</a>
+<h1>Review Packages</h1>
+<p>Package assets, exports, and readiness reports for approval. Feedback stays local unless copied, downloaded, or shared as an exported package.</p>
+</div>
+<div class="actions"><button class="btn primary" id="newPackageBtn" type="button">New package</button><button class="btn" id="importProjectBtn" type="button">Import active project</button></div>
+</div>
+<div class="review-shell">
+<aside class="panel">
+<h2>Packages</h2>
+<div class="pkg-list" id="packageList"></div>
+<div class="actions"><label class="btn">Import JSON<input id="importJson" type="file" accept="application/json" hidden></label></div>
+</aside>
+<section class="panel" id="editor"></section>
+</div>
+</main>
+<footer class="fds-footer">FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a> | <a href="https://openfrontier-docs.pages.dev">Docs</a> | <a href="/terms/">Terms</a> | <a href="/privacy/">Privacy</a></footer>
+<div class="toast" id="toast" role="status"></div>
+<script src="/nav.js" defer></script>
+<script>
+(function(){
+  var REVIEW_KEY = "fds.reviews.v1";
+  var PROJECT_KEY = "fds.projects.v1";
+  var ACTIVE_PROJECT_KEY = "fds.projects.active";
+  var SEED_KEY = "fds.review.seed";
+  var state = readReviews();
+
+  function now(){ return new Date().toISOString(); }
+  function uid(prefix){ return (prefix || "rev") + "-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 7); }
+  function clean(value){ return String(value || "").trim(); }
+  function esc(value){ return String(value || "").replace(/[&<>"']/g,function(ch){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]; }); }
+  function el(id){ return document.getElementById(id); }
+  function readReviews(){
+    try {
+      var parsed = JSON.parse(localStorage.getItem(REVIEW_KEY) || "{}");
+      if (!Array.isArray(parsed.packages)) parsed.packages = [];
+      parsed.version = 1;
+      parsed.activeId = parsed.activeId || (parsed.packages[0] && parsed.packages[0].id) || "";
+      return parsed;
+    } catch (err) {
+      return { version: 1, activeId: "", packages: [] };
+    }
+  }
+  function writeReviews(){
+    state.version = 1;
+    localStorage.setItem(REVIEW_KEY, JSON.stringify(state));
+  }
+  function readProjects(){
+    try {
+      var parsed = JSON.parse(localStorage.getItem(PROJECT_KEY) || "{}");
+      if (!Array.isArray(parsed.projects)) parsed.projects = [];
+      parsed.activeId = localStorage.getItem(ACTIVE_PROJECT_KEY) || parsed.activeId || "";
+      return parsed;
+    } catch (err) {
+      return { projects: [], activeId: "" };
+    }
+  }
+  function activePackage(){
+    return state.packages.find(function(pkg){ return pkg.id === state.activeId; }) || state.packages[0] || null;
+  }
+  function assetUrl(item){
+    return clean(item.mediaUrl || item.imageUrl || item.download || item.url || item.pageUrl || "");
+  }
+  function normalizeAsset(item, source){
+    item = item || {};
+    return {
+      id: item.reviewAssetId || item.id || item.assetId || uid("asset"),
+      label: clean(item.label || item.title || item.name || item.url || "Review asset"),
+      url: clean(item.pageUrl || item.url || ""),
+      mediaUrl: assetUrl(item),
+      type: clean(item.type || item.assetType || source || "asset"),
+      source: clean(item.source || source || "fds"),
+      author: clean(item.author || ""),
+      license: clean(item.license || item.licenseId || ""),
+      category: clean(item.category || ""),
+      metadata: clean(item.summary || item.report || ""),
+      status: clean(item.status || "pending"),
+      note: clean(item.note || "")
+    };
+  }
+  function packageFromItems(title, items, source){
+    var stamp = now();
+    return {
+      id: uid("review"),
+      title: clean(title) || "Review package",
+      reviewer: "",
+      instructions: "Select an approval state and leave notes for each asset.",
+      createdAt: stamp,
+      updatedAt: stamp,
+      source: clean(source || "manual"),
+      assets: (items || []).map(function(item){ return normalizeAsset(item, source); })
+    };
+  }
+  function activeProjectPackage(){
+    var projects = readProjects();
+    var project = projects.projects.find(function(item){ return item.id === projects.activeId; }) || projects.projects[0];
+    if (!project) return null;
+    var assets = []
+      .concat(project.assets || [])
+      .concat((project.exports || []).map(function(item){ return Object.assign({}, item, { type: item.type || "export", source: item.source || "project-export" }); }));
+    return packageFromItems(project.name + " review", assets, "project:" + project.id);
+  }
+  function consumeSeed(){
+    try {
+      var seed = JSON.parse(localStorage.getItem(SEED_KEY) || "null");
+      if (!seed) return null;
+      localStorage.removeItem(SEED_KEY);
+      return packageFromItems(seed.title || "Asset review", seed.assets || [], seed.source || "seed");
+    } catch (err) {
+      localStorage.removeItem(SEED_KEY);
+      return null;
+    }
+  }
+  function ensurePackage(){
+    var hashId = decodeURIComponent((location.hash || "").replace(/^#/, ""));
+    var seeded = consumeSeed();
+    if (seeded) {
+      state.packages.unshift(seeded);
+      state.activeId = seeded.id;
+      writeReviews();
+      history.replaceState(null, "", location.pathname + "#" + encodeURIComponent(seeded.id));
+      return;
+    }
+    if (hashId && state.packages.some(function(pkg){ return pkg.id === hashId; })) {
+      state.activeId = hashId;
+      writeReviews();
+      return;
+    }
+    if (!state.packages.length) {
+      var fromProject = activeProjectPackage();
+      state.packages.unshift(fromProject || packageFromItems("Review package", [], "manual"));
+      state.activeId = state.packages[0].id;
+      writeReviews();
+    }
+  }
+  function counts(pkg){
+    var result = { approved: 0, needs_changes: 0, rejected: 0, pending: 0 };
+    (pkg.assets || []).forEach(function(item){ result[item.status] = (result[item.status] || 0) + 1; });
+    return result;
+  }
+  function buildSummary(pkg){
+    var c = counts(pkg);
+    var lines = [
+      "FDS Review Package",
+      "Title: " + pkg.title,
+      "Reviewer: " + (pkg.reviewer || "Not set"),
+      "Updated: " + pkg.updatedAt,
+      "Status: " + c.approved + " approved, " + c.needs_changes + " needs changes, " + c.rejected + " rejected, " + c.pending + " pending",
+      "",
+      "Instructions: " + (pkg.instructions || ""),
+      ""
+    ];
+    (pkg.assets || []).forEach(function(item, index){
+      lines.push((index + 1) + ". " + item.label);
+      lines.push("   Status: " + item.status.replace("_", " "));
+      if (item.url) lines.push("   Link: " + item.url);
+      if (item.mediaUrl && item.mediaUrl !== item.url) lines.push("   Preview: " + item.mediaUrl);
+      if (item.type || item.source || item.license || item.author) {
+        lines.push("   Metadata: " + [item.type, item.source, item.license, item.author].filter(Boolean).join(" | "));
+      }
+      lines.push("   Note: " + (item.note || "No note"));
+      lines.push("");
+    });
+    return lines.join("\n");
+  }
+  function renderList(){
+    el("packageList").innerHTML = state.packages.length ? state.packages.map(function(pkg){
+      var c = counts(pkg);
+      return '<button class="pkg-btn' + (pkg.id === state.activeId ? " active" : "") + '" data-package="' + esc(pkg.id) + '" type="button"><strong>' + esc(pkg.title) + '</strong><span>' + esc(pkg.updatedAt.slice(0, 10)) + " | " + (pkg.assets || []).length + " items | " + c.approved + " approved</span></button>";
+    }).join("") : '<p class="empty">No review packages yet.</p>';
+  }
+  function preview(item){
+    var url = item.mediaUrl || item.url;
+    if (/\.(png|jpe?g|webp|avif|gif|svg)(\?|#|$)/i.test(url)) return '<div class="preview"><img src="' + esc(url) + '" alt="' + esc(item.label) + '" loading="lazy"></div>';
+    return '<div class="preview">' + esc(item.type || "Asset") + '</div>';
+  }
+  function renderEditor(){
+    var pkg = activePackage();
+    var editor = el("editor");
+    if (!pkg) {
+      editor.innerHTML = '<div class="empty">Create a package or import an active project.</div>';
+      return;
+    }
+    var c = counts(pkg);
+    editor.innerHTML = [
+      '<h2>Review package</h2>',
+      '<div class="field-grid">',
+      '<div class="field"><label for="packageTitle">Package title</label><input id="packageTitle" value="' + esc(pkg.title) + '"></div>',
+      '<div class="field"><label for="reviewer">Reviewer</label><input id="reviewer" value="' + esc(pkg.reviewer || "") + '" placeholder="Client or team name"></div>',
+      '</div>',
+      '<div class="field"><label for="instructions">Instructions</label><textarea id="instructions">' + esc(pkg.instructions || "") + '</textarea></div>',
+      '<div class="summary-grid">',
+      '<div class="metric"><strong id="approvedCount">' + c.approved + '</strong><span>Approved</span></div>',
+      '<div class="metric"><strong id="needsChangesCount">' + c.needs_changes + '</strong><span>Needs changes</span></div>',
+      '<div class="metric"><strong id="rejectedCount">' + c.rejected + '</strong><span>Rejected</span></div>',
+      '<div class="metric"><strong id="pendingCount">' + c.pending + '</strong><span>Pending</span></div>',
+      '</div>',
+      '<div class="field-grid">',
+      '<div class="field"><label for="manualLabel">Add asset label</label><input id="manualLabel" placeholder="Logo concept A"></div>',
+      '<div class="field"><label for="manualUrl">URL or preview</label><input id="manualUrl" placeholder="https://..."></div>',
+      '</div>',
+      '<div class="actions"><button class="btn" id="addAssetBtn" type="button">Add asset</button><button class="btn" id="copySummaryBtn" type="button">Copy summary</button><button class="btn" id="downloadJsonBtn" type="button">Download JSON</button><button class="btn" id="downloadHtmlBtn" type="button">Download review HTML</button><button class="btn" id="copyLinkBtn" type="button">Copy package link</button><button class="btn" id="deletePackageBtn" type="button">Delete package</button></div>',
+      '<pre class="report-box" id="summaryText">' + esc(buildSummary(pkg)) + '</pre>',
+      '<div class="asset-list">' + ((pkg.assets || []).length ? pkg.assets.map(renderAsset).join("") : '<div class="empty">No assets yet. Import a project or add a manual asset.</div>') + '</div>'
+    ].join("");
+  }
+  function renderAsset(item, index){
+    return '<article class="review-card" data-index="' + index + '">' +
+      preview(item) +
+      '<div class="min-w-0">' +
+      '<div class="asset-top"><div><h3>' + esc(item.label) + '</h3><div class="asset-meta">' + [item.type, item.source, item.category, item.license, item.author].filter(Boolean).slice(0, 5).map(function(v){ return '<span class="pill">' + esc(v) + '</span>'; }).join("") + '</div></div><button class="btn" data-remove-asset="' + index + '" type="button">Remove</button></div>' +
+      '<div class="review-fields"><div class="field"><label>Status</label><select data-status="' + index + '"><option value="pending"' + selected(item.status, "pending") + '>Pending</option><option value="approved"' + selected(item.status, "approved") + '>Approved</option><option value="needs_changes"' + selected(item.status, "needs_changes") + '>Needs changes</option><option value="rejected"' + selected(item.status, "rejected") + '>Rejected</option></select></div><div class="field"><label>Feedback note</label><textarea data-note="' + index + '">' + esc(item.note || "") + '</textarea></div></div>' +
+      (item.url ? '<a class="back" href="' + esc(item.url) + '" target="_blank" rel="noopener">Open source</a>' : '') +
+      '</div></article>';
+  }
+  function selected(actual, expected){ return actual === expected ? " selected" : ""; }
+  function render(){
+    ensurePackage();
+    renderList();
+    renderEditor();
+  }
+  function touch(pkg){
+    pkg.updatedAt = now();
+    writeReviews();
+    el("summaryText").textContent = buildSummary(pkg);
+    updateMetrics(pkg);
+    renderList();
+  }
+  function updateMetrics(pkg){
+    var c = counts(pkg);
+    if (el("approvedCount")) el("approvedCount").textContent = c.approved;
+    if (el("needsChangesCount")) el("needsChangesCount").textContent = c.needs_changes;
+    if (el("rejectedCount")) el("rejectedCount").textContent = c.rejected;
+    if (el("pendingCount")) el("pendingCount").textContent = c.pending;
+  }
+  function copyText(text, message){
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function(){ toast(message); }).catch(function(){ fallbackCopy(text, message); });
+    } else {
+      fallbackCopy(text, message);
+    }
+  }
+  function fallbackCopy(text, message){
+    var area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "readonly");
+    area.style.cssText = "position:fixed;left:-9999px;top:0";
+    document.body.appendChild(area);
+    area.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (err) {}
+    area.remove();
+    toast(ok ? message : "Select summary text to copy");
+  }
+  function download(filename, text, type){
+    var blob = new Blob([text], { type: type || "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+  function standaloneHtml(pkg){
+    var embedded = JSON.stringify(pkg).replace(/</g, "\\u003c");
+    var script = `
+var pkg=${embedded};
+function escText(value){return String(value||"").replace(/[&<>"']/g,function(ch){return {"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","'":"&#39;"}[ch];});}
+function isImage(url){return /\\.(png|jpe?g|webp|avif|gif|svg)(\\?|#|$)/i.test(String(url||""));}
+function summary(){
+  var lines=["Review: "+pkg.title,""];
+  pkg.assets.forEach(function(asset,index){
+    lines.push((index+1)+". "+asset.label+" - "+(asset.status||"pending")+" - "+(asset.note||"No note"));
+  });
+  return lines.join("\\n");
+}
+function render(){
+  document.getElementById("title").textContent=pkg.title;
+  document.getElementById("instructions").textContent=pkg.instructions||"";
+  document.getElementById("assets").innerHTML=(pkg.assets||[]).map(function(asset,index){
+    var url=asset.mediaUrl||asset.url||"";
+    var preview=isImage(url)?'<img src="'+escText(url)+'" alt="'+escText(asset.label)+'">':escText(asset.type||"Asset");
+    var pills=[asset.type,asset.source,asset.license,asset.author].filter(Boolean).map(function(value){return '<span class="pill">'+escText(value)+'</span>';}).join("");
+    return '<article class="card grid"><div class="preview">'+preview+'</div><div><h2>'+escText(asset.label)+'</h2><div>'+pills+'</div><label>Status<select data-status="'+index+'"><option value="pending">Pending</option><option value="approved">Approved</option><option value="needs_changes">Needs changes</option><option value="rejected">Rejected</option></select></label><label>Note<textarea data-note="'+index+'">'+escText(asset.note||"")+'</textarea></label></div></article>';
+  }).join("");
+  (pkg.assets||[]).forEach(function(asset,index){
+    var select=document.querySelector('[data-status="'+index+'"]');
+    if(select) select.value=asset.status||"pending";
+  });
+  document.getElementById("summary").textContent=summary();
+}
+document.addEventListener("input",function(event){
+  var index=event.target.dataset.status||event.target.dataset.note;
+  if(index==null) return;
+  if(event.target.dataset.status!=null) pkg.assets[Number(index)].status=event.target.value;
+  if(event.target.dataset.note!=null) pkg.assets[Number(index)].note=event.target.value;
+  document.getElementById("summary").textContent=summary();
+});
+render();
+`;
+    return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>' + esc(pkg.title) + '</title><style>body{font-family:system-ui,sans-serif;margin:0;background:#f8fafc;color:#111827}.wrap{max-width:980px;margin:0 auto;padding:24px}.card{border:1px solid #e5e7eb;border-radius:8px;background:#fff;padding:14px;margin:12px 0}.grid{display:grid;grid-template-columns:150px 1fr;gap:12px}.preview{height:120px;background:#f3f4f6;border-radius:8px;display:grid;place-items:center;overflow:hidden}.preview img{width:100%;height:100%;object-fit:cover}select,textarea{width:100%;box-sizing:border-box;margin-top:6px;padding:8px;border:1px solid #d1d5db;border-radius:6px}textarea{min-height:70px}.pill{display:inline-block;border:1px solid #e5e7eb;border-radius:999px;padding:2px 7px;margin:2px;font-size:12px;color:#4b5563}@media(max-width:620px){.grid{grid-template-columns:1fr}.preview{height:180px}}</style></head><body><main class="wrap"><h1 id="title"></h1><p id="instructions"></p><div id="assets"></div><pre id="summary"></pre></main><script>' + script.replace(/<\/script/gi, "<\\/script") + '<\\/script></body></html>';
+  }
+  function toast(message){
+    var t = el("toast");
+    t.textContent = message;
+    t.classList.add("show");
+    setTimeout(function(){ t.classList.remove("show"); }, 1800);
+  }
+  document.addEventListener("click", function(event){
+    var pkgBtn = event.target.closest("[data-package]");
+    if (pkgBtn) {
+      state.activeId = pkgBtn.getAttribute("data-package");
+      writeReviews();
+      history.replaceState(null, "", location.pathname + "#" + encodeURIComponent(state.activeId));
+      render();
+      return;
+    }
+    var pkg = activePackage();
+    if (event.target.id === "newPackageBtn") {
+      var created = packageFromItems("Review package " + (state.packages.length + 1), [], "manual");
+      state.packages.unshift(created);
+      state.activeId = created.id;
+      writeReviews();
+      history.replaceState(null, "", location.pathname + "#" + encodeURIComponent(created.id));
+      render();
+      return;
+    }
+    if (event.target.id === "importProjectBtn") {
+      var imported = activeProjectPackage();
+      if (!imported) { toast("No project assets to import"); return; }
+      state.packages.unshift(imported);
+      state.activeId = imported.id;
+      writeReviews();
+      history.replaceState(null, "", location.pathname + "#" + encodeURIComponent(imported.id));
+      render();
+      return;
+    }
+    if (!pkg) return;
+    if (event.target.id === "addAssetBtn") {
+      var label = clean(el("manualLabel").value);
+      var url = clean(el("manualUrl").value);
+      if (!label && !url) return;
+      pkg.assets.push(normalizeAsset({ label: label || url, url: url, mediaUrl: url, type: "manual", source: "manual" }, "manual"));
+      touch(pkg);
+      renderEditor();
+      return;
+    }
+    if (event.target.id === "copySummaryBtn") copyText(buildSummary(pkg), "Summary copied");
+    if (event.target.id === "copyLinkBtn") copyText(location.origin + location.pathname + "#" + encodeURIComponent(pkg.id), "Package link copied");
+    if (event.target.id === "downloadJsonBtn") download(slug(pkg.title) + "-review.json", JSON.stringify(pkg, null, 2), "application/json");
+    if (event.target.id === "downloadHtmlBtn") download(slug(pkg.title) + "-review.html", standaloneHtml(pkg), "text/html");
+    if (event.target.id === "deletePackageBtn") {
+      if (!confirm("Delete this local review package?")) return;
+      state.packages = state.packages.filter(function(item){ return item.id !== pkg.id; });
+      state.activeId = (state.packages[0] && state.packages[0].id) || "";
+      writeReviews();
+      history.replaceState(null, "", location.pathname + (state.activeId ? "#" + encodeURIComponent(state.activeId) : ""));
+      render();
+    }
+    var remove = event.target.closest("[data-remove-asset]");
+    if (remove) {
+      pkg.assets.splice(Number(remove.getAttribute("data-remove-asset")), 1);
+      touch(pkg);
+      renderEditor();
+    }
+  });
+  document.addEventListener("input", function(event){
+    var pkg = activePackage();
+    if (!pkg) return;
+    if (event.target.id === "packageTitle") pkg.title = clean(event.target.value) || "Review package";
+    else if (event.target.id === "reviewer") pkg.reviewer = event.target.value;
+    else if (event.target.id === "instructions") pkg.instructions = event.target.value;
+    else if (event.target.dataset.status != null) pkg.assets[Number(event.target.dataset.status)].status = event.target.value;
+    else if (event.target.dataset.note != null) pkg.assets[Number(event.target.dataset.note)].note = event.target.value;
+    else return;
+    touch(pkg);
+  });
+  el("importJson").addEventListener("change", function(event){
+    var file = event.target.files && event.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      try {
+        var parsed = JSON.parse(String(reader.result || "{}"));
+        var pkg = parsed.assets ? parsed : null;
+        if (!pkg && Array.isArray(parsed.packages)) pkg = parsed.packages[0];
+        if (!pkg || !Array.isArray(pkg.assets)) throw new Error("Missing review assets");
+        pkg.id = pkg.id || uid("review");
+        pkg.updatedAt = now();
+        state.packages.unshift(pkg);
+        state.activeId = pkg.id;
+        writeReviews();
+        render();
+      } catch (err) {
+        alert("Import failed: " + err.message);
+      }
+    };
+    reader.readAsText(file);
+  });
+  function slug(value){ return clean(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "fds"; }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", render);
+  else render();
+})();
+</script>
+</body>
+</html>

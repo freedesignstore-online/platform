@@ -733,6 +733,7 @@ function openAssetModal(id){
     <button class="btn btn-secondary" type="button" onclick="copyCredit('${escapeHtml(photo.id)}')">Copy Info</button>
     <button class="btn btn-secondary" type="button" onclick="downloadAssetInfo('${escapeHtml(photo.id)}')">Download Info</button>
     <button class="btn btn-secondary" type="button" onclick="savePhotoToProject('${escapeHtml(photo.id)}')">Save to Project</button>
+    <button class="btn btn-secondary" type="button" onclick="reviewPhoto('${escapeHtml(photo.id)}')">Review</button>
     <a class="btn btn-secondary" href="${escapeHtml(photo.url)}" target="_blank" rel="noopener">Open Image</a>
     ${shareRow}`;
   if(photo.source==='hosted') history.replaceState(null,'',location.pathname+location.search+'#'+photo.id);
@@ -772,6 +773,17 @@ function savePhotoToProject(id){
   const photo=findPhoto(id);
   if(!photo||!window.FDSProjects) return;
   window.FDSProjects.saveAsset(projectAssetPayload(photo),{defaultProjectName:'Asset Collection'});
+}
+
+function reviewPhoto(id){
+  const photo=findPhoto(id);
+  if(!photo) return;
+  localStorage.setItem('fds.review.seed',JSON.stringify({
+    title:(photo.title||'Asset')+' review',
+    source:'asset-modal',
+    assets:[projectAssetPayload(photo)]
+  }));
+  location.href='/reviews/#new';
 }
 
 function closeAssetModal(){

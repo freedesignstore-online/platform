@@ -77,6 +77,7 @@ Any MCP client:
 - Workflows: https://freedesignstore.online/workflows/
 - Projects: https://freedesignstore.online/projects/ (local-first notes, colors, fonts, assets, exports, workflow progress, and saved stock/generated assets)
 - Design readiness checker: https://freedesignstore.online/readiness/ (browser-only contrast, asset quality, metadata, consistency, export recommendations, copy/download/project-saved reports)
+- Review packages: https://freedesignstore.online/reviews/ (local/shareable packages with previews, metadata, approval states, per-asset notes, copyable summaries, JSON export, and standalone HTML export)
 - Asset library: https://freedesignstore.online/images/stock-photos/
   Browse via URL params: ?category=<name>, ?type=<assetType>, ?tag=<tag> (or ?q=<query>), ?origin=<origin>, ?license=<licenseId>, ?source=<hosted|community|unsplash>. #<asset-id> opens the asset detail modal (params and hash combine).
 - Asset trust metadata: gallery modals and /photo/<id> pages expose license/use, source/origin, dimensions, file type/size, suggested use, description/alt fallback, palette fallback, and copy/download metadata text actions.

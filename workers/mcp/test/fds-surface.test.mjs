@@ -202,6 +202,44 @@ test('design readiness checker is discoverable and saves local reports', async (
   assert.match(roadmap, /\[#7 Design readiness checker\].*\| Complete \|/);
 });
 
+test('review packages support local approval loops from projects and assets', async () => {
+  const reviewsHtml = await readRepo('store/reviews/index.html');
+  const projectsJs = await readRepo('store/projects/projects.js');
+  const galleryHtml = await readRepo('store/images/stock-photos/index.html');
+  const photoPage = await readRepo('functions/photo/[id].js');
+  const sitemap = await readRepo('store/sitemap.xml');
+  const readme = await readRepo('README.md');
+  const roadmap = await readRepo('ROADMAP.md');
+  const llms = await readRepo('store/llms.txt');
+
+  assert.match(sitemap, /https:\/\/freedesignstore\.online\/reviews\//);
+  for (const expected of [
+    'fds.reviews.v1',
+    'fds.review.seed',
+    'function buildSummary',
+    'function standaloneHtml',
+    'approved',
+    'needs_changes',
+    'rejected',
+    'Download review HTML',
+    'Copy summary',
+    '/nav.js',
+  ]) {
+    assert.match(reviewsHtml, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
+  assert.match(projectsJs, /id="createReview"/);
+  assert.match(projectsJs, /location\.href = "\/reviews\/#new"/);
+  assert.match(projectsJs, /fds\.review\.seed/);
+  assert.match(galleryHtml, /function reviewPhoto/);
+  assert.match(galleryHtml, /onclick="reviewPhoto/);
+  assert.match(photoPage, /id="reviewAssetBtn"/);
+  assert.match(photoPage, /location\.href='\/reviews\/#new'/);
+  assert.match(readme, /\/reviews\//);
+  assert.match(readme, /standalone review HTML export/);
+  assert.match(llms, /Review packages: https:\/\/freedesignstore\.online\/reviews\//);
+  assert.match(roadmap, /\[#5 Review pages\].*\| Complete \|/);
+});
+
 function catalogItem(overrides) {
   return {
     id: 'x', title: 'Untitled', category: 'Lifestyle', assetType: 'photo',

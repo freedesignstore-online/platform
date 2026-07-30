@@ -143,6 +143,7 @@ ${originBlock}
 <div class="actions">
 <a class="btn btn-primary" href="${esc(item.download)}" download="${esc(item.filename)}">Download</a>
 <button class="btn btn-outline" id="saveProjectBtn" type="button">Save to Project</button>
+<button class="btn btn-outline" id="reviewAssetBtn" type="button">Review</button>
 <a class="btn btn-outline" href="/images/stock-photos/">Browse all assets</a>
 <div class="share-row">
 <button class="share-btn" id="copyBtn" type="button">Copy link</button>
@@ -183,6 +184,14 @@ document.getElementById('saveProjectBtn').addEventListener('click',function(){
   const result=window.FDSProjects.saveAsset(fdsProjectAsset,{defaultProjectName:'Asset Collection'});
   this.textContent='Saved to '+result.project.name;
   setTimeout(()=>{this.textContent='Save to Project';},1800);
+});
+document.getElementById('reviewAssetBtn').addEventListener('click',function(){
+  localStorage.setItem('fds.review.seed',JSON.stringify({
+    title:fdsProjectAsset.label+' review',
+    source:'asset-detail',
+    assets:[fdsProjectAsset]
+  }));
+  location.href='/reviews/#new';
 });
 document.getElementById('copyBtn').addEventListener('click',function(){
   navigator.clipboard.writeText(location.href).then(()=>{

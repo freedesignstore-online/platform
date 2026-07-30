@@ -56,6 +56,7 @@ store/                  Static site (Cloudflare Pages output)
   workflows/            Guided workflow hub + detail routes (local checklist state)
   projects/             Local-first project workspace (localStorage) + shared save helper
   readiness/            Design readiness checker (contrast, asset quality, metadata, exports, local reports)
+  reviews/              Local/shareable review packages (approval status, comments, exports)
   brand/*/              16 brand tools (each a single index.html)
   images/*/             16 image tools + stock-photos library
   templates/*/          6 template tools
@@ -84,6 +85,7 @@ workers/mcp/            MCP server (Cloudflare Worker, 18 tools)
 - Workflow detail pages live under `store/workflows/<slug>/` and render shared content from `store/workflows/workflow.js`
 - Projects live under `store/projects/` and use localStorage keys `fds.projects.v1` and `fds.projects.active`
 - Readiness reports from `/readiness/` save into project `exports` through `window.FDSProjects.saveExport`
+- Review packages live under `/reviews/`, use localStorage key `fds.reviews.v1`, and can be seeded through `fds.review.seed`
 - Back link: `<a class="back" href="/tools/">&larr; Tools</a>`
 - Accent: `#ec4899`, fonts: Fraunces (headings) + Manrope (body)
 - Nav order: Tools | Workflows | Projects | Assets | Creators | Skills | Console
