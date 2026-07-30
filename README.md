@@ -12,6 +12,7 @@ Part of [Open Frontier](https://openfrontier.pages.dev).
 | `/tools/` | All 47 tools with search and category filters |
 | `/workflows/` | Guided design workflows that connect existing FDS tools by job |
 | `/workflows/<slug>/` | Workflow detail pages with inputs, ordered steps, tool links, exports, and local checklist state |
+| `/projects/` | Local-first project workspace for notes, colors, fonts, assets, exports, and workflow progress |
 | `/images/stock-photos/` | Asset library — curated + community catalog (photos, illustrations, renders, AI art, video), Unsplash search |
 | `/photo/<id>` | Individual asset detail page with OG tags + share buttons |
 | `/skills/` | MCP playbooks + capability manifest |
@@ -31,6 +32,10 @@ Workflow routes are task-first entry points for people who do not know which ind
 - `/workflows/asset-export/`
 
 Each workflow renders from `store/workflows/workflow.js` and includes required inputs, ordered steps, links into existing tools, final exports, copyable plan text, and local checklist persistence.
+
+## Projects
+
+`/projects/` is a local-first workspace backed by browser storage. Users can create, rename, delete, import, and export projects without an account. A project stores notes, colors, fonts, assets/links, export metadata, and saved workflow progress from the workflow detail pages.
 
 ## Tools (47)
 
@@ -64,6 +69,7 @@ claude mcp add freedesignstore https://mcp.freedesignstore.online/mcp
 store/                  Static site (Cloudflare Pages)
   tools/                Tools directory page
   workflows/            Guided workflow hub + detail routes
+  projects/             Local-first project workspace
   brand/*/              16 brand tools
   images/*/             16 image tools + stock-photos library
   templates/*/          6 template tools

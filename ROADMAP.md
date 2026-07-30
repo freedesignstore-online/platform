@@ -6,7 +6,7 @@ This roadmap keeps the current GitHub issues aligned with product direction and 
 
 | Issue | Status | Critical Assessment | Dependency Notes |
 |---|---|---|---|
-| [#3 Project workspace](https://github.com/freedesignstore-online/platform/issues/3) | Open | High leverage. This should become the local-first continuity layer for brand colors, fonts, assets, notes, workflow progress, and export history. Keep it local-first before considering accounts. | Builds naturally on `/workflows/` and should reuse workflow slugs/checklist state. |
+| [#3 Project workspace](https://github.com/freedesignstore-online/platform/issues/3) | In progress | V1 local workspace is being implemented as `/projects/`: create/rename/delete, notes, colors, fonts, assets, exports, import/export JSON, and saved workflow progress. Keep account-backed collaboration out of scope. | Builds naturally on `/workflows/` and reuses workflow slugs/checklist state. |
 | [#4 Asset trust metadata](https://github.com/freedesignstore-online/platform/issues/4) | Open | High trust impact. Asset pages already disclose some origin/license data, but the issue should standardize missing/fallback metadata and copied/downloaded metadata. | Should land before deep review/share work so review packages carry reliable metadata. |
 | [#5 Review pages](https://github.com/freedesignstore-online/platform/issues/5) | Open | Useful for freelancers, but easiest to overbuild. Start with local/shareable review packages and copyable feedback before adding server comments. | Depends on selecting assets from #3 or existing asset cards; benefits from #4 trust metadata. |
 | [#6 Guided workflow hubs](https://github.com/freedesignstore-online/platform/issues/6) | Complete | Acceptance criteria are satisfied: hub plus dedicated routes, ordered steps, tool links, task-first screens, inputs, exports, and local checklist state. Future integration belongs under #3. | Completed by commits `79d8217` and `53fa905`. |
@@ -14,11 +14,10 @@ This roadmap keeps the current GitHub issues aligned with product direction and 
 
 ## Implementation Order
 
-1. Close #6 as complete.
-2. Build #3 project workspace as the backbone for saved workflow state, notes, assets, and exports.
-3. Build #4 asset trust metadata so all later workspace/review/readiness views rely on consistent asset facts.
-4. Build #7 design readiness checker with deterministic checks and local reports.
-5. Build #5 review packages on top of project assets and trust metadata.
+1. Finish #3 project workspace integration beyond workflows where practical.
+2. Build #4 asset trust metadata so all later workspace/review/readiness views rely on consistent asset facts.
+3. Build #7 design readiness checker with deterministic checks and local reports.
+4. Build #5 review packages on top of project assets and trust metadata.
 
 ## Documentation Rules
 

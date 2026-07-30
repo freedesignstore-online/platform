@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Projects - FreeDesignStore</title>
+<meta name="description" content="Local-first FreeDesignStore project workspace for brand colors, fonts, assets, notes, exports, and workflow progress.">
+<meta property="og:title" content="Projects - FreeDesignStore">
+<meta property="og:description" content="Save FDS workflow progress, project notes, assets, colors, fonts, and exports locally in your browser.">
+<link rel="canonical" href="https://freedesignstore.online/projects/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/tw.css">
+</head>
+<body>
+<header class="fds-header">
+<a href="/" class="brand"><span class="brand-emoji">FDS</span><span class="brand-name">FreeDesignStore</span></a>
+<nav class="fds-nav"><a href="/tools/">Tools</a><a href="/workflows/">Workflows</a><a href="/projects/">Projects</a><a href="/images/stock-photos/">Assets</a><a href="/creators">Creators</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
+</header>
+<main class="max-w-[1180px] mx-auto px-6 pt-8 pb-12">
+<section class="mb-5">
+<p class="text-[.72rem] font-extrabold uppercase text-accent mb-1">Local workspace</p>
+<h1 class="font-display text-[2.35rem] leading-[1.05] font-bold mb-2 max-[520px]:text-3xl">Projects</h1>
+<p class="text-muted text-[.9rem] leading-relaxed max-w-[720px]">Save design decisions, links, workflow progress, notes, and export metadata in your browser. No account required; export JSON when you need a backup or handoff.</p>
+</section>
+<section class="grid grid-cols-[280px_1fr] gap-4 max-[820px]:grid-cols-1">
+<aside class="bg-panel border border-hairline rounded-2xl p-4 content-start">
+<div class="flex gap-2 mb-3">
+<button class="hero-btn w-full justify-center" id="newProject" type="button">New Project</button>
+</div>
+<div class="grid gap-2" id="projectList"></div>
+<div class="border-t border-hairline mt-4 pt-4 grid gap-2">
+<button class="filter-btn" id="exportAll" type="button">Export JSON</button>
+<label class="filter-btn text-center cursor-pointer">Import JSON<input class="hidden" id="importFile" type="file" accept="application/json"></label>
+</div>
+</aside>
+<section class="grid gap-4" id="projectEditor"></section>
+</section>
+</main>
+<footer class="fds-footer">FreeDesignStore - part of <a href="https://openfrontier.pages.dev">Open Frontier</a> | <a href="https://openfrontier-docs.pages.dev">Docs</a> | <a href="/terms/">Terms</a> | <a href="/privacy/">Privacy</a></footer>
+<script src="/projects/projects.js" defer></script>
+<script src="/nav.js" defer></script>
+</body>
+</html>

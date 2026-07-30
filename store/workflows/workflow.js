@@ -248,6 +248,72 @@
     localStorage.setItem(key(slug), JSON.stringify(values));
   }
 
+  function projectId() {
+    return "proj-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 7);
+  }
+
+  function readProjects() {
+    try {
+      var state = JSON.parse(localStorage.getItem("fds.projects.v1") || "{}");
+      if (!Array.isArray(state.projects)) state.projects = [];
+      state.version = 1;
+      state.activeId = localStorage.getItem("fds.projects.active") || state.activeId || "";
+      return state;
+    } catch (err) {
+      return { version: 1, activeId: "", projects: [] };
+    }
+  }
+
+  function writeProjects(state) {
+    localStorage.setItem("fds.projects.v1", JSON.stringify(state));
+    if (state.activeId) localStorage.setItem("fds.projects.active", state.activeId);
+  }
+
+  function activeProject(state, workflow) {
+    var project = state.projects.find(function (item) { return item.id === state.activeId; });
+    if (project) return project;
+    var stamp = new Date().toISOString();
+    project = {
+      id: projectId(),
+      name: workflow.title + " Project",
+      createdAt: stamp,
+      updatedAt: stamp,
+      colors: [],
+      fonts: [],
+      assets: [],
+      notes: "",
+      exports: [],
+      workflows: {}
+    };
+    state.projects.unshift(project);
+    state.activeId = project.id;
+    return project;
+  }
+
+  function saveWorkflowToProject(slug, workflow) {
+    var state = readProjects();
+    var project = activeProject(state, workflow);
+    var stamp = new Date().toISOString();
+    project.workflows = project.workflows || {};
+    project.workflows[slug] = {
+      slug: slug,
+      title: workflow.title,
+      checked: readChecked(slug),
+      plan: copyPlan(workflow),
+      savedAt: stamp
+    };
+    workflow.exports.forEach(function (label) {
+      project.exports = project.exports || [];
+      var exists = project.exports.some(function (item) {
+        return item.source === "workflow" && item.workflow === slug && item.label === label;
+      });
+      if (!exists) project.exports.push({ label: label, url: "", type: "planned", source: "workflow", workflow: slug, createdAt: stamp });
+    });
+    project.updatedAt = stamp;
+    writeProjects(state);
+    return project;
+  }
+
   function toolLinks(tools) {
     return tools.map(function (tool) {
       return '<a class="stock-link" href="' + esc(tool[1]) + '">' + esc(tool[0]) + " -></a>";
@@ -310,7 +376,7 @@
       '<p class="text-[.72rem] font-extrabold uppercase text-accent mt-4 mb-1">' + esc(workflow.issue) + "</p>",
       '<h1 class="font-display text-[2.35rem] leading-[1.05] font-bold mb-2 max-[520px]:text-3xl">' + esc(workflow.title) + "</h1>",
       '<p class="text-muted text-[.9rem] leading-relaxed max-w-[720px]">' + esc(workflow.intro) + "</p>",
-      '<div class="flex flex-wrap gap-2 mt-4"><button class="hero-btn" id="copyWorkflowPlan" type="button">Copy Plan</button><a class="hero-btn secondary" href="/tools/">Browse All Tools</a></div>',
+      '<div class="flex flex-wrap gap-2 mt-4"><button class="hero-btn" id="copyWorkflowPlan" type="button">Copy Plan</button><button class="hero-btn secondary" id="saveWorkflowProject" type="button">Save to Project</button><a class="hero-btn secondary" href="/projects/">Projects</a><a class="hero-btn secondary" href="/tools/">Browse All Tools</a></div>',
       "</section>",
       '<section class="grid grid-cols-[.78fr_1.22fr] gap-4 max-[820px]:grid-cols-1">',
       '<aside class="grid gap-4 content-start">',
@@ -344,6 +410,13 @@
         copy.textContent = "Copy Failed";
         setTimeout(function () { copy.textContent = "Copy Plan"; }, 1400);
       });
+    });
+
+    var save = document.getElementById("saveWorkflowProject");
+    save.addEventListener("click", function () {
+      var project = saveWorkflowToProject(slug, workflow);
+      save.textContent = "Saved to " + project.name;
+      setTimeout(function () { save.textContent = "Save to Project"; }, 1800);
     });
   }
 

@@ -1,6 +1,6 @@
 # FreeDesignStore Platform
 
-Unified R2 catalog (curated + community assets: photos, illustrations, renders, AI art, video), guided design workflows, 47 browser tools, contributor identity with public profiles, publishing via MCP.
+Unified R2 catalog (curated + community assets: photos, illustrations, renders, AI art, video), guided design workflows, local-first projects, 47 browser tools, contributor identity with public profiles, publishing via MCP.
 
 ## MCP-first workflow
 
@@ -54,6 +54,7 @@ claude mcp add freedesignstore https://mcp.freedesignstore.online/mcp
 store/                  Static site (Cloudflare Pages output)
   tools/                Tools directory page with search + filters
   workflows/            Guided workflow hub + detail routes (local checklist state)
+  projects/             Local-first project workspace (localStorage)
   brand/*/              16 brand tools (each a single index.html)
   images/*/             16 image tools + stock-photos library
   templates/*/          6 template tools
@@ -80,9 +81,10 @@ workers/mcp/            MCP server (Cloudflare Worker, 18 tools)
 
 - Every tool page is a single self-contained `index.html`
 - Workflow detail pages live under `store/workflows/<slug>/` and render shared content from `store/workflows/workflow.js`
+- Projects live under `store/projects/` and use localStorage keys `fds.projects.v1` and `fds.projects.active`
 - Back link: `<a class="back" href="/tools/">&larr; Tools</a>`
 - Accent: `#ec4899`, fonts: Fraunces (headings) + Manrope (body)
-- Nav order: Tools | Workflows | Assets | Creators | Skills | Console
+- Nav order: Tools | Workflows | Projects | Assets | Creators | Skills | Console
 - Sticky header: `position:sticky;top:0;backdrop-filter:blur(14px)`
 - Curated AI images: Pollinations generates SQUARE-native only (768x768 anon cap) and stretches non-square requests — generate square, center-crop to 16:9, upscale to 1672x941 with sips. Record prompts in `store/assets/stock/manifest.json`.
 - Image categories: Lifestyle, Nature, People, Travel, Workspace, Backgrounds, etc.
