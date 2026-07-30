@@ -2,7 +2,7 @@
 
 ## What we accept
 
-Self-contained browser design tools. Each tool is a single `index.html` file.
+Self-contained browser design tools, workflow pages, and documentation updates that help people complete real design jobs. Each tool is a single `index.html` file.
 
 ## Design rules (LIGHT theme)
 
@@ -19,6 +19,8 @@ Self-contained browser design tools. Each tool is a single `index.html` file.
 | Back link | `<a class="back" href="/tools/">&larr; Tools</a>` |
 | Related | `<script src="/related.js"></script>` before `</body>` |
 
+Workflow detail pages live under `store/workflows/<slug>/` and should use the shared `store/workflows/workflow.js` renderer unless they need custom behavior.
+
 ## Directory structure
 
 ```
@@ -26,7 +28,8 @@ store/
 ├── brand/your-tool/index.html        (brand identity tools)
 ├── images/your-tool/index.html       (image utilities)
 ├── templates/your-tool/index.html    (template editors)
-└── components/your-tool/index.html   (UI/UX tools)
+├── components/your-tool/index.html   (UI/UX tools)
+└── workflows/your-workflow/index.html (guided workflow routes)
 ```
 
 ## Registry entry
@@ -40,7 +43,7 @@ Add to `store/registry.json`:
   "description": "One-line description.",
   "icon": "emoji",
   "iconBg": "#ec4899",
-  "category": "brand|images|templates",
-  "section": "brand|images|templates"
+  "category": "brand|images|templates|uiux",
+  "section": "brand|images|templates|uiux"
 }
 ```

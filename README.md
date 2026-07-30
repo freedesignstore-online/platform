@@ -1,6 +1,6 @@
 # FreeDesignStore
 
-**[freedesignstore.online](https://freedesignstore.online)** — 52 free stock images + 46 browser-based design tools. No signup, no watermarks, no install.
+**[freedesignstore.online](https://freedesignstore.online)** — a live CC0 design asset catalog, guided design workflows, and 47 browser-based design tools. No signup for tools, no watermarks, no install.
 
 Part of [Open Frontier](https://openfrontier.pages.dev).
 
@@ -8,8 +8,10 @@ Part of [Open Frontier](https://openfrontier.pages.dev).
 
 | URL | What |
 |-----|------|
-| `/` | Homepage — hero, asset carousel with infinite scroll, tool grid |
-| `/tools/` | All 46 tools with search and category filters |
+| `/` | Homepage — hero, asset carousel with infinite scroll, workflow shortcuts, tool grid |
+| `/tools/` | All 47 tools with search and category filters |
+| `/workflows/` | Guided design workflows that connect existing FDS tools by job |
+| `/workflows/<slug>/` | Workflow detail pages with inputs, ordered steps, tool links, exports, and local checklist state |
 | `/images/stock-photos/` | Asset library — curated + community catalog (photos, illustrations, renders, AI art, video), Unsplash search |
 | `/photo/<id>` | Individual asset detail page with OG tags + share buttons |
 | `/skills/` | MCP playbooks + capability manifest |
@@ -17,13 +19,26 @@ Part of [Open Frontier](https://openfrontier.pages.dev).
 | `/llms.txt` | AI-readable docs index |
 | `/.well-known/mcp.json` | MCP discovery metadata |
 
-## Tools (46)
+## Workflows
+
+Workflow routes are task-first entry points for people who do not know which individual tool to open first:
+
+- `/workflows/launch-brand/`
+- `/workflows/landing-page/`
+- `/workflows/social-campaign/`
+- `/workflows/ui-kit/`
+- `/workflows/pitch-deck/`
+- `/workflows/asset-export/`
+
+Each workflow renders from `store/workflows/workflow.js` and includes required inputs, ordered steps, links into existing tools, final exports, copyable plan text, and local checklist persistence.
+
+## Tools (47)
 
 ### Brand (16)
 Logo Maker, Color Palette, Typography Pairing, Brand Kit Builder, Business Card Designer, Favicon Generator, Smart Color from Description, Smart Logo Concepts, Design Token Generator, QR Code Designer, Contrast Checker, Tailwind Theme Builder, CSS Animation Studio, CSS Effects Generator, Micro-Interaction Library, Color Blindness Simulator
 
-### Images (15)
-Image Resizer, SVG Icon Library, Gradient Maker, Background Remover, Pattern Generator, Design Asset Library, Free Logo Templates, Personal Asset Manager, Format Converter, Noise & Texture Generator, SVG Optimizer, Avatar Generator, Photo Editor, Vector Editor, Pixel Art Editor
+### Images (16)
+AI Icon Set Generator, Image Resizer, SVG Icon Library, Gradient Maker, Background Remover, Pattern Generator, Design Asset Library, Free Logo Templates, Personal Asset Manager, Format Converter, Noise & Texture Generator, SVG Optimizer, Avatar Generator, Photo Editor, Vector Editor, Pixel Art Editor
 
 ### Templates (6)
 Social Media Templates, OG Image Maker, Slide Deck Builder, Pitch Deck Generator, Device Mockup Generator, Wireframe Builder
@@ -31,15 +46,13 @@ Social Media Templates, OG Image Maker, Slide Deck Builder, Pitch Deck Generator
 ### UI/UX (9)
 UI Component Library, CSS Layout Builder, Form Builder, Landing Page Builder, Dashboard Builder, Moodboard Builder, User Flow Builder, Sitemap Generator, Design Handoff Sheet
 
-## Stock Images (52)
+## Asset catalog
 
-AI-generated lifestyle, nature, travel, people, workspace, and background photos at 1672x941. Each image has a unique URL at `/photo/<id>` with OG meta tags for social sharing (X, Facebook, LinkedIn, Pinterest).
-
-Categories: Lifestyle (25), Nature (9), People (5), Travel (3), Workspace (2), Backgrounds (2), Technology (1), Business (1), Marketing (1), Mockups (1), Textures (1), UI (1)
+The public asset catalog is backed by Cloudflare R2 + KV and includes curated and community assets across photos, illustrations, renders, AI art, icons, patterns, textures, UI assets, and video. Asset counts are live data; use MCP `catalog_status` for the current total. Each public asset has a unique URL at `/photo/<id>` with OG meta tags for social sharing.
 
 ## MCP
 
-15-tool MCP server at `mcp.freedesignstore.online/mcp`. OAuth 2.1 (GitHub/Google) or bearer token auth. See [CLAUDE.md](./CLAUDE.md) for agent workflow and [MCP-CATALOG.md](./MCP-CATALOG.md) for full docs.
+18-tool MCP server at `mcp.freedesignstore.online/mcp`. OAuth 2.1 (GitHub/Google) or bearer token auth. See [CLAUDE.md](./CLAUDE.md) for agent workflow and [MCP-CATALOG.md](./MCP-CATALOG.md) for full docs.
 
 ```bash
 claude mcp add freedesignstore https://mcp.freedesignstore.online/mcp
@@ -50,8 +63,9 @@ claude mcp add freedesignstore https://mcp.freedesignstore.online/mcp
 ```
 store/                  Static site (Cloudflare Pages)
   tools/                Tools directory page
+  workflows/            Guided workflow hub + detail routes
   brand/*/              16 brand tools
-  images/*/             15 image tools + stock-photos library
+  images/*/             16 image tools + stock-photos library
   templates/*/          6 template tools
   components/*/         9 UI/UX tools
   skills/               MCP playbooks (6)

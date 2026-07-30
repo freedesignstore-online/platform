@@ -1,8 +1,9 @@
 # Catalog & contributor uploads backend
 
 The FreeDesignStore catalog is unified on Cloudflare R2 (binaries) + KV (metadata),
-served by Pages Functions. It holds the curated set (301 assets owned by the
-`fds-official` account, handle `freedesignstore`) and community contributions.
+served by Pages Functions. It holds curated assets owned by the `fds-official`
+account (handle `freedesignstore`) and community contributions. Counts are live
+catalog data; use MCP `catalog_status` or the Admin console for current totals.
 Nothing binary is committed to git.
 
 ## Bindings

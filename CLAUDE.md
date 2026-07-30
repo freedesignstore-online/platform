@@ -1,6 +1,6 @@
 # FreeDesignStore Platform
 
-Unified R2 catalog (869 curated + community assets: photos, illustrations, renders, AI art, video), 46 browser tools, contributor identity with public profiles, publishing via MCP.
+Unified R2 catalog (curated + community assets: photos, illustrations, renders, AI art, video), guided design workflows, 47 browser tools, contributor identity with public profiles, publishing via MCP.
 
 ## MCP-first workflow
 
@@ -53,8 +53,9 @@ claude mcp add freedesignstore https://mcp.freedesignstore.online/mcp
 ```
 store/                  Static site (Cloudflare Pages output)
   tools/                Tools directory page with search + filters
+  workflows/            Guided workflow hub + detail routes (local checklist state)
   brand/*/              16 brand tools (each a single index.html)
-  images/*/             15 image tools + stock-photos library
+  images/*/             16 image tools + stock-photos library
   templates/*/          6 template tools
   components/*/         9 UI/UX tools
   skills/               MCP playbooks (6) + capability manifest
@@ -78,9 +79,10 @@ workers/mcp/            MCP server (Cloudflare Worker, 18 tools)
 ## Conventions
 
 - Every tool page is a single self-contained `index.html`
+- Workflow detail pages live under `store/workflows/<slug>/` and render shared content from `store/workflows/workflow.js`
 - Back link: `<a class="back" href="/tools/">&larr; Tools</a>`
 - Accent: `#ec4899`, fonts: Fraunces (headings) + Manrope (body)
-- Nav order: Tools | Assets | Creators | Skills | Console
+- Nav order: Tools | Workflows | Assets | Creators | Skills | Console
 - Sticky header: `position:sticky;top:0;backdrop-filter:blur(14px)`
 - Curated AI images: Pollinations generates SQUARE-native only (768x768 anon cap) and stretches non-square requests — generate square, center-crop to 16:9, upscale to 1672x941 with sips. Record prompts in `store/assets/stock/manifest.json`.
 - Image categories: Lifestyle, Nature, People, Travel, Workspace, Backgrounds, etc.
@@ -89,7 +91,7 @@ workers/mcp/            MCP server (Cloudflare Worker, 18 tools)
 
 - ALL asset binaries live in R2 (`fds-stock-assets`); metadata in KV (`FDS_STOCK_KV`). Nothing binary is committed to git.
 - KV keys: `stock:item:{id}`, `stock:index:{public,pending}`, `stock:index:account:{accountId}`, `profile:account:{accountId}`, `profile:handle:{handle}`.
-- Curated set: 869 items (incl. 6 hi-res background videos) owned by `fds-official` (`source: "hosted"`), objects at `hosted/<filename>`; legacy `/assets/stock/<file>` URLs served by `functions/assets/stock/[file].js` (HeartFull stores them).
+- Curated/community counts are live catalog data; use MCP `catalog_status` for current totals. Curated assets are owned by `fds-official` (`source: "hosted"`), objects at `hosted/<filename>`; legacy `/assets/stock/<file>` URLs served by `functions/assets/stock/[file].js` (HeartFull stores them).
 - Uploads require sign-in (session cookie verified in Pages via `functions/api/_session.js`, needs SESSION_SIGNING_KEY on the Pages project; proxies to the MCP worker until set) and publish instantly; moderation is takedown-based.
 - Taxonomy axes on every asset: `assetType` (13 types incl. video/animation), `origin` (photograph | ai-generated | 3d-render | digital-illustration | vector-art | scan | mixed, with `originDetail` tool/model/prompt — AI must name the tool), `licenseId` (always `cc0` — the whole catalog is public-domain dedicated, uploads force it; `fds-free | attribution` are legacy render-only ids), `purpose`, `safe`. Origin is disclosed on asset pages.
 - Legal pages: `/terms/` (CC0 dedication, contributor terms, takedowns) and `/privacy/` (cookieless analytics, contributor OAuth data). Linked from every footer.
