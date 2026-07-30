@@ -88,6 +88,25 @@
     };
   }
 
+  function normalizeExport(exportItem) {
+    var stamp = now();
+    var label = clean(exportItem && (exportItem.label || exportItem.title || exportItem.name));
+    return {
+      id: exportItem && exportItem.projectExportId || uid("export"),
+      label: label || "Saved export",
+      type: clean(exportItem && (exportItem.type || "export")),
+      source: clean(exportItem && (exportItem.source || "fds")),
+      url: clean(exportItem && (exportItem.url || "")),
+      format: clean(exportItem && (exportItem.format || "")),
+      score: typeof (exportItem && exportItem.score) === "number" ? exportItem.score : null,
+      status: clean(exportItem && exportItem.status || ""),
+      summary: clean(exportItem && exportItem.summary || ""),
+      report: clean(exportItem && exportItem.report || ""),
+      createdAt: exportItem && exportItem.createdAt || stamp,
+      updatedAt: stamp
+    };
+  }
+
   function sameAsset(a, b) {
     if (a.assetId && b.assetId && a.source === b.source) return a.assetId === b.assetId;
     if (a.url && b.url) return a.url === b.url;
@@ -135,12 +154,33 @@
     }, options);
   }
 
+  function saveExport(exportItem, options) {
+    var state = readState();
+    var project = ensureActiveProject(state, options && options.defaultProjectName);
+    var item = normalizeExport(exportItem || {});
+    var existing = project.exports.find(function (candidate) {
+      if (candidate.id && item.id && candidate.id === item.id) return true;
+      return candidate.source && item.source && candidate.label === item.label && candidate.source === item.source;
+    });
+    if (existing) {
+      Object.assign(existing, item, { id: existing.id, createdAt: existing.createdAt || item.createdAt, updatedAt: now() });
+      item = existing;
+    } else {
+      project.exports.unshift(item);
+    }
+    project.updatedAt = now();
+    writeState(state);
+    if (!(options && options.silent)) toast("Saved report to " + project.name);
+    return { state: state, project: project, item: item, duplicate: Boolean(existing) };
+  }
+
   window.FDSProjects = {
     keys: { store: STORE_KEY, active: ACTIVE_KEY },
     readState: readState,
     writeState: writeState,
     ensureActiveProject: ensureActiveProject,
     saveAsset: saveAsset,
-    saveTool: saveTool
+    saveTool: saveTool,
+    saveExport: saveExport
   };
 })();

@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Design Readiness Checker - FreeDesignStore</title>
+<meta name="description" content="Check design assets for accessibility contrast, image dimensions, file size, metadata, consistency, and export quality before handoff.">
+<meta property="og:title" content="Design Readiness Checker - FreeDesignStore">
+<meta property="og:description" content="Browser-only design readiness checks with pass, warning, and fail remediation.">
+<link rel="canonical" href="https://freedesignstore.online/readiness/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/tw.css">
+<style>
+.readiness-page{max-width:1180px;margin:0 auto;padding:24px;color:var(--color-ink)}
+.readiness-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin-bottom:18px;flex-wrap:wrap}
+.back{font-size:.78rem;font-weight:800;color:var(--color-accent)}
+.readiness-title h1{font-family:var(--font-display);font-size:2rem;line-height:1.08;font-weight:700;letter-spacing:0;margin:.3rem 0}
+.readiness-title p{max-width:720px;color:var(--color-muted);font-size:.9rem;line-height:1.55}
+.scorebox{min-width:190px;border:1px solid var(--color-hairline);background:var(--color-panel);border-radius:8px;padding:14px;text-align:right;box-shadow:0 1px 3px #00000008}
+.scorebox strong{display:block;font-size:2rem;line-height:1;font-weight:800}
+.scorebox span{display:block;margin-top:5px;color:var(--color-muted);font-size:.72rem;font-weight:800;text-transform:uppercase}
+.readiness-shell{display:grid;grid-template-columns:minmax(320px,420px) minmax(0,1fr);gap:16px;align-items:start}
+.panel{border:1px solid var(--color-hairline);background:var(--color-panel);border-radius:8px;padding:16px;box-shadow:0 1px 3px #00000008}
+.panel h2{font-size:.86rem;font-weight:800;text-transform:uppercase;color:var(--color-muted);letter-spacing:.04em;margin-bottom:12px}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.field label{font-size:.73rem;color:var(--color-muted);font-weight:800}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--color-hairline);border-radius:8px;background:var(--color-paper);padding:10px 11px;color:var(--color-ink);font-size:.86rem;outline:none}
+.field textarea{min-height:74px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--color-accent);box-shadow:0 0 0 3px #ec48991a}
+.drop{border:1px dashed #d8cbd3;border-radius:8px;background:var(--color-paper);padding:16px;display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.drop input{max-width:100%;font-size:.8rem}
+.asset-meta{font-size:.76rem;color:var(--color-muted);line-height:1.45;word-break:break-word}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn{border:1px solid var(--color-hairline);background:var(--color-panel);color:var(--color-ink);border-radius:999px;padding:9px 13px;font-size:.8rem;font-weight:800;cursor:pointer}
+.btn:hover{border-color:var(--color-accent);color:var(--color-accent)}
+.btn.primary{background:var(--color-accent);border-color:var(--color-accent);color:#fff}
+.btn.primary:hover{background:var(--color-accent-deep);color:#fff}
+.summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.metric{border:1px solid var(--color-hairline);border-radius:8px;padding:12px;background:var(--color-paper)}
+.metric strong{display:block;font-size:1.6rem;line-height:1;font-weight:800}
+.metric span{display:block;margin-top:5px;color:var(--color-muted);font-size:.72rem;font-weight:800;text-transform:uppercase}
+.check-section{border:1px solid var(--color-hairline);border-radius:8px;margin-bottom:10px;overflow:hidden}
+.check-section h3{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--color-paper);padding:11px 12px;font-size:.88rem;font-weight:800}
+.check-list{display:grid}
+.check-row{display:grid;grid-template-columns:78px minmax(0,1fr);gap:10px;padding:11px 12px;border-top:1px solid var(--color-hairline)}
+.status{align-self:start;text-align:center;border-radius:999px;padding:4px 8px;font-size:.68rem;font-weight:900;letter-spacing:.03em}
+.status.pass{background:#dcfce7;color:#166534}
+.status.warn{background:#fef3c7;color:#92400e}
+.status.fail{background:#fee2e2;color:#991b1b}
+.check-row strong{display:block;font-size:.84rem;margin-bottom:3px}
+.check-row p{font-size:.78rem;color:var(--color-muted);line-height:1.45}
+.report-box{border:1px solid var(--color-hairline);border-radius:8px;background:var(--color-paper);padding:12px;white-space:pre-wrap;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;max-height:340px;overflow:auto}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:2000;background:#111827;color:#fff;border:1px solid rgba(255,255,255,.2);box-shadow:0 12px 30px rgba(15,23,42,.22);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:800;opacity:0;pointer-events:none;transition:opacity .16s}
+.toast.show{opacity:1}
+@media (max-width:860px){.readiness-shell{grid-template-columns:1fr}.scorebox{text-align:left}.summary-grid{grid-template-columns:repeat(3,minmax(86px,1fr))}}
+@media (max-width:560px){.readiness-page{padding:18px}.field-grid{grid-template-columns:1fr}.check-row{grid-template-columns:1fr}.status{justify-self:start}.summary-grid{grid-template-columns:1fr}.actions .btn{width:100%}}
+@media (prefers-color-scheme:dark){.drop,.field input,.field select,.field textarea,.metric,.check-section h3,.report-box{background:#1c1922;border-color:#302b39}.status.pass{background:#11351f;color:#86efac}.status.warn{background:#3b2a10;color:#fbbf24}.status.fail{background:#3f1717;color:#fca5a5}}
+</style>
+</head>
+<body>
+<header class="fds-header">
+<a href="/" class="brand"><span class="brand-emoji">🎨</span><span class="brand-name">FreeDesignStore</span></a>
+<nav class="fds-nav"><a href="/tools/">Tools</a><a href="/workflows/">Workflows</a><a href="/projects/">Projects</a><a href="/images/stock-photos/">Assets</a><a href="/creators">Creators</a><a href="/skills/">Skills</a><a href="/console/">Console</a></nav>
+</header>
+<main class="readiness-page">
+<div class="readiness-head">
+<div class="readiness-title">
+<a class="back" href="/tools/">&larr; Tools</a>
+<h1>Design Readiness Checker</h1>
+<p>Run deterministic checks for accessibility, asset quality, metadata, consistency, and export fit before a design leaves the browser.</p>
+</div>
+<div class="scorebox" aria-live="polite"><strong id="score">--</strong><span id="scoreLabel">Not checked</span></div>
+</div>
+
+<div class="readiness-shell">
+<section class="panel" aria-labelledby="inputs-title">
+<h2 id="inputs-title">Inputs</h2>
+<div class="drop">
+<input id="assetFile" type="file" accept="image/png,image/jpeg,image/webp,image/avif,image/svg+xml,video/mp4,video/webm">
+<div class="asset-meta" id="assetMeta">No file selected.</div>
+</div>
+<div class="field-grid">
+<div class="field"><label for="assetTitle">Asset title</label><input id="assetTitle" value="Campaign hero image"></div>
+<div class="field"><label for="intendedUse">Intended use</label><select id="intendedUse"><option value="hero">Website hero</option><option value="social">Social post</option><option value="og">Open Graph image</option><option value="icon">Icon or logo</option><option value="ui">UI screenshot</option><option value="print">Print handoff</option></select></div>
+</div>
+<div class="field"><label for="altText">Alt or description</label><textarea id="altText">Abstract product workspace scene with readable focal area and enough empty space for headline copy.</textarea></div>
+<div class="field-grid">
+<div class="field"><label for="origin">Source or origin</label><select id="origin"><option value="photograph">Photograph</option><option value="ai-generated">AI generated</option><option value="vector-art">Vector art</option><option value="3d-render">3D render</option><option value="mixed">Mixed source</option><option value="">Unknown</option></select></div>
+<div class="field"><label for="license">License</label><select id="license"><option value="cc0">CC0/public domain</option><option value="owned">Owned/commissioned</option><option value="attribution">Attribution required</option><option value="">Unknown</option></select></div>
+</div>
+<div class="field-grid">
+<div class="field"><label for="foreground">Text color</label><input id="foreground" type="color" value="#111827"></div>
+<div class="field"><label for="background">Background color</label><input id="background" type="color" value="#ffffff"></div>
+</div>
+<div class="field-grid">
+<div class="field"><label for="accent">Accent color</label><input id="accent" type="color" value="#ec4899"></div>
+<div class="field"><label for="exportFormat">Export format</label><select id="exportFormat"><option value="webp">WebP</option><option value="png">PNG</option><option value="jpeg">JPEG</option><option value="svg">SVG</option><option value="pdf">PDF</option><option value="mp4">MP4</option></select></div>
+</div>
+<div class="field"><label for="fonts">Fonts in use</label><input id="fonts" value="Fraunces, Manrope"></div>
+<div class="field"><label for="spacing">Spacing scale</label><input id="spacing" value="4, 8, 12, 16, 24, 32"></div>
+<div class="actions">
+<button class="btn primary" id="runBtn">Run check</button>
+<button class="btn" id="copyBtn">Copy report</button>
+<button class="btn" id="downloadBtn">Download report</button>
+<button class="btn" id="saveBtn">Save to project</button>
+</div>
+</section>
+
+<section class="panel" id="report" aria-labelledby="results-title">
+<h2 id="results-title">Report</h2>
+<div class="summary-grid">
+<div class="metric"><strong id="passCount">0</strong><span>Pass</span></div>
+<div class="metric"><strong id="warnCount">0</strong><span>Warn</span></div>
+<div class="metric"><strong id="failCount">0</strong><span>Fail</span></div>
+</div>
+<div id="results"></div>
+<div class="actions">
+<a class="btn" href="#report" id="reportLink">Report link</a>
+</div>
+<pre class="report-box" id="reportText">Run a check to generate a copyable readiness report.</pre>
+</section>
+</div>
+</main>
+<footer class="fds-footer">FreeDesignStore — part of <a href="https://openfrontier.pages.dev">Open Frontier</a> | <a href="https://openfrontier-docs.pages.dev">Docs</a> | <a href="/terms/">Terms</a> | <a href="/privacy/">Privacy</a></footer>
+<div class="toast" id="toast" role="status"></div>
+<script src="/projects/project-save.js"></script>
+<script>
+(function(){
+  var asset = { name: "", type: "", size: 0, width: 0, height: 0 };
+  var latest = null;
+  var checksBySection = [
+    ["Accessibility", []],
+    ["Asset quality", []],
+    ["Metadata", []],
+    ["Consistency", []],
+    ["Export", []]
+  ];
+  var useSpecs = {
+    hero: { label: "Website hero", minW: 1600, minH: 900, formats: ["webp","jpeg","avif"], maxSize: 800000 },
+    social: { label: "Social post", minW: 1080, minH: 1080, formats: ["png","jpeg","webp"], maxSize: 1200000 },
+    og: { label: "Open Graph image", minW: 1200, minH: 630, ratio: 1200/630, formats: ["png","jpeg","webp"], maxSize: 900000 },
+    icon: { label: "Icon or logo", minW: 512, minH: 512, square: true, formats: ["svg","png"], maxSize: 400000 },
+    ui: { label: "UI screenshot", minW: 1280, minH: 720, formats: ["png","webp"], maxSize: 1500000 },
+    print: { label: "Print handoff", minW: 2400, minH: 2400, formats: ["pdf","png"], maxSize: 8000000 }
+  };
+
+  function el(id){ return document.getElementById(id); }
+  function clean(value){ return String(value || "").trim(); }
+  function escapeHtml(value){ return String(value || "").replace(/[&<>"']/g,function(ch){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]; }); }
+  function bytes(value){
+    if (!value) return "0 B";
+    if (value < 1024) return value + " B";
+    if (value < 1048576) return (value / 1024).toFixed(1) + " KB";
+    return (value / 1048576).toFixed(2) + " MB";
+  }
+  function hexToRgb(hex){
+    var match = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || "");
+    return match ? { r: parseInt(match[1],16), g: parseInt(match[2],16), b: parseInt(match[3],16) } : null;
+  }
+  function luminance(rgb){
+    return [rgb.r, rgb.g, rgb.b].map(function(v){
+      v = v / 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    }).reduce(function(sum, value, index){ return sum + value * [0.2126, 0.7152, 0.0722][index]; }, 0);
+  }
+  function contrastRatio(foreground, background){
+    var fg = hexToRgb(foreground);
+    var bg = hexToRgb(background);
+    if (!fg || !bg) return 0;
+    var l1 = luminance(fg);
+    var l2 = luminance(bg);
+    var light = Math.max(l1, l2);
+    var dark = Math.min(l1, l2);
+    return (light + 0.05) / (dark + 0.05);
+  }
+  function add(sectionName, status, title, detail, fix){
+    var target = checksBySection.find(function(pair){ return pair[0] === sectionName; });
+    target[1].push({ status: status, title: title, detail: detail, fix: fix || "" });
+  }
+  function resetSections(){
+    checksBySection = checksBySection.map(function(pair){ return [pair[0], []]; });
+  }
+  function collectInputs(){
+    return {
+      title: clean(el("assetTitle").value),
+      alt: clean(el("altText").value),
+      origin: clean(el("origin").value),
+      license: clean(el("license").value),
+      intendedUse: clean(el("intendedUse").value),
+      foreground: clean(el("foreground").value),
+      background: clean(el("background").value),
+      accent: clean(el("accent").value),
+      exportFormat: clean(el("exportFormat").value),
+      fonts: clean(el("fonts").value).split(",").map(clean).filter(Boolean),
+      spacing: clean(el("spacing").value).split(",").map(clean).filter(Boolean)
+    };
+  }
+  function checkAccessibility(input){
+    var ratio = contrastRatio(input.foreground, input.background);
+    if (ratio >= 4.5) add("Accessibility", "pass", "Text contrast", "Ratio " + ratio.toFixed(2) + ":1 meets WCAG AA for normal text.", "");
+    else if (ratio >= 3) add("Accessibility", "warn", "Text contrast", "Ratio " + ratio.toFixed(2) + ":1 is acceptable only for large text.", "Darken the text color, lighten the background, or reserve this pairing for large type.");
+    else add("Accessibility", "fail", "Text contrast", "Ratio " + ratio.toFixed(2) + ":1 fails WCAG contrast guidance.", "Choose a foreground/background pair of at least 4.5:1 for body text.");
+    var accentRatio = contrastRatio(input.accent, input.background);
+    if (accentRatio >= 3) add("Accessibility", "pass", "Accent contrast", "Accent ratio " + accentRatio.toFixed(2) + ":1 is usable for controls and graphic indicators.", "");
+    else add("Accessibility", "warn", "Accent contrast", "Accent ratio " + accentRatio.toFixed(2) + ":1 may disappear against the background.", "Use a darker/lighter accent for borders, focus states, and non-text UI marks.");
+    if (input.alt.length >= 20) add("Accessibility", "pass", "Description coverage", "Alt/description has enough context for review and reuse.", "");
+    else add("Accessibility", "fail", "Description coverage", "Alt/description is missing or too short.", "Write a concrete description of the visible subject, mood, and intended purpose.");
+  }
+  function checkAsset(input){
+    var spec = useSpecs[input.intendedUse] || useSpecs.hero;
+    if (!asset.name) {
+      add("Asset quality", "warn", "Uploaded asset", "No file was uploaded, so dimensions and file size cannot be verified.", "Upload the final image, SVG, or video before handoff.");
+      return;
+    }
+    add("Asset quality", "pass", "File detected", asset.name + " (" + (asset.type || "unknown type") + ", " + bytes(asset.size) + ").", "");
+    if (asset.width && asset.height) {
+      var sizeOk = asset.width >= spec.minW && asset.height >= spec.minH;
+      var status = sizeOk ? "pass" : "fail";
+      add("Asset quality", status, "Dimensions", asset.width + "x" + asset.height + " checked for " + spec.label + ".", sizeOk ? "" : "Export at least " + spec.minW + "x" + spec.minH + " for this use.");
+      if (spec.square) {
+        var squareOk = Math.abs(asset.width - asset.height) <= 2;
+        add("Asset quality", squareOk ? "pass" : "warn", "Aspect ratio", squareOk ? "Asset is square." : "Asset is not square.", squareOk ? "" : "Use a square canvas for icons and logos.");
+      }
+      if (spec.ratio) {
+        var ratio = asset.width / asset.height;
+        var near = Math.abs(ratio - spec.ratio) < 0.04;
+        add("Asset quality", near ? "pass" : "warn", "Open Graph ratio", near ? "Asset is close to 1200x630 ratio." : "Asset ratio differs from 1200x630.", near ? "" : "Crop to 1.91:1 for consistent link previews.");
+      }
+    } else {
+      add("Asset quality", "warn", "Dimensions", "Dimensions could not be read from this file.", "Confirm pixel size in the source app before export.");
+    }
+    if (asset.size > spec.maxSize * 2) add("Asset quality", "fail", "File size", bytes(asset.size) + " is too heavy for " + spec.label + ".", "Compress or resize before publishing.");
+    else if (asset.size > spec.maxSize) add("Asset quality", "warn", "File size", bytes(asset.size) + " is above the recommended target.", "Try a WebP/JPEG export at a lower quality setting.");
+    else add("Asset quality", "pass", "File size", bytes(asset.size) + " is within the recommended target.", "");
+  }
+  function checkMetadata(input){
+    add("Metadata", input.title.length >= 4 ? "pass" : "warn", "Title", input.title.length >= 4 ? "Title is specific enough for project lists." : "Title is missing or vague.", "Use a short descriptive asset name.");
+    add("Metadata", input.origin ? "pass" : "fail", "Origin", input.origin ? "Origin is disclosed as " + input.origin + "." : "Origin is not disclosed.", "Choose photograph, AI generated, vector art, 3D render, mixed, or another known source.");
+    add("Metadata", input.license ? "pass" : "fail", "License", input.license ? "License is recorded as " + input.license + "." : "License is unknown.", "Record rights before using the asset in client or public work.");
+    if (input.origin === "ai-generated" && input.alt.length < 40) {
+      add("Metadata", "warn", "AI disclosure detail", "AI origin is marked, but the description is thin.", "Add tool/model/source detail in the asset notes when available.");
+    }
+  }
+  function checkConsistency(input){
+    if (input.fonts.length <= 2 && input.fonts.length > 0) add("Consistency", "pass", "Font count", input.fonts.length + " font family/families listed.", "");
+    else if (input.fonts.length === 3) add("Consistency", "warn", "Font count", "Three font families can work but need clear roles.", "Assign one role per font or reduce the set.");
+    else add("Consistency", "fail", "Font count", input.fonts.length ? input.fonts.length + " font families listed." : "No fonts listed.", "Keep handoff font families to one or two unless the design system requires more.");
+    var numbers = input.spacing.map(function(v){ return Number(v); });
+    var valid = numbers.length >= 4 && numbers.every(function(n){ return Number.isFinite(n) && n > 0; });
+    var increasing = valid && numbers.every(function(n, i){ return i === 0 || n > numbers[i - 1]; });
+    if (valid && increasing && numbers.length <= 8) add("Consistency", "pass", "Spacing scale", "Spacing scale is numeric, ordered, and compact.", "");
+    else if (valid && increasing) add("Consistency", "warn", "Spacing scale", "Spacing scale is valid but broad.", "Reduce rarely used steps before handoff.");
+    else add("Consistency", "fail", "Spacing scale", "Spacing scale is missing, unordered, or non-numeric.", "Use ordered numeric values such as 4, 8, 12, 16, 24, 32.");
+    var uniqueColors = [input.foreground, input.background, input.accent].filter(Boolean).filter(function(v, i, arr){ return arr.indexOf(v) === i; });
+    add("Consistency", uniqueColors.length >= 3 ? "pass" : "warn", "Core colors", uniqueColors.length + " distinct core colors supplied.", "Keep foreground, background, and accent tokens distinct enough for implementation.");
+  }
+  function checkExport(input){
+    var spec = useSpecs[input.intendedUse] || useSpecs.hero;
+    var formatOk = spec.formats.indexOf(input.exportFormat) !== -1;
+    add("Export", formatOk ? "pass" : "warn", "Format fit", input.exportFormat.toUpperCase() + " checked for " + spec.label + ".", formatOk ? "" : "Recommended formats: " + spec.formats.map(function(f){ return f.toUpperCase(); }).join(", ") + ".");
+    if (input.intendedUse === "icon" && input.exportFormat === "jpeg") {
+      add("Export", "fail", "Transparency support", "JPEG cannot preserve transparent icon backgrounds.", "Use SVG or PNG for icons and logos.");
+    } else {
+      add("Export", "pass", "Export handoff", "Report includes format, size, metadata, and remediation notes.", "");
+    }
+  }
+  function scoreChecks(items){
+    var total = items.length || 1;
+    var pass = items.filter(function(i){ return i.status === "pass"; }).length;
+    var warn = items.filter(function(i){ return i.status === "warn"; }).length;
+    var fail = items.filter(function(i){ return i.status === "fail"; }).length;
+    var score = Math.max(0, Math.round(((pass + warn * 0.55) / total) * 100 - fail * 4));
+    return { pass: pass, warn: warn, fail: fail, score: score };
+  }
+  function buildReport(input, stats){
+    var lines = [
+      "Design Readiness Report",
+      "Generated: " + new Date().toISOString(),
+      "Score: " + stats.score + "/100",
+      "Asset: " + (asset.name || input.title || "Not uploaded"),
+      "Use: " + (useSpecs[input.intendedUse] || useSpecs.hero).label,
+      "Export: " + input.exportFormat.toUpperCase(),
+      "Colors: text " + input.foreground + ", background " + input.background + ", accent " + input.accent,
+      ""
+    ];
+    checksBySection.forEach(function(pair){
+      lines.push(pair[0]);
+      pair[1].forEach(function(item){
+        lines.push("- " + item.status.toUpperCase() + ": " + item.title + " - " + item.detail + (item.fix ? " Fix: " + item.fix : ""));
+      });
+      lines.push("");
+    });
+    return lines.join("\n");
+  }
+  function render(input, stats, report){
+    el("score").textContent = stats.score;
+    el("scoreLabel").textContent = stats.fail ? "Needs fixes" : (stats.warn ? "Ready with notes" : "Ready");
+    el("passCount").textContent = stats.pass;
+    el("warnCount").textContent = stats.warn;
+    el("failCount").textContent = stats.fail;
+    el("results").innerHTML = checksBySection.map(function(pair){
+      return '<section class="check-section"><h3><span>' + escapeHtml(pair[0]) + '</span><span>' + pair[1].length + '</span></h3><div class="check-list">' +
+        pair[1].map(function(item){
+          return '<div class="check-row"><span class="status ' + item.status + '">' + item.status.toUpperCase() + '</span><div><strong>' + escapeHtml(item.title) + '</strong><p>' + escapeHtml(item.detail + (item.fix ? " " + item.fix : "")) + '</p></div></div>';
+        }).join("") + '</div></section>';
+    }).join("");
+    el("reportText").textContent = report;
+    latest = { input: input, stats: stats, report: report };
+    localStorage.setItem("fds.readiness.latest", JSON.stringify(latest));
+    if (location.hash !== "#report") history.replaceState(null, "", location.pathname + "#report");
+  }
+  function runChecks(){
+    var input = collectInputs();
+    resetSections();
+    checkAccessibility(input);
+    checkAsset(input);
+    checkMetadata(input);
+    checkConsistency(input);
+    checkExport(input);
+    var all = checksBySection.reduce(function(list, pair){ return list.concat(pair[1]); }, []);
+    var stats = scoreChecks(all);
+    var report = buildReport(input, stats);
+    render(input, stats, report);
+    return latest;
+  }
+  function showToast(message){
+    var toast = el("toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+    setTimeout(function(){ toast.classList.remove("show"); }, 1800);
+  }
+  function copyReport(){
+    var report = latest ? latest.report : el("reportText").textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(report).then(function(){ showToast("Report copied"); }).catch(function(){ fallbackCopy(report); });
+    } else {
+      fallbackCopy(report);
+    }
+  }
+  function fallbackCopy(report) {
+    var area = document.createElement("textarea");
+    area.value = report;
+    area.setAttribute("readonly", "readonly");
+    area.style.cssText = "position:fixed;left:-9999px;top:0";
+    document.body.appendChild(area);
+    area.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (err) {}
+    area.remove();
+    showToast(ok ? "Report copied" : "Select report text to copy");
+  }
+  function downloadReport(){
+    if (!latest) runChecks();
+    var blob = new Blob([latest.report], { type: "text/plain" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "fds-design-readiness-report.txt";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+  function saveReport(){
+    if (!latest) runChecks();
+    if (!window.FDSProjects || !window.FDSProjects.saveExport) {
+      showToast("Project save is unavailable");
+      return;
+    }
+    var input = latest.input;
+    window.FDSProjects.saveExport({
+      label: (input.title || "Design") + " readiness report",
+      type: "readiness-report",
+      source: "fds-readiness",
+      url: location.href,
+      format: input.exportFormat,
+      score: latest.stats.score,
+      status: latest.stats.fail ? "needs-fixes" : (latest.stats.warn ? "ready-with-notes" : "ready"),
+      summary: latest.stats.pass + " pass, " + latest.stats.warn + " warn, " + latest.stats.fail + " fail",
+      report: latest.report
+    }, { defaultProjectName: "Readiness Reports" });
+  }
+  function parseSvgDimensions(text){
+    var width = Number((text.match(/\bwidth=["']?([\d.]+)/i) || [])[1]);
+    var height = Number((text.match(/\bheight=["']?([\d.]+)/i) || [])[1]);
+    var viewBox = text.match(/\bviewBox=["']([\d.\s-]+)["']/i);
+    if ((!width || !height) && viewBox) {
+      var parts = viewBox[1].trim().split(/\s+/).map(Number);
+      width = width || parts[2] || 0;
+      height = height || parts[3] || 0;
+    }
+    asset.width = width || 0;
+    asset.height = height || 0;
+    updateAssetMeta();
+  }
+  function updateAssetMeta(){
+    var details = asset.name ? [asset.name, asset.type || "unknown type", bytes(asset.size)] : ["No file selected."];
+    if (asset.width && asset.height) details.push(asset.width + "x" + asset.height);
+    el("assetMeta").textContent = details.join(" | ");
+  }
+  function loadFile(file){
+    if (!file) {
+      asset = { name: "", type: "", size: 0, width: 0, height: 0 };
+      updateAssetMeta();
+      return;
+    }
+    asset = { name: file.name, type: file.type, size: file.size, width: 0, height: 0 };
+    updateAssetMeta();
+    if (file.type === "image/svg+xml" || /\.svg$/i.test(file.name)) {
+      file.text().then(parseSvgDimensions).catch(updateAssetMeta);
+      return;
+    }
+    if (/^image\//.test(file.type)) {
+      var img = new Image();
+      img.onload = function(){
+        asset.width = img.naturalWidth;
+        asset.height = img.naturalHeight;
+        URL.revokeObjectURL(img.src);
+        updateAssetMeta();
+      };
+      img.src = URL.createObjectURL(file);
+    }
+  }
+  el("assetFile").addEventListener("change", function(event){ loadFile(event.target.files[0]); });
+  el("runBtn").addEventListener("click", runChecks);
+  el("copyBtn").addEventListener("click", copyReport);
+  el("downloadBtn").addEventListener("click", downloadReport);
+  el("saveBtn").addEventListener("click", saveReport);
+  if (location.hash === "#report") {
+    try {
+      latest = JSON.parse(localStorage.getItem("fds.readiness.latest") || "null");
+      if (latest && latest.report) {
+        el("reportText").textContent = latest.report;
+        el("score").textContent = latest.stats.score;
+        el("scoreLabel").textContent = latest.stats.fail ? "Needs fixes" : (latest.stats.warn ? "Ready with notes" : "Ready");
+        el("passCount").textContent = latest.stats.pass;
+        el("warnCount").textContent = latest.stats.warn;
+        el("failCount").textContent = latest.stats.fail;
+      }
+    } catch (err) {}
+  }
+  window.FDSReadiness = { contrastRatio: contrastRatio, runChecks: runChecks };
+  runChecks();
+})();
+</script>
+</body>
+</html>

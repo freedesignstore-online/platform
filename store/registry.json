@@ -388,6 +388,15 @@
       "section": "components"
     },
     {
+      "id": "design-readiness",
+      "name": "Design Readiness Checker",
+      "description": "Check contrast, image dimensions, file size, metadata, consistency, and export fit before handoff.",
+      "icon": "\u2713",
+      "iconBg": "#14b8a6",
+      "category": "uiux",
+      "section": "readiness"
+    },
+    {
       "id": "photo-editor",
       "name": "Photo Editor",
       "description": "Mini-Photoshop. 15 tools, layers, adjustments, clone stamp, blur, gradient. Undo/redo, keyboard shortcuts.",
@@ -423,6 +432,14 @@
       "emoji": "\ud83e\uddff",
       "description": "Generate consistent SVG icon sets from a theme with a free AI model. Recolor, copy, download icons or a sprite.",
       "category": "images"
+    },
+    {
+      "id": "design-readiness",
+      "name": "Design Readiness Checker",
+      "url": "/readiness/",
+      "emoji": "\u2713",
+      "description": "Check contrast, image dimensions, file size, metadata, consistency, and export fit before handoff.",
+      "category": "uiux"
     }
   ]
 }

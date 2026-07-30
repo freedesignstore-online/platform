@@ -1,6 +1,6 @@
 # FreeDesignStore
 
-**[freedesignstore.online](https://freedesignstore.online)** — a live CC0 design asset catalog, guided design workflows, and 47 browser-based design tools. No signup for tools, no watermarks, no install.
+**[freedesignstore.online](https://freedesignstore.online)** — a live CC0 design asset catalog, guided design workflows, and 48 browser-based design tools. No signup for tools, no watermarks, no install.
 
 Part of [Open Frontier](https://openfrontier.pages.dev).
 
@@ -9,10 +9,11 @@ Part of [Open Frontier](https://openfrontier.pages.dev).
 | URL | What |
 |-----|------|
 | `/` | Homepage — hero, asset carousel with infinite scroll, workflow shortcuts, tool grid |
-| `/tools/` | All 47 tools with search and category filters |
+| `/tools/` | All 48 tools with search and category filters |
 | `/workflows/` | Guided design workflows that connect existing FDS tools by job |
 | `/workflows/<slug>/` | Workflow detail pages with inputs, ordered steps, tool links, exports, and local checklist state |
 | `/projects/` | Local-first project workspace for notes, colors, fonts, assets, exports, and workflow progress |
+| `/readiness/` | Design readiness checker for contrast, dimensions, metadata, consistency, exports, and local reports |
 | `/images/stock-photos/` | Asset library — curated + community catalog (photos, illustrations, renders, AI art, video), Unsplash search, trust metadata modal |
 | `/photo/<id>` | Individual asset detail page with OG tags, share buttons, project save, and trust metadata |
 | `/skills/` | MCP playbooks + capability manifest |
@@ -35,9 +36,9 @@ Each workflow renders from `store/workflows/workflow.js` and includes required i
 
 ## Projects
 
-`/projects/` is a local-first workspace backed by browser storage. Users can create, rename, delete, import, and export projects without an account. A project stores notes, colors, fonts, assets/links, export metadata, saved workflow progress from the workflow detail pages, and saved assets from the stock library, asset detail pages, and generated SVG panel.
+`/projects/` is a local-first workspace backed by browser storage. Users can create, rename, delete, import, and export projects without an account. A project stores notes, colors, fonts, assets/links, export metadata, saved workflow progress from the workflow detail pages, saved assets from the stock library, asset detail pages, and generated SVG panel, plus readiness reports from `/readiness/`.
 
-## Tools (47)
+## Tools (48)
 
 ### Brand (16)
 Logo Maker, Color Palette, Typography Pairing, Brand Kit Builder, Business Card Designer, Favicon Generator, Smart Color from Description, Smart Logo Concepts, Design Token Generator, QR Code Designer, Contrast Checker, Tailwind Theme Builder, CSS Animation Studio, CSS Effects Generator, Micro-Interaction Library, Color Blindness Simulator
@@ -48,8 +49,8 @@ AI Icon Set Generator, Image Resizer, SVG Icon Library, Gradient Maker, Backgrou
 ### Templates (6)
 Social Media Templates, OG Image Maker, Slide Deck Builder, Pitch Deck Generator, Device Mockup Generator, Wireframe Builder
 
-### UI/UX (9)
-UI Component Library, CSS Layout Builder, Form Builder, Landing Page Builder, Dashboard Builder, Moodboard Builder, User Flow Builder, Sitemap Generator, Design Handoff Sheet
+### UI/UX (10)
+UI Component Library, CSS Layout Builder, Form Builder, Landing Page Builder, Dashboard Builder, Moodboard Builder, User Flow Builder, Sitemap Generator, Design Handoff Sheet, Design Readiness Checker
 
 ## Asset catalog
 
@@ -70,10 +71,11 @@ store/                  Static site (Cloudflare Pages)
   tools/                Tools directory page
   workflows/            Guided workflow hub + detail routes
   projects/             Local-first project workspace
+  readiness/            Design readiness checker + local reports
   brand/*/              16 brand tools
   images/*/             16 image tools + stock-photos library
   templates/*/          6 template tools
-  components/*/         9 UI/UX tools
+  components/*/         9 UI/UX component/workflow tools
   skills/               MCP playbooks (6)
   assets/stock/         manifest.json (images live in R2)
   console/              Creator portal

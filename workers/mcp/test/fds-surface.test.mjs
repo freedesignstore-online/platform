@@ -163,6 +163,45 @@ test('home and public library make assets a first-class FDS surface', async () =
   assert.doesNotMatch(libraryHtml, /HOSTED_PHOTOS/);
 });
 
+test('design readiness checker is discoverable and saves local reports', async () => {
+  const homeHtml = await readRepo('store/index.html');
+  const toolsHtml = await readRepo('store/tools/index.html');
+  const sitemap = await readRepo('store/sitemap.xml');
+  const registry = JSON.parse(await readRepo('store/registry.json'));
+  const readinessHtml = await readRepo('store/readiness/index.html');
+  const projectSave = await readRepo('store/projects/project-save.js');
+  const readme = await readRepo('README.md');
+  const roadmap = await readRepo('ROADMAP.md');
+
+  for (const html of [homeHtml, toolsHtml]) {
+    assert.match(html, /Design Readiness Checker/);
+    assert.match(html, /href="\/readiness\/"/);
+    assert.match(html, /All \(48\)/);
+    assert.match(html, /UI\/UX \(10\)/);
+  }
+  assert.match(sitemap, /https:\/\/freedesignstore\.online\/readiness\//);
+  assert.ok(registry.robots.some((item) => item.id === 'design-readiness' && item.category === 'uiux'));
+  assert.ok(registry.tools.some((item) => item.id === 'design-readiness' && item.url === '/readiness/'));
+
+  for (const expected of [
+    'function contrastRatio',
+    'function runChecks',
+    'function copyReport',
+    'function saveReport',
+    'WCAG',
+    'image dimensions',
+    'fds.readiness.latest',
+    'FDSProjects.saveExport',
+  ]) {
+    assert.match(readinessHtml, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
+  assert.match(projectSave, /function saveExport/);
+  assert.match(projectSave, /project\.exports\.unshift/);
+  assert.match(readme, /Tools \(48\)/);
+  assert.match(readme, /Design Readiness Checker/);
+  assert.match(roadmap, /\[#7 Design readiness checker\].*\| Complete \|/);
+});
+
 function catalogItem(overrides) {
   return {
     id: 'x', title: 'Untitled', category: 'Lifestyle', assetType: 'photo',

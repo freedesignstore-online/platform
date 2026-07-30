@@ -1,6 +1,6 @@
 # FreeDesignStore Platform
 
-Unified R2 catalog (curated + community assets: photos, illustrations, renders, AI art, video), guided design workflows, local-first projects, 47 browser tools, contributor identity with public profiles, publishing via MCP.
+Unified R2 catalog (curated + community assets: photos, illustrations, renders, AI art, video), guided design workflows, local-first projects, 48 browser tools, contributor identity with public profiles, publishing via MCP.
 
 ## MCP-first workflow
 
@@ -55,10 +55,11 @@ store/                  Static site (Cloudflare Pages output)
   tools/                Tools directory page with search + filters
   workflows/            Guided workflow hub + detail routes (local checklist state)
   projects/             Local-first project workspace (localStorage) + shared save helper
+  readiness/            Design readiness checker (contrast, asset quality, metadata, exports, local reports)
   brand/*/              16 brand tools (each a single index.html)
   images/*/             16 image tools + stock-photos library
   templates/*/          6 template tools
-  components/*/         9 UI/UX tools
+  components/*/         9 UI/UX component/workflow tools
   skills/               MCP playbooks (6) + capability manifest
   assets/stock/         manifest.json only — images live in R2 (served via functions/assets/stock/)
   console/              Creator portal (GitHub/Google OAuth sign-in)
@@ -82,6 +83,7 @@ workers/mcp/            MCP server (Cloudflare Worker, 18 tools)
 - Every tool page is a single self-contained `index.html`
 - Workflow detail pages live under `store/workflows/<slug>/` and render shared content from `store/workflows/workflow.js`
 - Projects live under `store/projects/` and use localStorage keys `fds.projects.v1` and `fds.projects.active`
+- Readiness reports from `/readiness/` save into project `exports` through `window.FDSProjects.saveExport`
 - Back link: `<a class="back" href="/tools/">&larr; Tools</a>`
 - Accent: `#ec4899`, fonts: Fraunces (headings) + Manrope (body)
 - Nav order: Tools | Workflows | Projects | Assets | Creators | Skills | Console
