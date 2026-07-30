@@ -13,8 +13,8 @@ Part of [Open Frontier](https://openfrontier.pages.dev).
 | `/workflows/` | Guided design workflows that connect existing FDS tools by job |
 | `/workflows/<slug>/` | Workflow detail pages with inputs, ordered steps, tool links, exports, and local checklist state |
 | `/projects/` | Local-first project workspace for notes, colors, fonts, assets, exports, and workflow progress |
-| `/images/stock-photos/` | Asset library — curated + community catalog (photos, illustrations, renders, AI art, video), Unsplash search |
-| `/photo/<id>` | Individual asset detail page with OG tags + share buttons |
+| `/images/stock-photos/` | Asset library — curated + community catalog (photos, illustrations, renders, AI art, video), Unsplash search, trust metadata modal |
+| `/photo/<id>` | Individual asset detail page with OG tags, share buttons, project save, and trust metadata |
 | `/skills/` | MCP playbooks + capability manifest |
 | `/console/` | Creator portal — sign in, publish assets |
 | `/llms.txt` | AI-readable docs index |
@@ -53,7 +53,7 @@ UI Component Library, CSS Layout Builder, Form Builder, Landing Page Builder, Da
 
 ## Asset catalog
 
-The public asset catalog is backed by Cloudflare R2 + KV and includes curated and community assets across photos, illustrations, renders, AI art, icons, patterns, textures, UI assets, and video. Asset counts are live data; use MCP `catalog_status` for the current total. Each public asset has a unique URL at `/photo/<id>` with OG meta tags for social sharing.
+The public asset catalog is backed by Cloudflare R2 + KV and includes curated and community assets across photos, illustrations, renders, AI art, icons, patterns, textures, UI assets, and video. Asset counts are live data; use MCP `catalog_status` for the current total. Each public asset has a unique URL at `/photo/<id>` with OG meta tags for social sharing and trust metadata: license/use, source/origin, dimensions, file type/size, suggested use, description/alt fallback, palette fallback, and download/export details. Gallery modals and detail pages can copy or download the same metadata as text.
 
 ## MCP
 
@@ -81,7 +81,7 @@ store/                  Static site (Cloudflare Pages)
   llms.txt              AI docs index
 functions/              Pages Functions
   api/stock/            Stock list/random/upload/moderate API
-  photo/[id].js         Photo detail page with OG tags
+  photo/[id].js         Photo detail page with OG tags + trust metadata
 workers/mcp/            MCP server (Cloudflare Worker)
 ```
 

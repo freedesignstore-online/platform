@@ -37,6 +37,7 @@ The MCP worker (`workers/mcp`) shares the same KV/R2 and sets `FDS_ADMIN_LOGINS`
 ## API
 
 - `GET /api/stock/list`: unified public catalog, newest first, server-paged. Filters: `source=hosted|community|all`, `assetType`, `category`, `orientation`, `purpose`, `origin`, `license`, `safe`, `q`. Paging: `limit` (default 60, max 500) + `offset`; the response adds `total`, `nextOffset` (pass it back as `offset` to continue; filtered scans are read-bounded, so a page can be short with `nextOffset` set), and `categories` counts when `facets=1`.
+- Public item responses include trust fields used by the gallery and `/photo/<id>` pages: `license/licenseId`, `origin/originDetail`, `contentType`, `size`, `width/height/duration`, `purpose`, `description/altText`, `palette`, `sourceUrl`, and download URL. When data is missing, the UI renders explicit fallback language instead of omitting the row.
 - `GET /api/stock/random?purpose=profile_background&count=3`: random curated assets (HeartFull integration — response shape is stable).
 - `POST /api/stock/upload`: multipart upload; requires session cookie + `rightsConsent=yes`, `releaseConsent=yes`, `origin`. Optional: `originTool/originModel/originPrompt`, `license`, `purpose`, `safe`, client `width/height/duration`.
 - `GET /api/stock/image/:id`: serve from R2 (supports Range requests for video seeking).

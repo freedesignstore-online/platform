@@ -78,6 +78,7 @@ Any MCP client:
 - Projects: https://freedesignstore.online/projects/ (local-first notes, colors, fonts, assets, exports, workflow progress, and saved stock/generated assets)
 - Asset library: https://freedesignstore.online/images/stock-photos/
   Browse via URL params: ?category=<name>, ?type=<assetType>, ?tag=<tag> (or ?q=<query>), ?origin=<origin>, ?license=<licenseId>, ?source=<hosted|community|unsplash>. #<asset-id> opens the asset detail modal (params and hash combine).
+- Asset trust metadata: gallery modals and /photo/<id> pages expose license/use, source/origin, dimensions, file type/size, suggested use, description/alt fallback, palette fallback, and copy/download metadata text actions.
 - Skills manifest: https://freedesignstore.online/skills/manifest.json
 - MCP discovery: https://freedesignstore.online/.well-known/mcp.json
 - MCP docs: https://freedesignstore.online/skills/

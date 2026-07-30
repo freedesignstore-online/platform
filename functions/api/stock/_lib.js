@@ -135,6 +135,9 @@ export function publicItem(item, origin = "") {
   const imagePath = `/api/stock/image/${item.id}`;
   const imageUrl = origin ? new URL(imagePath, origin).toString() : imagePath;
   const downloadUrl = origin ? new URL(`${imagePath}?download=1`, origin).toString() : `${imagePath}?download=1`;
+  const description =
+    cleanText(item.description || item.altText, "", 280) ||
+    `${cleanText(item.title, "Untitled asset", 120)} is a ${item.assetType || "design"} asset in ${cleanText(item.category, "the catalog", 64)} by ${cleanText(item.author, "FreeDesignStore", 80)}.`;
   return {
     id: item.id,
     source: item.source === "hosted" ? "hosted" : "community",
@@ -150,14 +153,19 @@ export function publicItem(item, origin = "") {
     download: downloadUrl,
     filename: item.filename,
     contentType: item.contentType,
+    size: item.size,
     width: item.width,
     height: item.height,
     orientation: item.height > item.width ? "portrait" : item.width > item.height ? "landscape" : undefined,
     safe: item.safe !== false,
     purpose: item.purpose || [],
+    description,
+    altText: cleanText(item.altText || item.description, description, 280),
+    palette: Array.isArray(item.palette) ? item.palette.filter(Boolean).slice(0, 8) : [],
     origin: item.origin,
     originDetail: item.originDetail,
     licenseId: item.licenseId,
+    sourceUrl: item.sourceUrl,
     duration: item.duration,
     ownerHandle: item.ownerHandle,
     authorUrl: item.ownerHandle ? `/u/${item.ownerHandle}` : undefined,

@@ -193,6 +193,19 @@
   .asset-page .made details { @apply mt-[.4rem]; }
   .asset-page .made summary { @apply cursor-pointer text-accent text-[.72rem] font-bold; }
   .asset-page .made .prompt { @apply text-gray-400 text-[.72rem] mt-[.3rem] leading-normal; }
+  .asset-page .trust-panel { @apply max-w-[1200px] mx-auto px-6 pb-8; }
+  .asset-page .trust-panel > .trust-head,
+  .asset-page .trust-grid { @apply border border-night-line bg-night-panel; }
+  .asset-page .trust-head { @apply rounded-t-xl p-4 flex items-start justify-between gap-4 max-[640px]:flex-col; }
+  .asset-page .trust-head p { @apply text-[.68rem] uppercase tracking-[.08em] text-gray-400 font-bold mb-1; }
+  .asset-page .trust-head h2 { @apply font-display text-[1.25rem] text-neutral-100; }
+  .asset-page .trust-head span { @apply text-[.7rem] text-emerald-500 border border-emerald-500/40 rounded-full py-1 px-2.5 font-bold; }
+  .asset-page .trust-grid { @apply border-t-0 rounded-b-xl p-4 grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3; }
+  .asset-page .trust-item { @apply border-t border-night-line pt-3; }
+  .asset-page .trust-item strong { @apply block text-[.68rem] uppercase tracking-[.06em] text-gray-400 mb-1; }
+  .asset-page .trust-item p { @apply text-[.78rem] text-neutral-100 leading-normal; }
+  .asset-page .trust-palette { @apply flex gap-1.5 flex-wrap; }
+  .asset-page .trust-palette span { @apply w-[22px] h-[22px] rounded-full border border-white/20; }
 
   /* --- creator profile page (/u/:handle, light SSR) --- */
   .profile-avatar { @apply w-[84px] h-[84px] rounded-full bg-blush object-cover border-2 border-hairline; }

@@ -58,6 +58,9 @@ interface CatalogItem {
   height?: number;
   duration?: number;
   purpose?: string[];
+  description?: string;
+  altText?: string;
+  palette?: string[];
   safe?: boolean;
   source?: 'community' | 'mcp';
   sourceUrl?: string;
@@ -379,6 +382,9 @@ function mcpDiscovery(env: Env, requestUrl: URL) {
 
 function publicItem(env: Env, item: CatalogItem) {
   const base = publicBase(env);
+  const description =
+    cleanText(item.description || item.altText, '', 280) ||
+    `${cleanText(item.title, 'Untitled asset', 120)} is a ${item.assetType || 'design'} asset in ${cleanText(item.category, 'the catalog', 64)} by ${cleanText(item.author, 'FreeDesignStore', 80)}.`;
   return {
     id: item.id,
     source: item.source || 'community',
@@ -392,7 +398,11 @@ function publicItem(env: Env, item: CatalogItem) {
     originDetail: item.originDetail,
     tags: item.tags || [],
     purpose: item.purpose || [],
+    description,
+    altText: cleanText(item.altText || item.description, description, 280),
+    palette: Array.isArray(item.palette) ? item.palette.filter(Boolean).slice(0, 8) : [],
     safe: item.safe !== false,
+    size: item.size,
     width: item.width,
     height: item.height,
     duration: item.duration,
@@ -400,6 +410,7 @@ function publicItem(env: Env, item: CatalogItem) {
     authorUrl: item.ownerHandle ? `${base}/u/${item.ownerHandle}` : undefined,
     url: `${base}/api/stock/image/${item.id}`,
     download: `${base}/api/stock/image/${item.id}?download=1`,
+    sourceUrl: item.sourceUrl,
     createdAt: item.createdAt,
     status: item.status,
   };

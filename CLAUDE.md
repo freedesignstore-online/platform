@@ -69,12 +69,12 @@ store/                  Static site (Cloudflare Pages output)
   favicon.svg           Site icon
 functions/              Cloudflare Pages Functions
   api/stock/            list.js, random.js, upload, profile, creators, moderate, unsplash (unified KV catalog)
-  photo/[id].js         Photo detail page (OG tags, share buttons, download)
+  photo/[id].js         Photo detail page (OG tags, share buttons, download, trust metadata)
 workers/mcp/            MCP server (Cloudflare Worker, 18 tools)
   src/index.ts          Main server (agents/mcp, McpServer, Zod)
   src/oauth-provider.ts OAuth 2.1 (GitHub/Google)
   src/session.ts        Session verification
-  test/                 Regression tests (11 tests)
+  test/                 Regression tests (37 tests)
 ```
 
 ## Conventions
@@ -88,6 +88,7 @@ workers/mcp/            MCP server (Cloudflare Worker, 18 tools)
 - Sticky header: `position:sticky;top:0;backdrop-filter:blur(14px)`
 - Curated AI images: Pollinations generates SQUARE-native only (768x768 anon cap) and stretches non-square requests — generate square, center-crop to 16:9, upscale to 1672x941 with sips. Record prompts in `store/assets/stock/manifest.json`.
 - Image categories: Lifestyle, Nature, People, Travel, Workspace, Backgrounds, etc.
+- Asset pages and gallery modals must show trust metadata with explicit fallbacks: license/use, source/origin, dimensions, file type/size, suggested use, description/alt text, palette, and download/source info.
 
 ## Unified catalog & contributors
 

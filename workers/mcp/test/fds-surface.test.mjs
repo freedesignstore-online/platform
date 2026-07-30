@@ -214,6 +214,11 @@ test('public stock list API serves the unified KV catalog with filters', async (
   assert.equal(hostedBody.items.length, 3);
   assert.ok(hostedBody.items.every((item) => item.source === 'hosted'));
   assert.ok(hostedBody.items.every((item) => item.url.startsWith('https://freedesignstore.online/api/stock/image/')));
+  assert.equal(hostedBody.items[0].size, 1000);
+  assert.equal(hostedBody.items[0].width, 1672);
+  assert.equal(hostedBody.items[0].height, 941);
+  assert.deepEqual(hostedBody.items[0].purpose, ['profile_background']);
+  assert.match(hostedBody.items[0].description, /asset/);
 
   const community = await onRequestGet({
     request: new Request('https://freedesignstore.online/api/stock/list?source=community'),
@@ -719,16 +724,26 @@ test('photo page and gallery disclose origin', async () => {
   assert.match(photoPage, /Origin not disclosed/);
   assert.match(photoPage, /Generation prompt/);
   assert.match(photoPage, /ImageObject/);
+  assert.match(photoPage, /Trust metadata/);
+  assert.match(photoPage, /License and use/);
+  assert.match(photoPage, /Description \/ alt text/);
+  assert.match(photoPage, /Copy info/);
+  assert.match(photoPage, /Download info/);
 
   const gallery = await readRepo('store/images/stock-photos/index.html');
   assert.match(gallery, /ORIGIN_FILTERS/);
   assert.match(gallery, /LICENSE_FILTERS/);
   assert.match(gallery, /uploadOrigin/);
+  assert.match(gallery, /metadataRows/);
+  assert.match(gallery, /assetMetadataText/);
+  assert.match(gallery, /Download Info/);
   assert.doesNotMatch(gallery, /HOSTED_PHOTOS/);
 
   const mcpSource = await readRepo('workers/mcp/src/index.ts');
   assert.match(mcpSource, /'update_asset'/);
   assert.match(mcpSource, /origin_tool/);
+  assert.match(mcpSource, /description/);
+  assert.match(mcpSource, /palette/);
 });
 
 test('catalog is browsable by tags and categories via deep links', async () => {

@@ -190,6 +190,14 @@ const LICENSE_FILTERS=[
   {id:'attribution',label:'Attribution'}
 ];
 const ORIGIN_BADGES={'photograph':'Photo','ai-generated':'AI','3d-render':'3D','digital-illustration':'Illustration','vector-art':'Vector','scan':'Scan','mixed':'Mixed'};
+const ORIGIN_LABELS={'photograph':'Photograph','ai-generated':'AI Generated','3d-render':'3D Render','digital-illustration':'Digital Illustration','vector-art':'Vector Art','scan':'Scan','mixed':'Mixed Media'};
+const ASSET_TYPE_LABELS={'photo':'Photo','illustration':'Illustration','vector':'Vector','icon':'Icon','pattern':'Pattern','texture':'Texture','background':'Background','ui':'UI asset','mockup':'Mockup','template':'Template','3d-render':'3D render','video':'Video','animation':'Animation'};
+const PURPOSE_LABELS={'profile_background':'Profile background','hero_image':'Hero image','thumbnail':'Thumbnail','wallpaper':'Wallpaper'};
+const LICENSE_NOTES={
+  cc0:'Public domain dedication. Use for personal or commercial work without permission or attribution.',
+  'fds-free':'Free for personal and commercial work. Attribution is appreciated but not required.',
+  attribution:'Free for personal and commercial work with creator credit.'
+};
 // Designer-practical categories lead; Art (largest but least "designer") sits near the end.
 const CATEGORIES=['Backgrounds','Textures','Patterns','Abstract','Nature','Food','Architecture','Travel','Workspace','People','Animals','Lifestyle','Business','Technology','Marketing','Social','Icons','Illustrations','UI','Mockups','Characters','Art','Community','Unsplash'];
 let activeSource='all';
@@ -217,6 +225,101 @@ const $=id=>document.getElementById(id);
 
 function escapeHtml(value){
   return String(value||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+function readableBytes(bytes){
+  const n=Number(bytes||0);
+  if(!n) return 'File size not supplied';
+  if(n>=1024*1024) return (n/(1024*1024)).toFixed(n>=10*1024*1024?0:1)+' MB';
+  if(n>=1024) return Math.round(n/1024)+' KB';
+  return n+' B';
+}
+
+function dimensionsText(asset){
+  if(asset.width&&asset.height){
+    const base=`${Math.round(asset.width)} x ${Math.round(asset.height)} px`;
+    return asset.duration?`${base} · ${Math.round(asset.duration)}s`:base;
+  }
+  return asset.duration?`${Math.round(asset.duration)}s · dimensions not supplied`:'Dimensions not supplied';
+}
+
+function licenseText(asset){
+  if(asset.source==='unsplash') return 'Unsplash License — open on Unsplash for source terms and download.';
+  const note=LICENSE_NOTES[asset.licenseId]||'Usage terms are listed on the asset page.';
+  return `${asset.license||'License not supplied'} — ${note}`;
+}
+
+function originText(asset){
+  if(asset.source==='unsplash') return 'External source: Unsplash. FDS links off and does not mirror the original.';
+  const label=ORIGIN_LABELS[asset.origin]||asset.origin;
+  if(!label) return 'Origin not disclosed';
+  const detail=asset.originDetail||{};
+  return `${label}${detail.tool?' · '+detail.tool:''}${detail.model?' ('+detail.model+')':''}`;
+}
+
+function suggestedUses(asset){
+  if(Array.isArray(asset.purpose)&&asset.purpose.length){
+    return asset.purpose.map(p=>PURPOSE_LABELS[p]||p).join(', ');
+  }
+  const type=asset.assetType||'asset';
+  if(['photo','background','3d-render'].includes(type)) return 'Hero sections, campaign visuals, social posts';
+  if(['pattern','texture'].includes(type)) return 'Background fills, brand systems, packaging, UI surfaces';
+  if(['icon','vector','illustration'].includes(type)) return 'Interfaces, landing pages, decks, brand collateral';
+  if(['video','animation'].includes(type)) return 'Motion backgrounds, social clips, presentation inserts';
+  if(['ui','template','mockup'].includes(type)) return 'Product previews, UI kits, client presentations';
+  return 'Brand assets, campaign layouts, presentation visuals';
+}
+
+function descriptionText(asset){
+  return asset.description||asset.altText||`${asset.title||'Untitled asset'} is a ${ASSET_TYPE_LABELS[asset.assetType]||asset.assetType||'design asset'} in ${asset.category||'the catalog'} by ${asset.author||'FreeDesignStore'}.`;
+}
+
+function paletteValues(asset){
+  const values=Array.isArray(asset.palette)?asset.palette.slice(0,8):[];
+  if(asset.color) values.push(asset.color);
+  return values.filter(v=>/^#[0-9a-f]{3,8}$/i.test(String(v||'')));
+}
+
+function paletteHtml(asset){
+  const values=paletteValues(asset);
+  if(!values.length) return 'Palette not supplied';
+  return `<span style="display:flex;gap:6px;flex-wrap:wrap">${values.map(color=>`<span title="${escapeHtml(color)}" style="width:22px;height:22px;border-radius:999px;border:1px solid rgba(148,163,184,.45);background:${escapeHtml(color)}"></span>`).join('')}</span>`;
+}
+
+function metadataRows(asset){
+  return [
+    ['License and use',licenseText(asset)],
+    ['Source / origin',originText(asset)],
+    ['Dimensions',dimensionsText(asset)],
+    ['File type',`${asset.contentType||'File type not supplied'} · ${readableBytes(asset.size)}`],
+    ['Suggested use',suggestedUses(asset)],
+    ['Description / alt text',descriptionText(asset)],
+    ['Color palette',paletteHtml(asset)]
+  ];
+}
+
+function assetMetadataText(asset){
+  const pageUrl=asset.source==='hosted'||asset.source==='community'
+    ? location.origin+'/photo/'+encodeURIComponent(asset.id)
+    : (asset.photoUrl||asset.creditUrl||asset.url);
+  const download=asset.source==='unsplash'?(asset.photoUrl||asset.creditUrl||asset.url):(asset.download||asset.url);
+  return [
+    `Asset: ${asset.title||'Untitled asset'}`,
+    `URL: ${pageUrl}`,
+    `Creator: ${asset.author||'Unknown'}`,
+    `License and use: ${licenseText(asset)}`,
+    `Source / origin: ${originText(asset)}`,
+    `Type: ${ASSET_TYPE_LABELS[asset.assetType]||asset.assetType||'Asset'}`,
+    `Category: ${asset.category||'Uncategorized'}`,
+    `Dimensions: ${dimensionsText(asset)}`,
+    `File type: ${asset.contentType||'File type not supplied'}`,
+    `File size: ${readableBytes(asset.size)}`,
+    `Suggested use: ${suggestedUses(asset)}`,
+    `Description / alt text: ${descriptionText(asset)}`,
+    `Palette: ${paletteValues(asset).join(', ')||'Not supplied'}`,
+    `Download/source: ${download||'Not supplied'}`,
+    `Tags: ${(asset.tags||[]).join(', ')||'None'}`
+  ].join('\n');
 }
 
 // Gallery tiles request a small WebP thumbnail (?size=400/800) from FDS-served
@@ -549,7 +652,7 @@ function photoCard(photo){
       <div class="tags"><span class="tag">${escapeHtml(photo.assetType||'photo')}</span>${photo.origin?`<span class="tag origin-tag">${escapeHtml(ORIGIN_BADGES[photo.origin]||photo.origin)}</span>`:''}${(photo.tags||[]).slice(0,3).map(t=>`<a class="tag" href="/images/stock-photos/?tag=${encodeURIComponent(t)}" data-tag="${escapeHtml(t)}">${escapeHtml(t)}</a>`).join('')}</div>
       <div class="actions">
         ${primaryAction.replace('onclick="','onclick="event.stopPropagation();')}
-        <button class="btn btn-secondary btn-small" onclick="event.stopPropagation();copyCredit('${escapeHtml(photo.id)}')">Copy Credit</button>
+        <button class="btn btn-secondary btn-small" onclick="event.stopPropagation();copyCredit('${escapeHtml(photo.id)}')">Copy Info</button>
         <button class="btn btn-secondary btn-small" onclick="event.stopPropagation();savePhotoToProject('${escapeHtml(photo.id)}')">Save</button>
       </div>
     </div>
@@ -612,9 +715,8 @@ function openAssetModal(id){
     : escapeHtml(photo.author||'Unknown');
   $('modalMeta').innerHTML=[
     `<div><strong>Author</strong>${authorDetail}</div>`,
-    `<div><strong>License</strong>${escapeHtml(photo.license||'Not specified')}</div>`,
-    `<div><strong>Category</strong>${escapeHtml(photo.category||'Uncategorized')}</div>`,
-    `<div><strong>Source</strong>${sourceDetail}</div>`
+    ...metadataRows(photo).map(row=>`<div><strong>${escapeHtml(row[0])}</strong>${row[0]==='Color palette'?row[1]:escapeHtml(row[1])}</div>`),
+    `<div><strong>Source note</strong>${sourceDetail}</div>`
   ].join('');
   const primaryAction=photo.source==='unsplash'
     ? `<button class="btn btn-primary wide" type="button" onclick="openUnsplash('${escapeHtml(photo.id)}')">Open on Unsplash</button>`
@@ -628,7 +730,8 @@ function openAssetModal(id){
     <a class="btn btn-secondary btn-small" href="https://pinterest.com/pin/create/button/?url=${encodeURIComponent(photoPageUrl)}&media=${encodeURIComponent(photo.url)}&description=${encodeURIComponent(photo.title)}" target="_blank" rel="noopener">Pinterest</a>
     </div>`:'';
   $('modalActions').innerHTML=`${primaryAction}
-    <button class="btn btn-secondary" type="button" onclick="copyCredit('${escapeHtml(photo.id)}')">Copy Credit</button>
+    <button class="btn btn-secondary" type="button" onclick="copyCredit('${escapeHtml(photo.id)}')">Copy Info</button>
+    <button class="btn btn-secondary" type="button" onclick="downloadAssetInfo('${escapeHtml(photo.id)}')">Download Info</button>
     <button class="btn btn-secondary" type="button" onclick="savePhotoToProject('${escapeHtml(photo.id)}')">Save to Project</button>
     <a class="btn btn-secondary" href="${escapeHtml(photo.url)}" target="_blank" rel="noopener">Open Image</a>
     ${shareRow}`;
@@ -708,6 +811,11 @@ async function searchUnsplash(q){
         author:photo.user.name,
         license:'Unsplash License',
         url:photo.urls.small,
+        width:photo.width,
+        height:photo.height,
+        description:photo.alt_description||photo.description||`Unsplash photo for ${q}`,
+        altText:photo.alt_description||photo.description||q,
+        palette:photo.color?[photo.color]:[],
         downloadLocation:photo.links.download_location,
         creditUrl:`${photo.user.links.html}?utm_source=FreeDesignStore&utm_medium=referral`,
         photoUrl:`${photo.links.html}?utm_source=FreeDesignStore&utm_medium=referral`,
@@ -774,10 +882,19 @@ function openUnsplash(id){
 function copyCredit(id){
   const photo=findPhoto(id);
   if(!photo) return;
-  const credit=photo.source==='unsplash'
-    ? `Photo by ${photo.author} on Unsplash${photo.creditUrl?' - '+photo.creditUrl:''}`
-    : `${photo.title} by ${photo.author} - ${photo.license}`;
-  navigator.clipboard?.writeText(credit);
+  const text=assetMetadataText(photo);
+  navigator.clipboard?.writeText(text).then(()=>{alert('Asset info copied!')});
+}
+
+function downloadAssetInfo(id){
+  const photo=findPhoto(id);
+  if(!photo) return;
+  const blob=new Blob([assetMetadataText(photo)],{type:'text/plain'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`${String(photo.title||'asset').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'asset'}-metadata.txt`;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 function handleFiles(files){
