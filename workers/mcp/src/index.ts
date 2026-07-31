@@ -1410,6 +1410,7 @@ export default {
     }
 
     if (url.pathname === '/' || url.pathname === '') {
+      if (isProtocolClient(request)) return wrongEndpoint();
       return new Response([
         'FreeDesignStore Catalog MCP Server v0.1.0',
         '',
@@ -1472,3 +1473,37 @@ export default {
     return new Response('Not found', { status: 404 });
   },
 };
+
+/**
+ * Is this an MCP protocol client rather than a person in a browser?
+ *
+ * A client pointed at the origin instead of `/mcp` asks for the event stream
+ * with `GET / Accept: text/event-stream` (the legacy SSE transport), or POSTs
+ * JSON-RPC. Answering either with 200 and a short non-stream body tells the
+ * client "stream opened" and then drops it — and the spec-correct response to a
+ * dropped stream is to reconnect, so it redials ~1/sec, forever. The flood is
+ * invisible: every response is a 200, nothing throws, no AI tokens are spent,
+ * nothing is written to storage, and the rate limiter only sees `tools/call`
+ * traffic carrying an account, which a bare GET has neither of.
+ *
+ * OPTIONS and HEAD deliberately return false so CORS preflight is unaffected.
+ */
+function isProtocolClient(request: Request): boolean {
+  if (request.method === 'POST') return true;
+  return (request.headers.get('accept') ?? '').includes('text/event-stream');
+}
+
+/** The JSON-RPC 405 the MCP spec requires from an endpoint with no stream to offer. */
+function wrongEndpoint(): Response {
+  return new Response(
+    JSON.stringify({
+      jsonrpc: '2.0',
+      id: null,
+      error: {
+        code: -32000,
+        message: 'Method Not Allowed — the MCP endpoint is https://mcp.freedesignstore.online/mcp',
+      },
+    }),
+    { status: 405, headers: { 'content-type': 'application/json', allow: 'GET, HEAD' } },
+  );
+}
