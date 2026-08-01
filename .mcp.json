@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "freedesignstore": {
-      "command": "npx",
-      "args": ["mcp-remote", "https://mcp.freedesignstore.online/mcp"]
+      "type": "http",
+      "url": "https://mcp.freedesignstore.online/mcp"
     }
   }
 }
