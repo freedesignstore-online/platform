@@ -1,0 +1,37 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.freedesignstore-online/mcp",
+  "description": "AI agent tools for FreeDesignStore: browse the CC0 design-asset catalog, apply design playbooks, and create/publish/moderate hosted assets. Read tools are open; write tools require an authenticated creator or admin account.",
+  "repository": {
+    "url": "https://github.com/freedesignstore-online/platform",
+    "source": "github"
+  },
+  "version": "0.2.0",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.freedesignstore.online/mcp"
+    }
+  ],
+  "tools": [
+    { "name": "asset_policy", "description": "Read catalog hosting rules, including Unsplash link-off policy" },
+    { "name": "list_design_skills", "description": "List published FDS design asset playbooks" },
+    { "name": "get_design_skill", "description": "Get one published FDS design asset playbook" },
+    { "name": "apply_design_skill", "description": "Apply a design asset playbook as questions, a checklist, or a tool plan" },
+    { "name": "catalog_status", "description": "Check storage readiness, asset counts, and whether the server is read-only" },
+    { "name": "whoami", "description": "Show the authenticated creator/admin account" },
+    { "name": "get_my_profile", "description": "Get the authenticated creator profile and public URL" },
+    { "name": "update_my_profile", "description": "Update creator handle, bio, website, and social links" },
+    { "name": "list_assets", "description": "List public or admin-visible pending catalog assets" },
+    { "name": "my_assets", "description": "List assets owned by the authenticated creator account" },
+    { "name": "get_asset", "description": "Get one asset's metadata and download URL" },
+    { "name": "create_svg_asset", "description": "Create a hosted generated SVG asset under the authenticated account (supports dry_run)" },
+    { "name": "create_asset_from_url", "description": "Ingest a public non-Unsplash HTTPS image URL under the authenticated account (supports dry_run)" },
+    { "name": "update_asset", "description": "Update metadata, taxonomy, and origin disclosure on an owned asset (supports dry_run)" },
+    { "name": "moderate_asset", "description": "Publish or reject a pending asset — admin only (supports dry_run)" },
+    { "name": "publish_asset", "description": "Publish a pending owned asset (supports dry_run)" },
+    { "name": "unpublish_asset", "description": "Move a public owned asset back to pending before deletion (supports dry_run)" },
+    { "name": "delete_asset", "description": "Delete catalog metadata and the R2 object — irreversible, requires confirm=<id> (supports dry_run)" },
+    { "name": "mcp_audit_log", "description": "Read your recent MCP audit events (writes, dry-runs, denials)" }
+  ]
+}

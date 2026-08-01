@@ -78,6 +78,10 @@
         {
           "name": "delete_asset",
           "description": "Delete catalog metadata and the R2 object"
+        },
+        {
+          "name": "mcp_audit_log",
+          "description": "Read your recent MCP audit events (writes, dry-runs, denials)"
         }
       ]
     }

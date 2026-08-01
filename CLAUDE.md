@@ -72,11 +72,13 @@ store/                  Static site (Cloudflare Pages output)
 functions/              Cloudflare Pages Functions
   api/stock/            list.js, random.js, upload, profile, creators, moderate, unsplash (unified KV catalog)
   photo/[id].js         Photo detail page (OG tags, share buttons, download, trust metadata)
-workers/mcp/            MCP server (Cloudflare Worker, 18 tools)
+workers/mcp/            MCP server (Cloudflare Worker, 19 tools)
   src/index.ts          Main server (agents/mcp, McpServer, Zod)
+  src/safety.ts         Read-only mode, audit log, dry-run, confirmation gates
   src/oauth-provider.ts OAuth 2.1 (GitHub/Google)
   src/session.ts        Session verification
-  test/                 Regression tests (37 tests)
+  server.json / AGENTS.md / README.md / CLAUDE.md  MCP registry manifest + agent docs
+  test/                 Regression tests
 ```
 
 ## Conventions

@@ -24,11 +24,52 @@ test('public MCP discovery advertises the dedicated FDS MCP endpoint', async () 
   const discovery = JSON.parse(await readRepo('store/.well-known/mcp.json'));
   assert.equal(discovery.servers[0].endpoint, 'https://mcp.freedesignstore.online/mcp');
   assert.equal(discovery.servers[0].transport, 'streamable-http');
-  assert.equal(discovery.servers[0].tools.length, 18);
-  for (const tool of ['list_design_skills', 'get_design_skill', 'apply_design_skill', 'publish_asset', 'unpublish_asset', 'delete_asset']) {
+  assert.equal(discovery.servers[0].tools.length, 19);
+  for (const tool of ['list_design_skills', 'get_design_skill', 'apply_design_skill', 'publish_asset', 'unpublish_asset', 'delete_asset', 'mcp_audit_log']) {
     assert.ok(discovery.servers[0].tools.some((item) => item.name === tool), `missing ${tool}`);
   }
   assert.doesNotMatch(JSON.stringify(discovery), /freeappstore|fds-mcp/i);
+});
+
+test('server.json manifest matches the discovery tool set', async () => {
+  const manifest = JSON.parse(await readRepo('workers/mcp/server.json'));
+  const discovery = JSON.parse(await readRepo('store/.well-known/mcp.json'));
+  const manifestNames = manifest.tools.map((t) => t.name).sort();
+  const discoveryNames = discovery.servers[0].tools.map((t) => t.name).sort();
+  assert.equal(manifest.tools.length, 19);
+  assert.deepEqual(manifestNames, discoveryNames);
+  assert.match(manifest.$schema, /modelcontextprotocol\.io\/schemas/);
+  assert.equal(manifest.remotes[0].url, 'https://mcp.freedesignstore.online/mcp');
+  assert.doesNotMatch(JSON.stringify(manifest), /freeappstore/i);
+});
+
+test('MCP safety layer is present and wired into every write tool', async () => {
+  const safety = await readRepo('workers/mcp/src/safety.ts');
+  // Read-only mode, audit trail with redaction, dry-run, confirmation, listing.
+  assert.match(safety, /MCP_READ_ONLY/);
+  assert.match(safety, /export function isReadOnly/);
+  assert.match(safety, /export async function requireWritable/);
+  assert.match(safety, /export async function requireConfirmation/);
+  assert.match(safety, /export async function dryRun/);
+  assert.match(safety, /export async function audit/);
+  assert.match(safety, /export async function listAuditEvents/);
+  assert.match(safety, /token\|secret\|password\|credential\|authorization/);
+  assert.match(safety, /expirationTtl: 90 \* 86_400/);
+
+  const source = await readRepo('workers/mcp/src/index.ts');
+  // errText carries isError so agents can detect failures.
+  assert.match(source, /const errText = .*isError: true/);
+  // Every write tool is guarded by read-only + audited; none still uses the old plain-txt guard.
+  for (const tool of ['create_svg_asset', 'create_asset_from_url', 'update_asset', 'moderate_asset', 'publish_asset', 'unpublish_asset', 'delete_asset', 'update_my_profile']) {
+    assert.match(source, new RegExp(`requireWritable\\(this\\.safety\\(\\), '${tool}'`), `${tool} missing read-only guard`);
+  }
+  // Destructive delete requires confirmation; audit log tool is exposed.
+  assert.match(source, /requireConfirmation\(this\.safety\(\), 'delete_asset'/);
+  assert.match(source, /'mcp_audit_log'/);
+  assert.match(source, /listAuditEvents\(this\.safety\(\)/);
+  // dry_run is offered on the asset mutations.
+  assert.match(source, /dryRun\(this\.safety\(\), 'create_svg_asset'/);
+  assert.match(source, /dryRun\(this\.safety\(\), 'delete_asset'/);
 });
 
 test('worker config has no FAS public route or FAS auth start', async () => {

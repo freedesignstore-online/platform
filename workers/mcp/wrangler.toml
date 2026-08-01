@@ -9,6 +9,9 @@ PUBLIC_BASE_URL = "https://freedesignstore.online"
 PUBLIC_MCP_BASE_URL = "https://mcp.freedesignstore.online"
 # GitHub logins / emails whose OAuth sessions get the admin role (comma-separated).
 FDS_ADMIN_LOGINS = "serge-ivo"
+# Set MCP_READ_ONLY = "1" to disable every write tool (create/update/publish/moderate/delete).
+# Reads and dry-runs still work; catalog_status.readOnly reflects the current state.
+# MCP_READ_ONLY = "1"
 
 [[routes]]
 pattern = "mcp.freedesignstore.online/*"

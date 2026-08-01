@@ -3,6 +3,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { createAuthChallenge, handleOAuthRoute, readMcpSessionCookie, resolveOAuthToken, type CreatorAccount } from './oauth-provider.js';
 import { verifySession } from './session.js';
+import { audit, dryRun, isReadOnly, listAuditEvents, requireConfirmation, requireWritable, type SafetyContext } from './safety.js';
 
 interface Env {
   FDS_STOCK_BUCKET?: R2Bucket;
@@ -14,6 +15,7 @@ interface Env {
   API_BASE?: string;
   OAUTH_KV?: KVNamespace;
   SESSION_SIGNING_KEY?: string;
+  MCP_READ_ONLY?: string;
   FDS_GITHUB_CLIENT_ID?: string;
   FDS_GITHUB_CLIENT_SECRET?: string;
   GITHUB_CLIENT_ID?: string;
@@ -156,6 +158,7 @@ const mcpDiscoveryTools = [
   { name: 'publish_asset', description: 'Publish a pending owned asset' },
   { name: 'unpublish_asset', description: 'Move a public owned asset back to pending before deletion' },
   { name: 'delete_asset', description: 'Delete catalog metadata and the R2 object' },
+  { name: 'mcp_audit_log', description: 'Read your recent MCP audit events (writes, dry-runs, denials)' },
 ];
 const unsafeSvg = [
   /<script[\s>]/i,
@@ -316,6 +319,9 @@ const DESIGN_SKILLS: DesignSkill[] = [
 ];
 
 const txt = (text: string) => ({ content: [{ type: 'text' as const, text }] });
+// Failure responses carry isError:true so agents can distinguish a failed tool
+// call from a successful one without parsing the message. Used for every guard.
+const errText = (text: string) => ({ content: [{ type: 'text' as const, text }], isError: true as const });
 const jsonText = (value: unknown) => txt(JSON.stringify(value, null, 2));
 
 function cleanText(value: unknown, fallback: string, max = 120): string {
@@ -800,6 +806,12 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
     } catch {}
   }
 
+  /** Build the safety context for the current caller: env for the read-only flag +
+   *  audit KV, and the account id the audit trail is keyed on. */
+  safety(): SafetyContext {
+    return { env: this.env, subject: currentProps(this.props).accountId };
+  }
+
   async init() {
     this.server.tool(
       'asset_policy',
@@ -834,7 +846,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
       },
       async ({ skill_id }) => {
         const skill = DESIGN_SKILLS.find((item) => item.id === skill_id);
-        return skill ? jsonText(skill) : txt(`Unknown design skill: ${skill_id}`);
+        return skill ? jsonText(skill) : errText(`Unknown design skill: ${skill_id}`);
       },
     );
 
@@ -848,7 +860,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
       },
       async ({ skill_id, context = '', mode = 'checklist' }) => {
         const skill = DESIGN_SKILLS.find((item) => item.id === skill_id);
-        if (!skill) return txt(`Unknown design skill: ${skill_id}`);
+        if (!skill) return errText(`Unknown design skill: ${skill_id}`);
         return jsonText(applyDesignSkill(skill, context, mode));
       },
     );
@@ -859,7 +871,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
       {},
       async () => {
         const store = requireStore(this.env);
-        if (typeof store === 'string') return txt(store);
+        if (typeof store === 'string') return errText(store);
         const [publicIds, pendingIds] = await Promise.all([
           readIndex(store.kv, PUBLIC_INDEX),
           readIndex(store.kv, PENDING_INDEX),
@@ -867,6 +879,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         return jsonText({
           ok: true,
           storage: 'configured',
+          readOnly: isReadOnly(this.env),
           publicCount: publicIds.length,
           pendingCount: pendingIds.length,
           publicBaseUrl: publicBase(this.env),
@@ -912,9 +925,9 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
       async () => {
         const props = currentProps(this.props);
         const authError = assertAccount(props);
-        if (authError) return txt(authError);
+        if (authError) return errText(authError);
         const store = requireStore(this.env);
-        if (typeof store === 'string') return txt(store);
+        if (typeof store === 'string') return errText(store);
         const profile = await ensureProfile(store.kv, props);
         return jsonText({ profile, profileUrl: profile ? `${publicBase(this.env)}/u/${profile.handle}` : null });
       },
@@ -937,19 +950,21 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
       async ({ handle, display_name, bio, website, x, github, instagram, dribbble, behance }) => {
         const props = currentProps(this.props);
         const authError = assertAccount(props);
-        if (authError) return txt(authError);
+        if (authError) return errText(authError);
+        const roBlock = await requireWritable(this.safety(), 'update_my_profile', { handle });
+        if (roBlock) return roBlock;
         const store = requireStore(this.env);
-        if (typeof store === 'string') return txt(store);
+        if (typeof store === 'string') return errText(store);
         const profile = await ensureProfile(store.kv, props);
-        if (!profile) return txt('Could not load your profile.');
+        if (!profile) return errText('Could not load your profile.');
 
         if (handle !== undefined) {
           const next = safeHandle(handle);
-          if (next.length < 3) return txt('Handles need at least 3 characters (a-z, 0-9, hyphens).');
-          if (RESERVED_HANDLES.has(next)) return txt('That handle is reserved.');
+          if (next.length < 3) return errText('Handles need at least 3 characters (a-z, 0-9, hyphens).');
+          if (RESERVED_HANDLES.has(next)) return errText('That handle is reserved.');
           if (next !== profile.handle) {
             const taken = await getProfileByHandle(store.kv, next);
-            if (taken && taken.accountId !== profile.accountId) return txt('That handle is already taken.');
+            if (taken && taken.accountId !== profile.accountId) return errText('That handle is already taken.');
             await store.kv.delete(`${HANDLE_PREFIX}${profile.handle}`);
             await store.kv.put(`${HANDLE_PREFIX}${next}`, JSON.stringify({ accountId: profile.accountId }));
             profile.handle = next;
@@ -959,7 +974,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         if (bio !== undefined) profile.bio = cleanText(bio, '', 400);
         if (website !== undefined) {
           const site = website.trim().slice(0, 200);
-          if (site && !site.startsWith('https://')) return txt('Website must be an https:// URL.');
+          if (site && !site.startsWith('https://')) return errText('Website must be an https:// URL.');
           profile.website = site;
         }
         const socialUpdates: Record<string, string | undefined> = { x, github, instagram, dribbble, behance };
@@ -972,6 +987,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         }
         profile.updatedAt = new Date().toISOString();
         await putProfile(store.kv, profile);
+        await audit(this.safety(), { tool: 'update_my_profile', action: 'success', result: { handle: profile.handle } });
         return jsonText({ profile, profileUrl: `${publicBase(this.env)}/u/${profile.handle}` });
       },
     );
@@ -986,9 +1002,9 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
       async ({ status = 'all', limit = 50 }) => {
         const props = currentProps(this.props);
         const authError = assertAccount(props);
-        if (authError) return txt(authError);
+        if (authError) return errText(authError);
         const store = requireStore(this.env);
-        if (typeof store === 'string') return txt(store);
+        if (typeof store === 'string') return errText(store);
         // Newest ids sit at the end of the index — reverse to list newest first,
         // then cap the fetch to the newest LIST_FETCH_CAP to bound KV ops.
         const ids = (await readIndex(store.kv, accountIndexKey(props.accountId || ''))).reverse().slice(0, LIST_FETCH_CAP);
@@ -1012,9 +1028,9 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
       },
       async ({ status = 'public', asset_type, origin, license, category, q, limit = 50 }) => {
         const store = requireStore(this.env);
-        if (typeof store === 'string') return txt(store);
+        if (typeof store === 'string') return errText(store);
         const props = currentProps(this.props);
-        if (status === 'pending' && !props.isAdmin) return txt(assertAdmin(props) || 'Not authorized.');
+        if (status === 'pending' && !props.isAdmin) return errText(assertAdmin(props) || 'Not authorized.');
 
         // Newest ids sit at the end of the index — reverse to list newest first,
         // then cap the fetch to the newest LIST_FETCH_CAP to bound KV ops.
@@ -1039,11 +1055,11 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
       { id: z.string().describe('Catalog asset id') },
       async ({ id }) => {
         const store = requireStore(this.env);
-        if (typeof store === 'string') return txt(store);
+        if (typeof store === 'string') return errText(store);
         const item = await getItem(store.kv, id);
-        if (!item) return txt(`Asset not found: ${id}`);
+        if (!item) return errText(`Asset not found: ${id}`);
         const props = currentProps(this.props);
-        if (item.status !== 'public' && !props.isAdmin && !isOwner(props, item)) return txt('Not authorized to view this asset.');
+        if (item.status !== 'public' && !props.isAdmin && !isOwner(props, item)) return errText('Not authorized to view this asset.');
         return jsonText(itemForAccount(this.env, item));
       },
     );
@@ -1066,20 +1082,27 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         safe: z.boolean().optional().describe('Safe-for-work flag (default true)'),
         tags: z.array(z.string()).optional().describe('Search tags'),
         publish: z.boolean().optional().describe('Publish immediately instead of leaving pending. Requires an authenticated creator or admin account.'),
+        dry_run: z.boolean().optional().describe('If true, validate inputs and return what would be created without hosting anything.'),
       },
-      async ({ title, svg, asset_type = 'illustration', category, author, license, origin = 'digital-illustration', origin_tool, origin_model, origin_prompt, purpose, safe, tags, publish = false }) => {
+      async ({ title, svg, asset_type = 'illustration', category, author, license, origin = 'digital-illustration', origin_tool, origin_model, origin_prompt, purpose, safe, tags, publish = false, dry_run = false }) => {
         const props = currentProps(this.props);
         const authError = assertAccount(props);
-        if (authError) return txt(authError);
+        if (authError) return errText(authError);
+        const roBlock = await requireWritable(this.safety(), 'create_svg_asset', { title, asset_type });
+        if (roBlock) return roBlock;
         const store = requireStore(this.env);
-        if (typeof store === 'string') return txt(store);
-        if (origin === 'ai-generated' && !origin_tool) return txt('AI-generated assets must disclose the tool used (origin_tool).');
+        if (typeof store === 'string') return errText(store);
+        if (origin === 'ai-generated' && !origin_tool) return errText('AI-generated assets must disclose the tool used (origin_tool).');
         if (!props.isAdmin && props.accountId) {
           const denied = await uploadAllowance(store.kv, props.accountId);
-          if (denied) return txt(denied);
+          if (denied) return errText(denied);
         }
         const bytes = validateSvg(svg);
-        if (typeof bytes === 'string') return txt(bytes);
+        if (typeof bytes === 'string') return errText(bytes);
+        if (dry_run) {
+          return dryRun(this.safety(), 'create_svg_asset', 'create', { title, asset_type },
+            { title, assetType: asset_type, bytes: bytes.length, publish: Boolean(publish), status: publish ? 'public' : 'pending' });
+        }
         const profile = await ensureProfile(store.kv, props);
         const result = await createAsset({
           env: this.env,
@@ -1102,6 +1125,8 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
           ownerName: props.accountName,
           ownerHandle: profile?.handle,
         });
+        const created = result as { ok?: boolean; admin?: { id?: string; status?: string } };
+        await audit(this.safety(), { tool: 'create_svg_asset', action: created.ok ? 'success' : 'failed', input: { title, asset_type }, result: { id: created.admin?.id, status: created.admin?.status } });
         return jsonText(result);
       },
     );
@@ -1124,38 +1149,46 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         safe: z.boolean().optional().describe('Safe-for-work flag (default true)'),
         tags: z.array(z.string()).optional().describe('Search tags'),
         publish: z.boolean().optional().describe('Publish immediately instead of leaving pending. Requires an authenticated creator or admin account.'),
+        dry_run: z.boolean().optional().describe('If true, validate inputs and return what would be ingested without fetching or hosting anything.'),
       },
-      async ({ url, title, asset_type = 'photo', category, author, license, origin, origin_tool, origin_model, origin_prompt, purpose, safe, tags, publish = false }) => {
+      async ({ url, title, asset_type = 'photo', category, author, license, origin, origin_tool, origin_model, origin_prompt, purpose, safe, tags, publish = false, dry_run = false }) => {
         const props = currentProps(this.props);
         const authError = assertAccount(props);
-        if (authError) return txt(authError);
+        if (authError) return errText(authError);
+        const roBlock = await requireWritable(this.safety(), 'create_asset_from_url', { url, title, asset_type });
+        if (roBlock) return roBlock;
         const store = requireStore(this.env);
-        if (typeof store === 'string') return txt(store);
-        if (origin === 'ai-generated' && !origin_tool) return txt('AI-generated assets must disclose the tool used (origin_tool).');
+        if (typeof store === 'string') return errText(store);
+        if (origin === 'ai-generated' && !origin_tool) return errText('AI-generated assets must disclose the tool used (origin_tool).');
         if (!props.isAdmin && props.accountId) {
           const denied = await uploadAllowance(store.kv, props.accountId);
-          if (denied) return txt(denied);
+          if (denied) return errText(denied);
         }
 
         const parsed = new URL(url);
-        if (parsed.protocol !== 'https:') return txt('Only HTTPS image URLs are accepted.');
-        if (isBlockedFetchHost(parsed)) return txt('Private, local, and metadata network URLs are not accepted.');
+        if (parsed.protocol !== 'https:') return errText('Only HTTPS image URLs are accepted.');
+        if (isBlockedFetchHost(parsed)) return errText('Private, local, and metadata network URLs are not accepted.');
         if (isBlockedMirrorHost(parsed)) {
-          return txt('Unsplash assets must not be mirrored into FDS. Link users to Unsplash for download instead.');
+          return errText('Unsplash assets must not be mirrored into FDS. Link users to Unsplash for download instead.');
+        }
+
+        if (dry_run) {
+          return dryRun(this.safety(), 'create_asset_from_url', 'ingest', { url, title, asset_type },
+            { title, assetType: asset_type, sourceUrl: parsed.toString(), publish: Boolean(publish), status: publish ? 'public' : 'pending' });
         }
 
         const res = await fetch(parsed.toString(), {
           headers: { 'User-Agent': 'FreeDesignStore-MCP/0.1' },
         });
-        if (!res.ok) return txt(`Could not fetch image: ${res.status}`);
+        if (!res.ok) return errText(`Could not fetch image: ${res.status}`);
         const contentType = (res.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
-        if (!allowedTypes.has(contentType)) return txt(`Unsupported image content type: ${contentType || 'unknown'}`);
+        if (!allowedTypes.has(contentType)) return errText(`Unsupported image content type: ${contentType || 'unknown'}`);
         const contentLength = Number(res.headers.get('content-length') || 0);
-        if (contentLength > MAX_FILE_SIZE) return txt('Image assets must be under 8 MB.');
+        if (contentLength > MAX_FILE_SIZE) return errText('Image assets must be under 8 MB.');
         const bytes = await res.arrayBuffer();
         if (contentType === 'image/svg+xml') {
           const checked = validateSvg(new TextDecoder().decode(bytes));
-          if (typeof checked === 'string') return txt(checked);
+          if (typeof checked === 'string') return errText(checked);
         }
 
         const profile = await ensureProfile(store.kv, props);
@@ -1181,6 +1214,8 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
           ownerName: props.accountName,
           ownerHandle: profile?.handle,
         });
+        const created = result as { ok?: boolean; admin?: { id?: string; status?: string } };
+        await audit(this.safety(), { tool: 'create_asset_from_url', action: created.ok ? 'success' : 'failed', input: { url, title, asset_type }, result: { id: created.admin?.id, status: created.admin?.status } });
         return jsonText(result);
       },
     );
@@ -1200,18 +1235,27 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         license: z.enum(licenseIds).optional().describe('License id'),
         purpose: z.array(z.string()).optional().describe('Intended purposes'),
         safe: z.boolean().optional().describe('Safe-for-work flag'),
+        dry_run: z.boolean().optional().describe('If true, validate ownership and inputs and return the fields that would change without writing.'),
       },
-      async ({ id, title, category, tags, origin, origin_tool, origin_model, origin_prompt, license, purpose, safe }) => {
+      async ({ id, title, category, tags, origin, origin_tool, origin_model, origin_prompt, license, purpose, safe, dry_run = false }) => {
         const props = currentProps(this.props);
         const authError = assertAccount(props);
-        if (authError) return txt(authError);
+        if (authError) return errText(authError);
+        const roBlock = await requireWritable(this.safety(), 'update_asset', { id });
+        if (roBlock) return roBlock;
         const store = requireStore(this.env);
-        if (typeof store === 'string') return txt(store);
+        if (typeof store === 'string') return errText(store);
         const item = await getItem(store.kv, id);
-        if (!item) return txt(`Asset not found: ${id}`);
-        if (!props.isAdmin && !isOwner(props, item)) return txt('Not authorized to update this asset.');
+        if (!item) return errText(`Asset not found: ${id}`);
+        if (!props.isAdmin && !isOwner(props, item)) return errText('Not authorized to update this asset.');
         if (origin === 'ai-generated' && !origin_tool && !item.originDetail?.tool) {
-          return txt('AI-generated assets must disclose the tool used (origin_tool).');
+          return errText('AI-generated assets must disclose the tool used (origin_tool).');
+        }
+        if (dry_run) {
+          const changes = Object.fromEntries(
+            Object.entries({ title, category, tags, origin, license, purpose, safe }).filter(([, v]) => v !== undefined),
+          );
+          return dryRun(this.safety(), 'update_asset', 'update', { id }, { id, changes });
         }
         if (title !== undefined) item.title = cleanText(title, item.title, 96);
         if (category !== undefined) item.category = cleanText(category, item.category, 64).toLowerCase();
@@ -1227,6 +1271,7 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         if (safe !== undefined) item.safe = safe;
         item.updatedAt = new Date().toISOString();
         await putItem(store.kv, item);
+        await audit(this.safety(), { tool: 'update_asset', action: 'success', input: { id }, result: { id, status: item.status } });
         return jsonText(itemForAccount(this.env, item));
       },
     );
@@ -1237,22 +1282,30 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
       {
         id: z.string().describe('Catalog asset id'),
         action: z.enum(['publish', 'reject']).describe('Moderation action'),
+        dry_run: z.boolean().optional().describe('If true, return the status change that would be applied without writing.'),
       },
-      async ({ id, action }) => {
+      async ({ id, action, dry_run = false }) => {
         const authError = assertAdmin(currentProps(this.props));
-        if (authError) return txt(authError);
+        if (authError) return errText(authError);
+        const roBlock = await requireWritable(this.safety(), 'moderate_asset', { id, action });
+        if (roBlock) return roBlock;
         const store = requireStore(this.env);
-        if (typeof store === 'string') return txt(store);
+        if (typeof store === 'string') return errText(store);
         const item = await getItem(store.kv, id);
-        if (!item) return txt(`Asset not found: ${id}`);
+        if (!item) return errText(`Asset not found: ${id}`);
 
-        item.status = action === 'publish' ? 'public' : 'rejected';
+        const nextStatus = action === 'publish' ? 'public' : 'rejected';
+        if (dry_run) {
+          return dryRun(this.safety(), 'moderate_asset', action, { id, action }, { id, from: item.status, to: nextStatus });
+        }
+        item.status = nextStatus;
         item.updatedAt = new Date().toISOString();
         await putItem(store.kv, item);
         await removeFromIndex(store.kv, PENDING_INDEX, id);
         if (action === 'publish') await addToIndex(store.kv, PUBLIC_INDEX, id);
         else await removeFromIndex(store.kv, PUBLIC_INDEX, id);
 
+        await audit(this.safety(), { tool: 'moderate_asset', action: 'success', input: { id, action }, result: { id, status: item.status } });
         return jsonText({ ok: true, item: publicItem(this.env, item) });
       },
     );
@@ -1260,25 +1313,34 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
     this.server.tool(
       'publish_asset',
       'Publish a pending catalog asset. Admins can publish any pending asset; creators can publish their own pending assets.',
-      { id: z.string().describe('Catalog asset id') },
-      async ({ id }) => {
+      {
+        id: z.string().describe('Catalog asset id'),
+        dry_run: z.boolean().optional().describe('If true, return the status change that would be applied without writing.'),
+      },
+      async ({ id, dry_run = false }) => {
         const props = currentProps(this.props);
         const authError = assertAccount(props);
-        if (authError) return txt(authError);
+        if (authError) return errText(authError);
+        const roBlock = await requireWritable(this.safety(), 'publish_asset', { id });
+        if (roBlock) return roBlock;
         const store = requireStore(this.env);
-        if (typeof store === 'string') return txt(store);
+        if (typeof store === 'string') return errText(store);
         const item = await getItem(store.kv, id);
-        if (!item) return txt(`Asset not found: ${id}`);
-        if (!props.isAdmin && !isOwner(props, item)) return txt('Not authorized to publish this asset.');
+        if (!item) return errText(`Asset not found: ${id}`);
+        if (!props.isAdmin && !isOwner(props, item)) return errText('Not authorized to publish this asset.');
         if (item.status === 'public') return jsonText({ ok: true, item: itemForAccount(this.env, item) });
-        if (item.status !== 'pending') return txt(`Only pending assets can be published. Current status: ${item.status}.`);
+        if (item.status !== 'pending') return errText(`Only pending assets can be published. Current status: ${item.status}.`);
 
+        if (dry_run) {
+          return dryRun(this.safety(), 'publish_asset', 'publish', { id }, { id, from: item.status, to: 'public' });
+        }
         item.status = 'public';
         item.updatedAt = new Date().toISOString();
         await putItem(store.kv, item);
         await removeFromIndex(store.kv, PENDING_INDEX, id);
         await addToIndex(store.kv, PUBLIC_INDEX, id);
 
+        await audit(this.safety(), { tool: 'publish_asset', action: 'success', input: { id }, result: { id, status: 'public' } });
         return jsonText({ ok: true, item: itemForAccount(this.env, item) });
       },
     );
@@ -1286,49 +1348,83 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
     this.server.tool(
       'unpublish_asset',
       'Unpublish a public catalog asset. Admins can unpublish any asset; creators can unpublish their own public assets before deletion.',
-      { id: z.string().describe('Catalog asset id') },
-      async ({ id }) => {
+      {
+        id: z.string().describe('Catalog asset id'),
+        dry_run: z.boolean().optional().describe('If true, return the status change that would be applied without writing.'),
+      },
+      async ({ id, dry_run = false }) => {
         const props = currentProps(this.props);
         const authError = assertAccount(props);
-        if (authError) return txt(authError);
+        if (authError) return errText(authError);
+        const roBlock = await requireWritable(this.safety(), 'unpublish_asset', { id });
+        if (roBlock) return roBlock;
         const store = requireStore(this.env);
-        if (typeof store === 'string') return txt(store);
+        if (typeof store === 'string') return errText(store);
         const item = await getItem(store.kv, id);
-        if (!item) return txt(`Asset not found: ${id}`);
-        if (!props.isAdmin && !isOwner(props, item)) return txt('Not authorized to unpublish this asset.');
-        if (item.status !== 'public') return txt(`Asset is already ${item.status}.`);
+        if (!item) return errText(`Asset not found: ${id}`);
+        if (!props.isAdmin && !isOwner(props, item)) return errText('Not authorized to unpublish this asset.');
+        if (item.status !== 'public') return errText(`Asset is already ${item.status}.`);
 
+        if (dry_run) {
+          return dryRun(this.safety(), 'unpublish_asset', 'unpublish', { id }, { id, from: item.status, to: 'pending' });
+        }
         item.status = 'pending';
         item.updatedAt = new Date().toISOString();
         await putItem(store.kv, item);
         await removeFromIndex(store.kv, PUBLIC_INDEX, id);
         await addToIndex(store.kv, PENDING_INDEX, id);
 
+        await audit(this.safety(), { tool: 'unpublish_asset', action: 'success', input: { id }, result: { id, status: 'pending' } });
         return jsonText({ ok: true, item: itemForAccount(this.env, item) });
       },
     );
 
     this.server.tool(
       'delete_asset',
-      'Delete a catalog asset and its R2 object. Admins can delete any asset; creators can delete their own unpublished assets.',
-      { id: z.string().describe('Catalog asset id') },
-      async ({ id }) => {
+      'Delete a catalog asset and its R2 object. Admins can delete any asset; creators can delete their own unpublished assets. Irreversible — requires confirm=<id>.',
+      {
+        id: z.string().describe('Catalog asset id'),
+        confirm: z.string().optional().describe('Must equal the asset id to confirm permanent deletion.'),
+        dry_run: z.boolean().optional().describe('If true, return what would be deleted without deleting anything (no confirm needed).'),
+      },
+      async ({ id, confirm, dry_run = false }) => {
         const props = currentProps(this.props);
         const authError = assertAccount(props);
-        if (authError) return txt(authError);
+        if (authError) return errText(authError);
+        const roBlock = await requireWritable(this.safety(), 'delete_asset', { id });
+        if (roBlock) return roBlock;
         const store = requireStore(this.env);
-        if (typeof store === 'string') return txt(store);
+        if (typeof store === 'string') return errText(store);
         const item = await getItem(store.kv, id);
-        if (!item) return txt(`Asset not found: ${id}`);
-        if (!props.isAdmin && !isOwner(props, item)) return txt('Not authorized to delete this asset.');
-        if (!props.isAdmin && item.status === 'public') return txt('Published assets require admin removal.');
+        if (!item) return errText(`Asset not found: ${id}`);
+        if (!props.isAdmin && !isOwner(props, item)) return errText('Not authorized to delete this asset.');
+        if (!props.isAdmin && item.status === 'public') return errText('Published assets require admin removal.');
+
+        if (dry_run) {
+          return dryRun(this.safety(), 'delete_asset', 'delete', { id }, { id, status: item.status, objectKey: item.objectKey });
+        }
+        const confirmBlock = await requireConfirmation(this.safety(), 'delete_asset', confirm, id, { id });
+        if (confirmBlock) return confirmBlock;
 
         await store.bucket.delete(item.objectKey);
         await deleteItem(store.kv, id);
         await removeFromIndex(store.kv, PUBLIC_INDEX, id);
         await removeFromIndex(store.kv, PENDING_INDEX, id);
         if (item.ownerAccountId) await removeFromIndex(store.kv, accountIndexKey(item.ownerAccountId), id);
+        await audit(this.safety(), { tool: 'delete_asset', action: 'success', input: { id }, result: { deleted: id } });
         return jsonText({ ok: true, deleted: id });
+      },
+    );
+
+    this.server.tool(
+      'mcp_audit_log',
+      'Read your recent MCP audit events for this account — every write, dry-run, and denied tool action, newest first. Requires an authenticated account.',
+      { limit: z.number().int().min(1).max(200).optional().describe('Max events to return (default 50)') },
+      async ({ limit }) => {
+        const props = currentProps(this.props);
+        const authError = assertAccount(props);
+        if (authError) return errText(authError);
+        return jsonText(await listAuditEvents(this.safety(), limit ?? 50));
       },
     );
   }

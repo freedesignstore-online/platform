@@ -63,7 +63,7 @@ The public asset catalog is backed by Cloudflare R2 + KV and includes curated an
 
 ## MCP
 
-18-tool MCP server at `mcp.freedesignstore.online/mcp`. OAuth 2.1 (GitHub/Google) or bearer token auth. See [CLAUDE.md](./CLAUDE.md) for agent workflow and [MCP-CATALOG.md](./MCP-CATALOG.md) for full docs.
+19-tool MCP server at `mcp.freedesignstore.online/mcp`. OAuth 2.1 (GitHub/Google) or bearer token auth. Read-only mode, per-account audit log, dry-run, and confirmation gates on destructive tools. See [CLAUDE.md](./CLAUDE.md) for agent workflow and [MCP-CATALOG.md](./MCP-CATALOG.md) for full docs.
 
 ```bash
 claude mcp add freedesignstore https://mcp.freedesignstore.online/mcp
