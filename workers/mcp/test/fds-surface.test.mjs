@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { test } from 'node:test';
+import ts from 'typescript';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, '../../..');
@@ -18,6 +19,30 @@ async function importRepoModule(path) {
 
 async function importRepoFile(path) {
   return import(pathToFileURL(resolve(repoRoot, path)).href);
+}
+
+/**
+ * Load one of the MCP worker's TypeScript modules for real execution.
+ *
+ * Most tests here assert on source text. That is enough to prove a call exists,
+ * but not that it runs in the right order — so the OAuth callback tests below
+ * drive the actual module instead. `node --test` cannot import `.ts`, so each
+ * module is type-stripped with the `typescript` devDependency (already required
+ * by `npm run typecheck`) and loaded as a data: URL. Relative specifiers cannot
+ * resolve from a data: URL, so the one internal import — `./session.js`, which
+ * maps to `session.ts` on disk — is rewritten to the transpiled session module.
+ *
+ * Only works for modules with no Workers-runtime imports: `src/index.ts` pulls
+ * in `agents/mcp`, which imports `cloudflare:workers` and cannot load in Node.
+ */
+async function importWorkerModule(path) {
+  const compilerOptions = { target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext };
+  const strip = async (file) => ts.transpileModule(await readRepo(file), { compilerOptions }).outputText;
+  const asDataUrl = (source) => `data:text/javascript,${encodeURIComponent(source)}`;
+
+  const sessionUrl = asDataUrl(await strip('workers/mcp/src/session.ts'));
+  const source = (await strip(path)).replace(/'\.\/session\.js'/g, JSON.stringify(sessionUrl));
+  return import(asDataUrl(source));
 }
 
 test('public MCP discovery advertises the dedicated FDS MCP endpoint', async () => {
@@ -1189,6 +1214,166 @@ test('reserved handles cannot be claimed', async () => {
   });
   assert.equal(res.status, 400);
   assert.match((await res.json()).error, /reserved/);
+});
+
+// --- MCP OAuth callback safety (issue #11) -------------------------------
+//
+// These drive the real handleOAuthRoute rather than asserting on source text,
+// so a future refactor that reorders the logic fails here even if the code
+// still reads plausibly.
+
+const OAUTH_NONCE_COOKIE = '__Host-fds_mcp_auth_nonce';
+const OAUTH_SESSION_COOKIE = '__Host-fds_mcp_session';
+
+function oauthConfig(kv) {
+  return {
+    issuer: 'https://mcp.freedesignstore.online',
+    authBase: 'https://freedesignstore.online',
+    kv,
+    sessionSigningKey: 'test-signing-key',
+    creatorAccounts: [],
+    githubClientId: 'gh-client-id',
+    githubClientSecret: 'gh-client-secret',
+    adminLogins: [],
+  };
+}
+
+function providerState({ authNonce, returnPath = '/console/' }) {
+  return b64url(JSON.stringify({ p: 'github', r: returnPath, a: authNonce, n: 'state-uuid' }));
+}
+
+/** Stub GitHub's token + user endpoints, recording every call for ordering assertions. */
+function stubGithub() {
+  const calls = [];
+  const original = globalThis.fetch;
+  globalThis.fetch = async (input) => {
+    const url = typeof input === 'string' ? input : input.url;
+    calls.push(url);
+    if (url.includes('login/oauth/access_token')) {
+      return Response.json({ access_token: 'gh-access-token' });
+    }
+    if (url.includes('api.github.com/user')) {
+      return Response.json({ id: 42, login: 'alice', name: 'Alice', avatar_url: 'https://x/a.png', email: 'alice@example.com' });
+    }
+    throw new Error(`unexpected fetch: ${url}`);
+  };
+  return { calls, restore: () => { globalThis.fetch = original; } };
+}
+
+function callbackRequest(state, { cookie = state } = {}) {
+  const url = `https://freedesignstore.online/.fds/auth/github/callback?code=provider-one-time-code&state=${state}`;
+  return new Request(url, { headers: { Cookie: `${OAUTH_NONCE_COOKIE}=${cookie}` } });
+}
+
+function setCookies(response) {
+  return response.headers.getSetCookie?.() ?? [response.headers.get('Set-Cookie')].filter(Boolean);
+}
+
+function cookieValue(response, name) {
+  for (const raw of setCookies(response)) {
+    const [pair] = raw.split(';');
+    const [key, ...rest] = pair.split('=');
+    if (key.trim() === name) return decodeURIComponent(rest.join('='));
+  }
+  return null;
+}
+
+test('provider callback checks the stored auth request before spending the provider code', async () => {
+  const { handleOAuthRoute } = await importWorkerModule('workers/mcp/src/oauth-provider.ts');
+  const kv = memoryKV();
+  const github = stubGithub();
+  try {
+    // Authorization request expired (nothing under authreq:) while the user sat
+    // on the consent screen. The provider code must survive unspent.
+    const state = providerState({ authNonce: 'expired-nonce' });
+    const res = await handleOAuthRoute(callbackRequest(state), oauthConfig(kv));
+
+    assert.equal(res.status, 400);
+    assert.match(await res.text(), /Restart authorization from your MCP client/);
+    assert.deepEqual(github.calls, [], 'provider code was redeemed despite a missing auth request');
+  } finally {
+    github.restore();
+  }
+});
+
+test('provider callback validates the browser nonce before spending the provider code', async () => {
+  const { handleOAuthRoute } = await importWorkerModule('workers/mcp/src/oauth-provider.ts');
+  const kv = memoryKV();
+  const github = stubGithub();
+  try {
+    const state = providerState({ authNonce: 'nonce-1' });
+    await kv.put('authreq:nonce-1', JSON.stringify({
+      clientId: 'client-1', redirectUri: 'https://client.example/cb', codeChallenge: 'challenge', state: 'client-state',
+    }));
+
+    // Cookie does not match the state parameter — a login-CSRF / code-injection
+    // attempt. Rejected before any provider call and before the KV read.
+    const res = await handleOAuthRoute(callbackRequest(state, { cookie: 'someone-elses-nonce' }), oauthConfig(kv));
+
+    assert.equal(res.status, 303);
+    assert.match(res.headers.get('Location'), /auth_error=invalid_state/);
+    assert.deepEqual(github.calls, [], 'provider code was redeemed for an unbound browser');
+    assert.ok(kv.data.has('authreq:nonce-1'), 'auth request consumed by a rejected callback');
+  } finally {
+    github.restore();
+  }
+});
+
+test('provider callback completes authorization and returns only a code in the redirect', async () => {
+  const { handleOAuthRoute } = await importWorkerModule('workers/mcp/src/oauth-provider.ts');
+  const kv = memoryKV();
+  const github = stubGithub();
+  try {
+    const state = providerState({ authNonce: 'nonce-1' });
+    await kv.put('authreq:nonce-1', JSON.stringify({
+      clientId: 'client-1', redirectUri: 'https://client.example/cb', codeChallenge: 'challenge', state: 'client-state',
+    }));
+
+    const res = await handleOAuthRoute(callbackRequest(state), oauthConfig(kv));
+    assert.equal(res.status, 302);
+
+    // Provider code redeemed exactly once, only after the checks passed.
+    assert.equal(github.calls.length, 2);
+    assert.match(github.calls[0], /login\/oauth\/access_token/);
+
+    const location = new URL(res.headers.get('Location'));
+    assert.equal(location.origin + location.pathname, 'https://client.example/cb');
+    assert.equal(location.searchParams.get('state'), 'client-state');
+    const authCode = location.searchParams.get('code');
+    assert.ok(authCode, 'no authorization code issued');
+
+    // #11 AC1: the session token reaches the browser as a cookie and never as a
+    // query parameter, which would land in edge logs, Referer, and history.
+    const sessionToken = cookieValue(res, OAUTH_SESSION_COOKIE);
+    assert.ok(sessionToken, 'no session cookie set');
+    assert.equal([...location.searchParams.keys()].sort().join(','), 'code,state');
+    assert.ok(!res.headers.get('Location').includes(sessionToken), 'session token leaked into the redirect URL');
+
+    // The auth request is single-use, and the code record is server-side only.
+    assert.ok(!kv.data.has('authreq:nonce-1'), 'auth request was not consumed');
+    assert.equal(JSON.parse(kv.data.get(`code:${authCode}`)).sessionToken, sessionToken);
+  } finally {
+    github.restore();
+  }
+});
+
+test('token-bearing MCP callback paths stay retired', async () => {
+  const { handleOAuthRoute } = await importWorkerModule('workers/mcp/src/oauth-provider.ts');
+  const config = oauthConfig(memoryKV());
+
+  // The PAS-shaped callbacks that used to carry a session/token in the query
+  // string. They must not come back as working routes.
+  for (const path of ['/.fds/auth/callback', '/oauth/callback', '/authorize/continue']) {
+    const res = await handleOAuthRoute(
+      new Request(`https://mcp.freedesignstore.online${path}?session=reusable-token`),
+      config,
+    );
+    assert.equal(res.status, 410, `${path} should be retired`);
+  }
+
+  // And no code path reads a session/token out of the query string at all.
+  const source = await readRepo('workers/mcp/src/oauth-provider.ts');
+  assert.doesNotMatch(source, /searchParams\.get\(\s*['"](session|token|session_token|access_token)['"]\s*\)/);
 });
 
 test('catalog sitemap lists photo and creator pages', async () => {

@@ -90,54 +90,14 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      # Live smoke against the deployment that just went out. The script compares
+      # the live server with store/.well-known/mcp.json, so the tool set is never
+      # hardcoded here — it cannot drift out of step with the manifest again.
+      # Set the FDS_MCP_TOKEN secret to also cover the authenticated JSON-RPC
+      # handshake, tools/list, and the live safety-gate schemas; without it those
+      # checks skip rather than fail.
       - name: Verify production MCP surface
-        run: |
-          node <<'NODE'
-          const base = 'https://mcp.freedesignstore.online';
-          const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-          async function retry(name, fn) {
-            let lastError;
-            for (let attempt = 1; attempt <= 12; attempt += 1) {
-              try {
-                await fn();
-                console.log(`${name}: ok`);
-                return;
-              } catch (error) {
-                lastError = error;
-                console.log(`${name}: attempt ${attempt} failed: ${error.message}`);
-                await sleep(5000);
-              }
-            }
-            throw lastError;
-          }
-
-          await retry('MCP discovery', async () => {
-            const res = await fetch(`${base}/.well-known/mcp.json`, { cache: 'no-store' });
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const body = await res.json();
-            if (body?.servers?.[0]?.endpoint !== `${base}/mcp`) {
-              throw new Error(`unexpected endpoint ${body?.servers?.[0]?.endpoint}`);
-            }
-            if ((body?.servers?.[0]?.tools || []).length !== 19) {
-              throw new Error('expected 19 MCP tools in discovery');
-            }
-          });
-
-          await retry('MCP health', async () => {
-            const res = await fetch(`${base}/health`, { cache: 'no-store' });
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const body = await res.json();
-            if (!body.ok || body.tools !== 19) throw new Error(`bad health ${JSON.stringify(body)}`);
-          });
-
-          await retry('MCP OAuth challenge', async () => {
-            const res = await fetch(`${base}/mcp`, { cache: 'no-store' });
-            const text = await res.text();
-            if (res.status !== 401) throw new Error(`expected 401, got ${res.status}`);
-            const challenge = res.headers.get('www-authenticate') || '';
-            if (!challenge.includes(`${base}/.well-known/oauth-protected-resource/mcp`)) {
-              throw new Error(`missing FDS OAuth resource metadata: ${challenge || text}`);
-            }
-          });
-          NODE
+        working-directory: workers/mcp
+        run: npm run smoke
+        env:
+          FDS_MCP_TOKEN: ${{ secrets.FDS_MCP_TOKEN }}

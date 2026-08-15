@@ -566,6 +566,24 @@ async function providerCallback(request: Request, config: OAuthConfig, provider:
   const code = url.searchParams.get('code');
   if (!code) return redirectWithAuthError(authBase(config), returnPath, 'missing_code', [clearNonceCookie()]);
 
+  // Load the pending MCP authorization request BEFORE redeeming the provider's
+  // one-time code. The provider code can be spent exactly once, and the
+  // `authreq` record expires 10 minutes after /authorize — easy to hit while the
+  // user sits on the GitHub/Google consent screen. Exchanging first would burn
+  // the code and only *then* discover the request had expired, leaving a dead
+  // link that cannot be retried. Checking first costs one KV read and keeps the
+  // failure recoverable. Mirrors the PAS MCP callback ordering.
+  let authRequestRaw: string | null = null;
+  if (state.a) {
+    authRequestRaw = await config.kv.get(`authreq:${state.a}`);
+    if (!authRequestRaw) {
+      return new Response(
+        'Authorization request expired before sign-in completed. Restart authorization from your MCP client.',
+        { status: 400, headers: { 'Cache-Control': 'no-store', 'Set-Cookie': clearNonceCookie() } },
+      );
+    }
+  }
+
   let profile: ProviderProfile;
   try {
     profile = provider === 'github'
@@ -577,7 +595,7 @@ async function providerCallback(request: Request, config: OAuthConfig, provider:
 
   const sessionToken = await sessionForProvider(config, profile);
   const cookies = [sessionCookie(sessionToken), clearNonceCookie()];
-  if (state.a) return issueAuthorizationCode(config, state.a, sessionToken, cookies);
+  if (state.a) return issueAuthorizationCode(config, state.a, sessionToken, cookies, authRequestRaw);
   return redirect(new URL(returnPath, authBase(config)).toString(), 303, cookies);
 }
 
@@ -768,8 +786,21 @@ async function authorize(request: Request, config: OAuthConfig): Promise<Respons
   return signInPage({ config, nonce: signInNonce, authNonce: nonce, clientName: client.client_name ?? null });
 }
 
-async function issueAuthorizationCode(config: OAuthConfig, nonce: string, sessionToken: string, cookies: string[] = []): Promise<Response> {
-  const reqRaw = await config.kv.get(`authreq:${nonce}`);
+/**
+ * Mint the OAuth authorization code for a signed-in session.
+ *
+ * `preloadedRequest` lets a caller that already read `authreq:${nonce}` hand the
+ * record over instead of re-reading it — see providerCallback, which must check
+ * the request exists before it spends the provider's single-use code.
+ */
+async function issueAuthorizationCode(
+  config: OAuthConfig,
+  nonce: string,
+  sessionToken: string,
+  cookies: string[] = [],
+  preloadedRequest?: string | null,
+): Promise<Response> {
+  const reqRaw = preloadedRequest ?? await config.kv.get(`authreq:${nonce}`);
   if (!reqRaw) return new Response('invalid or expired nonce', { status: 400 });
   await config.kv.delete(`authreq:${nonce}`);
 
