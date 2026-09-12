@@ -2,6 +2,33 @@ import { error, json } from "./_lib.js";
 
 const APP = "FreeDesignStore";
 
+/**
+ * Is this search result an Unsplash+ premium photo?
+ *
+ * Unsplash+ is a paid subscription licence, not the free Unsplash Licence, and
+ * premium photos are interleaved into ordinary search results with no visual
+ * marker. The restriction is on the licence, not on where the bytes are hosted,
+ * so linking one is a violation even though we never mirror it.
+ *
+ * They have to be dropped here rather than flagged for the caller to handle:
+ * every surface downstream labels whatever it receives "Unsplash License".
+ *
+ * Detection is deliberately belt-and-braces. The `premium`/`plus` booleans are
+ * not documented as stable across API versions, while the
+ * `plus.unsplash.com` / `premium_photo-` URL shape has always been present on
+ * premium assets — so a change to either signal alone still excludes the photo.
+ */
+export function isPremiumPhoto(photo) {
+  if (!photo || typeof photo !== "object") return false;
+  if (photo.premium === true || photo.plus === true) return true;
+  const candidates = [...Object.values(photo.urls || {}), photo.links?.html, photo.links?.download];
+  return candidates.some(
+    (value) =>
+      typeof value === "string" &&
+      (value.includes("plus.unsplash.com") || value.includes("premium_photo-"))
+  );
+}
+
 export async function onRequestGet({ request, env }) {
   const accessKey = env.UNSPLASH_ACCESS_KEY;
   if (!accessKey) {
@@ -28,10 +55,13 @@ export async function onRequestGet({ request, env }) {
   }
 
   const data = await res.json();
+  const results = Array.isArray(data.results) ? data.results : [];
+  const free = results.filter((photo) => !isPremiumPhoto(photo));
   return json({
     ok: true,
     total: data.total || 0,
-    items: (data.results || []).map((photo) => ({
+    excludedPremium: results.length - free.length,
+    items: free.map((photo) => ({
       id: `unsplash-${photo.id}`,
       source: "unsplash",
       assetType: "photo",
