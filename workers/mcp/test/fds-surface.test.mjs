@@ -1476,3 +1476,65 @@ test('create_asset_from_url blocks every unsplash.com subdomain, premium include
   const mcpSource = await readRepo('workers/mcp/src/index.ts');
   assert.match(mcpSource, /host\.endsWith\('\.unsplash\.com'\)/);
 });
+
+// --- ?size= is validated rather than silently ignored (issue #9) ---
+
+// memoryBucket() returns bare {body}; the image route needs real R2 object shape
+// (writeHttpMetadata/httpEtag) on the thumbnail path.
+function r2Bucket() {
+  const objects = new Map();
+  const wrap = (key) => ({
+    body: objects.get(key),
+    httpEtag: `"etag-${key}"`,
+    size: String(objects.get(key) ?? '').length,
+    writeHttpMetadata(headers) { headers.set('content-type', 'application/octet-stream'); },
+  });
+  return {
+    objects,
+    async put(key, body) { objects.set(key, body); },
+    async get(key) { return objects.has(key) ? wrap(key) : null; },
+    async head(key) { return objects.has(key) ? wrap(key) : null; },
+  };
+}
+
+test('stock image route rejects unsupported ?size= instead of serving the original', async () => {
+  const { onRequestGet } = await importRepoFile('functions/api/stock/image/[id].js');
+  const kv = memoryKV();
+  const bucket = r2Bucket();
+  const item = catalogItem({ id: 'img-1', objectKey: 'hosted/img-1.jpg' });
+  await kv.put(`stock:item:${item.id}`, JSON.stringify(item));
+  await bucket.put('hosted/img-1.jpg', 'ORIGINAL-BYTES');
+  await bucket.put('thumb/400/img-1.webp', 'THUMB-400');
+  const env = { FDS_STOCK_KV: kv, FDS_STOCK_BUCKET: bucket };
+  const get = (qs) =>
+    onRequestGet({ request: new Request(`https://freedesignstore.online/api/stock/image/img-1${qs}`), env, params: { id: 'img-1' } });
+
+  // The reported failure: a size with no stored variant served the full original.
+  for (const bad of ['1200', '1600', '0', 'large', '']) {
+    const res = await get(`?size=${bad}`);
+    assert.equal(res.status, 400, `?size=${bad} must be rejected, not silently downgraded`);
+    const body = await res.json();
+    assert.match(body.error, /400, 800/, 'the 400 must name the supported sizes');
+  }
+
+  // Aliases the issue names: ignored entirely before, same silent-wrong-size failure.
+  for (const alias of ['w=1200', 'width=1200', 'resize=1200']) {
+    const res = await get(`?${alias}`);
+    assert.equal(res.status, 400, `?${alias} must be rejected`);
+    assert.match((await res.json()).error, /Use \?size=/);
+  }
+
+  // A supported size still serves its stored variant.
+  const ok = await get('?size=400');
+  assert.equal(ok.status, 200);
+  assert.equal(ok.headers.get('content-type'), 'image/webp');
+
+  // A supported size with NO stored variant must still fall through to the
+  // original -- that fallback is deliberate and must not become an error.
+  const fallback = await get('?size=800');
+  assert.equal(fallback.status, 200, '800 has no stored thumb here; must serve the original');
+  assert.notEqual(fallback.headers.get('content-type'), 'image/webp');
+
+  // No size at all is unaffected.
+  assert.equal((await get('')).status, 200);
+});

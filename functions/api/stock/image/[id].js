@@ -2,6 +2,12 @@ import { canViewItem, error, getItem, requireStore } from "../_lib.js";
 
 const THUMB_SIZES = new Set(["400", "800"]);
 
+// Parameters a caller could reasonably expect to resize. This route serves
+// pre-generated variants and never transforms an image, so none of them can
+// work. Ignoring them silently is the defect in #9: the caller believes it
+// received a thumbnail and ships the full-size original instead.
+const SIZE_ALIASES = ["w", "width", "resize"];
+
 export async function onRequestGet({ params, request, env }) {
   const store = requireStore(env);
   if (store.missing) return store.response;
@@ -14,11 +20,27 @@ export async function onRequestGet({ params, request, env }) {
   }
 
   // Pre-generated thumbnail path: ?size=400|800 serves a small WebP variant for
-  // gallery tiles instead of the multi-MB original. Falls back to the original
-  // when no thumb exists (e.g. server-created assets not yet backfilled), so this
-  // is a pure optimization that never 404s.
+  // gallery tiles instead of the multi-MB original. A supported size with no
+  // stored thumb (e.g. server-created assets not yet backfilled, SVGs, or a
+  // range request mid-seek) falls back to the original, so a valid request is
+  // never turned into an error.
   const reqUrl = new URL(request.url);
   const sizeParam = reqUrl.searchParams.get("size");
+
+  // ?size= selects a stored variant; it does not resize. An unsupported value
+  // used to fall through to the original, so ?size=1200 returned a multi-MB
+  // file that the caller believed was a 1200px thumbnail (#9). Reject the value
+  // instead. A *supported* size with no stored variant still falls through
+  // silently below -- that is a genuine fallback, not a wrong-sized answer.
+  const supported = [...THUMB_SIZES].join(", ");
+  if (sizeParam !== null && !THUMB_SIZES.has(sizeParam)) {
+    return error(`Unsupported size "${sizeParam}". Supported sizes: ${supported}.`, 400);
+  }
+  const alias = SIZE_ALIASES.find((name) => reqUrl.searchParams.has(name));
+  if (alias) {
+    return error(`Unsupported parameter "${alias}". Use ?size= with one of: ${supported}.`, 400);
+  }
+
   const ct = String(item.contentType || "");
   const isRaster = ct.startsWith("image/") && ct !== "image/svg+xml";
   const isVideo = ct.startsWith("video/"); // videos have a pre-generated poster frame at the same thumb key
