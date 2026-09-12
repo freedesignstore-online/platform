@@ -814,7 +814,14 @@ async function searchUnsplash(q){
       const res=await fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(q)}&per_page=24&client_id=${encodeURIComponent(apiKey)}`);
       if(!res.ok) throw new Error('Unsplash API error');
       const raw=await res.json();
-      data={items:raw.results.map(photo=>({
+      // Unsplash+ premium is a paid licence, not the free Unsplash Licence, and is
+      // interleaved into results unmarked. Mirrors isPremiumPhoto() in
+      // functions/api/stock/unsplash.js — this direct-to-Unsplash fallback runs
+      // when the server route is unavailable, so it needs the same exclusion.
+      const isPremium=photo=>photo.premium===true||photo.plus===true||
+        [...Object.values(photo.urls||{}),photo.links&&photo.links.html].some(v=>
+          typeof v==='string'&&(v.includes('plus.unsplash.com')||v.includes('premium_photo-')));
+      data={items:raw.results.filter(photo=>!isPremium(photo)).map(photo=>({
         id:`unsplash-${photo.id}`,
         source:'unsplash',
         assetType:'photo',

@@ -260,6 +260,7 @@ const DESIGN_SKILLS: DesignSkill[] = [
       'Did the creator take the photo or have explicit permission to release it for free?',
       'Does the photo include recognizable people, private property, sensitive locations, trademarks, or documents?',
       'Is the source Unsplash or another third-party stock site?',
+      'If Unsplash: is it Unsplash+ premium (`plus.unsplash.com` or a `premium_photo-` URL)? Premium is excluded — check the URL, not the search page.',
       'Is the intended action upload, direct URL ingest, or link-off attribution?',
       'What category, tags, and use cases help designers find it?',
       'Is the image technically useful: sharp, uncropped, inspectable, and not misleading?',
@@ -269,6 +270,7 @@ const DESIGN_SKILLS: DesignSkill[] = [
       'Attribution and license label.',
       'Catalog title, category, tags, and asset type.',
       'If source is Unsplash, link users to Unsplash for download instead of mirroring into FDS.',
+      'If source is Unsplash+ premium, reject it — a paid licence is not free to link, let alone mirror.',
       'If source is a permitted non-Unsplash HTTPS image, use create_asset_from_url.',
     ],
     suggestedTools: ['asset_policy', 'create_asset_from_url', 'list_assets'],
@@ -283,7 +285,7 @@ const DESIGN_SKILLS: DesignSkill[] = [
       'What license or release lets FDS offer it for free download?',
       'Does it contain people, private information, trademarks, or third-party artwork?',
       'Does SVG markup contain script, event handlers, unsafe URLs, foreignObject, iframe, object, or embed?',
-      'Is the source URL from Unsplash or a blocked/private network?',
+      'Is the source URL from Unsplash or a blocked/private network? If Unsplash, is it Unsplash+ premium (`plus.unsplash.com`, `premium_photo-`)?',
       'Would a designer understand the asset allowed reuse from the metadata?',
     ],
     outputContract: [
@@ -587,7 +589,7 @@ function applyDesignSkill(skill: DesignSkill, context: string, mode: 'questions'
   const base = {
     skill: designSkillSummary(skill),
     context,
-    rule: 'Do not publish assets unless rights, safety, usefulness, and metadata are clear. Unsplash must link off instead of being mirrored into FDS.',
+    rule: 'Do not publish assets unless rights, safety, usefulness, and metadata are clear. Unsplash must link off instead of being mirrored into FDS, and Unsplash+ premium must be rejected outright \u2014 a paid licence is not free to link.',
   };
   if (mode === 'questions') {
     return {
@@ -608,7 +610,7 @@ function applyDesignSkill(skill: DesignSkill, context: string, mode: 'questions'
     checklist: skill.outputContract,
     qualityGate: [
       'Rights and source provenance are explicit.',
-      'Unsplash assets are linked off, not mirrored.',
+      'Unsplash assets are linked off, not mirrored, and Unsplash+ premium is rejected rather than linked.',
       'SVG output avoids scripts, event handlers, foreignObject, embeds, iframes, and unsafe URLs.',
       'Title, category, tags, author, license, and asset type are useful to designers.',
       'Public publication is limited to admins or trusted creators.',
@@ -823,7 +825,8 @@ export class FdsCatalogMcp extends McpAgent<Env, unknown, McpProps> {
         '- FDS/community assets may be hosted in our R2 bucket only when the uploader owns the rights or has permission to release them for free.',
         '- SVG uploads are sanitized and unsafe scripting/embedded content is rejected.',
         '- Unsplash assets are not mirrored into our catalog by MCP. Show attribution, embed/hotlink only where allowed by the Unsplash API, and link users to Unsplash for download.',
-        '- The MCP `create_asset_from_url` tool rejects unsplash.com and images.unsplash.com URLs.',
+        '- Unsplash+ premium assets (`plus.unsplash.com`, `premium_photo-` URLs) are excluded entirely — they are a paid subscription licence, not the free Unsplash Licence. The restriction is on the licence, not on where the bytes are hosted, so linking one is a violation even though we never mirror it. Premium and free results are interleaved in Unsplash search with no visual marker, so check every URL rather than the search page.',
+        '- The MCP `create_asset_from_url` tool rejects unsplash.com and every unsplash.com subdomain, including images.unsplash.com and plus.unsplash.com.',
         '- Generated illustrations/icons/patterns can be stored when the submitter has rights to share the output.',
       ].join('\n')),
     );
@@ -1524,7 +1527,7 @@ export default {
         browserAuthEnabled
           ? 'Auth: FDS OAuth 2.1 browser sign-in, or Authorization: Bearer <creator token, STOCK_ADMIN_TOKEN, or MCP_ADMIN_TOKEN>'
           : 'Auth: Authorization: Bearer <creator token, STOCK_ADMIN_TOKEN, or MCP_ADMIN_TOKEN>',
-        'Unsplash: link off for download; do not mirror into FDS.',
+        'Unsplash: link off for download; do not mirror into FDS. Unsplash+ premium (plus.unsplash.com) is excluded entirely.',
       ].join('\n'), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
     }
 

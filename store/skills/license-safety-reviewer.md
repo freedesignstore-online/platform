@@ -14,7 +14,7 @@ Before publishing a pending asset, ingesting an external URL, or accepting a cre
 2. What license or release lets FDS offer it for free download?
 3. Does it contain people, private information, trademarks, or third-party artwork?
 4. Does SVG markup contain script, event handlers, unsafe URLs, foreignObject, iframe, object, or embed?
-5. Is the source URL from Unsplash or a blocked/private network?
+5. Is the source URL from Unsplash or a blocked/private network? If Unsplash, is it Unsplash+ premium (`plus.unsplash.com`, `premium_photo-`)?
 6. Would a designer understand the asset's allowed reuse from the metadata?
 
 ## Output Contract
@@ -33,3 +33,5 @@ Before publishing a pending asset, ingesting an external URL, or accepting a cre
 ## Rule
 
 When rights are unclear, keep the asset pending. Public catalog convenience is not worth legal or trust ambiguity.
+
+Treat "it came from Unsplash" as insufficient on its own: Unsplash+ premium carries a paid licence and is excluded, and it is indistinguishable from free results without checking the URL.

@@ -1390,3 +1390,89 @@ test('catalog sitemap lists photo and creator pages', async () => {
   const robots = await readRepo('store/robots.txt');
   assert.match(robots, /sitemap-catalog\.xml/);
 });
+
+// --- Unsplash+ premium exclusion (issue #10) ---
+
+// Shape mirrors api.unsplash.com/search/photos results. Premium photos are
+// returned interleaved with free ones and differ only by URL host/prefix and
+// (inconsistently) a boolean, which is the whole reason they need catching.
+function unsplashPhoto({ id, premiumUrl = false, premiumFlag = false }) {
+  const base = premiumUrl
+    ? `https://plus.unsplash.com/premium_photo-${id}`
+    : `https://images.unsplash.com/photo-${id}`;
+  return {
+    id,
+    urls: { small: `${base}?w=400`, regular: `${base}?w=1080` },
+    links: { html: `https://unsplash.com/photos/${id}`, download_location: `https://api.unsplash.com/photos/${id}/download` },
+    user: { name: 'Test Photographer', links: { html: 'https://unsplash.com/@test' } },
+    width: 400,
+    height: 300,
+    ...(premiumFlag ? { premium: true } : {}),
+  };
+}
+
+test('Unsplash search API excludes Unsplash+ premium results', async () => {
+  const { onRequestGet, isPremiumPhoto } = await importRepoFile('functions/api/stock/unsplash.js');
+
+  // Detection covers each signal independently: either alone must exclude.
+  assert.equal(isPremiumPhoto(unsplashPhoto({ id: 'a' })), false);
+  assert.equal(isPremiumPhoto(unsplashPhoto({ id: 'b', premiumUrl: true })), true);
+  assert.equal(isPremiumPhoto(unsplashPhoto({ id: 'c', premiumFlag: true })), true);
+  assert.equal(isPremiumPhoto({ plus: true }), true);
+  assert.equal(isPremiumPhoto(null), false);
+
+  const results = [
+    unsplashPhoto({ id: 'free-1' }),
+    unsplashPhoto({ id: 'prem-1', premiumUrl: true }),
+    unsplashPhoto({ id: 'free-2' }),
+    unsplashPhoto({ id: 'prem-2', premiumFlag: true }),
+  ];
+
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(JSON.stringify({ total: 4, results }), {
+    headers: { 'content-type': 'application/json' },
+  });
+  try {
+    const res = await onRequestGet({
+      request: new Request('https://freedesignstore.online/api/stock/unsplash?q=test'),
+      env: { UNSPLASH_ACCESS_KEY: 'test-key' },
+    });
+    const body = await res.json();
+
+    assert.equal(body.ok, true);
+    assert.equal(body.items.length, 2, 'both premium photos must be dropped');
+    assert.equal(body.excludedPremium, 2);
+    assert.deepEqual(body.items.map((i) => i.id), ['unsplash-free-1', 'unsplash-free-2']);
+
+    // The label is only truthful because premium never reaches this point.
+    assert.ok(body.items.every((i) => i.license === 'Unsplash License'));
+    const serialized = JSON.stringify(body);
+    assert.ok(!serialized.includes('plus.unsplash.com'), 'no premium URL may reach a caller');
+    assert.ok(!serialized.includes('premium_photo-'));
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
+test('asset_policy and skills name Unsplash+ premium as excluded', async () => {
+  const mcpSource = await readRepo('workers/mcp/src/index.ts');
+  assert.match(mcpSource, /plus\.unsplash\.com/);
+  assert.match(mcpSource, /premium_photo-/);
+
+  for (const path of ['store/skills/stock-photo-curator.md', 'store/skills/license-safety-reviewer.md']) {
+    assert.match(await readRepo(path), /Unsplash\+ premium/, `${path} must name premium`);
+  }
+
+  // The direct-to-Unsplash fallback bypasses the Pages route, so it needs its own filter.
+  const stockPage = await readRepo('store/images/stock-photos/index.html');
+  assert.match(stockPage, /premium_photo-/);
+});
+
+test('create_asset_from_url blocks every unsplash.com subdomain, premium included', async () => {
+  // isBlockedMirrorHost is module-private and src/index.ts cannot load in Node
+  // (it imports `agents/mcp` -> `cloudflare:workers`), so assert on source.
+  // endsWith('.unsplash.com') already covers plus.unsplash.com; pinning it here
+  // stops a narrowing to an explicit host list from silently readmitting premium.
+  const mcpSource = await readRepo('workers/mcp/src/index.ts');
+  assert.match(mcpSource, /host\.endsWith\('\.unsplash\.com'\)/);
+});
